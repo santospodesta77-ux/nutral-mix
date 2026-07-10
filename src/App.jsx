@@ -62,10 +62,10 @@ const INV_26 = {
 const PLAN_2627 = {
   "L3H|1":"MAIZ","L3H|2":"GIRASOL","L3H|3":"SOJA","L3H|5":"PASTURA",
   "L3H|6":"VERDEO-MAIZ","L3H|7":"MAIZ","L3H|8":"VERDEO-MAIZ",
-  "L3H|9B":"GIRASOL","L3H|10O":"CEBADA-MAIZ","L3H|13G":"CEBADA-SOJA",
+  "L3H|9B":"SOJA","L3H|10O":"CEBADA-MAIZ","L3H|13G":"CEBADA-SOJA",
   "L3H|13CH":"CEBADA-SOJA","L3H|14":"VERDEO-MAIZ","L3H|17":"GIRASOL",
   "L3H|18":"PASTURA","L3H|19":"SOJA","L3H|20":"SOJA","L3H|21N":"SOJA",
-  "L3H|21S":"SOJA","L3H|22":"GIRASOL","L3H|23":"GIRASOL",
+  "L3H|21S":"SOJA","L3H|22":"GIRASOL","L3H|23":"CEBADA-GIRASOL", // doble cultivo confirmado
   "L3H|26":"MAIZ","L3H|27":"MAIZ","L3H|28":"GIRASOL","L3H|29":"MAIZ",
   "L3H|4":"TRIGO-SOJA",
   "LA CUCA|1":"SOJA","LA CUCA|2":"FINA","LA CUCA|3N":"MAIZ",
@@ -135,6 +135,92 @@ const RINDE_2526 = {
   "LAS TIAS|11":37,"LOS ABUELOS|2":11,"LOS ABUELOS|3":7,
   "DON RAMON|5":25,"LA ADORACION|3":19,
 };
+
+// ============================================================
+// HISTORICO DE ROTACION — 8 campañas por lote (19-20 a 26-27)
+// cv = cultivo, rF = rinde fina qq/ha, rG = rinde gruesa qq/ha
+// ============================================================
+const HISTORICO_ROTACION = {
+  "L3H|1":{"19-20":{cv:"MAIZ",rF:null,rG:85},"20-21":{cv:"SOJA",rF:null,rG:31},"21-22":{cv:"GIRASOL",rF:null,rG:29},"22-23":{cv:"SOJA",rF:null,rG:10},"23-24":{cv:"MAIZ",rF:null,rG:77.5},"24-25":{cv:"GIRASOL",rF:null,rG:14.9},"25-26":{cv:"TRIGO-SOJA",rF:37,rG:24},"26-27":{cv:"MAIZ",rF:null,rG:null}},
+  "L3H|2":{"19-20":{cv:"MAIZ",rF:null,rG:78},"20-21":{cv:"GIRASOL",rF:null,rG:28},"21-22":{cv:"TRIGO-MAIZ",rF:62,rG:42},"22-23":{cv:"SOJA",rF:null,rG:25.5},"23-24":{cv:"GIRASOL",rF:null,rG:28.2},"24-25":{cv:"TRIGO",rF:30,rG:null},"25-26":{cv:"MAIZ",rF:null,rG:null},"26-27":{cv:"GIRASOL",rF:null,rG:null}},
+  "L3H|3":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"MAIZ",rF:null,rG:78},"21-22":{cv:"GIRASOL",rF:null,rG:25},"22-23":{cv:"TRIGO-SOJA",rF:28.5,rG:18},"23-24":{cv:"MAIZ",rF:null,rG:90},"24-25":{cv:"MANI",rF:null,rG:null},"25-26":{cv:"MAIZ",rF:null,rG:null},"26-27":{cv:"SOJA",rF:null,rG:null}},
+  "L3H|4":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"MAIZ",rF:null,rG:72},"21-22":{cv:"SOJA",rF:null,rG:41},"22-23":{cv:"MAIZ",rF:null,rG:62},"23-24":{cv:"SOJA",rF:null,rG:31},"24-25":{cv:"MAIZ",rF:null,rG:56.6},"25-26":{cv:"MANI",rF:null,rG:null},"26-27":{cv:"TRIGO-SOJA",rF:null,rG:null}},
+  "L3H|5":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"PASTURA",rF:null,rG:null},"22-23":{cv:"PASTURA",rF:null,rG:null},"23-24":{cv:"MAIZ",rF:null,rG:85},"24-25":{cv:"SOJA",rF:null,rG:24.3},"25-26":{cv:"GIRASOL",rF:null,rG:30},"26-27":{cv:"PASTURA",rF:null,rG:null}},
+  "L3H|6":{"19-20":{cv:"GIRASOL",rF:null,rG:26},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"PASTURA",rF:null,rG:null},"22-23":{cv:"PASTURA",rF:null,rG:null},"23-24":{cv:"PASTURA",rF:null,rG:null},"24-25":{cv:"PASTURA",rF:null,rG:null},"25-26":{cv:"PASTURA",rF:null,rG:null},"26-27":{cv:"VERDEO-MAIZ",rF:null,rG:null}},
+  "L3H|7":{"19-20":{cv:"GIRASOL",rF:null,rG:31},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"PASTURA",rF:null,rG:null},"22-23":{cv:"PASTURA",rF:null,rG:null},"23-24":{cv:"PASTURA",rF:null,rG:null},"24-25":{cv:"MAIZ",rF:null,rG:45.9},"25-26":{cv:"MANI",rF:null,rG:null},"26-27":{cv:"MAIZ",rF:null,rG:null}},
+  "L3H|8":{"19-20":{cv:"MAIZ",rF:null,rG:95},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"MAIZ",rF:null,rG:92},"22-23":{cv:"GIRASOL",rF:null,rG:21},"23-24":{cv:"PASTURA",rF:null,rG:null},"24-25":{cv:"PASTURA",rF:null,rG:null},"25-26":{cv:"PASTURA",rF:null,rG:null},"26-27":{cv:"VERDEO-MAIZ",rF:null,rG:null}},
+  "L3H|9A":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"PASTURA",rF:null,rG:null},"22-23":{cv:"PASTURA",rF:null,rG:null},"23-24":{cv:"MAIZ",rF:null,rG:61},"24-25":{cv:"GIRASOL",rF:null,rG:12.8},"25-26":{cv:"PASTURA",rF:null,rG:null},"26-27":{cv:"PASTURA",rF:null,rG:null}},
+  "L3H|9B":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"PASTURA",rF:null,rG:null},"22-23":{cv:"PASTURA",rF:null,rG:null},"23-24":{cv:"MAIZ",rF:null,rG:61},"24-25":{cv:"GIRASOL",rF:null,rG:12.8},"25-26":{cv:"TRIGO-MAIZ",rF:41,rG:null},"26-27":{cv:"SOJA",rF:null,rG:null}},
+  "L3H|10E":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"PASTURA",rF:null,rG:null},"22-23":{cv:"PASTURA",rF:null,rG:null},"23-24":{cv:"PASTURA",rF:null,rG:null},"24-25":{cv:"PASTURA",rF:null,rG:null},"25-26":{cv:"PASTURA",rF:null,rG:null},"26-27":{cv:"VERDEO-MAIZ",rF:null,rG:null}},
+  "L3H|10O":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"PASTURA",rF:null,rG:null},"22-23":{cv:"PASTURA",rF:null,rG:null},"23-24":{cv:"PASTURA",rF:null,rG:null},"24-25":{cv:"PASTURA",rF:null,rG:null},"25-26":{cv:"MAIZ",rF:null,rG:null},"26-27":{cv:"CEBADA-MAIZ",rF:null,rG:null}},
+  "L3H|11":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"PASTURA",rF:null,rG:null},"22-23":{cv:"PASTURA",rF:null,rG:null},"23-24":{cv:"PASTURA",rF:null,rG:null},"24-25":{cv:"PASTURA",rF:null,rG:null},"25-26":{cv:"PASTURA",rF:null,rG:null},"26-27":{cv:"AVENA",rF:null,rG:null}},
+  "L3H|12":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"GIRASOL",rF:null,rG:29},"22-23":{cv:"MAIZ",rF:null,rG:32},"23-24":{cv:"MANI",rF:null,rG:null},"24-25":{cv:"SOJA",rF:null,rG:23},"25-26":{cv:"GIRASOL",rF:null,rG:29},"26-27":{cv:"PASTURA",rF:null,rG:null}},
+  "L3H|13G":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"MAIZ",rF:null,rG:65},"22-23":{cv:"SOJA",rF:null,rG:10},"23-24":{cv:"MANI",rF:null,rG:null},"24-25":{cv:"CENTENO-SOJA",rF:null,rG:11.1},"25-26":{cv:"GIRASOL",rF:null,rG:34},"26-27":{cv:"CEBADA-SOJA",rF:null,rG:null}},
+  "L3H|13CH":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"PASTURA",rF:null,rG:null},"22-23":{cv:"PASTURA",rF:null,rG:null},"23-24":{cv:"PASTURA",rF:null,rG:null},"24-25":{cv:"PASTURA",rF:null,rG:null},"25-26":{cv:"GIRASOL",rF:null,rG:24},"26-27":{cv:"CEBADA-SOJA",rF:null,rG:null}},
+  "L3H|13CH BAJO":{"19-20":{cv:"AGROPIRO",rF:null,rG:null},"20-21":{cv:"AGROPIRO",rF:null,rG:null},"21-22":{cv:"AGROPIRO",rF:null,rG:null},"22-23":{cv:"AGROPIRO",rF:null,rG:null},"23-24":{cv:"AGROPIRO",rF:null,rG:null},"24-25":{cv:"AGROPIRO",rF:null,rG:null},"25-26":{cv:"AGROPIRO",rF:null,rG:null},"26-27":{cv:"AGROPIRO",rF:null,rG:null}},
+  "L3H|14":{"19-20":{cv:"SOJA",rF:null,rG:38},"20-21":{cv:"GIRASOL",rF:null,rG:33},"21-22":{cv:"PASTURA",rF:null,rG:null},"22-23":{cv:"PASTURA",rF:null,rG:null},"23-24":{cv:"PASTURA",rF:null,rG:null},"24-25":{cv:"PASTURA",rF:null,rG:null},"25-26":{cv:"PASTURA",rF:null,rG:null},"26-27":{cv:"VERDEO-MAIZ",rF:null,rG:null}},
+  "L3H|15":{"19-20":{cv:"SOJA",rF:null,rG:38},"20-21":{cv:"GIRASOL",rF:null,rG:33},"21-22":{cv:"PASTURA",rF:null,rG:null},"22-23":{cv:"PASTURA",rF:null,rG:null},"23-24":{cv:"PASTURA",rF:null,rG:null},"24-25":{cv:"PASTURA",rF:null,rG:null},"25-26":{cv:"PASTURA",rF:null,rG:null},"26-27":{cv:"PASTURA",rF:null,rG:null}},
+  "L3H|16":{"19-20":{cv:"MAIZ",rF:null,rG:83},"20-21":{cv:"SOJA",rF:null,rG:20},"21-22":{cv:null,rF:null,rG:null},"22-23":{cv:"MAIZ",rF:null,rG:32},"23-24":{cv:"GIRASOL",rF:null,rG:21},"24-25":{cv:"PASTURA",rF:null,rG:null},"25-26":{cv:"PASTURA",rF:null,rG:null},"26-27":{cv:"PASTURA",rF:null,rG:null}},
+  "L3H|17":{"19-20":{cv:"SOJA",rF:null,rG:34},"20-21":{cv:"MAIZ",rF:null,rG:91},"21-22":{cv:"SOJA",rF:null,rG:47},"22-23":{cv:"GIRASOL",rF:null,rG:29.5},"23-24":{cv:"CEBADA-SOJA",rF:17.8,rG:38.5},"24-25":{cv:"MAIZ",rF:null,rG:79},"25-26":{cv:"SOJA",rF:null,rG:30},"26-27":{cv:"GIRASOL",rF:null,rG:null}},
+  "L3H|18":{"19-20":{cv:"SOJA",rF:null,rG:27},"20-21":{cv:"GIRASOL",rF:null,rG:31},"21-22":{cv:"MAIZ",rF:null,rG:94},"22-23":{cv:"SOJA",rF:null,rG:0.6},"23-24":{cv:"CEBADA-SOJA",rF:17.8,rG:32.5},"24-25":{cv:"GIRASOL",rF:null,rG:17.13},"25-26":{cv:"CEBADA-GIRASOL",rF:39,rG:12},"26-27":{cv:"PASTURA",rF:null,rG:null}},
+  "L3H|19":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"MAIZ",rF:null,rG:98},"22-23":{cv:"GIRASOL",rF:null,rG:25},"23-24":{cv:"MAIZ",rF:null,rG:72},"24-25":{cv:"GIRASOL",rF:null,rG:10},"25-26":{cv:"CEBADA-MAIZ",rF:39,rG:null},"26-27":{cv:"SOJA",rF:null,rG:null}},
+  "L3H|20":{"19-20":{cv:"SOJA",rF:null,rG:30},"20-21":{cv:"MANI",rF:null,rG:null},"21-22":{cv:"CEBADA-SOJA",rF:38,rG:14},"22-23":{cv:"MAIZ",rF:null,rG:70},"23-24":{cv:"SOJA",rF:null,rG:37},"24-25":{cv:"MANI",rF:null,rG:null},"25-26":{cv:"MAIZ",rF:null,rG:null},"26-27":{cv:"SOJA",rF:null,rG:null}},
+  "L3H|21N":{"19-20":{cv:"MAIZ",rF:null,rG:78},"20-21":{cv:"GIRASOL",rF:null,rG:34},"21-22":{cv:"TRIGO-MAIZ",rF:52,rG:29},"22-23":{cv:"SOJA",rF:null,rG:16},"23-24":{cv:"MAIZ",rF:null,rG:92},"24-25":{cv:"SOJA",rF:null,rG:35.6},"25-26":{cv:"MAIZ T",rF:null,rG:82},"26-27":{cv:"SOJA",rF:null,rG:null}},
+  "L3H|21S":{"19-20":{cv:"MAIZ",rF:null,rG:78},"20-21":{cv:"GIRASOL",rF:null,rG:34},"21-22":{cv:"TRIGO-MAIZ",rF:52,rG:29},"22-23":{cv:"SOJA",rF:null,rG:16},"23-24":{cv:"MAIZ",rF:null,rG:92},"24-25":{cv:"SOJA",rF:null,rG:35.6},"25-26":{cv:"MAIZ",rF:null,rG:null},"26-27":{cv:"SOJA",rF:null,rG:null}},
+  "L3H|22":{"19-20":{cv:"SOJA",rF:null,rG:44},"20-21":{cv:"GIRASOL",rF:null,rG:27},"21-22":{cv:"SOJA",rF:null,rG:40},"22-23":{cv:"MAIZ",rF:null,rG:57},"23-24":{cv:"SOJA",rF:null,rG:29.7},"24-25":{cv:"TRIGO",rF:25,rG:null},"25-26":{cv:"TRIGO-SOJA",rF:29,rG:31},"26-27":{cv:"GIRASOL",rF:null,rG:null}},
+  "L3H|23":{"19-20":{cv:"MAIZ",rF:null,rG:80},"20-21":{cv:"TRIGO-MAIZ",rF:50,rG:60},"21-22":{cv:"SOJA",rF:null,rG:43},"22-23":{cv:"TRIGO-SOJA",rF:21.5,rG:0.6},"23-24":{cv:"MANI",rF:null,rG:null},"24-25":{cv:"MAIZ",rF:null,rG:58.3},"25-26":{cv:"SOJA",rF:null,rG:32},"26-27":{cv:"CEBADA-GIRASOL",rF:null,rG:null}},
+  "L3H|24":{"19-20":{cv:"MAIZ",rF:null,rG:81},"20-21":{cv:"SOJA",rF:null,rG:36},"21-22":{cv:"GIRASOL",rF:null,rG:27},"22-23":{cv:"PASTURA",rF:null,rG:null},"23-24":{cv:"PASTURA",rF:null,rG:null},"24-25":{cv:"PASTURA",rF:null,rG:null},"25-26":{cv:"PASTURA",rF:null,rG:null},"26-27":{cv:"PASTURA",rF:null,rG:null}},
+  "L3H|25":{"19-20":{cv:"MAIZ",rF:null,rG:75},"20-21":{cv:"SOJA",rF:null,rG:28},"21-22":{cv:"GIRASOL",rF:null,rG:23},"22-23":{cv:"PASTURA",rF:null,rG:null},"23-24":{cv:"PASTURA",rF:null,rG:null},"24-25":{cv:"PASTURA",rF:null,rG:null},"25-26":{cv:"PASTURA",rF:null,rG:null},"26-27":{cv:"PASTURA",rF:null,rG:null}},
+  "L3H|26":{"19-20":{cv:"SOJA",rF:null,rG:40},"20-21":{cv:"TRIGO-MAIZ",rF:31,rG:50},"21-22":{cv:"SOJA",rF:null,rG:41},"22-23":{cv:"MAIZ",rF:null,rG:69},"23-24":{cv:"GIRASOL",rF:null,rG:21},"24-25":{cv:"TRIGO",rF:18,rG:null},"25-26":{cv:"TRIGO-SOJA",rF:28,rG:32},"26-27":{cv:"MAIZ",rF:null,rG:null}},
+  "L3H|27":{"19-20":{cv:"MAIZ",rF:null,rG:115},"20-21":{cv:"SOJA",rF:null,rG:48},"21-22":{cv:"MAIZ",rF:null,rG:77},"22-23":{cv:"GIRASOL",rF:null,rG:23},"23-24":{cv:"SOJA",rF:null,rG:39},"24-25":{cv:"MAIZ",rF:null,rG:78},"25-26":{cv:"SOJA",rF:null,rG:36},"26-27":{cv:"MAIZ",rF:null,rG:null}},
+  "L3H|28":{"19-20":{cv:"GIRASOL",rF:null,rG:37},"20-21":{cv:"TRIGO-MAIZ",rF:53,rG:60},"21-22":{cv:"SOJA",rF:null,rG:42},"22-23":{cv:"MAIZ",rF:null,rG:70},"23-24":{cv:"TRIGO-SOJA",rF:20,rG:35},"24-25":{cv:"MAIZ",rF:null,rG:74},"25-26":{cv:"SOJA",rF:null,rG:33},"26-27":{cv:"GIRASOL",rF:null,rG:null}},
+  "L3H|29":{"19-20":{cv:"SOJA",rF:null,rG:36},"20-21":{cv:"GIRASOL",rF:null,rG:24},"21-22":{cv:"CEBADA-SOJA",rF:23,rG:0.9},"22-23":{cv:"SORGO",rF:null,rG:null},"23-24":{cv:"MAIZ",rF:null,rG:63},"24-25":{cv:"GIRASOL",rF:null,rG:17},"25-26":{cv:"TRIGO-SOJA",rF:27,rG:null},"26-27":{cv:"MAIZ",rF:null,rG:null}},
+  "L3H|30":{"19-20":{cv:"AGROPIRO",rF:null,rG:null},"20-21":{cv:"AGROPIRO",rF:null,rG:null},"21-22":{cv:"AGROPIRO",rF:null,rG:null},"22-23":{cv:"AGROPIRO",rF:null,rG:null},"23-24":{cv:"AGROPIRO",rF:null,rG:null},"24-25":{cv:"AGROPIRO",rF:null,rG:null},"25-26":{cv:"AGROPIRO",rF:null,rG:null},"26-27":{cv:"AGROPIRO",rF:null,rG:null}},
+  "LA CUCA|1":{"25-26":{cv:"MAIZ",rF:null,rG:null},"26-27":{cv:"SOJA",rF:null,rG:null}},
+  "LA CUCA|2":{"25-26":{cv:"GIRASOL",rF:null,rG:28},"26-27":{cv:"FINA",rF:null,rG:null}},
+  "LA CUCA|3N":{"25-26":{cv:"SOJA",rF:null,rG:37},"26-27":{cv:"MAIZ",rF:null,rG:null}},
+  "LA CHOLITA|1":{"25-26":{cv:"SOJA 2",rF:null,rG:28},"26-27":{cv:"GIRASOL",rF:null,rG:null}},
+  "LA CHOLITA|2":{"25-26":{cv:"MAIZ",rF:null,rG:null},"26-27":{cv:"SOJA",rF:null,rG:null}},
+  "LA CHOLITA|3":{"25-26":{cv:"GIRASOL",rF:null,rG:30},"26-27":{cv:"MAIZ",rF:null,rG:null}},
+  "LA CHOLITA|4":{"25-26":{cv:"GIRASOL",rF:null,rG:22},"26-27":{cv:"CEBADA",rF:null,rG:null}},
+  "LA CHOLITA|5":{"25-26":{cv:"GIRASOL",rF:null,rG:20},"26-27":{cv:"CEBADA",rF:null,rG:null}},
+  "EL DESCANSO|1":{"25-26":{cv:"SOJA",rF:null,rG:43},"26-27":{cv:"MAIZ",rF:null,rG:null}},
+  "EL DESCANSO|2":{"25-26":{cv:"MAIZ",rF:null,rG:null},"26-27":{cv:"SOJA",rF:null,rG:null}},
+  "EL DESCANSO|3":{"25-26":{cv:"SOJA",rF:null,rG:43},"26-27":{cv:"MAIZ",rF:null,rG:null}},
+  "EL DESCANSO|4":{"25-26":{cv:"MAIZ",rF:null,rG:null},"26-27":{cv:"SOJA",rF:null,rG:null}},
+  "EL DESCANSO|5":{"25-26":{cv:"MAIZ",rF:null,rG:null},"26-27":{cv:"GIRASOL",rF:null,rG:null}},
+  "EL DESCANSO|6":{"25-26":{cv:"MAIZ",rF:null,rG:null},"26-27":{cv:"SOJA",rF:null,rG:null}},
+  "EL DESCANSO|7":{"25-26":{cv:"GIRASOL",rF:null,rG:28},"26-27":{cv:"MAIZ",rF:null,rG:null}},
+  "EL DESCANSO|8":{"25-26":{cv:"GIRASOL",rF:null,rG:28},"26-27":{cv:"MAIZ",rF:null,rG:null}},
+  "LA DORA|1":{"25-26":{cv:"SOJA",rF:null,rG:30},"26-27":{cv:"GIRASOL",rF:null,rG:null}},
+  "LA DORA|2":{"25-26":{cv:"GIRASOL",rF:null,rG:null},"26-27":{cv:"MAIZ",rF:null,rG:null}},
+  "LA DORA|4":{"25-26":{cv:"MAIZ",rF:null,rG:null},"26-27":{cv:"SOJA",rF:null,rG:null}},
+  "LA DORA|5":{"25-26":{cv:"MAIZ",rF:null,rG:null},"26-27":{cv:"SOJA",rF:null,rG:null}},
+  "LA DORA|6":{"25-26":{cv:"PASTURA",rF:null,rG:null},"26-27":{cv:"PASTURA",rF:null,rG:null}},
+  "LA DORA|7":{"25-26":{cv:"MAIZ",rF:null,rG:null},"26-27":{cv:"SOJA",rF:null,rG:null}},
+  "LA DORA|8":{"25-26":{cv:"GIRASOL",rF:null,rG:null},"26-27":{cv:"CEBADA-SOJA",rF:null,rG:null}},
+  "LAS TIAS|9":{"25-26":{cv:"SORGO",rF:null,rG:null},"26-27":{cv:"CENTENO",rF:null,rG:null}},
+  "LAS TIAS|10":{"25-26":{cv:"MAIZ",rF:null,rG:null},"26-27":{cv:"SOJA",rF:null,rG:null}},
+  "LAS TIAS|11":{"25-26":{cv:"SOJA",rF:null,rG:37},"26-27":{cv:"MAIZ",rF:null,rG:null}},
+  "LAS TIAS|12":{"25-26":{cv:"PASTURA",rF:null,rG:null},"26-27":{cv:"PASTURA",rF:null,rG:null}},
+  "LOS ABUELOS|2":{"25-26":{cv:"GIRASOL",rF:null,rG:11},"26-27":{cv:"MAIZ",rF:null,rG:null}},
+  "LOS ABUELOS|3":{"25-26":{cv:"GIRASOL",rF:null,rG:7},"26-27":{cv:"MAIZ",rF:null,rG:null}},
+  "LOS ABUELOS|4":{"25-26":{cv:"MAIZ",rF:null,rG:null}},
+  "LOS ABUELOS|5":{"26-27":{cv:"TRIGO",rF:null,rG:null}},
+  "LOS ABUELOS|6A":{"25-26":{cv:"VERDEO",rF:null,rG:null},"26-27":{cv:"PASTURA",rF:null,rG:null}},
+  "LOS ABUELOS|6C":{"25-26":{cv:"MAIZ",rF:null,rG:null}},
+  "LOS ABUELOS|7B":{"25-26":{cv:"MAIZ",rF:null,rG:null}},
+  "LOS ABUELOS|8A":{"25-26":{cv:"MAIZ",rF:null,rG:null}},
+  "LOS ABUELOS|8B":{"25-26":{cv:"MAIZ",rF:null,rG:null},"26-27":{cv:"CENTENO",rF:null,rG:null}},
+  "LOS ABUELOS|3O":{"25-26":{cv:"MAIZ",rF:null,rG:null}},
+  "LOS ABUELOS|9A":{"25-26":{cv:"PASTURA",rF:null,rG:null},"26-27":{cv:"PASTURA",rF:null,rG:null}},
+  "LOS ABUELOS|9B":{"25-26":{cv:"CENTENO",rF:null,rG:null},"26-27":{cv:"PASTURA",rF:null,rG:null}},
+  "LOS ABUELOS|10":{"26-27":{cv:"CENTENO",rF:null,rG:null}},
+  "LA MARIA OLIVA|2":{"25-26":{cv:"MAIZ",rF:null,rG:null}},
+  "LA MARIA OLIVA|3":{"25-26":{cv:"MAIZ",rF:null,rG:null}},
+};
+
+const CAMPAÑAS = ["19-20","20-21","21-22","22-23","23-24","24-25","25-26","26-27"];
 
 // márgenes 25-26
 const MB_LOTE = {
@@ -229,6 +315,10 @@ const APLICACIONES = [
   {fecha:"2026-04-26",campo:"LA CHOLITA",lote:"4",ha:50,cultivo:"CEBADA",costo:2070.7,productos:["GLIFOSATO BOX 72%","2-4 D 97 SIGMA","LIGIER PH BIO","METSULFURON"]},
   {fecha:"2026-04-25",campo:"EL DESCANSO",lote:"1",ha:15,cultivo:"COBERTURA",costo:684,productos:["GLIFOSATO BOX 72%","TERBUTILAZINA","LIGIER PH BIO","2-4 D 97 SIGMA"]},
   {fecha:"2026-03-18",campo:"L3H",lote:"12",ha:78,cultivo:"PASTURA",costo:1738.6,productos:["GLIFOSATO GRANULADO","2-4 D 97 SIGMA","FLUMETSULAN","ACEITE METILADO","LIGIER PH BIO"]},
+  {fecha:"2026-06-25",campo:"L3H",lote:"23",ha:53,cultivo:"CEBADA",costo:2997.6,productos:["CONTROLMAX","POWERSPRAY 2-4D 68%","DICAMBA","FLUROCLORIDONA 25%","RIZOSPRAY EXTREMO"]},
+  {fecha:"2026-06-25",campo:"L3H",lote:"1",ha:60,cultivo:"MAIZ",costo:2092.2,productos:["CONTROLMAX","POWERSPRAY 2-4D 68%","DICAMBA","ATRAZINA 90%","RIZOSPRAY EXTREMO"]},
+  {fecha:"2026-06-29",campo:"LOS ABUELOS",lote:"5B (sur)",ha:45,cultivo:"TRIGO",costo:1328.5,productos:["CONTROLMAX","POWERSPRAY 2-4D 68%","DICAMBA","METSULFURON","RIZOSPRAY EXTREMO"]},
+  {fecha:"2026-07-02",campo:"EL TORELLO",lote:"5",ha:52,cultivo:"CEBADA",costo:1243.7,productos:["GLIFOSATO LT BOX","2-4 D 97 SIGMA","LIGIER PH BIO","DICAMBA SIGMA","METSULFURON"]},
 ].map((a,i)=>({...a,id:i,costoHa:a.ha?a.costo/a.ha:0})).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
 // fertilizaciones realizadas (registro campaña 26-27 y 25-26 relevantes)
 const FERTILIZACIONES = [
@@ -242,6 +332,28 @@ const FERTILIZACIONES = [
   {fecha:"2026-06-29",campo:"LOS ABUELOS",lote:"5A",ha:30,cultivo:"TRIGO",tipo:"Arranque",producto:"Nutrimap",dosis:"130 kg/ha",costoHa:98.8,notas:"Trigo B620"},
   {fecha:"2026-06-29",campo:"LOS ABUELOS",lote:"5B",ha:30,cultivo:"TRIGO",tipo:"Arranque",producto:"Nutrimap",dosis:"130 kg/ha",costoHa:98.8,notas:""},
   {fecha:"2026-06-29",campo:"LOS ABUELOS",lote:"8B",ha:19,cultivo:"CENTENO",tipo:"Arranque",producto:"MAP",dosis:"70 kg/ha",costoHa:40.6,notas:""},
+  // Nuevas fert 06-08/07/26 (planilla actualizada)
+  {fecha:"2026-07-06",campo:"LOS NIETOS",lote:"4",ha:27,cultivo:"CEBADA",tipo:"Arranque",producto:"MAP azufrado NUTRIEN",dosis:"50 kg/ha",costoHa:46.9,notas:""},
+  {fecha:"2026-07-06",campo:"EL ABUELO",lote:"2",ha:62,cultivo:"CEBADA",tipo:"Arranque",producto:"MAP azufrado NUTRIEN",dosis:"50 kg/ha",costoHa:46.9,notas:""},
+  {fecha:"2026-07-06",campo:"EL ABUELO",lote:"4",ha:17,cultivo:"CEBADA",tipo:"Arranque",producto:"MAP azufrado NUTRIEN",dosis:"50 kg/ha",costoHa:46.9,notas:""},
+  {fecha:"2026-07-06",campo:"EL ABUELO",lote:"5",ha:40,cultivo:"CEBADA",tipo:"Arranque",producto:"MAP azufrado NUTRIEN",dosis:"50 kg/ha",costoHa:46.9,notas:""},
+  {fecha:"2026-07-06",campo:"EL TORELLO",lote:"5",ha:52,cultivo:"CEBADA",tipo:"Arranque",producto:"MAP azufrado NUTRIEN",dosis:"50 kg/ha",costoHa:46.9,notas:""},
+  {fecha:"2026-07-07",campo:"L3H",lote:"13C",ha:25,cultivo:"CEBADA",tipo:"Arranque",producto:"MAP azufrado NUTRIEN",dosis:"50 kg/ha",costoHa:46.9,notas:""},
+  {fecha:"2026-07-07",campo:"L3H",lote:"13G",ha:115,cultivo:"CEBADA",tipo:"Arranque",producto:"MAP azufrado NUTRIEN",dosis:"50 kg/ha",costoHa:46.9,notas:""},
+  {fecha:"2026-07-07",campo:"L3H",lote:"10",ha:30,cultivo:"CEBADA",tipo:"Arranque",producto:"MAP azufrado NUTRIEN",dosis:"70 kg/ha",costoHa:65.6,notas:""},
+  {fecha:"2026-07-07",campo:"L3H",lote:"23",ha:50,cultivo:"CEBADA",tipo:"Arranque",producto:"MAP azufrado NUTRIEN",dosis:"70 kg/ha",costoHa:65.6,notas:""},
+  {fecha:"2026-07-07",campo:"L3H",lote:"4",ha:100,cultivo:"TRIGO",tipo:"Arranque",producto:"MAP azufrado NUTRIEN",dosis:"50 kg/ha",costoHa:46.9,notas:""},
+  {fecha:"2026-07-08",campo:"LA CHOLITA",lote:"5",ha:50,cultivo:"CEBADA",tipo:"Arranque",producto:"MAP azufrado NUTRIEN",dosis:"50 kg/ha",costoHa:46.9,notas:""},
+  {fecha:"2026-07-08",campo:"LA CHOLITA",lote:"6",ha:20,cultivo:"CEBADA",tipo:"Arranque",producto:"MAP azufrado NUTRIEN",dosis:"50 kg/ha",costoHa:46.9,notas:""},
+  // Urea-S incorporada (fertilización N temprana - siembra)
+  {fecha:"2026-07-07",campo:"L3H",lote:"13G",ha:115,cultivo:"CEBADA",tipo:"N siembra",producto:"UREA-S NUTRIEN incorp.",dosis:"100 kg/ha",costoHa:56.5,notas:"Incorporada con siembra"},
+  {fecha:"2026-07-07",campo:"L3H",lote:"13C",ha:25,cultivo:"CEBADA",tipo:"N siembra",producto:"UREA-S NUTRIEN incorp.",dosis:"100 kg/ha",costoHa:56.5,notas:""},
+  {fecha:"2026-07-07",campo:"L3H",lote:"10",ha:25,cultivo:"CEBADA",tipo:"N siembra",producto:"UREA-S NUTRIEN incorp.",dosis:"150 kg/ha",costoHa:84.75,notas:""},
+  {fecha:"2026-07-07",campo:"L3H",lote:"23",ha:50,cultivo:"CEBADA",tipo:"N siembra",producto:"UREA-S NUTRIEN incorp.",dosis:"100 kg/ha",costoHa:56.5,notas:""},
+  {fecha:"2026-07-07",campo:"L3H",lote:"4",ha:100,cultivo:"TRIGO",tipo:"N siembra",producto:"UREA-S NUTRIEN incorp.",dosis:"100 kg/ha",costoHa:56.5,notas:""},
+  {fecha:"2026-07-08",campo:"EL ABUELO",lote:"4",ha:100,cultivo:"TRIGO",tipo:"N siembra",producto:"UREA-S NUTRIEN incorp.",dosis:"100 kg/ha",costoHa:56.5,notas:""},
+  {fecha:"2026-07-08",campo:"LA CHOLITA",lote:"6",ha:20,cultivo:"CEBADA",tipo:"N siembra",producto:"UREA-S NUTRIEN incorp.",dosis:"100 kg/ha",costoHa:56.5,notas:""},
+  {fecha:"2026-07-08",campo:"LA CHOLITA",lote:"5",ha:60,cultivo:"CEBADA",tipo:"N siembra",producto:"UREA-S NUTRIEN incorp.",dosis:"100 kg/ha",costoHa:56.5,notas:""},
 ].map((f,i)=>({...f,id:i})).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
 
 
@@ -587,12 +699,12 @@ function getFill(campoId, loteId, modo, sueloVar) {
 }
 
 // ── COMPONENTE MAPA ──────────────────────────────────────────
-function MapaCampo({campo, modo, sueloVar, mini=false}){
+function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick}){
   const [hov,setHov]=useState(null);
   const [vx,vy,vw,vh]=campo.vb;
   const k=vw/700;
   return (
-    <svg viewBox={`${vx} ${vy} ${vw} ${vh}`} style={{width:"100%",height:"auto",display:"block"}}>
+    <svg viewBox={`${vx} ${vy} ${vw} ${vh}`} style={{width:"100%",height:"auto",display:"block",cursor:onLoteClick?"pointer":"default"}}>
       {(campo.grises||[]).map((g,j)=>{
         const[cx,cy]=centro(g.poly);
         return <g key={j}>
@@ -608,7 +720,7 @@ function MapaCampo({campo, modo, sueloVar, mini=false}){
         const [cx,cy]=centro(l.poly);
         const w=anchoP(l.poly);
         const isH=hov===l.id;
-        return <g key={l.id} onMouseEnter={()=>!mini&&setHov(l.id)} onMouseLeave={()=>setHov(null)}>
+        return <g key={l.id} onMouseEnter={()=>!mini&&setHov(l.id)} onMouseLeave={()=>setHov(null)} onClick={onLoteClick?()=>onLoteClick(campo,l):undefined}>
           <polygon points={l.poly.map(p=>p.join(",")).join(" ")}
             fill={fill} stroke={isH?"#1A1610":TINTA}
             strokeWidth={(isH?2.5:dim?0.8:1.3)*k} opacity={dim?0.75:1}/>
@@ -1582,7 +1694,12 @@ export default function App(){
   const [brocha,setBrocha]=useState(0);
   const [etiquetas,setEtiquetas]=useState(["","","",""]);
   const [titulos,setTitulos]=useState({});
+  const [loteAbierto,setLoteAbierto]=useState(null); // {campo, lote} para modal historial
+  const [campSel,setCampSel]=useState("26-27");
   const svgRef=useRef(null);
+
+  const abrirLote=(campo,lote)=>setLoteAbierto({campo,lote});
+  const cerrarLote=()=>setLoteAbierto(null);
 
   const caja={background:CREMA,border:`1.5px solid ${TINTA}`,borderRadius:12,padding:"14px 16px"};
   const tab=(a)=>({padding:"8px 14px",fontSize:13,fontWeight:700,cursor:"pointer",borderRadius:8,
@@ -1708,7 +1825,7 @@ export default function App(){
                 <div style={{fontWeight:700,fontSize:15}}>{campo.nombre}</div>
                 <div style={{fontSize:12,opacity:0.6}}>{PRODUCTOR[campo.id]} · {fmt(haCampo(campo))} ha</div>
               </div>
-              <MapaCampo campo={campo} modo={capaModo} sueloVar={sueloVar}/>
+              <MapaCampo campo={campo} modo={capaModo} sueloVar={sueloVar} onLoteClick={abrirLote}/>
               <div style={{paddingInline:4}}><Leyenda modo={capaModo} sueloVar={sueloVar}/></div>
             </div>
             {/* panel suelos si aplica */}
@@ -1756,7 +1873,7 @@ export default function App(){
                     <div style={{fontWeight:700,fontSize:14}}>{c.nombre}</div>
                     <div style={{fontSize:12,opacity:0.55}}>{PRODUCTOR[c.id]} · {fmt(haCampo(c))} ha</div>
                   </div>
-                  <MapaCampo campo={c} modo={capaModo} sueloVar={sueloVar} mini={false}/>
+                  <MapaCampo campo={c} modo={capaModo} sueloVar={sueloVar} mini={false} onLoteClick={abrirLote}/>
                   <div style={{marginTop:4}}><Leyenda modo={capaModo} sueloVar={sueloVar}/></div>
                 </div>
               ))}
@@ -2092,6 +2209,130 @@ export default function App(){
 
         <div style={{fontSize:11,opacity:0.45,marginTop:20,textAlign:"center"}}>
         </div>
+      </div>
+
+      {/* MODAL HISTORIAL LOTE */}
+      {loteAbierto&&<ModalHistorial loteInfo={loteAbierto} onClose={cerrarLote} campSel={campSel} setCampSel={setCampSel}/>}
+    </div>
+  );
+}
+
+// ============================================================
+// MODAL HISTORIAL — muestra 8 campañas de un lote
+// ============================================================
+function ModalHistorial({loteInfo, onClose, campSel, setCampSel}){
+  const {campo,lote}=loteInfo;
+  const key=`${campo.id}|${lote.id}`;
+  const hist=HISTORICO_ROTACION[key];
+  const camps=["19-20","20-21","21-22","22-23","23-24","24-25","25-26","26-27"];
+  const camp=hist&&hist[campSel]?campSel:(hist?camps.filter(c=>hist[c]).slice(-1)[0]:"26-27");
+  const dato=hist?hist[camp]:null;
+  const cv=dato?.cv||"Sin datos";
+  const rF=dato?.rF;
+  const rG=dato?.rG;
+
+  // Estadísticas del lote
+  const rindesFina=hist?Object.entries(hist).filter(([_,d])=>d.rF).map(([c,d])=>({c,r:d.rF})):[];
+  const rindesGruesa=hist?Object.entries(hist).filter(([_,d])=>d.rG).map(([c,d])=>({c,r:d.rG})):[];
+
+  const overlay={position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:16};
+  const modal={background:CREMA,borderRadius:14,maxWidth:640,width:"100%",maxHeight:"90vh",overflow:"auto",boxShadow:"0 20px 60px rgba(0,0,0,0.3)",border:`2px solid ${TINTA}`};
+
+  return (
+    <div style={overlay} onClick={onClose}>
+      <div style={modal} onClick={e=>e.stopPropagation()}>
+        {/* Header */}
+        <div style={{padding:"16px 20px",borderBottom:`1.5px solid ${TINTA}`,display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10}}>
+          <div>
+            <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.6}}>{campo.nombre}</div>
+            <div style={{fontSize:22,fontWeight:700,marginTop:2}}>Lote {lote.label||lote.id}</div>
+            <div style={{fontSize:13,opacity:0.7,marginTop:2}}>{lote.ha} ha</div>
+          </div>
+          <button onClick={onClose} style={{background:"none",border:"none",fontSize:26,cursor:"pointer",lineHeight:1,color:TINTA,padding:4}}>×</button>
+        </div>
+
+        {/* Selector de campaña */}
+        <div style={{padding:"14px 20px",borderBottom:"1px solid #D8D2C0"}}>
+          <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55,marginBottom:8}}>Campaña</div>
+          <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+            {camps.map(c=>{
+              const tieneDato=hist&&hist[c];
+              const activa=c===camp;
+              return <button key={c} onClick={()=>tieneDato&&setCampSel(c)}
+                disabled={!tieneDato}
+                style={{padding:"6px 11px",fontSize:12.5,fontWeight:700,cursor:tieneDato?"pointer":"not-allowed",borderRadius:18,border:`1.5px solid ${activa?TINTA:"#C8C2B0"}`,background:activa?TINTA:tieneDato?"transparent":"#F0EDE3",color:activa?"#fff":tieneDato?TINTA:"#B5AF9D",fontFamily:"inherit",opacity:tieneDato?1:0.5}}>
+                {c}
+              </button>;
+            })}
+          </div>
+        </div>
+
+        {/* Detalle de campaña seleccionada */}
+        <div style={{padding:"18px 20px"}}>
+          {dato?(
+            <div>
+              <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55}}>Campaña {camp}</div>
+              <div style={{display:"flex",alignItems:"center",gap:12,marginTop:8}}>
+                <span style={{width:22,height:22,borderRadius:5,background:colorCv(cv),border:`1.5px solid ${TINTA}`,flexShrink:0}}/>
+                <span style={{fontSize:20,fontWeight:700}}>{cv}</span>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginTop:14}}>
+                <div style={{background:"#fff",border:"1px solid #E5E0D0",borderRadius:8,padding:"10px 12px"}}>
+                  <div style={{fontSize:10.5,letterSpacing:"0.1em",textTransform:"uppercase",opacity:0.55}}>Rinde fina</div>
+                  <div style={{fontSize:24,fontWeight:700,marginTop:3}}>{rF!=null?`${rF} qq/ha`:"—"}</div>
+                </div>
+                <div style={{background:"#fff",border:"1px solid #E5E0D0",borderRadius:8,padding:"10px 12px"}}>
+                  <div style={{fontSize:10.5,letterSpacing:"0.1em",textTransform:"uppercase",opacity:0.55}}>Rinde gruesa</div>
+                  <div style={{fontSize:24,fontWeight:700,marginTop:3}}>{rG!=null?`${rG} qq/ha`:"—"}</div>
+                </div>
+              </div>
+            </div>
+          ):(
+            <div style={{opacity:0.55,fontStyle:"italic",fontSize:14}}>Sin datos históricos para este lote.</div>
+          )}
+        </div>
+
+        {/* Tabla completa de 8 campañas */}
+        {hist&&(
+          <div style={{padding:"0 20px 18px"}}>
+            <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55,marginBottom:8}}>Historial completo</div>
+            <div style={{background:"#fff",border:"1px solid #E5E0D0",borderRadius:8,overflow:"hidden"}}>
+              <table style={{width:"100%",borderCollapse:"collapse",fontSize:12.5}}>
+                <thead><tr style={{background:"#E5E0D0"}}>
+                  {["Campaña","Cultivo","R. fina","R. gruesa"].map(h=>(
+                    <th key={h} style={{textAlign:"left",padding:"7px 10px",fontSize:10.5,textTransform:"uppercase",letterSpacing:"0.06em",opacity:0.7,whiteSpace:"nowrap"}}>{h}</th>
+                  ))}
+                </tr></thead>
+                <tbody>
+                  {camps.map(c=>{
+                    const d=hist[c];
+                    if(!d) return null;
+                    return <tr key={c} style={{borderTop:"1px solid #EEE9DC",background:c===camp?"#F8F5EC":"transparent"}}>
+                      <td style={{padding:"7px 10px",fontWeight:c===camp?700:500,whiteSpace:"nowrap"}}>{c}</td>
+                      <td style={{padding:"7px 10px"}}>
+                        {d.cv?<span style={{display:"inline-flex",alignItems:"center",gap:5}}>
+                          <span style={{width:9,height:9,borderRadius:2,background:colorCv(d.cv),flexShrink:0}}/>{d.cv}
+                        </span>:<span style={{opacity:0.4}}>—</span>}
+                      </td>
+                      <td style={{padding:"7px 10px",fontWeight:600}}>{d.rF!=null?`${d.rF} qq`:<span style={{opacity:0.4}}>—</span>}</td>
+                      <td style={{padding:"7px 10px",fontWeight:600}}>{d.rG!=null?`${d.rG} qq`:<span style={{opacity:0.4}}>—</span>}</td>
+                    </tr>;
+                  })}
+                </tbody>
+              </table>
+            </div>
+            {(rindesFina.length>0||rindesGruesa.length>0)&&(
+              <div style={{display:"flex",gap:14,marginTop:12,flexWrap:"wrap",fontSize:12}}>
+                {rindesFina.length>0&&<div style={{opacity:0.75}}>
+                  <b>Promedio fina:</b> {(rindesFina.reduce((s,x)=>s+x.r,0)/rindesFina.length).toFixed(1)} qq ({rindesFina.length} camp)
+                </div>}
+                {rindesGruesa.length>0&&<div style={{opacity:0.75}}>
+                  <b>Promedio gruesa:</b> {(rindesGruesa.reduce((s,x)=>s+x.r,0)/rindesGruesa.length).toFixed(1)} qq ({rindesGruesa.length} camp)
+                </div>}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
