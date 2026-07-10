@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef } from "react";
 
 // ============================================================
-// NUTRAL MIX · Gestión integral de campos · campaña 26-27
+// SMIX · Gestión integral de campos · campaña 26-27
 // General Pico, La Pampa
 // ============================================================
 const TINTA = "#2E2A22";
@@ -832,7 +832,7 @@ function generarProximasAcciones(CAMPOS_DATA, INV_26_DATA, PLAN_2627_DATA, APLIC
 }
 
 // ============================================================
-// MÓDULO PROTOCOLOS — integrar en GestionCamposNutralMix.jsx
+// MÓDULO PROTOCOLOS — integrar en GestionCamposSmix.jsx
 // Agregarlo como nueva pestaña "📋 Protocolos"
 // ============================================================
 
@@ -1666,7 +1666,7 @@ export default function App(){
 
         {/* Header */}
         <div style={{marginBottom:14}}>
-          <div style={{fontSize:11,letterSpacing:"0.25em",textTransform:"uppercase",opacity:0.5}}>Nutral Mix · General Pico, La Pampa · campaña 26-27</div>
+          <div style={{fontSize:11,letterSpacing:"0.25em",textTransform:"uppercase",opacity:0.5}}>SMIX · General Pico, La Pampa · campaña 26-27</div>
           <h1 style={{margin:"2px 0 4px",fontSize:26,fontWeight:700}}>Gestión integral de campos</h1>
           <div style={{fontSize:13,opacity:0.6}}>{CAMPOS.length} campos · {fmt(haTotal)} ha totales · {APLICACIONES.length} aplicaciones registradas</div>
         </div>
