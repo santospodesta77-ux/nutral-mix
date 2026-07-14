@@ -1924,10 +1924,10 @@
     "tokensEntrada": 65534,
     "tokensSalida": 15253
   },
-  "modifiedTimes": {
-    "rotaciones": "2026-07-13T13:09:58.964Z",
-    "labores": "2026-07-13T13:57:01.929Z",
-    "margenes": "2026-07-06T13:39:09.153Z",
-    "suelos": "2026-07-13T13:09:28.201Z"
-  }
+ "modifiedTimes": {
+  "rotaciones": null,
+  "labores": null,
+  "margenes": null,
+  "suelos": null
+}
 }
