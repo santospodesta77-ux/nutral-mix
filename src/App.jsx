@@ -2346,7 +2346,7 @@ export default function App(){
       </div>
 
       {/* MODAL HISTORIAL LOTE */}
-      {loteAbierto&&<ModalHistorial loteInfo={loteAbierto} onClose={cerrarLote} campSel={campSel} setCampSel={setCampSel} historico={HISTORICO_ROTACION}/>}
+      {loteAbierto&&<ModalHistorial loteInfo={loteAbierto} onClose={cerrarLote} campSel={campSel} setCampSel={setCampSel} historico={HISTORICO_ROTACION} aplicaciones={APLICACIONES} fertilizaciones={FERTILIZACIONES}/>}
     </div>
   );
 }
@@ -2354,7 +2354,7 @@ export default function App(){
 // ============================================================
 // MODAL HISTORIAL — muestra 8 campañas de un lote
 // ============================================================
-function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico}){
+function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, aplicaciones=[], fertilizaciones=[]}){
   const HISTORICO_ROTACION = historico || HISTORICO_ROTACION_FALLBACK;
   const {campo,lote}=loteInfo;
   const key=`${campo.id}|${lote.id}`;
@@ -2369,6 +2369,41 @@ function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico}){
   // Estadísticas del lote
   const rindesFina=hist?Object.entries(hist).filter(([_,d])=>d.rF).map(([c,d])=>({c,r:d.rF})):[];
   const rindesGruesa=hist?Object.entries(hist).filter(([_,d])=>d.rG).map(([c,d])=>({c,r:d.rG})):[];
+
+  // Filtrar aplicaciones y fert de este lote (matching flexible)
+  const normLote=s=>(s||"").toString().toUpperCase().replace(/\s/g,"");
+  const matchLote=(x)=>{
+    if(x.campo!==campo.id) return false;
+    const a=normLote(x.lote), b=normLote(lote.id);
+    return a===b||a.includes(b)||b.includes(a);
+  };
+  const aplLote=aplicaciones.filter(matchLote).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+  const fertLote=fertilizaciones.filter(matchLote).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+  const ultimaApl=aplLote[0]||null;
+
+  // Sumar kg totales de fertilizante en la campaña actual (26-27, o últimas 12 meses)
+  const haceUnAnio=new Date();
+  haceUnAnio.setFullYear(haceUnAnio.getFullYear()-1);
+  const fertRecientes=fertLote.filter(f=>new Date(f.fecha)>=haceUnAnio);
+  // Extraer kg/ha del texto de dosis (ej "150 kg/ha" → 150)
+  const parseKg=(dosis)=>{
+    if(!dosis) return 0;
+    const m=(dosis+"").match(/(\d+(?:\.\d+)?)\s*kg/i);
+    return m?parseFloat(m[1]):0;
+  };
+  // Agrupar por producto
+  const fertPorProducto={};
+  fertRecientes.forEach(f=>{
+    const kgHa=parseKg(f.dosis);
+    const key2=f.producto||"Fertilizante";
+    if(!fertPorProducto[key2]) fertPorProducto[key2]={kgHa:0, kgTotal:0, apps:0, fechas:[]};
+    fertPorProducto[key2].kgHa+=kgHa;
+    fertPorProducto[key2].kgTotal+=kgHa*(f.ha||lote.ha||0);
+    fertPorProducto[key2].apps+=1;
+    fertPorProducto[key2].fechas.push(f.fecha);
+  });
+  const fertResumen=Object.entries(fertPorProducto).sort((a,b)=>b[1].kgHa-a[1].kgHa);
+  const kgHaTotal=Object.values(fertPorProducto).reduce((s,f)=>s+f.kgHa,0);
 
   const overlay={position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:16};
   const modal={background:CREMA,borderRadius:14,maxWidth:640,width:"100%",maxHeight:"90vh",overflow:"auto",boxShadow:"0 20px 60px rgba(0,0,0,0.3)",border:`2px solid ${TINTA}`};
@@ -2468,6 +2503,71 @@ function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico}){
             )}
           </div>
         )}
+
+        {/* ── Última aplicación de herbicidas ── */}
+        <div style={{padding:"14px 20px",borderTop:"1px solid #D8D2C0"}}>
+          <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55,marginBottom:8}}>🧪 Última aplicación de herbicida</div>
+          {ultimaApl?(
+            <div style={{background:"#FFFDF7",border:"1px solid #E5E0D0",borderRadius:9,padding:"10px 12px"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",flexWrap:"wrap",gap:6}}>
+                <div style={{fontWeight:700,fontSize:13.5}}>{new Date(ultimaApl.fecha).toLocaleDateString("es-AR",{day:"2-digit",month:"short",year:"numeric"})}</div>
+                <div style={{fontSize:12,opacity:0.65}}>
+                  {ultimaApl.ha} ha · US$ {ultimaApl.costo?.toFixed(0)||"—"} <span style={{opacity:0.6}}>(${((ultimaApl.costo||0)/(ultimaApl.ha||1)).toFixed(1)}/ha)</span>
+                </div>
+              </div>
+              {ultimaApl.cultivo&&<div style={{fontSize:12,marginTop:3,opacity:0.75}}>
+                <span style={{display:"inline-flex",alignItems:"center",gap:5}}>
+                  <span style={{width:9,height:9,borderRadius:2,background:colorCv(ultimaApl.cultivo)}}/>Cultivo: {ultimaApl.cultivo}
+                </span>
+              </div>}
+              <div style={{display:"flex",flexWrap:"wrap",gap:5,marginTop:8}}>
+                {(ultimaApl.productos||[]).map((p,i)=>(
+                  <span key={i} style={{fontSize:11,background:"#F3EFE3",borderRadius:5,padding:"2px 8px",fontWeight:600}}>{p}</span>
+                ))}
+              </div>
+              {aplLote.length>1&&(
+                <div style={{fontSize:11,marginTop:8,opacity:0.55,fontStyle:"italic"}}>
+                  + {aplLote.length-1} aplicación(es) previa(s) en este lote
+                </div>
+              )}
+            </div>
+          ):(
+            <div style={{fontSize:12.5,opacity:0.55,fontStyle:"italic"}}>Sin aplicaciones registradas.</div>
+          )}
+        </div>
+
+        {/* ── Fertilización (últimos 12 meses) ── */}
+        <div style={{padding:"14px 20px",borderTop:"1px solid #D8D2C0"}}>
+          <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55,marginBottom:8}}>🌱 Fertilización campaña actual</div>
+          {fertResumen.length>0?(
+            <div>
+              <div style={{background:"#FFFDF7",border:"1px solid #E5E0D0",borderRadius:9,padding:"10px 12px",marginBottom:8}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",flexWrap:"wrap",gap:6}}>
+                  <div style={{fontSize:20,fontWeight:700}}>{kgHaTotal.toFixed(0)} kg/ha</div>
+                  <div style={{fontSize:12,opacity:0.7}}>total aplicado · {fertRecientes.length} aplicación(es)</div>
+                </div>
+              </div>
+              <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                {fertResumen.map(([prod,d])=>(
+                  <div key={prod} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 10px",background:"#fff",border:"1px solid #EEE9DC",borderRadius:7,fontSize:12.5}}>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontWeight:700}}>{prod}</div>
+                      <div style={{fontSize:11,opacity:0.6}}>
+                        {d.apps} aplicación{d.apps>1?"es":""} · {d.fechas.map(f=>new Date(f).toLocaleDateString("es-AR",{day:"2-digit",month:"short"})).join(", ")}
+                      </div>
+                    </div>
+                    <div style={{textAlign:"right",flexShrink:0}}>
+                      <div style={{fontWeight:700,color:"#3B82C4"}}>{d.kgHa.toFixed(0)} kg/ha</div>
+                      {d.kgTotal>0&&<div style={{fontSize:10.5,opacity:0.55}}>{d.kgTotal.toFixed(0)} kg total</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ):(
+            <div style={{fontSize:12.5,opacity:0.55,fontStyle:"italic"}}>Sin fertilizaciones registradas en los últimos 12 meses.</div>
+          )}
+        </div>
       </div>
     </div>
   );
