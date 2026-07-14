@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 
 // ============================================================
 // SMIX · Gestión integral de campos · campaña 26-27
@@ -46,9 +46,9 @@ function escalaColor(val,min,max,c1,c2){
 
 // ── DATOS: rotación ─────────────────────────────────────────
 // 26-27 invierno: sólo lo sembrado hoy (30/6/2026)
-const INV_26 = {
+const INV_26_FALLBACK = {
   "L3H|4":"TRIGO","L3H|6":"VERDEO","L3H|8":"VERDEO",
-  "L3H|9A":"PASTURA","L3H|10O":"CEBADA","L3H|11":"AVENA",
+  "L3H|9A":"PASTURA","L3H|10O":"CEBADA",
   "L3H|12":"PASTURA","L3H|13G":"CEBADA","L3H|13CH":"CEBADA",
   "L3H|14":"VERDEO","L3H|15":"PASTURA","L3H|16":"PASTURA",
   "L3H|24":"PASTURA","L3H|25":"PASTURA","L3H|30":"AGROPIRO",
@@ -59,10 +59,10 @@ const INV_26 = {
   "DOÑA TERESA|6":"CEBADA","LA CUCA|2":"FINA",
 };
 // 26-27 plan gruesa
-const PLAN_2627 = {
+const PLAN_2627_FALLBACK = {
   "L3H|1":"MAIZ","L3H|2":"GIRASOL","L3H|3":"SOJA","L3H|5":"PASTURA",
   "L3H|6":"VERDEO-MAIZ","L3H|7":"MAIZ","L3H|8":"VERDEO-MAIZ",
-  "L3H|9B":"SOJA","L3H|10O":"CEBADA-MAIZ","L3H|13G":"CEBADA-SOJA",
+  "L3H|9B":"SOJA","L3H|10O":"CEBADA-MAIZ","L3H|10E":"VERDEO-MAIZ","L3H|11":"PASTURA","L3H|13G":"CEBADA-SOJA",
   "L3H|13CH":"CEBADA-SOJA","L3H|14":"VERDEO-MAIZ","L3H|17":"GIRASOL",
   "L3H|18":"PASTURA","L3H|19":"SOJA","L3H|20":"SOJA","L3H|21N":"SOJA",
   "L3H|21S":"SOJA","L3H|22":"GIRASOL","L3H|23":"CEBADA-GIRASOL", // doble cultivo confirmado
@@ -79,7 +79,7 @@ const PLAN_2627 = {
   "DON ANTONIO|10":"AVENA","DON ANTONIO|11":"AVENA","DOÑA TERESA|6":"CEBADA",
 };
 // 25-26 cultivo por lote
-const CULT_2526 = {
+const CULT_2526_FALLBACK = {
   "L3H|1":"SOJA 2","L3H|2":"MAIZ","L3H|3":"MAIZ","L3H|4":"MANI","L3H|5":"GIRASOL",
   "L3H|6":"PASTURA","L3H|7":"MANI","L3H|8":"PASTURA","L3H|9A":"PASTURA","L3H|9B":"MAIZ 2",
   "L3H|10O":"MAIZ","L3H|10E":"SOJA 2","L3H|11":"PASTURA","L3H|12":"GIRASOL","L3H|13G":"GIRASOL",
@@ -116,7 +116,7 @@ const CULT_2526 = {
 };
 
 // rindes 25-26
-const RINDE_2526 = {
+const RINDE_2526_FALLBACK = {
   // L3H girasoles
   "L3H|5":30,"L3H|12":29,"L3H|13G":34,"L3H|13CH":24,"L3H|18":12,
   // L3H maíz tardío
@@ -140,7 +140,7 @@ const RINDE_2526 = {
 // HISTORICO DE ROTACION — 8 campañas por lote (19-20 a 26-27)
 // cv = cultivo, rF = rinde fina qq/ha, rG = rinde gruesa qq/ha
 // ============================================================
-const HISTORICO_ROTACION = {
+const HISTORICO_ROTACION_FALLBACK = {
   "L3H|1":{"19-20":{cv:"MAIZ",rF:null,rG:85},"20-21":{cv:"SOJA",rF:null,rG:31},"21-22":{cv:"GIRASOL",rF:null,rG:29},"22-23":{cv:"SOJA",rF:null,rG:10},"23-24":{cv:"MAIZ",rF:null,rG:77.5},"24-25":{cv:"GIRASOL",rF:null,rG:14.9},"25-26":{cv:"TRIGO-SOJA",rF:37,rG:24},"26-27":{cv:"MAIZ",rF:null,rG:null}},
   "L3H|2":{"19-20":{cv:"MAIZ",rF:null,rG:78},"20-21":{cv:"GIRASOL",rF:null,rG:28},"21-22":{cv:"TRIGO-MAIZ",rF:62,rG:42},"22-23":{cv:"SOJA",rF:null,rG:25.5},"23-24":{cv:"GIRASOL",rF:null,rG:28.2},"24-25":{cv:"TRIGO",rF:30,rG:null},"25-26":{cv:"MAIZ",rF:null,rG:null},"26-27":{cv:"GIRASOL",rF:null,rG:null}},
   "L3H|3":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"MAIZ",rF:null,rG:78},"21-22":{cv:"GIRASOL",rF:null,rG:25},"22-23":{cv:"TRIGO-SOJA",rF:28.5,rG:18},"23-24":{cv:"MAIZ",rF:null,rG:90},"24-25":{cv:"MANI",rF:null,rG:null},"25-26":{cv:"MAIZ",rF:null,rG:null},"26-27":{cv:"SOJA",rF:null,rG:null}},
@@ -153,7 +153,7 @@ const HISTORICO_ROTACION = {
   "L3H|9B":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"PASTURA",rF:null,rG:null},"22-23":{cv:"PASTURA",rF:null,rG:null},"23-24":{cv:"MAIZ",rF:null,rG:61},"24-25":{cv:"GIRASOL",rF:null,rG:12.8},"25-26":{cv:"TRIGO-MAIZ",rF:41,rG:null},"26-27":{cv:"SOJA",rF:null,rG:null}},
   "L3H|10E":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"PASTURA",rF:null,rG:null},"22-23":{cv:"PASTURA",rF:null,rG:null},"23-24":{cv:"PASTURA",rF:null,rG:null},"24-25":{cv:"PASTURA",rF:null,rG:null},"25-26":{cv:"PASTURA",rF:null,rG:null},"26-27":{cv:"VERDEO-MAIZ",rF:null,rG:null}},
   "L3H|10O":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"PASTURA",rF:null,rG:null},"22-23":{cv:"PASTURA",rF:null,rG:null},"23-24":{cv:"PASTURA",rF:null,rG:null},"24-25":{cv:"PASTURA",rF:null,rG:null},"25-26":{cv:"MAIZ",rF:null,rG:null},"26-27":{cv:"CEBADA-MAIZ",rF:null,rG:null}},
-  "L3H|11":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"PASTURA",rF:null,rG:null},"22-23":{cv:"PASTURA",rF:null,rG:null},"23-24":{cv:"PASTURA",rF:null,rG:null},"24-25":{cv:"PASTURA",rF:null,rG:null},"25-26":{cv:"PASTURA",rF:null,rG:null},"26-27":{cv:"AVENA",rF:null,rG:null}},
+  "L3H|11":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"PASTURA",rF:null,rG:null},"22-23":{cv:"PASTURA",rF:null,rG:null},"23-24":{cv:"PASTURA",rF:null,rG:null},"24-25":{cv:"PASTURA",rF:null,rG:null},"25-26":{cv:"PASTURA",rF:null,rG:null},"26-27":{cv:"PASTURA",rF:null,rG:null}},
   "L3H|12":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"GIRASOL",rF:null,rG:29},"22-23":{cv:"MAIZ",rF:null,rG:32},"23-24":{cv:"MANI",rF:null,rG:null},"24-25":{cv:"SOJA",rF:null,rG:23},"25-26":{cv:"GIRASOL",rF:null,rG:29},"26-27":{cv:"PASTURA",rF:null,rG:null}},
   "L3H|13G":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"MAIZ",rF:null,rG:65},"22-23":{cv:"SOJA",rF:null,rG:10},"23-24":{cv:"MANI",rF:null,rG:null},"24-25":{cv:"CENTENO-SOJA",rF:null,rG:11.1},"25-26":{cv:"GIRASOL",rF:null,rG:34},"26-27":{cv:"CEBADA-SOJA",rF:null,rG:null}},
   "L3H|13CH":{"19-20":{cv:"PASTURA",rF:null,rG:null},"20-21":{cv:"PASTURA",rF:null,rG:null},"21-22":{cv:"PASTURA",rF:null,rG:null},"22-23":{cv:"PASTURA",rF:null,rG:null},"23-24":{cv:"PASTURA",rF:null,rG:null},"24-25":{cv:"PASTURA",rF:null,rG:null},"25-26":{cv:"GIRASOL",rF:null,rG:24},"26-27":{cv:"CEBADA-SOJA",rF:null,rG:null}},
@@ -254,7 +254,7 @@ const MB_LOTE = {
 // análisis de suelo (0-20, promedio por lote, último disponible)
 // Texturas por lote (propiedad física, no cambia con el manejo)
 // Formato: [arcilla%, limo%, arena%] — promedio de posiciones cuando aplica
-const TEXTURA_LOTE = {
+const TEXTURA_LOTE_FALLBACK = {
   "L3H|3":  [7.3, 30.7, 62],
   "L3H|25": [8, 33, 59],
   "L3H|24": [9, 30, 61],
@@ -264,7 +264,7 @@ const TEXTURA_LOTE = {
   "L3H|10E":[5.33, 20, 74.67],
 };
 
-const SUELOS = {
+const SUELOS_FALLBACK = {
   // === Análisis 2017 ===
   "L3H|16":{fecha:"2017",P:17.1,N:14.2,MO:1.521},
   "L3H|27":{fecha:"2017",P:16.3,N:9.1,MO:1.112},
@@ -289,7 +289,7 @@ const SUELOS = {
 };
 
 // aplicaciones herbicidas (registro)
-const APLICACIONES = [
+const APLICACIONES_FALLBACK = [
   {fecha:"2026-06-29",campo:"LOS ABUELOS",lote:"5b (sur)",ha:45,cultivo:"TRIGO",costo:1328.5,productos:["CONTROLMAX","POWERSPRAY 2,4D 68%","Dicamba Duranor","Metsulfuron Metil","RizoSpray EXTREMO"]},
   {fecha:"2026-06-29",campo:"LOS ABUELOS",lote:"8B (SUR)",ha:23,cultivo:"CENTENO",costo:670.9,productos:["CONTROLMAX","POWERSPRAY 2,4D 68%","Dicamba Duranor","Metsulfuron Metil","RizoSpray EXTREMO"]},
   {fecha:"2026-06-25",campo:"L3H",lote:"23",ha:53,cultivo:"CEBADA",costo:2997.6,productos:["CONTROLMAX","POWERSPRAY 2,4D 68%","Dicamba Duranor","Flurocloridona 25%","RizoSpray EXTREMO"]},
@@ -321,7 +321,7 @@ const APLICACIONES = [
   {fecha:"2026-07-02",campo:"EL TORELLO",lote:"5",ha:52,cultivo:"CEBADA",costo:1243.7,productos:["GLIFOSATO LT BOX","2-4 D 97 SIGMA","LIGIER PH BIO","DICAMBA SIGMA","METSULFURON"]},
 ].map((a,i)=>({...a,id:i,costoHa:a.ha?a.costo/a.ha:0})).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
 // fertilizaciones realizadas (registro campaña 26-27 y 25-26 relevantes)
-const FERTILIZACIONES = [
+const FERTILIZACIONES_FALLBACK = [
   {fecha:"2026-06-25",campo:"L3H",lote:"13G",ha:142,cultivo:"CEBADA",tipo:"Arranque",producto:"MAP",dosis:"90 kg/ha",costoHa:52.2,notas:"Fertilización a la siembra"},
   {fecha:"2026-06-25",campo:"L3H",lote:"10O",ha:30,cultivo:"CEBADA",tipo:"Arranque",producto:"MAP",dosis:"90 kg/ha",costoHa:52.2,notas:"Fertilización a la siembra"},
   {fecha:"2026-06-25",campo:"L3H",lote:"13CH",ha:16,cultivo:"CEBADA",tipo:"Arranque",producto:"MAP",dosis:"90 kg/ha",costoHa:52.2,notas:""},
@@ -654,17 +654,40 @@ const CAMPOS = [
 ];
 
 // ── LÓGICA DE CAPAS ─────────────────────────────────────────
-// modo = rotacion | plan | rindes | margenes | suelos
+// modo = campaña | rindes | margenes | suelos
+// modo = campaña | rindes | margenes | suelos
 // suelo_var = P | N | MO
-function getFill(campoId, loteId, modo, sueloVar) {
+// datos = {INV_26, PLAN_2627, RINDE_2526, SUELOS}
+// Devuelve fill primario, label. Si es doble cultivo devuelve fill2 (para rayado)
+function getFill(campoId, loteId, modo, sueloVar, datos = {}) {
+  const {INV_26 = INV_26_FALLBACK, PLAN_2627 = PLAN_2627_FALLBACK, RINDE_2526 = RINDE_2526_FALLBACK, SUELOS = SUELOS_FALLBACK} = datos;
   const k=`${campoId}|${loteId}`;
-  if(modo==="rotacion"){
-    const cv=INV_26[k];
-    return {fill:cv?colorCv(cv):"#F0EDE5",label:cv||"sin sembrar",dim:!cv};
-  }
-  if(modo==="plan"){
-    const cv=PLAN_2627[k];
-    return {fill:cv?colorCv(baseCv(cv)):"#F0EDE5",label:cv||"sin definir",dim:!cv};
+  if(modo==="campaña"){
+    const inv=INV_26[k];       // cultivo fina (invierno)
+    const plan=PLAN_2627[k];    // cultivo gruesa (o doble cultivo con guión)
+    // Caso doble cultivo: (a) fina invierno + gruesa distinta, o (b) plan viene "X-Y"
+    let fina=inv, gruesa=null;
+    if(plan){
+      if(plan.includes("-")){
+        const [f,g]=plan.split("-").map(s=>s.trim());
+        fina=fina||f;
+        gruesa=g;
+      } else {
+        gruesa=plan;
+      }
+    }
+    // Si el plan es igual a la fina (ej "PASTURA"), no es doble cultivo
+    if(fina&&gruesa&&baseCv(fina)===baseCv(gruesa)) gruesa=null;
+    if(!fina&&!gruesa) return {fill:"#F0EDE5",label:"sin sembrar",dim:true};
+    if(fina&&gruesa) return {
+      fill:colorCv(fina),
+      fill2:colorCv(gruesa),
+      label:`${fina} + ${gruesa}`,
+      dim:false,
+      doble:true
+    };
+    const cv=fina||gruesa;
+    return {fill:colorCv(cv),label:cv,dim:false};
   }
   if(modo==="rindes"){
     const r=RINDE_2526[k];
@@ -699,7 +722,7 @@ function getFill(campoId, loteId, modo, sueloVar) {
 }
 
 // ── COMPONENTE MAPA ──────────────────────────────────────────
-function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick}){
+function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick, datos}){
   const [hov,setHov]=useState(null);
   const [vx,vy,vw,vh]=campo.vb;
   const k=vw/700;
@@ -716,13 +739,23 @@ function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick}){
         <text key={j} x={r.x} y={r.y} fontSize={10.5*k} fontStyle="italic" fill="#8A8270" textAnchor="middle" transform={r.rot?`rotate(${r.rot} ${r.x} ${r.y})`:undefined}>{r.t}</text>
       ))}
       {campo.lotes.map(l=>{
-        const {fill,label,dim}=getFill(campo.id,l.id,modo,sueloVar);
+        const info=getFill(campo.id,l.id,modo,sueloVar,datos);
+        const {fill,fill2,label,dim,doble}=info;
         const [cx,cy]=centro(l.poly);
         const w=anchoP(l.poly);
         const isH=hov===l.id;
+        const patternId=`p_${campo.id.replace(/\s+/g,"")}_${l.id.replace(/\s+/g,"")}`.replace(/[^a-zA-Z0-9_]/g,"");
         return <g key={l.id} onMouseEnter={()=>!mini&&setHov(l.id)} onMouseLeave={()=>setHov(null)} onClick={onLoteClick?()=>onLoteClick(campo,l):undefined}>
+          {doble&&(
+            <defs>
+              <pattern id={patternId} patternUnits="userSpaceOnUse" width={12*k} height={12*k} patternTransform="rotate(45)">
+                <rect width={6*k} height={12*k} fill={fill}/>
+                <rect x={6*k} width={6*k} height={12*k} fill={fill2}/>
+              </pattern>
+            </defs>
+          )}
           <polygon points={l.poly.map(p=>p.join(",")).join(" ")}
-            fill={fill} stroke={isH?"#1A1610":TINTA}
+            fill={doble?`url(#${patternId})`:fill} stroke={isH?"#1A1610":TINTA}
             strokeWidth={(isH?2.5:dim?0.8:1.3)*k} opacity={dim?0.75:1}/>
           {!mini&&w>=34*k&&(
             <g style={{pointerEvents:"none"}}>
@@ -749,17 +782,25 @@ function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick}){
 // ── LEYENDA ──────────────────────────────────────────────────
 function Leyenda({modo,sueloVar}){
   const tag={display:"flex",alignItems:"center",gap:5,fontSize:12};
-  if(modo==="rotacion"){
-    const cvs=["CEBADA","TRIGO","AVENA","CENTENO","AGROPIRO","VERDEO","PASTURA","FINA"];
-    return <div style={{display:"flex",flexWrap:"wrap",gap:"4px 12px",marginTop:6}}>
-      {cvs.map(cv=><div key={cv} style={tag}><span style={{width:11,height:11,borderRadius:3,background:colorCv(cv),border:`1px solid ${TINTA}`,flexShrink:0}}/>{cv}</div>)}
-      <div style={tag}><span style={{width:11,height:11,borderRadius:3,background:"#F0EDE5",border:"1px solid #C0B99A",flexShrink:0}}/>sin sembrar</div>
-    </div>;
-  }
-  if(modo==="plan"){
-    const cvs=["MAIZ","SOJA","GIRASOL","CEBADA","TRIGO","AVENA","VERDEO","PASTURA"];
-    return <div style={{display:"flex",flexWrap:"wrap",gap:"4px 12px",marginTop:6}}>
-      {cvs.map(cv=><div key={cv} style={tag}><span style={{width:11,height:11,borderRadius:3,background:colorCv(cv),border:`1px solid ${TINTA}`,flexShrink:0}}/>{cv}</div>)}
+  if(modo==="campaña"){
+    const cvs=["MAIZ","SOJA","GIRASOL","CEBADA","TRIGO","AVENA","CENTENO","VERDEO","AGROPIRO","PASTURA"];
+    return <div style={{marginTop:6}}>
+      <div style={{display:"flex",flexWrap:"wrap",gap:"4px 12px"}}>
+        {cvs.map(cv=><div key={cv} style={tag}><span style={{width:11,height:11,borderRadius:3,background:colorCv(cv),border:`1px solid ${TINTA}`,flexShrink:0}}/>{cv}</div>)}
+        <div style={tag}><span style={{width:11,height:11,borderRadius:3,background:"#F0EDE5",border:"1px solid #C0B99A",flexShrink:0}}/>sin sembrar</div>
+      </div>
+      <div style={{...tag,marginTop:5,fontSize:11.5,opacity:0.75}}>
+        <svg width="16" height="11" style={{flexShrink:0}}>
+          <defs>
+            <pattern id="lgd_stripe" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+              <rect width="3" height="6" fill="#C9B458"/>
+              <rect x="3" width="3" height="6" fill="#43A047"/>
+            </pattern>
+          </defs>
+          <rect width="16" height="11" fill="url(#lgd_stripe)" stroke="#2E2A22" strokeWidth="0.7"/>
+        </svg>
+        <span>rayado = doble cultivo (fina + gruesa)</span>
+      </div>
     </div>;
   }
   if(modo==="rindes") return <GradBar min="0 qq" max="90 qq" c1="#FFF5CC" c2="#BF4000" label="Rinde 25-26"/>;
@@ -1682,9 +1723,44 @@ function VistaProtocolos() {
   );
 }
 export default function App(){
+  // ── DATOS DINÁMICOS: cargados desde /datos.json (pipeline automático) ──
+  const [datosOK, setDatosOK] = useState(null); // null=cargando, true=cargado, false=falló
+  const [datosRemotos, setDatosRemotos] = useState(null);
+  const [fechaDatos, setFechaDatos] = useState(null);
+
+  useEffect(() => {
+    fetch("/datos.json")
+      .then(r => r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status)))
+      .then(d => {
+        setDatosRemotos(d);
+        setFechaDatos(d.generado);
+        setDatosOK(true);
+        console.log("✓ Datos cargados de /datos.json — generado:", d.generado);
+      })
+      .catch(err => {
+        console.warn("⚠ No pude cargar /datos.json, usando datos hardcodeados. Error:", err.message);
+        setDatosOK(false);
+      });
+  }, []);
+
+  // Selectores: usan datos remotos si existen, sino fallback
+  const INV_26 = datosRemotos?.INV_26 || INV_26_FALLBACK;
+  const PLAN_2627 = datosRemotos?.PLAN_2627 || PLAN_2627_FALLBACK;
+  const CULT_2526 = datosRemotos?.CULT_2526 || CULT_2526_FALLBACK;
+  const RINDE_2526 = datosRemotos?.RINDE_2526 || RINDE_2526_FALLBACK;
+  const HISTORICO_ROTACION = datosRemotos?.HISTORICO_ROTACION || HISTORICO_ROTACION_FALLBACK;
+  const TEXTURA_LOTE = datosRemotos?.TEXTURA_LOTE || TEXTURA_LOTE_FALLBACK;
+  const SUELOS = datosRemotos?.SUELOS || SUELOS_FALLBACK;
+  const APLICACIONES = datosRemotos?.APLICACIONES ?
+    datosRemotos.APLICACIONES.map((a,i)=>({...a,id:i,costoHa:a.ha?a.costo/a.ha:0})).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha))
+    : APLICACIONES_FALLBACK;
+  const FERTILIZACIONES = datosRemotos?.FERTILIZACIONES ?
+    datosRemotos.FERTILIZACIONES.map((f,i)=>({...f,id:i})).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha))
+    : FERTILIZACIONES_FALLBACK;
+
   const [vista,setVista]=useState("mapas");        // mapas | galeria | herbicidas | acciones | ordenes | margenes | protocolos
   const [campoSel,setCampoSel]=useState("L3H");
-  const [capaModo,setCapaModo]=useState("rotacion"); // rotacion|plan|rindes|margenes|suelos
+  const [capaModo,setCapaModo]=useState("campaña"); // campaña|rindes|margenes|suelos
   const [sueloVar,setSueloVar]=useState("P");
   const [campoFiltro,setCampoFiltro]=useState("TODOS");
   const [acciones,setAcciones]=useState(ACCIONES_INIT);
@@ -1768,8 +1844,7 @@ export default function App(){
   }).sort((a,b)=>b.mbsa-a.mbsa);
 
   const CAPAS=[
-    {id:"rotacion",lbl:"🌾 Invierno 26-27"},
-    {id:"plan",lbl:"📋 Plan gruesa 26-27"},
+    {id:"campaña",lbl:"🌾 Campaña 26-27"},
     {id:"rindes",lbl:"📈 Rindes 25-26"},
     {id:"margenes",lbl:"💵 Márgenes 25-26"},
     {id:"suelos",lbl:"🔬 Análisis de suelo"},
@@ -1784,6 +1859,11 @@ export default function App(){
         {/* Header */}
         <div style={{marginBottom:14}}>
           <div style={{fontSize:11,letterSpacing:"0.25em",textTransform:"uppercase",opacity:0.5}}>SMIX · General Pico, La Pampa · campaña 26-27</div>
+          <div style={{fontSize:10.5,opacity:0.55,marginTop:4,display:"flex",alignItems:"center",gap:6}}>
+            {datosOK === null && <><span>⏳</span> Cargando datos…</>}
+            {datosOK === true && fechaDatos && <><span style={{color:"#43A047"}}>●</span> Datos actualizados: {new Date(fechaDatos).toLocaleString("es-AR",{timeZone:"America/Argentina/Buenos_Aires",dateStyle:"short",timeStyle:"short"})}</>}
+            {datosOK === false && <><span style={{color:"#C0392B"}}>●</span> Sin conexión a datos actualizados (modo offline)</>}
+          </div>
           <h1 style={{margin:"2px 0 4px",fontSize:26,fontWeight:700}}>Gestión integral de campos</h1>
           <div style={{fontSize:13,opacity:0.6}}>{CAMPOS.length} campos · {fmt(haTotal)} ha totales · {APLICACIONES.length} aplicaciones registradas</div>
         </div>
@@ -1825,8 +1905,62 @@ export default function App(){
                 <div style={{fontWeight:700,fontSize:15}}>{campo.nombre}</div>
                 <div style={{fontSize:12,opacity:0.6}}>{PRODUCTOR[campo.id]} · {fmt(haCampo(campo))} ha</div>
               </div>
-              <MapaCampo campo={campo} modo={capaModo} sueloVar={sueloVar} onLoteClick={abrirLote}/>
+              <MapaCampo campo={campo} modo={capaModo} sueloVar={sueloVar} onLoteClick={abrirLote} datos={{INV_26,PLAN_2627,RINDE_2526,SUELOS}}/>
               <div style={{paddingInline:4}}><Leyenda modo={capaModo} sueloVar={sueloVar}/></div>
+              {/* Resumen ha por cultivo — campaña 26-27 */}
+              {capaModo==="campaña"&&(()=>{
+                const acum={};
+                campo.lotes.forEach(l=>{
+                  const inv=INV_26[`${campo.id}|${l.id}`];
+                  const plan=PLAN_2627[`${campo.id}|${l.id}`];
+                  let fina=inv, gruesa=null;
+                  if(plan){
+                    if(plan.includes("-")){
+                      const [f,g]=plan.split("-").map(s=>s.trim());
+                      fina=fina||f; gruesa=g;
+                    } else gruesa=plan;
+                  }
+                  if(fina&&gruesa&&baseCv(fina)===baseCv(gruesa)) gruesa=null;
+                  // Separar 2da: gruesa que va sobre fina cosechada o sobre verdeo
+                  // se etiqueta como "MAIZ 2" o "SOJA 2"
+                  let etiquetaGruesa=gruesa;
+                  if(gruesa&&fina){
+                    const finaBase=baseCv(fina);
+                    const gruesaBase=baseCv(gruesa);
+                    // Si la fina es un cultivo cosechable (cebada, trigo, avena, centeno) o verdeo
+                    // → la gruesa es de 2da
+                    const finasCosechables=["CEBADA","TRIGO","AVENA","CENTENO","VERDEO"];
+                    if(finasCosechables.includes(finaBase)){
+                      if(gruesaBase==="MAIZ") etiquetaGruesa="MAIZ 2";
+                      else if(gruesaBase==="SOJA") etiquetaGruesa="SOJA 2";
+                      else if(gruesaBase==="GIRASOL") etiquetaGruesa="GIRASOL 2";
+                    }
+                  }
+                  if(fina) acum[fina]=(acum[fina]||0)+l.ha;
+                  if(etiquetaGruesa) acum[etiquetaGruesa]=(acum[etiquetaGruesa]||0)+l.ha;
+                  if(!fina&&!gruesa) acum["sin sembrar"]=(acum["sin sembrar"]||0)+l.ha;
+                });
+                const rows=Object.entries(acum).sort((a,b)=>b[1]-a[1]);
+                const total=rows.reduce((s,[_,ha])=>s+ha,0);
+                return (
+                  <div style={{marginTop:12,paddingTop:12,borderTop:"1.5px dashed #D8D2C0",paddingInline:4}}>
+                    <div style={{fontSize:11,letterSpacing:"0.18em",textTransform:"uppercase",opacity:0.55,marginBottom:8}}>Resumen ha por cultivo</div>
+                    <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+                      {rows.map(([cv,ha])=>{
+                        const pct=(ha/total*100).toFixed(0);
+                        const es2da=/\s2$/.test(cv);
+                        return <div key={cv} style={{display:"flex",alignItems:"center",gap:7,background:"#FFFDF7",border:"1px solid #E5E0D0",borderRadius:8,padding:"6px 10px",fontSize:12.5}}>
+                          <span style={{width:11,height:11,borderRadius:3,background:cv==="sin sembrar"?"#F0EDE5":colorCv(cv),border:`1px solid ${TINTA}`,flexShrink:0,opacity:es2da?0.7:1}}/>
+                          <span style={{fontWeight:700}}>{cv}</span>
+                          <span style={{opacity:0.6}}>·</span>
+                          <span style={{fontWeight:600}}>{fmt(ha)} ha</span>
+                          <span style={{opacity:0.55,fontSize:11}}>({pct}%)</span>
+                        </div>;
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
             {/* panel suelos si aplica */}
             {capaModo==="suelos"&&(
@@ -1873,7 +2007,7 @@ export default function App(){
                     <div style={{fontWeight:700,fontSize:14}}>{c.nombre}</div>
                     <div style={{fontSize:12,opacity:0.55}}>{PRODUCTOR[c.id]} · {fmt(haCampo(c))} ha</div>
                   </div>
-                  <MapaCampo campo={c} modo={capaModo} sueloVar={sueloVar} mini={false} onLoteClick={abrirLote}/>
+                  <MapaCampo campo={c} modo={capaModo} sueloVar={sueloVar} mini={false} onLoteClick={abrirLote} datos={{INV_26,PLAN_2627,RINDE_2526,SUELOS}}/>
                   <div style={{marginTop:4}}><Leyenda modo={capaModo} sueloVar={sueloVar}/></div>
                 </div>
               ))}
@@ -2212,7 +2346,7 @@ export default function App(){
       </div>
 
       {/* MODAL HISTORIAL LOTE */}
-      {loteAbierto&&<ModalHistorial loteInfo={loteAbierto} onClose={cerrarLote} campSel={campSel} setCampSel={setCampSel}/>}
+      {loteAbierto&&<ModalHistorial loteInfo={loteAbierto} onClose={cerrarLote} campSel={campSel} setCampSel={setCampSel} historico={HISTORICO_ROTACION}/>}
     </div>
   );
 }
@@ -2220,7 +2354,8 @@ export default function App(){
 // ============================================================
 // MODAL HISTORIAL — muestra 8 campañas de un lote
 // ============================================================
-function ModalHistorial({loteInfo, onClose, campSel, setCampSel}){
+function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico}){
+  const HISTORICO_ROTACION = historico || HISTORICO_ROTACION_FALLBACK;
   const {campo,lote}=loteInfo;
   const key=`${campo.id}|${lote.id}`;
   const hist=HISTORICO_ROTACION[key];
