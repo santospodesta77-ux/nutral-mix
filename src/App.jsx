@@ -28,9 +28,28 @@ const fmt  = n => Math.round(n).toLocaleString("es-AR");
 const fmt1 = n => (Math.round(n*10)/10).toLocaleString("es-AR",{minimumFractionDigits:1});
 const fechaCorta = f => { const[y,m,d]=f.split("-"); return `${d}/${m}/${y.slice(2)}`; };
 const diasHasta  = f => Math.round((new Date(f)-new Date("2026-06-30"))/86400000);
+// Centroide geométrico real (fórmula de área signada) — cae dentro del polígono
+// para polígonos convexos y cerca del centro visual para irregulares
 const centro = poly => {
-  const xs=poly.map(p=>p[0]),ys=poly.map(p=>p[1]);
-  return [(Math.min(...xs)+Math.max(...xs))/2,(Math.min(...ys)+Math.max(...ys))/2];
+  if(poly.length < 3) {
+    const xs=poly.map(p=>p[0]),ys=poly.map(p=>p[1]);
+    return [(Math.min(...xs)+Math.max(...xs))/2,(Math.min(...ys)+Math.max(...ys))/2];
+  }
+  let cx=0, cy=0, area=0;
+  for(let i=0; i<poly.length; i++){
+    const [x0,y0]=poly[i];
+    const [x1,y1]=poly[(i+1)%poly.length];
+    const cross = x0*y1 - x1*y0;
+    cx += (x0+x1)*cross;
+    cy += (y0+y1)*cross;
+    area += cross;
+  }
+  area *= 0.5;
+  if(Math.abs(area) < 1e-6){
+    const xs=poly.map(p=>p[0]),ys=poly.map(p=>p[1]);
+    return [(Math.min(...xs)+Math.max(...xs))/2,(Math.min(...ys)+Math.max(...ys))/2];
+  }
+  return [cx/(6*area), cy/(6*area)];
 };
 const anchoP = poly => Math.max(...poly.map(p=>p[0]))-Math.min(...poly.map(p=>p[0]));
 const haCampo = c => c.lotes.reduce((s,l)=>s+(Number(l.ha)||0),0);
@@ -759,10 +778,11 @@ function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick, datos}){
             strokeWidth={(isH?2.5:dim?0.8:1.3)*k} opacity={dim?0.75:1}/>
           {!mini&&w>=34*k&&(
             <g style={{pointerEvents:"none"}}>
-              <text x={cx} y={cy+(dim?4:label?-2:4)*k} fontSize={(w<55*k?9.5:12)*k}
+              <text x={cx} y={cy+(dim?-2:label?-6:-2)*k} fontSize={(w<55*k?9.5:12)*k}
                 fontWeight="700" textAnchor="middle"
                 fill={dim?"#B0A89A":TINTA} opacity={dim?0.55:1}>{l.label}</text>
-              {!dim&&label&&<text x={cx} y={cy+11*k} fontSize={8.5*k} textAnchor="middle" fill={TINTA} opacity={0.85}>{label}</text>}
+              {l.ha&&<text x={cx} y={cy+(dim?9:label?4:9)*k} fontSize={(w<55*k?7.5:9)*k} textAnchor="middle" fill={dim?"#B0A89A":TINTA} opacity={dim?0.5:0.65}>{l.ha} ha</text>}
+              {!dim&&label&&<text x={cx} y={cy+15*k} fontSize={8.5*k} textAnchor="middle" fill={TINTA} opacity={0.85}>{label}</text>}
             </g>
           )}
           {isH&&!mini&&(()=>{
@@ -850,14 +870,21 @@ function deducirEstadoLote(campoId, loteId, ha, cultivoAsignado, aplicaciones, f
   if(!protoKey || !PROTOCOLOS_DATA[protoKey]) return null;
   const proto = PROTOCOLOS_DATA[protoKey];
 
-  // aplicaciones y fert de este lote (matching flexible: campo + lote incluye)
-  const norm = s => (s||"").toString().toUpperCase().replace(/\s/g,"");
+  // aplicaciones y fert de este lote (matching exacto o por partes agrupadas)
+  const norm = s => (s||"").toString().toUpperCase().replace(/\s/g,"").replace(/[-_]/g,"");
   const loteN = norm(loteId);
+  const matchExacto = (loteX) => {
+    const a = norm(loteX);
+    if(a === loteN) return true;
+    // Si el lote de la aplicación agrupa varios (ej "2,4Y5"), split y match exacto
+    const partes = a.split(/[,YY;]/).map(s=>s.trim()).filter(Boolean);
+    return partes.some(p => p === loteN);
+  };
   const aplLote = aplicaciones.filter(a =>
-    a.campo === campoId && (norm(a.lote) === loteN || norm(a.lote).includes(loteN) || loteN.includes(norm(a.lote)))
+    a.campo === campoId && matchExacto(a.lote)
   ).sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
   const fertLote = fertilizaciones.filter(f =>
-    f.campo === campoId && (norm(f.lote) === loteN || norm(f.lote).includes(loteN) || loteN.includes(norm(f.lote)))
+    f.campo === campoId && matchExacto(f.lote)
   ).sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
 
   // Heurística: mapear cada aplicación/fert a una etapa del protocolo por palabras clave
@@ -2379,11 +2406,15 @@ function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, apli
   const rindesGruesa=hist?Object.entries(hist).filter(([_,d])=>d.rG).map(([c,d])=>({c,r:d.rG})):[];
 
   // Filtrar aplicaciones y fert de este lote (matching flexible)
-  const normLote=s=>(s||"").toString().toUpperCase().replace(/\s/g,"");
+  const normLote=s=>(s||"").toString().toUpperCase().replace(/\s/g,"").replace(/[-_]/g,"");
   const matchLote=(x)=>{
     if(x.campo!==campo.id) return false;
     const a=normLote(x.lote), b=normLote(lote.id);
-    return a===b||a.includes(b)||b.includes(a);
+    if(a===b) return true;
+    // Si el lote de la aplicación agrupa varios (ej "2,4Y5" contiene el lote "2" o "4" o "5")
+    // separamos por comas o "Y" y verificamos si alguno matchea exacto
+    const partes=a.split(/[,YY;]/).map(s=>s.trim()).filter(Boolean);
+    return partes.some(p=>p===b);
   };
   const aplLote=aplicaciones.filter(matchLote).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
   const fertLote=fertilizaciones.filter(matchLote).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
