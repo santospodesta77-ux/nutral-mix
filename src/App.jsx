@@ -1857,15 +1857,23 @@ export default function App(){
       <div style={{maxWidth:1200,margin:"0 auto"}}>
 
         {/* Header */}
-        <div style={{marginBottom:14}}>
-          <div style={{fontSize:11,letterSpacing:"0.25em",textTransform:"uppercase",opacity:0.5}}>SMIX · General Pico, La Pampa · campaña 26-27</div>
-          <div style={{fontSize:10.5,opacity:0.55,marginTop:4,display:"flex",alignItems:"center",gap:6}}>
-            {datosOK === null && <><span>⏳</span> Cargando datos…</>}
-            {datosOK === true && fechaDatos && <><span style={{color:"#43A047"}}>●</span> Datos actualizados: {new Date(fechaDatos).toLocaleString("es-AR",{timeZone:"America/Argentina/Buenos_Aires",dateStyle:"short",timeStyle:"short"})}</>}
-            {datosOK === false && <><span style={{color:"#C0392B"}}>●</span> Sin conexión a datos actualizados (modo offline)</>}
+        <div style={{marginBottom:14,display:"flex",alignItems:"center",gap:14}}>
+          <svg width="56" height="56" viewBox="0 0 512 512" style={{flexShrink:0,background:"#fff",borderRadius:10,border:`1px solid ${TINTA}`,padding:4}}>
+            <rect x="88" y="88" width="150" height="150" rx="18" fill="#1E2E7E"/>
+            <rect x="274" y="88" width="150" height="150" rx="18" fill="#F5D426"/>
+            <circle cx="163" cy="349" r="75" fill="#43A047"/>
+            <rect x="274" y="274" width="150" height="150" rx="18" fill="#1E2E7E"/>
+          </svg>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontSize:11,letterSpacing:"0.25em",textTransform:"uppercase",opacity:0.5}}>SMIX · General Pico, La Pampa · campaña 26-27</div>
+            <div style={{fontSize:10.5,opacity:0.55,marginTop:4,display:"flex",alignItems:"center",gap:6}}>
+              {datosOK === null && <><span>⏳</span> Cargando datos…</>}
+              {datosOK === true && fechaDatos && <><span style={{color:"#43A047"}}>●</span> Datos actualizados: {new Date(fechaDatos).toLocaleString("es-AR",{timeZone:"America/Argentina/Buenos_Aires",dateStyle:"short",timeStyle:"short"})}</>}
+              {datosOK === false && <><span style={{color:"#C0392B"}}>●</span> Sin conexión a datos actualizados (modo offline)</>}
+            </div>
+            <h1 style={{margin:"2px 0 4px",fontSize:26,fontWeight:700}}>Gestión integral de campos</h1>
+            <div style={{fontSize:13,opacity:0.6}}>{CAMPOS.length} campos · {fmt(haTotal)} ha totales · {APLICACIONES.length} aplicaciones registradas</div>
           </div>
-          <h1 style={{margin:"2px 0 4px",fontSize:26,fontWeight:700}}>Gestión integral de campos</h1>
-          <div style={{fontSize:13,opacity:0.6}}>{CAMPOS.length} campos · {fmt(haTotal)} ha totales · {APLICACIONES.length} aplicaciones registradas</div>
         </div>
 
         {/* TABS PRINCIPALES */}
