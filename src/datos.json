@@ -1,17 +1,17 @@
 {
-  "generado": "2026-07-20T12:03:00.504Z",
+  "generado": "2026-07-20T22:32:03.314Z",
   "warnings": [
-    "Campo MIRASOL es alias ambiguo (puede ser Don Antonio, La Flecha o Doña Teresa) - no asignado",
-    "Lote L3H|13CH en aplicaciones normalizado a L3H|13C para consistencia",
-    "Lote L3H|10 O normalizado a L3H|10O",
-    "Lote EL ABUELO 2,4 y 5 aparece como lote combinado - se normaliza a EL ABUELO|2,4 Y 5",
-    "Lote EL ABUELO 1 y 3 aparece como lote combinado - se normaliza a EL ABUELO|1 Y 3",
-    "Lote LA DORA MAIZ HUMED - nombre ambiguo, no se puede asignar lote específico",
-    "Aplicación deduplicada: GLIFOSATO GRANULADO LT BOX (producto largo vs corto) - 15 instancias unificadas",
-    "Campo LA MARIA OLIVA aparece en cronograma pero no tiene datos en otras planillas",
-    "Campo EL 5 aparece en cronograma pero no tiene datos en otras planillas",
-    "Producto CLEARSOL sin precio en BH CEREALES - aplicación del 30/11/2025 sin costo calculable",
-    "Varios lotes sin datos históricos completos de rotación (solo aparecen en 26-27)"
+    "Campo '5' identificado en planilla LABORES y BASE DE LABORES - normalizado a EL 5",
+    "Lote 'L3H-13' aparece con variantes: '13ch', '13C', '13G' - unificados",
+    "Lote 'L3H 10' aparece como 'L3H 10 O' y 'L3H-10' - unificados a 'L3H|10O'",
+    "Lote 'EL ABUELO 2,4 y 5' indica múltiples lotes (2, 4 y 5) - considerado como unidad",
+    "Aplicación duplicada eliminada: GLIFOSATO GRANULADO LT BOX (13/07/2026, EL ABUELO, 2,4 y 5) - nombre largo vs corto",
+    "Producto 'CONTROLMAX' en planilla BH CEREALES sin dosis - usado en aplicaciones 25/06/2026",
+    "Cultivo 'COBERTURA' identificado en lotes EL DESCANSO - posible cultivo de cobertura previo",
+    "Cultivo 'pastura' en L3H 12 - normalizado a PASTURA",
+    "Fertilización con semilla (TRIGO PROPIO, CEBADA PROPIA) marcada con '*' en dosis - indica siembra",
+    "Campo 'MIRASOL' mencionado en CLIENTES Y CAMPOS es ambiguo - no asignado",
+    "15 lotes sin datos completos de rotación histórica (solo campañas recientes 25-26 y 26-27)"
   ],
   "INV_26": {
     "L3H|1": "TRIGO",
@@ -162,7 +162,8 @@
     "LA CARLOTA|9": "MAIZ",
     "L3H|13C": "CEBADA",
     "LA CHOLITA|6": "CEBADA",
-    "LOS ABUELOS|5B": "TRIGO"
+    "LOS ABUELOS|5B": "TRIGO",
+    "EL 5|3": "AVENA"
   },
   "PLAN_2627": {
     "L3H|1": "MAIZ",
@@ -317,7 +318,7 @@
     "L3H|9A": "PASTURA",
     "L3H|9B": "TRIGO-MAIZ",
     "L3H|10E": "PASTURA",
-    "L3H|10O": "MAIZ",
+    "L3H|10O": "CEBADA",
     "L3H|11": "PASTURA",
     "L3H|12": "PASTURA",
     "L3H|13G": "CEBADA",
@@ -326,38 +327,38 @@
     "L3H|14": "PASTURA",
     "L3H|15": "PASTURA",
     "L3H|16": "PASTURA",
-    "L3H|17": "SOJA",
+    "L3H|17": "GIRASOL",
     "L3H|18": "CEBADA-GIRASOL",
     "L3H|19": "CEBADA-MAIZ",
     "L3H|20": "MAIZ",
     "L3H|21N": "MAIZ T",
     "L3H|21S": "MAIZ",
-    "L3H|22": "TRIGO-SOJA",
-    "L3H|23": "SOJA",
+    "L3H|22": "GIRASOL",
+    "L3H|23": "CEBADA",
     "L3H|24": "PASTURA",
     "L3H|25": "PASTURA",
-    "L3H|26": "TRIGO-SOJA",
-    "L3H|27": "SOJA",
-    "L3H|28": "SOJA",
-    "L3H|29": "TRIGO-SOJA",
+    "L3H|26": "MAIZ",
+    "L3H|27": "MAIZ",
+    "L3H|28": "GIRASOL",
+    "L3H|29": "MAIZ",
     "L3H|30": "AGROPIRO",
     "LA CUCA|1": "MAIZ",
     "LA CUCA|2": "GIRASOL",
-    "LA CUCA|3N": "SOJA",
-    "LA CHOLITA|1": "SOJA 2",
+    "LA CUCA|3N": "GIRASOL",
+    "LA CHOLITA|1": "GIRASOL",
     "LA CHOLITA|2": "MAIZ",
     "LA CHOLITA|3": "COBERTURA",
     "LA CHOLITA|4": "CEBADA",
     "LA CHOLITA|5": "CEBADA",
     "EL DESCANSO|1": "COBERTURA",
     "EL DESCANSO|2": "MAIZ",
-    "EL DESCANSO|3": "COBERTURA",
+    "EL DESCANSO|3": "MAIZ",
     "EL DESCANSO|4": "MAIZ",
     "EL DESCANSO|5": "MAIZ",
     "EL DESCANSO|6": "MAIZ",
     "EL DESCANSO|7": "COBERTURA",
     "EL DESCANSO|8": "GIRASOL",
-    "LA DORA|1": "SOJA",
+    "LA DORA|1": "MAIZ",
     "LA DORA|2": "GIRASOL",
     "LA DORA|4": "MAIZ",
     "LA DORA|5": "MAIZ",
@@ -366,7 +367,7 @@
     "LA DORA|8": "GIRASOL",
     "LAS TIAS|9": "SORGO",
     "LAS TIAS|10": "MAIZ",
-    "LAS TIAS|11": "SOJA",
+    "LAS TIAS|11": "MAIZ",
     "LAS TIAS|12": "PASTURA",
     "LOS ABUELOS|2": "GIRASOL",
     "LOS ABUELOS|3": "GIRASOL",
@@ -375,7 +376,7 @@
     "LOS ABUELOS|6C": "MAIZ",
     "LOS ABUELOS|7B": "MAIZ",
     "LOS ABUELOS|8A": "MAIZ",
-    "LOS ABUELOS|8B": "MAIZ",
+    "LOS ABUELOS|8B": "CENTENO",
     "LOS ABUELOS|3O": "MAIZ",
     "LOS ABUELOS|9A": "PASTURA",
     "LOS ABUELOS|9B": "CENTENO",
@@ -384,7 +385,7 @@
     "LA MARIA OLIVA|FRANJA 1": "MAIZ",
     "LA MARIA OLIVA|FRANJA 2": "MAIZ",
     "EL 5|1": "MAIZ",
-    "EL 5|2": "SORGO",
+    "EL 5|2": "AVENA",
     "EL 5|4": "PASTURA",
     "LA FLECHA|1": "SORGO",
     "LA FLECHA|2": "SORGO",
@@ -405,34 +406,34 @@
     "DOÑA TERESA|5": "PASTURA",
     "DOÑA TERESA|6": "GIRASOL",
     "DOÑA TERESA|7": "PASTURA",
-    "DOÑA TERESA|8": "SORGO",
+    "DOÑA TERESA|8": "CEBADA",
     "DOÑA TERESA|9": "PASTURA",
     "EL TORELLO|1": "MAIZ",
     "EL TORELLO|2": "PASTURA",
     "EL TORELLO|3": "PASTURA",
-    "EL TORELLO|5": "SORGO",
+    "EL TORELLO|5": "CEBADA",
     "EL TORELLO|6": "MAIZ",
     "EL TORELLO|7": "MAIZ",
     "EL TORELLO|8": "MAIZ",
     "EL TORELLO|9": "PASTURA",
-    "DON RAMON|1": "SORGO",
-    "DON RAMON|2": "SORGO",
+    "DON RAMON|1": "AVENA",
+    "DON RAMON|2": "AVENA",
     "DON RAMON|3": "SORGO",
     "DON RAMON|4": "X",
     "DON RAMON|5": "GIRASOL",
     "DON RAMON|6": "MAIZ",
     "EL ABUELO|1": "MAIZ 2",
-    "EL ABUELO|2": "GIRASOL",
+    "EL ABUELO|2": "CEBADA",
     "EL ABUELO|3": "MAIZ 2",
-    "EL ABUELO|4": "GIRASOL",
-    "EL ABUELO|5": "GIRASOL",
+    "EL ABUELO|4": "CEBADA",
+    "EL ABUELO|5": "CEBADA",
     "LOS NIETOS|2": "MAIZ",
-    "LOS NIETOS|4": "MAIZ",
+    "LOS NIETOS|4": "CEBADA",
     "LOS NIETOS|5": "MAIZ",
-    "LOS NIETOS|7": "MAIZ",
+    "LOS NIETOS|7": "AVENA",
     "LOS NIETOS|9": "GIRASOL",
     "LOS NIETOS|11": "MAIZ",
-    "EL CIPRES|1": "SORGO",
+    "EL CIPRES|1": "CEBADA",
     "EL CIPRES|2N": "PASTURA",
     "EL CIPRES|2S": "PASTURA",
     "EL CIPRES|5": "MAIZ",
@@ -456,7 +457,8 @@
     "L3H|13C": "CEBADA",
     "LA CHOLITA|6": "CEBADA",
     "LA DORA|MAIZ HUMED": "MAIZ",
-    "LOS ABUELOS|5B": "TRIGO"
+    "LOS ABUELOS|5B": "TRIGO",
+    "EL 5|3": "AVENA"
   },
   "RINDE_2526": {
     "L3H|1": 24,
@@ -1371,6 +1373,18 @@
       ]
     },
     {
+      "fecha": "2026-11-30",
+      "campo": "LA CUCA",
+      "lote": "2",
+      "ha": 112,
+      "cultivo": "GIRASOL",
+      "costo": 705.6,
+      "produtos": [
+        "CLEARSOL",
+        "ACEITE METILADO ROCIO"
+      ]
+    },
+    {
       "fecha": "2026-07-20",
       "campo": "LOS ABUELOS",
       "lote": "2",
@@ -1398,6 +1412,36 @@
         "DICAMBA DURANOR",
         "RIZOSPRAY CORRECTOR",
         "ATRAZINA"
+      ]
+    },
+    {
+      "fecha": "2026-07-20",
+      "campo": "LOS ABUELOS",
+      "lote": "2",
+      "ha": 42,
+      "cultivo": "MAIZ",
+      "costo": 1335.6,
+      "produtos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Dicamba 70.8 % Duranor Avance",
+        "Coady. RizoSpray Corrector Secuestrante",
+        "Atrazina 90 % solida"
+      ]
+    },
+    {
+      "fecha": "2026-07-20",
+      "campo": "LOS ABUELOS",
+      "lote": "3",
+      "ha": 39,
+      "cultivo": "MAIZ",
+      "costo": 1240.2,
+      "produtos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Dicamba 70.8 % Duranor Avance",
+        "Coady. RizoSpray Corrector Secuestrante",
+        "Atrazina 90 % solida"
       ]
     },
     {
@@ -1482,6 +1526,48 @@
       "productos": [
         "DICAMBA DURANOR",
         "POWERSPRAY 2,4D"
+      ]
+    },
+    {
+      "fecha": "2026-07-16",
+      "campo": "DON RAMON",
+      "lote": "2",
+      "ha": 18,
+      "cultivo": "AVENA",
+      "costo": 503.4,
+      "produtos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Dicamba 70.8 % Duranor Avance",
+        "Metsulfuron Metil 60 %",
+        "Coady. RizoSpray EXTREMO"
+      ]
+    },
+    {
+      "fecha": "2026-07-16",
+      "campo": "DON RAMON",
+      "lote": "1",
+      "ha": 20,
+      "cultivo": "AVENA",
+      "costo": 559.3,
+      "produtos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Dicamba 70.8 % Duranor Avance",
+        "Metsulfuron Metil 60 %",
+        "Coady. RizoSpray EXTREMO"
+      ]
+    },
+    {
+      "fecha": "2026-07-16",
+      "campo": "DON RAMON",
+      "lote": "6",
+      "ha": 60,
+      "cultivo": "VERDEO",
+      "costo": 823.2,
+      "produtos": [
+        "Dicamba 70.8 % Duranor Avance",
+        "POWERSPRAY 2,4D 68%"
       ]
     },
     {
@@ -3899,6 +3985,28 @@
   ],
   "FERTILIZACIONES": [
     {
+      "fecha": "2026-07-21",
+      "campo": "LOS ABUELOS",
+      "lote": "8B",
+      "ha": 20,
+      "cultivo": "CENTENO",
+      "tipo": "Siembra",
+      "producto": "CENTENO PROPIO",
+      "dosis": "50 kg/ha",
+      "costoHa": 20.6
+    },
+    {
+      "fecha": "2026-07-21",
+      "campo": "LOS ABUELOS",
+      "lote": "5B",
+      "ha": 40,
+      "cultivo": "TRIGO",
+      "tipo": "Siembra",
+      "producto": "TRIGO PROPIO",
+      "dosis": "100 kg/ha",
+      "costoHa": 27.8
+    },
+    {
       "fecha": "2026-07-15",
       "campo": "LA CHOLITA",
       "lote": "5",
@@ -4128,6 +4236,28 @@
       "producto": "CENTENO PROPIO",
       "dosis": "50 kg/ha",
       "costoHa": 20.6
+    },
+    {
+      "fecha": "2026-07-08",
+      "campo": "LA CHOLITA",
+      "lote": "6",
+      "ha": 20,
+      "cultivo": "CEBADA",
+      "tipo": "Arranque+Incorporada",
+      "producto": "MAP AZURADO NUTRIEN + UREA-S NUTRIEN",
+      "dosis": "50+100 kg/ha",
+      "costoHa": 103.4
+    },
+    {
+      "fecha": "2026-07-08",
+      "campo": "EL 5",
+      "lote": "2 y 3",
+      "ha": 40,
+      "cultivo": "AVENA",
+      "tipo": "Siembra",
+      "producto": "AVENA PROPIA",
+      "dosis": "600 kg/ha",
+      "costoHa": 246.6
     },
     {
       "fecha": "2026-07-07",
@@ -4599,7 +4729,7 @@
   },
   "modifiedTimes": {
     "rotaciones": "2026-07-15T11:50:51.519Z",
-    "labores": "2026-07-20T11:58:10.963Z",
+    "labores": "2026-07-20T12:05:40.488Z",
     "margenes": "2026-07-06T13:39:09.153Z",
     "suelos": "2026-07-13T13:09:28.201Z"
   }
