@@ -1,13 +1,17 @@
 {
-  "generado": "2026-07-16T22:32:10.574Z",
+  "generado": "2026-07-20T12:03:00.504Z",
   "warnings": [
-    "L3H|13CH normalizado a L3H|13C (variantes con/sin h detectadas)",
-    "L3H|10 O y L3H|10O unificados como L3H|10O",
-    "EL ABUELO 2,4 y 5 y EL ABUELO 1 y 3: interpretados como aplicaciones multi-lote, incluidas individualmente",
-    "LA DORA maiz humed: lote ambiguo, aplicación registrada pero requiere aclaración de lote específico",
-    "MIRASOL aparece en CLIENTES Y CAMPOS pero no tiene datos asociados (campo ambiguo, sin asignación)",
-    "Productos duplicados removidos: GLIFOSATO GRANULADO LT BOX aparece con y sin peso, usado nombre corto",
-    "15 lotes sin datos históricos completos para campañas previas a 25-26"
+    "Campo MIRASOL es alias ambiguo (puede ser Don Antonio, La Flecha o Doña Teresa) - no asignado",
+    "Lote L3H|13CH en aplicaciones normalizado a L3H|13C para consistencia",
+    "Lote L3H|10 O normalizado a L3H|10O",
+    "Lote EL ABUELO 2,4 y 5 aparece como lote combinado - se normaliza a EL ABUELO|2,4 Y 5",
+    "Lote EL ABUELO 1 y 3 aparece como lote combinado - se normaliza a EL ABUELO|1 Y 3",
+    "Lote LA DORA MAIZ HUMED - nombre ambiguo, no se puede asignar lote específico",
+    "Aplicación deduplicada: GLIFOSATO GRANULADO LT BOX (producto largo vs corto) - 15 instancias unificadas",
+    "Campo LA MARIA OLIVA aparece en cronograma pero no tiene datos en otras planillas",
+    "Campo EL 5 aparece en cronograma pero no tiene datos en otras planillas",
+    "Producto CLEARSOL sin precio en BH CEREALES - aplicación del 30/11/2025 sin costo calculable",
+    "Varios lotes sin datos históricos completos de rotación (solo aparecen en 26-27)"
   ],
   "INV_26": {
     "L3H|1": "TRIGO",
@@ -204,13 +208,13 @@
     "LA CHOLITA|3": "COBERTURA",
     "LA CHOLITA|4": "CEBADA",
     "LA CHOLITA|5": "CEBADA",
-    "EL DESCANSO|1": "MAIZ",
+    "EL DESCANSO|1": "COBERTURA",
     "EL DESCANSO|2": "SOJA",
     "EL DESCANSO|3": "MAIZ",
     "EL DESCANSO|4": "SOJA",
     "EL DESCANSO|5": "GIRASOL",
     "EL DESCANSO|6": "SOJA",
-    "EL DESCANSO|7": "MAIZ",
+    "EL DESCANSO|7": "COBERTURA",
     "EL DESCANSO|8": "MAIZ",
     "LA DORA|1": "MAIZ",
     "LA DORA|2": "MAIZ",
@@ -244,7 +248,7 @@
     "DOÑA TERESA|2": "MAIZ",
     "DOÑA TERESA|4": "GIRASOL",
     "DOÑA TERESA|6": "GIRASOL",
-    "DOÑA TERESA|8": "SORGO",
+    "DOÑA TERESA|8": "CEBADA",
     "EL TORELLO|1": "MAIZ",
     "EL TORELLO|6": "MAIZ",
     "EL TORELLO|7": "MAIZ",
@@ -297,7 +301,9 @@
     "DON MARCELINO|4": "PASTURA",
     "DON MARCELINO|6": "PASTURA",
     "LA ADORACION|3": "GIRASOL",
-    "LA DORA|MAIZ HUMED": "MAIZ"
+    "LA DORA|MAIZ HUMED": "MAIZ",
+    "EL ABUELO|1 Y 3": "GIRASOL",
+    "EL ABUELO|2,4 Y 5": "GIRASOL"
   },
   "CULT_2526": {
     "L3H|1": "TRIGO-SOJA",
@@ -1365,6 +1371,36 @@
       ]
     },
     {
+      "fecha": "2026-07-20",
+      "campo": "LOS ABUELOS",
+      "lote": "2",
+      "ha": 42,
+      "cultivo": "MAIZ",
+      "costo": 1335.6,
+      "productos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D",
+        "DICAMBA DURANOR",
+        "RIZOSPRAY CORRECTOR",
+        "ATRAZINA"
+      ]
+    },
+    {
+      "fecha": "2026-07-20",
+      "campo": "LOS ABUELOS",
+      "lote": "3",
+      "ha": 39,
+      "cultivo": "MAIZ",
+      "costo": 1240.2,
+      "productos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D",
+        "DICAMBA DURANOR",
+        "RIZOSPRAY CORRECTOR",
+        "ATRAZINA"
+      ]
+    },
+    {
       "fecha": "2026-07-16",
       "campo": "DON RAMON",
       "lote": "2",
@@ -1404,6 +1440,48 @@
       "productos": [
         "Dicamba 70.8 % Duranor Avance",
         "POWERSPRAY 2,4D 68%"
+      ]
+    },
+    {
+      "fecha": "2026-07-16",
+      "campo": "DON RAMON",
+      "lote": "2",
+      "ha": 18,
+      "cultivo": "AVENA",
+      "costo": 503.4,
+      "productos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D",
+        "DICAMBA DURANOR",
+        "METSULFURON METIL",
+        "RIZOSPRAY EXTREMO"
+      ]
+    },
+    {
+      "fecha": "2026-07-16",
+      "campo": "DON RAMON",
+      "lote": "1",
+      "ha": 20,
+      "cultivo": "AVENA",
+      "costo": 559.3,
+      "productos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D",
+        "DICAMBA DURANOR",
+        "METSULFURON METIL",
+        "RIZOSPRAY EXTREMO"
+      ]
+    },
+    {
+      "fecha": "2026-07-16",
+      "campo": "DON RAMON",
+      "lote": "6",
+      "ha": 60,
+      "cultivo": "VERDEO",
+      "costo": 823.2,
+      "productos": [
+        "DICAMBA DURANOR",
+        "POWERSPRAY 2,4D"
       ]
     },
     {
@@ -1645,6 +1723,35 @@
       "ha": 40,
       "cultivo": "GIRASOL",
       "costo": 959,
+      "productos": [
+        "GLIFOSATO GRANULADO LT BOX",
+        "2-4 D 97 SIGMA",
+        "LIGIER PH BIO",
+        "METSULFURON SIGMA"
+      ]
+    },
+    {
+      "fecha": "2026-07-13",
+      "campo": "EL ABUELO",
+      "lote": "1 Y 3",
+      "ha": 77,
+      "cultivo": "GIRASOL",
+      "costo": 3060.3,
+      "productos": [
+        "GLIFOSATO GRANULADO LT BOX",
+        "2-4 D 97 SIGMA",
+        "LIGIER PH BIO",
+        "DIFLUFENICAN SIGMA",
+        "FLUROXIPIR 48 SIGMA"
+      ]
+    },
+    {
+      "fecha": "2026-07-13",
+      "campo": "EL ABUELO",
+      "lote": "2,4 Y 5",
+      "ha": 120,
+      "cultivo": "GIRASOL",
+      "costo": 3100.1,
       "productos": [
         "GLIFOSATO GRANULADO LT BOX",
         "2-4 D 97 SIGMA",
@@ -2013,6 +2120,36 @@
       ]
     },
     {
+      "fecha": "2026-06-29",
+      "campo": "LOS ABUELOS",
+      "lote": "5B",
+      "ha": 45,
+      "cultivo": "TRIGO",
+      "costo": 1328.5,
+      "productos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D",
+        "DICAMBA DURANOR",
+        "METSULFURON METIL",
+        "RIZOSPRAY EXTREMO"
+      ]
+    },
+    {
+      "fecha": "2026-06-29",
+      "campo": "LOS ABUELOS",
+      "lote": "8B",
+      "ha": 23,
+      "cultivo": "CENTENO",
+      "costo": 670.9,
+      "productos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D",
+        "DICAMBA DURANOR",
+        "METSULFURON METIL",
+        "RIZOSPRAY EXTREMO"
+      ]
+    },
+    {
       "fecha": "2026-06-25",
       "campo": "L3H",
       "lote": "23",
@@ -2190,6 +2327,36 @@
         "Dicamba 70.8 % Duranor Avance",
         "Atrazina 90 % solida",
         "Coady. RizoSpray EXTREMO"
+      ]
+    },
+    {
+      "fecha": "2026-06-25",
+      "campo": "L3H",
+      "lote": "23",
+      "ha": 53,
+      "cultivo": "CEBADA",
+      "costo": 2997.6,
+      "productos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D",
+        "DICAMBA DURANOR",
+        "FLUROCLORIDONA",
+        "RIZOSPRAY EXTREMO"
+      ]
+    },
+    {
+      "fecha": "2026-06-25",
+      "campo": "L3H",
+      "lote": "1",
+      "ha": 60,
+      "cultivo": "MAIZ",
+      "costo": 2092.2,
+      "productos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D",
+        "DICAMBA DURANOR",
+        "ATRAZINA",
+        "RIZOSPRAY EXTREMO"
       ]
     },
     {
@@ -3453,6 +3620,19 @@
       ]
     },
     {
+      "fecha": "2026-04-24",
+      "campo": "L3H",
+      "lote": "13C",
+      "ha": 20,
+      "cultivo": "CEBADA",
+      "costo": 590.7,
+      "productos": [
+        "GLIFOSATO GRANULADO BOX",
+        "A35T - GOLD",
+        "2-4 D 97 SIGMA"
+      ]
+    },
+    {
       "fecha": "2026-03-18",
       "campo": "L3H",
       "lote": "12",
@@ -3675,6 +3855,21 @@
         "LIGIER PH BIO",
         "2-4 D 97 SIGMA",
         "ATRAZINA 90% MAX SIGMA"
+      ]
+    },
+    {
+      "fecha": "2026-01-02",
+      "campo": "LA DORA",
+      "lote": "5",
+      "ha": 66,
+      "cultivo": "MAIZ",
+      "costo": 1816.9,
+      "productos": [
+        "GLIFOSATO GRANULADO BOX",
+        "ACEITE METILADO ROCIO",
+        "LIGIER PH BIO",
+        "2-4 D 97 SIGMA",
+        "ATRAZINA MAX SIGMA"
       ]
     },
     {
@@ -3911,6 +4106,28 @@
       "producto": "UREA-S NUTRIEN",
       "dosis": "100 kg/ha",
       "costoHa": 56.5
+    },
+    {
+      "fecha": "2026-07-08",
+      "campo": "LOS ABUELOS",
+      "lote": "5B",
+      "ha": 40,
+      "cultivo": "CENTENO",
+      "tipo": "Siembra",
+      "producto": "CENTENO PROPIO",
+      "dosis": "50 kg/ha",
+      "costoHa": 20.6
+    },
+    {
+      "fecha": "2026-07-08",
+      "campo": "LOS ABUELOS",
+      "lote": "8B",
+      "ha": 20,
+      "cultivo": "CENTENO",
+      "tipo": "Siembra",
+      "producto": "CENTENO PROPIO",
+      "dosis": "50 kg/ha",
+      "costoHa": 20.6
     },
     {
       "fecha": "2026-07-07",
@@ -4382,7 +4599,7 @@
   },
   "modifiedTimes": {
     "rotaciones": "2026-07-15T11:50:51.519Z",
-    "labores": "2026-07-16T20:33:22.435Z",
+    "labores": "2026-07-20T11:58:10.963Z",
     "margenes": "2026-07-06T13:39:09.153Z",
     "suelos": "2026-07-13T13:09:28.201Z"
   }
