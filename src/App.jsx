@@ -72,7 +72,7 @@ const INV_26_FALLBACK = {
   "L3H|14":"VERDEO","L3H|15":"PASTURA","L3H|16":"PASTURA",
   "L3H|24":"PASTURA","L3H|25":"PASTURA","L3H|30":"AGROPIRO",
   "LA CHOLITA|4":"CEBADA","LA CHOLITA|5":"CEBADA",
-  "LOS ABUELOS|5A":"TRIGO","LOS ABUELOS|5B":"TRIGO","LOS ABUELOS|8B":"CENTENO",
+  "LOS ABUELOS|5A":"CENTENO","LOS ABUELOS|5B":"TRIGO","LOS ABUELOS|8B":"CENTENO",
   "EL 5|1":"AVENA","EL 5|2":"AVENA",
   "DON ANTONIO|10":"AVENA","DON ANTONIO|11":"AVENA",
   "DOÑA TERESA|6":"CEBADA","LA CUCA|2":"FINA",
@@ -93,7 +93,7 @@ const PLAN_2627_FALLBACK = {
   "EL DESCANSO|1":"MAIZ","EL DESCANSO|2":"SOJA","EL DESCANSO|3":"MAIZ",
   "EL DESCANSO|4":"SOJA","EL DESCANSO|5":"GIRASOL","EL DESCANSO|6":"SOJA",
   "EL DESCANSO|7":"MAIZ","EL DESCANSO|8":"MAIZ",
-  "LOS ABUELOS|5A":"TRIGO","LOS ABUELOS|5B":"TRIGO","LOS ABUELOS|8B":"CENTENO",
+  "LOS ABUELOS|8B":"CENTENO",
   "EL 5|1":"AVENA-MAIZ","EL 5|2":"AVENA",
   "DON ANTONIO|10":"AVENA","DON ANTONIO|11":"AVENA","DOÑA TERESA|6":"CEBADA",
 };
@@ -225,7 +225,8 @@ const HISTORICO_ROTACION_FALLBACK = {
   "LOS ABUELOS|2":{"25-26":{cv:"GIRASOL",rF:null,rG:11},"26-27":{cv:"MAIZ",rF:null,rG:null}},
   "LOS ABUELOS|3":{"25-26":{cv:"GIRASOL",rF:null,rG:7},"26-27":{cv:"MAIZ",rF:null,rG:null}},
   "LOS ABUELOS|4":{"25-26":{cv:"MAIZ",rF:null,rG:null}},
-  "LOS ABUELOS|5":{"26-27":{cv:"TRIGO",rF:null,rG:null}},
+  "LOS ABUELOS|5A":{"26-27":{cv:"CENTENO",rF:null,rG:null}},
+  "LOS ABUELOS|5B":{"26-27":{cv:"TRIGO",rF:null,rG:null}},
   "LOS ABUELOS|6A":{"25-26":{cv:"VERDEO",rF:null,rG:null},"26-27":{cv:"PASTURA",rF:null,rG:null}},
   "LOS ABUELOS|6C":{"25-26":{cv:"MAIZ",rF:null,rG:null}},
   "LOS ABUELOS|7B":{"25-26":{cv:"MAIZ",rF:null,rG:null}},
@@ -309,7 +310,7 @@ const SUELOS_FALLBACK = {
 
 // aplicaciones herbicidas (registro)
 const APLICACIONES_FALLBACK = [
-  {fecha:"2026-06-29",campo:"LOS ABUELOS",lote:"5b (sur)",ha:45,cultivo:"TRIGO",costo:1328.5,productos:["CONTROLMAX","POWERSPRAY 2,4D 68%","Dicamba Duranor","Metsulfuron Metil","RizoSpray EXTREMO"]},
+  {fecha:"2026-06-29",campo:"LOS ABUELOS",lote:"5b (sur)",ha:40,cultivo:"TRIGO",costo:1181,productos:["CONTROLMAX","POWERSPRAY 2,4D 68%","Dicamba Duranor","Metsulfuron Metil","RizoSpray EXTREMO"]},
   {fecha:"2026-06-29",campo:"LOS ABUELOS",lote:"8B (SUR)",ha:23,cultivo:"CENTENO",costo:670.9,productos:["CONTROLMAX","POWERSPRAY 2,4D 68%","Dicamba Duranor","Metsulfuron Metil","RizoSpray EXTREMO"]},
   {fecha:"2026-06-25",campo:"L3H",lote:"23",ha:53,cultivo:"CEBADA",costo:2997.6,productos:["CONTROLMAX","POWERSPRAY 2,4D 68%","Dicamba Duranor","Flurocloridona 25%","RizoSpray EXTREMO"]},
   {fecha:"2026-06-25",campo:"L3H",lote:"1",ha:60,cultivo:"MAIZ",costo:2092.2,productos:["CONTROLMAX","POWERSPRAY 2,4D 68%","Dicamba Duranor","Atrazina 90% sólida","RizoSpray EXTREMO"]},
@@ -336,7 +337,7 @@ const APLICACIONES_FALLBACK = [
   {fecha:"2026-03-18",campo:"L3H",lote:"12",ha:78,cultivo:"PASTURA",costo:1738.6,productos:["GLIFOSATO GRANULADO","2-4 D 97 SIGMA","FLUMETSULAN","ACEITE METILADO","LIGIER PH BIO"]},
   {fecha:"2026-06-25",campo:"L3H",lote:"23",ha:53,cultivo:"CEBADA",costo:2997.6,productos:["CONTROLMAX","POWERSPRAY 2-4D 68%","DICAMBA","FLUROCLORIDONA 25%","RIZOSPRAY EXTREMO"]},
   {fecha:"2026-06-25",campo:"L3H",lote:"1",ha:60,cultivo:"MAIZ",costo:2092.2,productos:["CONTROLMAX","POWERSPRAY 2-4D 68%","DICAMBA","ATRAZINA 90%","RIZOSPRAY EXTREMO"]},
-  {fecha:"2026-06-29",campo:"LOS ABUELOS",lote:"5B (sur)",ha:45,cultivo:"TRIGO",costo:1328.5,productos:["CONTROLMAX","POWERSPRAY 2-4D 68%","DICAMBA","METSULFURON","RIZOSPRAY EXTREMO"]},
+  {fecha:"2026-06-29",campo:"LOS ABUELOS",lote:"5B (sur)",ha:40,cultivo:"TRIGO",costo:1181,productos:["CONTROLMAX","POWERSPRAY 2-4D 68%","DICAMBA","METSULFURON","RIZOSPRAY EXTREMO"]},
   {fecha:"2026-07-02",campo:"EL TORELLO",lote:"5",ha:52,cultivo:"CEBADA",costo:1243.7,productos:["GLIFOSATO LT BOX","2-4 D 97 SIGMA","LIGIER PH BIO","DICAMBA SIGMA","METSULFURON"]},
 ].map((a,i)=>({...a,id:i,costoHa:a.ha?a.costo/a.ha:0})).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
 // fertilizaciones realizadas (registro campaña 26-27 y 25-26 relevantes)
@@ -348,8 +349,8 @@ const FERTILIZACIONES_FALLBACK = [
   {fecha:"2026-04-26",campo:"LA CHOLITA",lote:"4",ha:50,cultivo:"CEBADA",tipo:"Arranque",producto:"MAP",dosis:"85 kg/ha",costoHa:49.3,notas:""},
   {fecha:"2026-04-26",campo:"LA CHOLITA",lote:"5",ha:20,cultivo:"CEBADA",tipo:"Arranque",producto:"MAP",dosis:"85 kg/ha",costoHa:49.3,notas:""},
   {fecha:"2026-06-14",campo:"DOÑA TERESA",lote:"6",ha:6,cultivo:"CEBADA",tipo:"Arranque",producto:"MAP",dosis:"85 kg/ha",costoHa:49.3,notas:""},
-  {fecha:"2026-06-29",campo:"LOS ABUELOS",lote:"5A",ha:30,cultivo:"TRIGO",tipo:"Arranque",producto:"Nutrimap",dosis:"130 kg/ha",costoHa:98.8,notas:"Trigo B620"},
-  {fecha:"2026-06-29",campo:"LOS ABUELOS",lote:"5B",ha:30,cultivo:"TRIGO",tipo:"Arranque",producto:"Nutrimap",dosis:"130 kg/ha",costoHa:98.8,notas:""},
+  {fecha:"2026-06-29",campo:"LOS ABUELOS",lote:"5A",ha:20,cultivo:"CENTENO",tipo:"Arranque",producto:"Nutrimap",dosis:"130 kg/ha",costoHa:98.8,notas:"Verdeo centeno"},
+  {fecha:"2026-06-29",campo:"LOS ABUELOS",lote:"5B",ha:40,cultivo:"TRIGO",tipo:"Arranque",producto:"Nutrimap",dosis:"130 kg/ha",costoHa:98.8,notas:"Trigo B620"},
   {fecha:"2026-06-29",campo:"LOS ABUELOS",lote:"8B",ha:19,cultivo:"CENTENO",tipo:"Arranque",producto:"MAP",dosis:"70 kg/ha",costoHa:40.6,notas:""},
   // Nuevas fert 06-08/07/26 (planilla actualizada)
   {fecha:"2026-07-06",campo:"LOS NIETOS",lote:"4",ha:27,cultivo:"CEBADA",tipo:"Arranque",producto:"MAP azufrado NUTRIEN",dosis:"50 kg/ha",costoHa:46.9,notas:""},
@@ -501,8 +502,8 @@ const CAMPOS = [
     {id:"6C",label:"6C",ha:16,poly:[[516,135],[565,135],[565,200],[516,200]]},
     {id:"4",label:"4",ha:11,poly:[[568,152],[640,152],[640,200],[568,200]]},
     {id:"2",label:"2",ha:42,poly:[[640,152],[755,152],[755,200],[640,200]]},
-    {id:"5A",label:"5A",ha:30,poly:[[516,205],[610,205],[610,303],[516,303]]},
-    {id:"5B",label:"5B",ha:30,poly:[[516,303],[610,303],[610,400],[516,400]]},
+    {id:"5A",label:"5A",ha:20,poly:[[516,205],[610,205],[610,303],[516,303]]},
+    {id:"5B",label:"5B",ha:40,poly:[[516,303],[610,303],[610,400],[516,400]]},
     {id:"3O",label:"3O",ha:21,poly:[[610,208],[665,208],[665,400],[610,400]]},
     {id:"3",label:"3",ha:39,poly:[[703,210],[755,210],[755,400],[703,400]]},
    ]},
@@ -2381,7 +2382,7 @@ export default function App(){
       </div>
 
       {/* MODAL HISTORIAL LOTE */}
-      {loteAbierto&&<ModalHistorial loteInfo={loteAbierto} onClose={cerrarLote} campSel={campSel} setCampSel={setCampSel} historico={HISTORICO_ROTACION} aplicaciones={APLICACIONES} fertilizaciones={FERTILIZACIONES}/>}
+      {loteAbierto&&<ModalHistorial loteInfo={loteAbierto} onClose={cerrarLote} campSel={campSel} setCampSel={setCampSel} historico={HISTORICO_ROTACION} aplicaciones={APLICACIONES} fertilizaciones={FERTILIZACIONES} inv26={INV_26} plan2627={PLAN_2627} suelos={SUELOS}/>}
     </div>
   );
 }
@@ -2389,7 +2390,7 @@ export default function App(){
 // ============================================================
 // MODAL HISTORIAL — muestra 8 campañas de un lote
 // ============================================================
-function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, aplicaciones=[], fertilizaciones=[]}){
+function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, aplicaciones=[], fertilizaciones=[], inv26={}, plan2627={}, suelos={}}){
   const HISTORICO_ROTACION = historico || HISTORICO_ROTACION_FALLBACK;
   const {campo,lote}=loteInfo;
   const key=`${campo.id}|${lote.id}`;
@@ -2460,113 +2461,94 @@ function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, apli
           <button onClick={onClose} style={{background:"none",border:"none",fontSize:26,cursor:"pointer",lineHeight:1,color:TINTA,padding:4}}>×</button>
         </div>
 
-        {/* Selector de campaña */}
+        {/* ── 1. CAMPAÑA ACTUAL 26-27 ── */}
+        {(()=>{
+          const k=`${campo.id}|${lote.id}`;
+          const fina=inv26[k];
+          const plan=plan2627[k];
+          const suelo=suelos[k];
+          let cvFina=fina, cvGruesa=null;
+          if(plan){
+            if(plan.includes("-")){
+              const [f,g]=plan.split("-").map(s=>s.trim());
+              cvFina=cvFina||f;
+              cvGruesa=g;
+            } else cvGruesa=plan;
+          }
+          if(cvFina&&cvGruesa&&baseCv(cvFina)===baseCv(cvGruesa)) cvGruesa=null;
+          const sinDatos=!cvFina&&!cvGruesa;
+          return (
+            <div style={{padding:"16px 20px",borderBottom:"1px solid #D8D2C0",background:"#FFFDF7"}}>
+              <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55,marginBottom:8}}>Campaña 26-27</div>
+              {sinDatos?(
+                <div style={{opacity:0.55,fontStyle:"italic",fontSize:13}}>Sin cultivo asignado.</div>
+              ):(
+                <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                  {cvFina&&(
+                    <div style={{flex:"1 1 200px",background:"#fff",border:`1.5px solid ${TINTA}`,borderRadius:9,padding:"10px 12px"}}>
+                      <div style={{fontSize:10.5,letterSpacing:"0.1em",textTransform:"uppercase",opacity:0.55}}>{cvGruesa?"Fina":"Cultivo"}</div>
+                      <div style={{display:"flex",alignItems:"center",gap:8,marginTop:5}}>
+                        <span style={{width:18,height:18,borderRadius:4,background:colorCv(cvFina),border:`1px solid ${TINTA}`,flexShrink:0}}/>
+                        <span style={{fontSize:18,fontWeight:700}}>{cvFina}</span>
+                      </div>
+                    </div>
+                  )}
+                  {cvGruesa&&(
+                    <div style={{flex:"1 1 200px",background:"#fff",border:`1.5px solid ${TINTA}`,borderRadius:9,padding:"10px 12px"}}>
+                      <div style={{fontSize:10.5,letterSpacing:"0.1em",textTransform:"uppercase",opacity:0.55}}>{cvFina?"Gruesa":"Cultivo"}</div>
+                      <div style={{display:"flex",alignItems:"center",gap:8,marginTop:5}}>
+                        <span style={{width:18,height:18,borderRadius:4,background:colorCv(cvGruesa),border:`1px solid ${TINTA}`,flexShrink:0}}/>
+                        <span style={{fontSize:18,fontWeight:700}}>{cvGruesa}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {suelo&&(
+                <div style={{marginTop:10,fontSize:12,opacity:0.75,display:"flex",gap:12,flexWrap:"wrap"}}>
+                  <span>🔬 Análisis {suelo.fecha}:</span>
+                  {suelo.P!=null&&<span><b>P</b> {suelo.P}</span>}
+                  {suelo.N!=null&&<span><b>N</b> {suelo.N}</span>}
+                  {suelo.MO!=null&&<span><b>MO</b> {suelo.MO}%</span>}
+                  {suelo.IMO&&<span><b>IMO</b> {suelo.IMO}</span>}
+                  {suelo.pH&&<span><b>pH</b> {suelo.pH}</span>}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* ── 2. ÚLTIMAS APLICACIONES DE HERBICIDA ── */}
         <div style={{padding:"14px 20px",borderBottom:"1px solid #D8D2C0"}}>
-          <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55,marginBottom:8}}>Campaña</div>
-          <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-            {camps.map(c=>{
-              const tieneDato=hist&&hist[c];
-              const activa=c===camp;
-              return <button key={c} onClick={()=>tieneDato&&setCampSel(c)}
-                disabled={!tieneDato}
-                style={{padding:"6px 11px",fontSize:12.5,fontWeight:700,cursor:tieneDato?"pointer":"not-allowed",borderRadius:18,border:`1.5px solid ${activa?TINTA:"#C8C2B0"}`,background:activa?TINTA:tieneDato?"transparent":"#F0EDE3",color:activa?"#fff":tieneDato?TINTA:"#B5AF9D",fontFamily:"inherit",opacity:tieneDato?1:0.5}}>
-                {c}
-              </button>;
-            })}
-          </div>
-        </div>
-
-        {/* Detalle de campaña seleccionada */}
-        <div style={{padding:"18px 20px"}}>
-          {dato?(
-            <div>
-              <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55}}>Campaña {camp}</div>
-              <div style={{display:"flex",alignItems:"center",gap:12,marginTop:8}}>
-                <span style={{width:22,height:22,borderRadius:5,background:colorCv(cv),border:`1.5px solid ${TINTA}`,flexShrink:0}}/>
-                <span style={{fontSize:20,fontWeight:700}}>{cv}</span>
-              </div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginTop:14}}>
-                <div style={{background:"#fff",border:"1px solid #E5E0D0",borderRadius:8,padding:"10px 12px"}}>
-                  <div style={{fontSize:10.5,letterSpacing:"0.1em",textTransform:"uppercase",opacity:0.55}}>Rinde fina</div>
-                  <div style={{fontSize:24,fontWeight:700,marginTop:3}}>{rF!=null?`${rF} qq/ha`:"—"}</div>
+          <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55,marginBottom:8}}>🧪 Aplicaciones de herbicida</div>
+          {aplLote.length>0?(
+            <div style={{display:"flex",flexDirection:"column",gap:7}}>
+              {aplLote.slice(0,3).map((a,i)=>(
+                <div key={a.id||i} style={{background:i===0?"#FFFDF7":"#fff",border:i===0?`1.5px solid ${TINTA}`:"1px solid #E5E0D0",borderRadius:9,padding:"9px 12px"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",flexWrap:"wrap",gap:6}}>
+                    <div style={{fontWeight:700,fontSize:13.5}}>
+                      {new Date(a.fecha).toLocaleDateString("es-AR",{day:"2-digit",month:"short",year:"numeric"})}
+                      {i===0&&<span style={{fontSize:10,marginLeft:6,padding:"2px 6px",background:TINTA,color:"#fff",borderRadius:4,letterSpacing:"0.05em"}}>ÚLTIMA</span>}
+                    </div>
+                    <div style={{fontSize:12,opacity:0.65}}>
+                      {a.ha} ha · US$ {a.costo?.toFixed(0)||"—"} <span style={{opacity:0.6}}>(${((a.costo||0)/(a.ha||1)).toFixed(1)}/ha)</span>
+                    </div>
+                  </div>
+                  {a.cultivo&&<div style={{fontSize:11.5,marginTop:3,opacity:0.7}}>
+                    <span style={{display:"inline-flex",alignItems:"center",gap:5}}>
+                      <span style={{width:8,height:8,borderRadius:2,background:colorCv(a.cultivo)}}/>{a.cultivo}
+                    </span>
+                  </div>}
+                  <div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:6}}>
+                    {(a.productos||[]).map((p,j)=>(
+                      <span key={j} style={{fontSize:10.5,background:"#F3EFE3",borderRadius:4,padding:"2px 6px",fontWeight:600}}>{p}</span>
+                    ))}
+                  </div>
                 </div>
-                <div style={{background:"#fff",border:"1px solid #E5E0D0",borderRadius:8,padding:"10px 12px"}}>
-                  <div style={{fontSize:10.5,letterSpacing:"0.1em",textTransform:"uppercase",opacity:0.55}}>Rinde gruesa</div>
-                  <div style={{fontSize:24,fontWeight:700,marginTop:3}}>{rG!=null?`${rG} qq/ha`:"—"}</div>
-                </div>
-              </div>
-            </div>
-          ):(
-            <div style={{opacity:0.55,fontStyle:"italic",fontSize:14}}>Sin datos históricos para este lote.</div>
-          )}
-        </div>
-
-        {/* Tabla completa de 8 campañas */}
-        {hist&&(
-          <div style={{padding:"0 20px 18px"}}>
-            <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55,marginBottom:8}}>Historial completo</div>
-            <div style={{background:"#fff",border:"1px solid #E5E0D0",borderRadius:8,overflow:"hidden"}}>
-              <table style={{width:"100%",borderCollapse:"collapse",fontSize:12.5}}>
-                <thead><tr style={{background:"#E5E0D0"}}>
-                  {["Campaña","Cultivo","R. fina","R. gruesa"].map(h=>(
-                    <th key={h} style={{textAlign:"left",padding:"7px 10px",fontSize:10.5,textTransform:"uppercase",letterSpacing:"0.06em",opacity:0.7,whiteSpace:"nowrap"}}>{h}</th>
-                  ))}
-                </tr></thead>
-                <tbody>
-                  {camps.map(c=>{
-                    const d=hist[c];
-                    if(!d) return null;
-                    return <tr key={c} style={{borderTop:"1px solid #EEE9DC",background:c===camp?"#F8F5EC":"transparent"}}>
-                      <td style={{padding:"7px 10px",fontWeight:c===camp?700:500,whiteSpace:"nowrap"}}>{c}</td>
-                      <td style={{padding:"7px 10px"}}>
-                        {d.cv?<span style={{display:"inline-flex",alignItems:"center",gap:5}}>
-                          <span style={{width:9,height:9,borderRadius:2,background:colorCv(d.cv),flexShrink:0}}/>{d.cv}
-                        </span>:<span style={{opacity:0.4}}>—</span>}
-                      </td>
-                      <td style={{padding:"7px 10px",fontWeight:600}}>{d.rF!=null?`${d.rF} qq`:<span style={{opacity:0.4}}>—</span>}</td>
-                      <td style={{padding:"7px 10px",fontWeight:600}}>{d.rG!=null?`${d.rG} qq`:<span style={{opacity:0.4}}>—</span>}</td>
-                    </tr>;
-                  })}
-                </tbody>
-              </table>
-            </div>
-            {(rindesFina.length>0||rindesGruesa.length>0)&&(
-              <div style={{display:"flex",gap:14,marginTop:12,flexWrap:"wrap",fontSize:12}}>
-                {rindesFina.length>0&&<div style={{opacity:0.75}}>
-                  <b>Promedio fina:</b> {(rindesFina.reduce((s,x)=>s+x.r,0)/rindesFina.length).toFixed(1)} qq ({rindesFina.length} camp)
-                </div>}
-                {rindesGruesa.length>0&&<div style={{opacity:0.75}}>
-                  <b>Promedio gruesa:</b> {(rindesGruesa.reduce((s,x)=>s+x.r,0)/rindesGruesa.length).toFixed(1)} qq ({rindesGruesa.length} camp)
-                </div>}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ── Última aplicación de herbicidas ── */}
-        <div style={{padding:"14px 20px",borderTop:"1px solid #D8D2C0"}}>
-          <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55,marginBottom:8}}>🧪 Última aplicación de herbicida</div>
-          {ultimaApl?(
-            <div style={{background:"#FFFDF7",border:"1px solid #E5E0D0",borderRadius:9,padding:"10px 12px"}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",flexWrap:"wrap",gap:6}}>
-                <div style={{fontWeight:700,fontSize:13.5}}>{new Date(ultimaApl.fecha).toLocaleDateString("es-AR",{day:"2-digit",month:"short",year:"numeric"})}</div>
-                <div style={{fontSize:12,opacity:0.65}}>
-                  {ultimaApl.ha} ha · US$ {ultimaApl.costo?.toFixed(0)||"—"} <span style={{opacity:0.6}}>(${((ultimaApl.costo||0)/(ultimaApl.ha||1)).toFixed(1)}/ha)</span>
-                </div>
-              </div>
-              {ultimaApl.cultivo&&<div style={{fontSize:12,marginTop:3,opacity:0.75}}>
-                <span style={{display:"inline-flex",alignItems:"center",gap:5}}>
-                  <span style={{width:9,height:9,borderRadius:2,background:colorCv(ultimaApl.cultivo)}}/>Cultivo: {ultimaApl.cultivo}
-                </span>
-              </div>}
-              <div style={{display:"flex",flexWrap:"wrap",gap:5,marginTop:8}}>
-                {(ultimaApl.productos||[]).map((p,i)=>(
-                  <span key={i} style={{fontSize:11,background:"#F3EFE3",borderRadius:5,padding:"2px 8px",fontWeight:600}}>{p}</span>
-                ))}
-              </div>
-              {aplLote.length>1&&(
-                <div style={{fontSize:11,marginTop:8,opacity:0.55,fontStyle:"italic"}}>
-                  + {aplLote.length-1} aplicación(es) previa(s) en este lote
+              ))}
+              {aplLote.length>3&&(
+                <div style={{fontSize:11,opacity:0.55,fontStyle:"italic",textAlign:"center",marginTop:2}}>
+                  + {aplLote.length-3} aplicación(es) más
                 </div>
               )}
             </div>
@@ -2575,12 +2557,12 @@ function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, apli
           )}
         </div>
 
-        {/* ── Fertilización (últimos 12 meses) ── */}
-        <div style={{padding:"14px 20px",borderTop:"1px solid #D8D2C0"}}>
+        {/* ── 3. FERTILIZACIÓN CAMPAÑA ACTUAL ── */}
+        <div style={{padding:"14px 20px",borderBottom:"1px solid #D8D2C0"}}>
           <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55,marginBottom:8}}>🌱 Fertilización campaña actual</div>
           {fertResumen.length>0?(
             <div>
-              <div style={{background:"#FFFDF7",border:"1px solid #E5E0D0",borderRadius:9,padding:"10px 12px",marginBottom:8}}>
+              <div style={{background:"#FFFDF7",border:`1.5px solid ${TINTA}`,borderRadius:9,padding:"10px 12px",marginBottom:8}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",flexWrap:"wrap",gap:6}}>
                   <div style={{fontSize:20,fontWeight:700}}>{kgHaTotal.toFixed(0)} kg/ha</div>
                   <div style={{fontSize:12,opacity:0.7}}>total aplicado · {fertRecientes.length} aplicación(es)</div>
@@ -2607,6 +2589,95 @@ function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, apli
             <div style={{fontSize:12.5,opacity:0.55,fontStyle:"italic"}}>Sin fertilizaciones registradas en los últimos 12 meses.</div>
           )}
         </div>
+
+        {/* ── 4. HISTÓRICO DE ROTACIÓN (plegable) ── */}
+        <details style={{padding:"0",borderTop:"1px solid #D8D2C0"}}>
+          <summary style={{padding:"14px 20px",cursor:"pointer",listStyle:"none",display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.65,fontWeight:700,userSelect:"none"}}>
+            <span>📜 Rotación histórica</span>
+            <span style={{fontSize:14,opacity:0.5}}>▾</span>
+          </summary>
+
+          {/* Selector de campaña */}
+          <div style={{padding:"0 20px 12px"}}>
+            <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+              {camps.map(c=>{
+                const tieneDato=hist&&hist[c];
+                const activa=c===camp;
+                return <button key={c} onClick={()=>tieneDato&&setCampSel(c)}
+                  disabled={!tieneDato}
+                  style={{padding:"5px 10px",fontSize:12,fontWeight:700,cursor:tieneDato?"pointer":"not-allowed",borderRadius:16,border:`1.5px solid ${activa?TINTA:"#C8C2B0"}`,background:activa?TINTA:tieneDato?"transparent":"#F0EDE3",color:activa?"#fff":tieneDato?TINTA:"#B5AF9D",fontFamily:"inherit",opacity:tieneDato?1:0.5}}>
+                  {c}
+                </button>;
+              })}
+            </div>
+          </div>
+
+          {/* Detalle de campaña seleccionada */}
+          <div style={{padding:"0 20px 14px"}}>
+            {dato?(
+              <div>
+                <div style={{fontSize:10.5,letterSpacing:"0.1em",textTransform:"uppercase",opacity:0.55}}>Campaña {camp}</div>
+                <div style={{display:"flex",alignItems:"center",gap:10,marginTop:6}}>
+                  <span style={{width:18,height:18,borderRadius:4,background:colorCv(cv),border:`1.5px solid ${TINTA}`,flexShrink:0}}/>
+                  <span style={{fontSize:17,fontWeight:700}}>{cv}</span>
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:10}}>
+                  <div style={{background:"#fff",border:"1px solid #E5E0D0",borderRadius:7,padding:"8px 10px"}}>
+                    <div style={{fontSize:10,letterSpacing:"0.1em",textTransform:"uppercase",opacity:0.55}}>Rinde fina</div>
+                    <div style={{fontSize:19,fontWeight:700,marginTop:2}}>{rF!=null?`${rF} qq/ha`:"—"}</div>
+                  </div>
+                  <div style={{background:"#fff",border:"1px solid #E5E0D0",borderRadius:7,padding:"8px 10px"}}>
+                    <div style={{fontSize:10,letterSpacing:"0.1em",textTransform:"uppercase",opacity:0.55}}>Rinde gruesa</div>
+                    <div style={{fontSize:19,fontWeight:700,marginTop:2}}>{rG!=null?`${rG} qq/ha`:"—"}</div>
+                  </div>
+                </div>
+              </div>
+            ):(
+              <div style={{opacity:0.55,fontStyle:"italic",fontSize:13}}>Sin datos históricos.</div>
+            )}
+          </div>
+
+          {/* Tabla completa */}
+          {hist&&(
+            <div style={{padding:"0 20px 18px"}}>
+              <div style={{background:"#fff",border:"1px solid #E5E0D0",borderRadius:8,overflow:"hidden"}}>
+                <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
+                  <thead><tr style={{background:"#E5E0D0"}}>
+                    {["Camp.","Cultivo","R. fina","R. gruesa"].map(h=>(
+                      <th key={h} style={{textAlign:"left",padding:"6px 9px",fontSize:10,textTransform:"uppercase",letterSpacing:"0.05em",opacity:0.7,whiteSpace:"nowrap"}}>{h}</th>
+                    ))}
+                  </tr></thead>
+                  <tbody>
+                    {camps.map(c=>{
+                      const d=hist[c];
+                      if(!d) return null;
+                      return <tr key={c} style={{borderTop:"1px solid #EEE9DC",background:c===camp?"#F8F5EC":"transparent"}}>
+                        <td style={{padding:"6px 9px",fontWeight:c===camp?700:500,whiteSpace:"nowrap"}}>{c}</td>
+                        <td style={{padding:"6px 9px"}}>
+                          {d.cv?<span style={{display:"inline-flex",alignItems:"center",gap:5}}>
+                            <span style={{width:8,height:8,borderRadius:2,background:colorCv(d.cv),flexShrink:0}}/>{d.cv}
+                          </span>:<span style={{opacity:0.4}}>—</span>}
+                        </td>
+                        <td style={{padding:"6px 9px",fontWeight:600}}>{d.rF!=null?`${d.rF} qq`:<span style={{opacity:0.4}}>—</span>}</td>
+                        <td style={{padding:"6px 9px",fontWeight:600}}>{d.rG!=null?`${d.rG} qq`:<span style={{opacity:0.4}}>—</span>}</td>
+                      </tr>;
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              {(rindesFina.length>0||rindesGruesa.length>0)&&(
+                <div style={{display:"flex",gap:12,marginTop:10,flexWrap:"wrap",fontSize:11.5}}>
+                  {rindesFina.length>0&&<div style={{opacity:0.75}}>
+                    <b>Prom. fina:</b> {(rindesFina.reduce((s,x)=>s+x.r,0)/rindesFina.length).toFixed(1)} qq ({rindesFina.length}c)
+                  </div>}
+                  {rindesGruesa.length>0&&<div style={{opacity:0.75}}>
+                    <b>Prom. gruesa:</b> {(rindesGruesa.reduce((s,x)=>s+x.r,0)/rindesGruesa.length).toFixed(1)} qq ({rindesGruesa.length}c)
+                  </div>}
+                </div>
+              )}
+            </div>
+          )}
+        </details>
       </div>
     </div>
   );
