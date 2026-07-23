@@ -396,6 +396,194 @@ const PRODUCTOR = {
 };
 const COLORES_APP = ["#E2574C","#3B82C4","#43A047","#F2B707"];
 
+// ── BASE DE PRODUCTOS Y PROVEEDORES ────────────────────────
+// Precios USD/L o USD/kg. Categorías: HER (herbicida), INS (insecticida),
+// FUN (fungicida), COAD (coadyuvante), FERT (fertilizante), SEM (semilla), SGR (curasemilla)
+const PRODUCTOS_BASE = [
+  // Glifosatos
+  {n:"GLIFOSATO GRANULADO LT BOX x 15 KG", cat:"HER", u:"kg", p:7.40},
+  {n:"GLIFOSATO GRANULADO BOX 72%", cat:"HER", u:"kg", p:5.66},
+  {n:"CONTROLMAX", cat:"HER", u:"L", p:7.17},
+  {n:"GLIFOSATO GOLD SIGMA x 20 LT", cat:"HER", u:"L", p:4.60},
+  {n:"GLIFOSATO GRANULADO MAX SIGMA x 15 Kg", cat:"HER", u:"kg", p:7.20},
+  {n:"GLIFOSATO PANZER GOLD x 20 LT", cat:"HER", u:"L", p:5.10},
+  {n:"GLIFOSATO TOUCHDOWN MAX x 10 KGS", cat:"HER", u:"kg", p:7.25},
+  {n:"SULFOSATO TOUCHDOWN x 20 LTRS", cat:"HER", u:"L", p:5.90},
+  {n:"TOP", cat:"HER", u:"L", p:5.67},
+  {n:"FG", cat:"HER", u:"L", p:7.06},
+  // 2,4-D y hormonales
+  {n:"2-4 D 97 SIGMA x 20 LT", cat:"HER", u:"L", p:5.35},
+  {n:"2-4 D 89% VOLERIS ADVANCE x 20 LT", cat:"HER", u:"L", p:5.15},
+  {n:"2-4 D ENLIST x 20 LT", cat:"HER", u:"L", p:5.55},
+  {n:"POWERSPRAY 2,4D 68%", cat:"HER", u:"L", p:6.00},
+  {n:"2,4 DB x 20 Lt", cat:"HER", u:"L", p:13.20},
+  {n:"VENCEWEED EXTRA x 20 LT (2-4 DB)", cat:"HER", u:"L", p:12.00},
+  {n:"DICAMBA SIGMA x 10 LT", cat:"HER", u:"L", p:7.50},
+  {n:"DICAMBA DURANOR ADV x 10 LT", cat:"HER", u:"L", p:7.50},
+  {n:"Dicamba 70.8 % Duranor Avance x Lt", cat:"HER", u:"L", p:7.10},
+  {n:"PICLORAM SIGMA x 5 LT", cat:"HER", u:"L", p:7.20},
+  {n:"LONTREL x 5 LT (clopiralid)", cat:"HER", u:"L", p:35.00},
+  {n:"FLUROXIPIR 48 SIGMA x 5 Lts", cat:"HER", u:"L", p:14.85},
+  {n:"PIXXARO x 5 LTS (fluroxipir + halauxifen)", cat:"HER", u:"L", p:51.05},
+  // Sulfonilureas
+  {n:"METSULFURON SIGMA x kg", cat:"HER", u:"kg", p:245.00},
+  {n:"Metsulfuron Metil 60 %", cat:"HER", u:"kg", p:50.00},
+  {n:"FINESSE WG x 150 GRS", cat:"HER", u:"kg", p:294.00},
+  // Residuales fina/gruesa
+  {n:"FLUMETSULAN ELEVATE x 5 LT", cat:"HER", u:"L", p:27.60},
+  {n:"FLUMETSULAN PREVISOR x 5 LT", cat:"HER", u:"L", p:20.20},
+  {n:"Flumetsulam x 5 Lt", cat:"HER", u:"L", p:25.50},
+  {n:"FLUMIOXAZIN ESPUELA x 5 LT 48%", cat:"HER", u:"L", p:15.50},
+  {n:"FLUMIOXAZIN OXALIS x 5 LT", cat:"HER", u:"L", p:15.50},
+  {n:"FLUMIOXAZIN GEMMIT TOP x 1LT", cat:"HER", u:"L", p:23.50},
+  {n:"FLUMIOXAZIN NYAMBI FLO x 5 LT", cat:"HER", u:"L", p:18.00},
+  {n:"FLUROCLORIDONA RAINBOW x 10 LT", cat:"HER", u:"L", p:12.00},
+  {n:"FLUROCLORIDONA TALIS x 20 LT", cat:"HER", u:"L", p:12.00},
+  {n:"Flurocloridona 25 %", cat:"HER", u:"L", p:14.00},
+  {n:"TUKEN (diflufenican) x 5 Lts", cat:"HER", u:"L", p:25.20},
+  {n:"DIFLUFENICAN SIGMA 50%", cat:"HER", u:"L", p:27.48},
+  {n:"PELICAN x 5 LTS (diflufenican)", cat:"HER", u:"L", p:27.90},
+  {n:"BRODAL (diflufenican)", cat:"HER", u:"L", p:35.00},
+  // ALS residuales soja
+  {n:"IMAZETAPIR 10,6 SIGMA x 20 LT", cat:"HER", u:"L", p:4.00},
+  {n:"IMAZETAPIR INITIOS x 20 LT", cat:"HER", u:"L", p:4.00},
+  {n:"DICLOSULAM RIDOF x 200 GR", cat:"HER", u:"kg", p:175.00},
+  {n:"SULFENTRAZONE CAPAZ x 10 LT", cat:"HER", u:"L", p:20.30},
+  {n:"SULFENTRAZONE ENELAN x 5 LT", cat:"HER", u:"L", p:20.50},
+  {n:"SULFENTRAZONE SHUTDOWN x 5 Lts", cat:"HER", u:"L", p:20.30},
+  // Cloroacetanilidas / piroxasulfone
+  {n:"DUAL GOLD x 5 Lts (s-metolacloro)", cat:"HER", u:"L", p:6.95},
+  {n:"ESE LACLORO 96% (S-Metolacloro) x 20 Lts", cat:"HER", u:"L", p:6.50},
+  {n:"S-METOLACLORO STRIM x 20 LT", cat:"HER", u:"L", p:6.50},
+  {n:"WINGER 85% WG (PIROXASULFONE) x 2,5 KG", cat:"HER", u:"kg", p:110.00},
+  {n:"FIERCE RM x 5 LT (flumioxazin + piroxasulfone)", cat:"HER", u:"L", p:59.00},
+  // Triazinas
+  {n:"ATRAZINA GESAPRIM 90 x 10 KG", cat:"HER", u:"kg", p:7.00},
+  {n:"ATRAZINA GOTEN 90% x 10 KGS", cat:"HER", u:"kg", p:6.00},
+  {n:"Atrazina 90 % solida x 15 kg", cat:"HER", u:"kg", p:5.60},
+  {n:"TERBUTILAZINA SIGMA x 20 Lts", cat:"HER", u:"L", p:6.70},
+  {n:"KORITSU (TERBUTILAZINA 50%)", cat:"HER", u:"L", p:6.35},
+  // Contactos / HPPD
+  {n:"HEAT x 350 GRS (safiufenacil)", cat:"HER", u:"kg", p:320.00},
+  {n:"SHARK (carfentrazone) x LT", cat:"HER", u:"L", p:100.80},
+  {n:"PARAQUAT SIGMA x 20 LT", cat:"HER", u:"L", p:3.35},
+  {n:"Glufosinato Amonio 20% Sigma x 20 Lts", cat:"HER", u:"L", p:4.40},
+  {n:"LAUDIS x 5 LTS", cat:"HER", u:"L", p:109.00},
+  {n:"ADENGO X 5 LT (isoxaflutol + tiencarbazona)", cat:"HER", u:"L", p:90.00},
+  {n:"ACURON UNO x 5 LT (biciclopirona)", cat:"HER", u:"L", p:42.75},
+  {n:"BORJA x 5 LT (biciclopirona)", cat:"HER", u:"L", p:42.75},
+  // Graminicidas
+  {n:"CLETODIM SIGMA x 20 LT", cat:"HER", u:"L", p:8.25},
+  {n:"HALOXIFOP 54 SIGMA x 10 LT", cat:"HER", u:"L", p:18.00},
+  {n:"AXIAL PLUS x 5 LT", cat:"HER", u:"L", p:41.10},
+  {n:"FOMESAFEN SIGMA x 20 LT", cat:"HER", u:"L", p:7.10},
+  // Insecticidas
+  {n:"AGNEO X 5 LT (TIAMETOXAM + LAMBDA)", cat:"INS", u:"L", p:13.80},
+  {n:"ENGEO (Tiametoxam + Lambda) x 5 LT", cat:"INS", u:"L", p:23.27},
+  {n:"AMPLIGO x LT", cat:"INS", u:"L", p:78.50},
+  {n:"LAMBDA 25 KARATE ZEON x 1 LT", cat:"INS", u:"L", p:42.00},
+  {n:"LAMBDA 25% CIALONTRIN x 5 LT", cat:"INS", u:"L", p:15.90},
+  {n:"BIFENTRIN 25 SIGMA x 5 LT", cat:"INS", u:"L", p:15.40},
+  {n:"ARANYA (Abamectina 3.6%) x 5 LT", cat:"INS", u:"L", p:10.00},
+  {n:"MUSTANG EW x 5 LT (zetametrina 20%)", cat:"INS", u:"L", p:18.00},
+  {n:"SHENZI x LT (clorantraniliprole 40%)", cat:"INS", u:"L", p:115.00},
+  {n:"VIRANTRA x 5 LTS", cat:"INS", u:"L", p:247.00},
+  {n:"STARKLE x UN (dinotefuran 70%)", cat:"INS", u:"kg", p:208.00},
+  // Fungicidas
+  {n:"MIRAVIS DUO x 5 LT", cat:"FUN", u:"L", p:37.10},
+  {n:"CRIPTON SC325 X 5 LT", cat:"FUN", u:"L", p:28.50},
+  // Coadyuvantes
+  {n:"LIGIER PH BIO x LT", cat:"COAD", u:"L", p:37.25},
+  {n:"LIGIER VERDE BIO x LT", cat:"COAD", u:"L", p:37.25},
+  {n:"LIGIER GRASS BIO x 5 LT", cat:"COAD", u:"L", p:24.60},
+  {n:"ACEITE METILADO ROCIO x 3 LT", cat:"COAD", u:"L", p:21.00},
+  {n:"ACEITE METILADO SOLY-OIL x 20 LT", cat:"COAD", u:"L", p:2.90},
+  {n:"ACEITE METILADO NANOMIC SIGMA x 5 LT", cat:"COAD", u:"L", p:22.00},
+  {n:"A35T - GOLD x 10 LT", cat:"COAD", u:"L", p:28.00},
+  {n:"A35T- BIO x 1 LT", cat:"COAD", u:"L", p:31.50},
+  {n:"Coady. RizoSpray EXTREMO x 10 Lt", cat:"COAD", u:"L", p:19.18},
+  {n:"Coady. RizoSpray Corrector Secuestrante x 1 Lt", cat:"COAD", u:"L", p:34.50},
+  {n:"Coady. RizoSpray Integrum x 10 Lt", cat:"COAD", u:"L", p:20.63},
+  {n:"SULFA-FIX x 20 LT (SULFATO AMONIO)", cat:"COAD", u:"L", p:1.25},
+  // Fertilizantes
+  {n:"UREA-S NUTRIEN", cat:"FERT", u:"kg", p:0.565},
+  {n:"MAP LARTY", cat:"FERT", u:"kg", p:0.950},
+  {n:"MAP AZURADO NUTRIEN", cat:"FERT", u:"kg", p:0.937},
+  {n:"DAP-S NUTRIEN", cat:"FERT", u:"kg", p:0.919},
+  {n:"NITROCOMPLEX", cat:"FERT", u:"kg", p:0.990},
+  {n:"nitrodoble tn", cat:"FERT", u:"kg", p:0.562},
+  {n:"urea tn", cat:"FERT", u:"kg", p:0.572},
+  {n:"SJ NUTRIEN", cat:"FERT", u:"kg", p:0.716},
+  {n:"Nutrimap", cat:"FERT", u:"kg", p:0.760},
+  // Semillas maíz
+  {n:"ADV 5505 CL B2", cat:"SEM", u:"bolsa", p:280},
+  {n:"ADV 5407 CL B1", cat:"SEM", u:"bolsa", p:295},
+  {n:"ADV 5310 CL B1", cat:"SEM", u:"bolsa", p:290},
+  {n:"ADV 5310 CL B2", cat:"SEM", u:"bolsa", p:250},
+  {n:"DK7210", cat:"SEM", u:"bolsa", p:160},
+  {n:"DK7303", cat:"SEM", u:"bolsa", p:130},
+  {n:"DK6962", cat:"SEM", u:"bolsa", p:195},
+  {n:"syn 3970 cl", cat:"SEM", u:"bolsa", p:296},
+  {n:"kws", cat:"SEM", u:"bolsa", p:140},
+  {n:"relincho", cat:"SEM", u:"bolsa", p:10},
+  // Semillas propias
+  {n:"TRIGO PROPIO", cat:"SEM", u:"kg", p:0.278},
+  {n:"CEBADA PROPIA", cat:"SEM", u:"kg", p:0.278},
+  {n:"CENTENO PROPIO", cat:"SEM", u:"kg", p:0.411},
+  {n:"AVENA PROPIA", cat:"SEM", u:"kg", p:0.411},
+  {n:"SJ PROPIA", cat:"SEM", u:"kg", p:0.040},
+  {n:"DM46i20", cat:"SEM", u:"kg", p:0.040},
+  // Curasemillas
+  {n:"CROPSTAR", cat:"SGR", u:"L", p:47.5},
+  {n:"REGENT ET", cat:"SGR", u:"kg", p:530},
+  {n:"ACCELERON CEREALES ESS.", cat:"SGR", u:"L", p:330},
+  {n:"ACCELERON SOJA ESENCIAL", cat:"SGR", u:"L", p:265},
+  {n:"EVERGOL ENERGY x20", cat:"SGR", u:"L", p:65},
+  // Labores/servicios (precio por ha)
+  {n:"PULVERIZADA TERRESTRE", cat:"LABOR", u:"ha", p:6.30},
+  {n:"INCORPORADA", cat:"LABOR", u:"ha", p:31.00},
+  {n:"VOLEADA", cat:"LABOR", u:"ha", p:10.00},
+  {n:"PARATIL", cat:"LABOR", u:"ha", p:65.00},
+  {n:"RASTRA", cat:"LABOR", u:"ha", p:45.00},
+  {n:"ROLOS", cat:"LABOR", u:"ha", p:31.25},
+  {n:"SG (siembra)", cat:"LABOR", u:"ha", p:48.00},
+  {n:"Mz PP (siembra maiz)", cat:"LABOR", u:"ha", p:60.00},
+  {n:"Sj PP (siembra soja)", cat:"LABOR", u:"ha", p:60.00},
+  {n:"Gr PP (siembra girasol)", cat:"LABOR", u:"ha", p:58.00},
+  {n:"Sj 2da (siembra soja de segunda)", cat:"LABOR", u:"ha", p:55.00},
+  {n:"Mz Fert (siembra fertilizada maiz)", cat:"LABOR", u:"ha", p:55.00},
+  {n:"Gr Fert (siembra fertilizada girasol)", cat:"LABOR", u:"ha", p:55.00},
+  {n:"Sj FERT (siembra fertilizada soja)", cat:"LABOR", u:"ha", p:60.00},
+  {n:"Fina fert (siembra fertilizada fina)", cat:"LABOR", u:"ha", p:57.00},
+];
+
+const PRODUCTORES_BASE = ["ENRIQUE","ANDRES","ENRIQUE - ANDRES","MARIANO","MARIANO - ANDRES","MARIANO - MATIAS - ANDRES","HAYDEE","HAYDEE - MARIANO","MATIAS","LORENZO","FAROUX MARIA GRACIELA","MATEAN SAS","SUC"];
+
+// Recetas plantilla (dosis/ha típicas)
+const RECETAS_BASE = [
+  {nombre:"Barbecho largo girasol", productos:[
+    {n:"GLIFOSATO GRANULADO LT BOX x 15 KG", d:1.5},
+    {n:"2-4 D 97 SIGMA x 20 LT", d:1.0},
+    {n:"LIGIER PH BIO x LT", d:0.05},
+    {n:"FLUROXIPIR 48 SIGMA x 5 Lts", d:0.3},
+    {n:"DIFLUFENICAN SIGMA 50%", d:0.2},
+  ]},
+  {nombre:"Presiembra fina", productos:[
+    {n:"GLIFOSATO GRANULADO LT BOX x 15 KG", d:1.5},
+    {n:"2-4 D 97 SIGMA x 20 LT", d:1.0},
+    {n:"LIGIER PH BIO x LT", d:0.05},
+    {n:"DICAMBA SIGMA x 10 LT", d:0.2},
+    {n:"METSULFURON SIGMA x kg", d:0.005},
+  ]},
+  {nombre:"Presiembra Mayer (jul 26)", productos:[
+    {n:"GLIFOSATO GRANULADO LT BOX x 15 KG", d:1.5},
+    {n:"2-4 D 97 SIGMA x 20 LT", d:0.5},
+    {n:"LIGIER PH BIO x LT", d:0.05},
+    {n:"DICAMBA SIGMA x 10 LT", d:0.1},
+    {n:"METSULFURON SIGMA x kg", d:0.00005},
+  ]},
+];
+
 // ── PLANOS ──────────────────────────────────────────────────
 const CAMPOS = [
   {id:"L3H",nombre:"Las Tres Hermanas",vb:[20,10,770,740],
@@ -1800,6 +1988,21 @@ export default function App(){
   const [titulos,setTitulos]=useState({});
   const [loteAbierto,setLoteAbierto]=useState(null); // {campo, lote} para modal historial
   const [campSel,setCampSel]=useState("26-27");
+
+  // === Estado del generador de órdenes ===
+  const [ordFecha, setOrdFecha] = useState(new Date().toISOString().split("T")[0]);
+  const [ordProductor, setOrdProductor] = useState("ENRIQUE");
+  const [ordCultivo, setOrdCultivo] = useState("cebada");
+  const [ordTipo, setOrdTipo] = useState("PULVERIZADA TERRESTRE"); // tipo de labor GLOBAL
+  // 4 tratamientos, uno por color. Cada uno con su etiqueta, cultivo y tabla de 10 filas.
+  const [tratamientos, setTratamientos] = useState(
+    Array(4).fill(null).map(() => ({
+      etiqueta: "",
+      cultivo: "cebada",
+      productos: Array(10).fill(null).map(() => ({n:"", d:0})),
+    }))
+  );
+
   const svgRef=useRef(null);
 
   const abrirLote=(campo,lote)=>setLoteAbierto({campo,lote});
@@ -1824,6 +2027,95 @@ export default function App(){
   const campoOrd=CAMPOS.find(c=>c.id===campoSel);
   const pintarL=lid=>{const k2=clL(campoSel,lid);setPintura(p=>{const n={...p};if(n[k2]===brocha)delete n[k2];else n[k2]=brocha;return n;});};
   const limpiarOrd=()=>setPintura(p=>{const n={...p};lotesDe(campoSel).forEach(l=>delete n[clL(campoSel,l.id)]);return n;});
+
+  // === Órdenes: helpers ===
+  // Lotes pintados agrupados por campo Y por tratamiento (color)
+  const lotesPintadosPorCampo = () => {
+    const acc = {};
+    CAMPOS.forEach(c => {
+      const pintados = c.lotes.filter(l => pintura[clL(c.id, l.id)] !== undefined);
+      if (pintados.length > 0) {
+        acc[c.id] = pintados.map(l => ({loteId: l.id, label: l.label||l.id, ha: Number(l.ha)||0, colorIdx: pintura[clL(c.id, l.id)]}));
+      }
+    });
+    return acc;
+  };
+  // Total ha de un tratamiento específico
+  const haTratamiento = (tratIdx) => {
+    let total = 0;
+    CAMPOS.forEach(c => {
+      c.lotes.forEach(l => {
+        if(pintura[clL(c.id, l.id)] === tratIdx) total += Number(l.ha)||0;
+      });
+    });
+    return total;
+  };
+  const haTotalOrden = () => COLORES_APP.reduce((s,_,i) => s + haTratamiento(i), 0);
+
+  const updateFila = (tratIdx, filaIdx, campoK, valor) => {
+    setTratamientos(ts => ts.map((t, ti) => {
+      if(ti !== tratIdx) return t;
+      return {
+        ...t,
+        productos: t.productos.map((p, pi) => {
+          if(pi !== filaIdx) return p;
+          if(campoK === "n") {
+            const base = PRODUCTOS_BASE.find(pr => pr.n === valor);
+            return {n: valor, d: p.d, u: base?.u||"L", p: base?.p||0};
+          }
+          if(campoK === "d") return {...p, d: parseFloat(valor)||0};
+          return p;
+        }),
+      };
+    }));
+  };
+  const updateEtiquetaTrat = (tratIdx, etq) => setTratamientos(ts => ts.map((t,i) => i===tratIdx ? {...t, etiqueta: etq} : t));
+  const updateCultivoTrat = (tratIdx, cv) => setTratamientos(ts => ts.map((t,i) => i===tratIdx ? {...t, cultivo: cv} : t));
+  const aplicarRecetaAlTrat = (tratIdx, receta) => {
+    const filas = Array(10).fill(null).map(() => ({n:"", d:0}));
+    receta.productos.forEach((rp, i) => {
+      if(i >= 10) return;
+      const base = PRODUCTOS_BASE.find(p => p.n === rp.n);
+      filas[i] = {n: rp.n, d: rp.d, u: base?.u||"L", p: base?.p||0};
+    });
+    setTratamientos(ts => ts.map((t,i) => i===tratIdx ? {...t, productos: filas} : t));
+  };
+  const limpiarTratamiento = (tratIdx) => {
+    // Limpia productos de un tratamiento Y despinta sus lotes
+    setTratamientos(ts => ts.map((t,i) => i===tratIdx
+      ? {etiqueta: "", cultivo: "cebada", productos: Array(10).fill(null).map(() => ({n:"", d:0}))}
+      : t
+    ));
+    setPintura(p => {
+      const n = {...p};
+      Object.keys(n).forEach(k => { if(n[k] === tratIdx) delete n[k]; });
+      return n;
+    });
+  };
+  const limpiarOrdenCompleta = () => {
+    setPintura({});
+    setTratamientos(Array(4).fill(null).map(() => ({
+      etiqueta: "",
+      cultivo: "cebada",
+      productos: Array(10).fill(null).map(() => ({n:"", d:0})),
+    })));
+  };
+
+  // Productos filtrados según tipo de labor GLOBAL (contexto)
+  const categoriaDelTipo = (tipo) => {
+    if(tipo === "PULVERIZADA TERRESTRE" || tipo === "PULVERIZADA AEREA") return ["HER","INS","FUN","COAD"];
+    if(tipo === "SIEMBRA") return ["SEM","FERT","SGR"];
+    if(tipo === "VOLEADA" || tipo === "INCORPORADA") return ["FERT"];
+    return ["HER","INS","FUN","COAD","FERT","SEM","SGR"];
+  };
+  const productosDisponibles = PRODUCTOS_BASE.filter(p => categoriaDelTipo(ordTipo).includes(p.cat));
+
+  // Tratamientos que tienen algo (productos + lotes pintados)
+  const tratamientosActivos = tratamientos
+    .map((t, i) => ({...t, idx: i, ha: haTratamiento(i), filasActivas: t.productos.filter(p => p.n && p.d > 0)}))
+    .filter(t => t.ha > 0 && t.filasActivas.length > 0);
+
+
   const descargarPNG=()=>{
     const svg=svgRef.current;if(!svg)return;
     const vb=svg.getAttribute("viewBox").split(" ").map(Number);
@@ -1844,6 +2136,14 @@ export default function App(){
       const a=document.createElement("a");a.download=`aplicacion_${campoSel.replace(/\s/g,"_")}.png`;
       a.href=cv.toDataURL("image/png");a.click();URL.revokeObjectURL(url);
     };img.src=url;
+  };
+  const imprimirOrdenCompleta=()=>{
+    // Imprime toda la sección de recibos con estilo aplicado. El usuario puede "Guardar como PDF" desde la impresora.
+    document.body.classList.add("printing-orden");
+    setTimeout(()=>{
+      window.print();
+      setTimeout(()=>document.body.classList.remove("printing-orden"),100);
+    },100);
   };
 
   // herbicidas
@@ -1882,6 +2182,18 @@ export default function App(){
 
   return (
     <div style={{minHeight:"100vh",background:FONDO,padding:"20px 14px",fontFamily:"'Avenir Next','Segoe UI',system-ui,sans-serif",color:TINTA}}>
+      <style>{`
+        @media print {
+          body.printing-orden * { visibility: hidden; }
+          body.printing-orden .orden-completa-print,
+          body.printing-orden .orden-completa-print * { visibility: visible; }
+          body.printing-orden .orden-completa-print { position:absolute; left:0; top:0; width:100%; padding:0; margin:0; }
+          body.printing-orden .no-print, body.printing-orden .no-print * { display:none !important; }
+          body.printing-orden .print-only { display:block !important; }
+          @page { margin: 1cm; }
+        }
+        .print-only { display: none; }
+      `}</style>
       <div style={{maxWidth:1200,margin:"0 auto"}}>
 
         {/* Header */}
@@ -1912,7 +2224,7 @@ export default function App(){
           <button style={tab(vista==="fertilizaciones")} onClick={()=>setVista("fertilizaciones")}>🌱 Fertilizaciones</button>
           <button style={tab(vista==="acciones")} onClick={()=>setVista("acciones")}>📅 Próximas acciones</button>
           <button style={tab(vista==="margenes")} onClick={()=>setVista("margenes")}>💵 Márgenes</button>
-          <button style={tab(vista==="ordenes")} onClick={()=>setVista("ordenes")}>🖨️ Órdenes de aplicación</button>
+          <button style={tab(vista==="ordenes")} onClick={()=>setVista("ordenes")}>🚜 Nueva labor</button>
           <button style={tab(vista==="protocolos")} onClick={()=>setVista("protocolos")}>📋 Protocolos</button>
         </div>
 
@@ -2288,84 +2600,363 @@ export default function App(){
           </div>
         )}
 
-        {/* ══ ÓRDENES DE APLICACIÓN ══ */}
+        {/* ══ NUEVA LABOR — orden con 4 tratamientos ══ */}
         {vista==="ordenes"&&(()=>{
+          const grupos = lotesPintadosPorCampo();
+          const campoIds = Object.keys(grupos);
+          const haTotalO = haTotalOrden();
           const [vx,vy,vw,vh]=campoOrd.vb;
           const k=vw/700;
-          const banda=(62+Math.max(colEn.length,0)*21+14)*k;
+
+          const tratActual = tratamientos[brocha];
+          const haBrocha = haTratamiento(brocha);
+          const costoTratamiento = (t, ha) => t.filasActivas.reduce((s,p) => s + p.d*ha*p.p, 0);
+
+          // Totalizador general: suma de productos de TODOS los tratamientos
+          const totalesGenerales = {};
+          tratamientosActivos.forEach(t => {
+            t.filasActivas.forEach(p => {
+              if(!totalesGenerales[p.n]) totalesGenerales[p.n] = {n:p.n, u:p.u, p:p.p, total:0, costo:0};
+              const cantP = p.d * t.ha;
+              totalesGenerales[p.n].total += cantP;
+              totalesGenerales[p.n].costo += cantP * p.p;
+            });
+          });
+          const listaTotales = Object.values(totalesGenerales);
+          const costoTotalGeneral = listaTotales.reduce((s,x) => s+x.costo, 0);
+
+          const TIPOS_LABOR = [
+            {v:"PULVERIZADA TERRESTRE", lbl:"🚿 Pulverización terrestre"},
+            {v:"PULVERIZADA AEREA", lbl:"✈️ Pulverización aérea"},
+            {v:"SIEMBRA", lbl:"🌱 Siembra"},
+            {v:"INCORPORADA", lbl:"🚜 Fertilización incorporada"},
+            {v:"VOLEADA", lbl:"⚡ Fertilización voleada"},
+            {v:"RASTRA", lbl:"🚜 Rastra"},
+            {v:"ROLOS", lbl:"🔄 Rolos"},
+            {v:"PARATIL", lbl:"🚜 Paratil"},
+          ];
+
           return (
-            <div style={{display:"flex",flexWrap:"wrap",gap:18,alignItems:"flex-start"}}>
-              <div style={{flex:"1 1 560px"}}>
-                <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:12,flexWrap:"wrap"}}>
-                  <select value={campoSel} onChange={e=>setCampoSel(e.target.value)}
-                    style={{padding:"9px 13px",fontSize:15,fontWeight:600,border:`1.5px solid ${TINTA}`,borderRadius:8,background:CREMA,color:TINTA,fontFamily:"inherit",cursor:"pointer"}}>
-                    {CAMPOS.map(c=><option key={c.id} value={c.id}>{c.nombre}{haPint(c.id)?` ● ${fmt(haPint(c.id))} ha`:""}</option>)}
-                  </select>
-                  <div style={{fontSize:12.5,opacity:0.65}}>Pintá lotes → exportá PNG para WhatsApp</div>
+            <div style={{display:"flex",flexDirection:"column",gap:16}}>
+              {/* ─── ENCABEZADO GLOBAL ─── */}
+              <div style={{...caja}}>
+                <div style={{fontSize:11,letterSpacing:"0.2em",textTransform:"uppercase",opacity:0.6,marginBottom:10}}>Nueva labor</div>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:10}}>
+                  <div>
+                    <div style={{fontSize:10.5,opacity:0.55,marginBottom:3}}>Tipo de labor</div>
+                    <select value={ordTipo} onChange={e=>setOrdTipo(e.target.value)} style={{...inputB,fontSize:13,fontWeight:600}}>
+                      {TIPOS_LABOR.map(t => <option key={t.v} value={t.v}>{t.lbl}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <div style={{fontSize:10.5,opacity:0.55,marginBottom:3}}>Fecha</div>
+                    <input type="date" value={ordFecha} onChange={e=>setOrdFecha(e.target.value)} style={{...inputB,fontSize:13}}/>
+                  </div>
+                  <div>
+                    <div style={{fontSize:10.5,opacity:0.55,marginBottom:3}}>Productor</div>
+                    <select value={ordProductor} onChange={e=>setOrdProductor(e.target.value)} style={{...inputB,fontSize:13,fontWeight:600}}>
+                      {PRODUCTORES_BASE.map(p => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                  </div>
                 </div>
-                <div style={{background:"#fff",border:`1.5px solid ${TINTA}`,borderRadius:12,padding:10,boxShadow:"0 2px 10px rgba(46,42,34,.12)"}}>
-                  <svg ref={svgRef} viewBox={`${vx} ${vy-banda} ${vw} ${vh+banda}`} style={{width:"100%",height:"auto",display:"block"}}>
-                    <text x={vx+12*k} y={vy-banda+26*k} fontSize={19*k} fontWeight="700" fill={TINTA}>{tit}</text>
-                    <text x={vx+12*k} y={vy-banda+46*k} fontSize={12*k} fill="#8A8270">{campoOrd.nombre} · {fmt(haPint(campoSel))} ha a aplicar</text>
-                    {colEn.map((i,fi)=>(
-                      <g key={i} transform={`translate(${vx+12*k},${vy-banda+(58+fi*21)*k})`}>
-                        <rect width={14*k} height={14*k} rx={3*k} fill={COLORES_APP[i]} stroke={TINTA} strokeWidth={k}/>
-                        <text x={20*k} y={11.5*k} fontSize={12*k} fill={TINTA}>{etiquetas[i]||`Tratamiento ${i+1}`} · {fmt(haCol(campoSel,i))} ha</text>
-                      </g>
-                    ))}
-                    {(campoOrd.refs||[]).map((r,j)=>(
-                      <text key={j} x={r.x} y={r.y} fontSize={11*k} fontStyle="italic" fill="#8A8270" textAnchor="middle" transform={r.rot?`rotate(${r.rot} ${r.x} ${r.y})`:undefined}>{r.t}</text>
-                    ))}
-                    {(campoOrd.grises||[]).map((g,j)=>{
-                      const[cx,cy]=centro(g.poly);
-                      return <g key={j}>
-                        <polygon points={g.poly.map(p=>p.join(",")).join(" ")} fill="#EDEBE3" stroke="#B5AF9D" strokeWidth={k}/>
-                        {g.label&&<text x={cx} y={cy} fontSize={11*k} fontStyle="italic" textAnchor="middle" fill="#9A937E">{g.label}</text>}
-                      </g>;
-                    })}
-                    {campoOrd.lotes.map(l=>{
-                      const idx=pintura[clL(campoSel,l.id)];
-                      const pint=idx!==undefined;
-                      const [cx,cy]=centro(l.poly);
-                      const w=anchoP(l.poly);
-                      const mHa=Number(l.ha)>0&&w>=40*k;
-                      return <g key={l.id} onClick={()=>pintarL(l.id)} style={{cursor:"pointer"}}>
-                        <polygon points={l.poly.map(p=>p.join(",")).join(" ")} fill={pint?COLORES_APP[idx]:"#FFFFFF"} fillOpacity={pint?0.85:1} stroke={TINTA} strokeWidth={(pint?2.2:1.2)*k}/>
-                        <g style={{pointerEvents:"none"}}>
-                          <text x={cx} y={cy+(mHa?0:4*k)} fontSize={(w<55*k?11:14)*k} fontWeight="700" textAnchor="middle" fill={pint?"#FFF":TINTA} opacity={pint?1:0.5} style={pint?{paintOrder:"stroke",stroke:"rgba(0,0,0,0.25)",strokeWidth:2*k}:{}}>{l.label}</text>
-                          {mHa&&<text x={cx} y={cy+13*k} fontSize={9.5*k} textAnchor="middle" fill={pint?"#FFF":TINTA} opacity={pint?0.95:0.45}>{l.ha} ha</text>}
-                        </g>
-                      </g>;
-                    })}
-                  </svg>
+                <div style={{marginTop:8,fontSize:11,opacity:0.55}}>Cada tratamiento tiene su propio cultivo (abajo).</div>
+                <div style={{marginTop:12,padding:"8px 12px",background:"#F3EFE3",borderRadius:8,fontSize:13,display:"flex",justifyContent:"space-between",flexWrap:"wrap",gap:6}}>
+                  <span style={{fontWeight:600}}>Total ha a aplicar:</span>
+                  <span style={{fontWeight:700,fontSize:15}}>{fmt(haTotalO)} ha</span>
                 </div>
               </div>
-              <div style={{flex:"1 1 290px",maxWidth:380,display:"flex",flexDirection:"column",gap:12}}>
-                <div style={caja}>
-                  <div style={{fontSize:11,letterSpacing:"0.2em",textTransform:"uppercase",opacity:0.55,marginBottom:8}}>Título · {campoOrd.nombre}</div>
-                  <input value={tit} onChange={e=>setTitulos(p=>({...p,[campoSel]:e.target.value}))} placeholder="Ej: Barbecho junio 2026" style={{...inputB,fontSize:14}}/>
-                </div>
-                <div style={caja}>
-                  <div style={{fontSize:11,letterSpacing:"0.2em",textTransform:"uppercase",opacity:0.55,marginBottom:10}}>Tratamientos</div>
-                  <div style={{fontSize:12.5,opacity:0.65,marginBottom:10}}>Elegí un color y tocá los lotes. Tocá de nuevo para despintar.</div>
-                  <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                    {COLORES_APP.map((color,i)=>(
-                      <div key={i} style={{display:"flex",alignItems:"center",gap:8}}>
-                        <button onClick={()=>setBrocha(i)} style={{width:30,height:30,borderRadius:8,cursor:"pointer",background:color,flexShrink:0,border:brocha===i?`3px solid ${TINTA}`:"2px solid rgba(46,42,34,0.25)",boxShadow:brocha===i?"0 0 0 2px #F8F5EC inset":"none"}}/>
-                        <input value={etiquetas[i]} placeholder={`Tratamiento ${i+1}`} onChange={e=>setEtiquetas(p=>p.map((t,j)=>j===i?e.target.value:t))} style={inputB}/>
-                        <span style={{fontSize:13,fontWeight:600,minWidth:52,textAlign:"right"}}>{fmt(haCol(campoSel,i))} ha</span>
+
+              {/* ─── SELECTOR DE TRATAMIENTO + MAPA ─── */}
+              <div style={{display:"flex",flexWrap:"wrap",gap:14}}>
+                {/* Panel izq: selector de tratamiento y su tabla */}
+                <div style={{flex:"1 1 500px",display:"flex",flexDirection:"column",gap:10}}>
+                  {/* Selector de tratamiento activo */}
+                  <div style={{...caja,padding:"10px 12px"}}>
+                    <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55,marginBottom:8}}>Tratamiento activo</div>
+                    <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                      {COLORES_APP.map((color,i)=>{
+                        const ha = haTratamiento(i);
+                        const activo = brocha === i;
+                        const filas = tratamientos[i].productos.filter(p => p.n && p.d > 0).length;
+                        return (
+                          <button key={i} onClick={()=>setBrocha(i)} style={{
+                            display:"flex",alignItems:"center",gap:6,padding:"6px 10px",cursor:"pointer",borderRadius:8,
+                            border:activo?`2.5px solid ${TINTA}`:"1.5px solid #C8C2B0",
+                            background:activo?"#F8F5EC":"#fff",fontFamily:"inherit",fontSize:12,fontWeight:600}}>
+                            <span style={{width:16,height:16,borderRadius:4,background:color,border:`1px solid ${TINTA}`}}/>
+                            <span>T{i+1}</span>
+                            {ha > 0 && <span style={{opacity:0.7}}>· {fmt(ha)}ha</span>}
+                            {filas > 0 && <span style={{opacity:0.55,fontSize:11}}>· {filas}p</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div style={{fontSize:11.5,opacity:0.55,marginTop:8}}>Elegí un tratamiento, pintá lotes y armale su receta. Después cambiá al siguiente.</div>
+                  </div>
+
+                  {/* Etiqueta del tratamiento activo */}
+                  <div style={caja}>
+                    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                      <span style={{width:22,height:22,borderRadius:5,background:COLORES_APP[brocha],border:`1.5px solid ${TINTA}`,flexShrink:0}}/>
+                      <div style={{fontSize:12,fontWeight:700}}>Tratamiento {brocha+1}</div>
+                      <input value={tratActual.etiqueta} onChange={e=>updateEtiquetaTrat(brocha, e.target.value)} placeholder="ej. Barbecho girasol" style={{...inputB,fontSize:12.5,flex:1}}/>
+                      <div style={{fontSize:12,opacity:0.65,whiteSpace:"nowrap"}}>{fmt(haBrocha)} ha</div>
+                    </div>
+                    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+                      <div style={{fontSize:10.5,opacity:0.55,paddingLeft:30}}>Cultivo:</div>
+                      <input value={tratActual.cultivo} onChange={e=>updateCultivoTrat(brocha, e.target.value)} placeholder="girasol, cebada, maíz, soja…" style={{...inputB,fontSize:12.5,flex:1,padding:"4px 8px"}}/>
+                    </div>
+                    {/* Recetas rápidas */}
+                    <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:10}}>
+                      {RECETAS_BASE.map(r => (
+                        <button key={r.nombre} onClick={()=>aplicarRecetaAlTrat(brocha, r)} style={{padding:"4px 9px",fontSize:10.5,fontWeight:600,cursor:"pointer",border:"1px solid #C8C2B0",borderRadius:14,background:"transparent",color:TINTA,fontFamily:"inherit"}}>
+                          📋 {r.nombre}
+                        </button>
+                      ))}
+                      <button onClick={()=>limpiarTratamiento(brocha)} style={{padding:"4px 9px",fontSize:10.5,fontWeight:600,cursor:"pointer",border:"1px solid #C0392B",borderRadius:14,background:"transparent",color:"#C0392B",fontFamily:"inherit",marginLeft:"auto"}}>Vaciar T{brocha+1}</button>
+                    </div>
+
+                    {/* Tabla estilo recibo */}
+                    <div style={{border:`1.5px solid ${TINTA}`,borderRadius:6,overflow:"hidden"}}>
+                      <div style={{display:"grid",gridTemplateColumns:"minmax(0,1fr) 62px 62px 62px",background:"#EEE9DC",borderBottom:`1.5px solid ${TINTA}`}}>
+                        <div style={{padding:"6px 8px",fontSize:10.5,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.05em"}}>Producto</div>
+                        <div style={{padding:"6px 8px",fontSize:10.5,fontWeight:700,textTransform:"uppercase",textAlign:"right"}}>Dosis/ha</div>
+                        <div style={{padding:"6px 8px",fontSize:10.5,fontWeight:700,textTransform:"uppercase",textAlign:"right"}}>Total</div>
+                        <div style={{padding:"6px 8px",fontSize:10.5,fontWeight:700,textTransform:"uppercase",textAlign:"right"}}>USD</div>
                       </div>
-                    ))}
-                  </div>
-                  <div style={{borderTop:"1px solid #D8D2C0",marginTop:12,paddingTop:10,display:"flex",justifyContent:"space-between",fontSize:14,fontWeight:700}}>
-                    <span>Total {campoOrd.nombre}</span><span>{fmt(haPint(campoSel))} ha</span>
+                      {tratActual.productos.map((p, fi) => {
+                        const total = p.d * haBrocha;
+                        const costo = total * p.p;
+                        return (
+                          <div key={fi} style={{display:"grid",gridTemplateColumns:"minmax(0,1fr) 62px 62px 62px",borderBottom:fi<9?"1px solid #EEE9DC":"none",background:fi%2===0?"#fff":"#FDFCF6"}}>
+                            <select value={p.n} onChange={e=>updateFila(brocha, fi, "n", e.target.value)} style={{padding:"5px 6px",fontSize:11.5,border:"none",background:"transparent",fontFamily:"inherit",color:TINTA,width:"100%",minWidth:0}}>
+                              <option value="">— vacío —</option>
+                              {productosDisponibles.map(pd => (
+                                <option key={pd.n} value={pd.n}>{pd.n}</option>
+                              ))}
+                            </select>
+                            <input type="number" step="0.001" value={p.d||""} onChange={e=>updateFila(brocha, fi, "d", e.target.value)} placeholder="0" style={{padding:"5px 6px",fontSize:11.5,border:"none",borderLeft:"1px solid #EEE9DC",background:"transparent",fontFamily:"inherit",color:TINTA,textAlign:"right",width:"100%",minWidth:0}}/>
+                            <div style={{padding:"5px 6px",fontSize:11,textAlign:"right",borderLeft:"1px solid #EEE9DC",opacity:total>0?1:0.35}}>{total>0?fmt(total):"—"}</div>
+                            <div style={{padding:"5px 6px",fontSize:11,textAlign:"right",borderLeft:"1px solid #EEE9DC",fontWeight:600,opacity:costo>0?1:0.35}}>{costo>0?fmt(costo):"—"}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {/* Totales del tratamiento */}
+                    <div style={{marginTop:8,padding:"8px 10px",background:"#F8F5EC",borderRadius:6,display:"flex",justifyContent:"space-between",fontSize:12}}>
+                      <span style={{fontWeight:600}}>Total tratamiento {brocha+1}:</span>
+                      <span style={{fontWeight:700}}>
+                        USD {fmt(tratActual.productos.reduce((s,p) => s + p.d*haBrocha*p.p, 0))}
+                        {haBrocha > 0 && <span style={{opacity:0.6,marginLeft:8}}>({(tratActual.productos.reduce((s,p) => s + p.d*p.p, 0)).toFixed(2)}/ha)</span>}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
-                  <button onClick={descargarPNG} style={{flex:1,padding:"12px 14px",fontSize:15,fontWeight:700,cursor:"pointer",border:"none",borderRadius:10,background:TINTA,color:"#F3EFE3",fontFamily:"inherit"}}>⬇ PNG de {campoOrd.nombre}</button>
-                  <button onClick={limpiarOrd} style={{padding:"12px 14px",fontSize:14,fontWeight:600,cursor:"pointer",border:`1.5px solid ${TINTA}`,borderRadius:10,background:"transparent",color:TINTA,fontFamily:"inherit"}}>Limpiar</button>
+
+                {/* Panel derecho: mapa */}
+                <div style={{flex:"1 1 400px"}}>
+                  <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:8,flexWrap:"wrap"}}>
+                    <select value={campoSel} onChange={e=>setCampoSel(e.target.value)}
+                      style={{padding:"7px 11px",fontSize:14,fontWeight:600,border:`1.5px solid ${TINTA}`,borderRadius:8,background:CREMA,color:TINTA,fontFamily:"inherit",cursor:"pointer"}}>
+                      {CAMPOS.map(c=><option key={c.id} value={c.id}>{c.nombre}{haPint(c.id)?` ● ${fmt(haPint(c.id))} ha`:""}</option>)}
+                    </select>
+                    <div style={{fontSize:11,opacity:0.6,flex:1,minWidth:120}}>Pintás con color de <b>T{brocha+1}</b></div>
+                  </div>
+                  <div style={{background:"#fff",border:`1.5px solid ${TINTA}`,borderRadius:10,padding:8}}>
+                    <svg ref={svgRef} viewBox={`${vx} ${vy} ${vw} ${vh}`} style={{width:"100%",height:"auto",display:"block"}}>
+                      {(campoOrd.refs||[]).map((r,j)=>(
+                        <text key={j} x={r.x} y={r.y} fontSize={11*k} fontStyle="italic" fill="#8A8270" textAnchor="middle" transform={r.rot?`rotate(${r.rot} ${r.x} ${r.y})`:undefined}>{r.t}</text>
+                      ))}
+                      {(campoOrd.grises||[]).map((g,j)=>{
+                        const[cx,cy]=centro(g.poly);
+                        return <g key={j}>
+                          <polygon points={g.poly.map(p=>p.join(",")).join(" ")} fill="#EDEBE3" stroke="#B5AF9D" strokeWidth={k}/>
+                          {g.label&&<text x={cx} y={cy} fontSize={11*k} fontStyle="italic" textAnchor="middle" fill="#9A937E">{g.label}</text>}
+                        </g>;
+                      })}
+                      {campoOrd.lotes.map(l=>{
+                        const idx=pintura[clL(campoSel,l.id)];
+                        const pint=idx!==undefined;
+                        const [cx,cy]=centro(l.poly);
+                        const w=anchoP(l.poly);
+                        const mHa=Number(l.ha)>0&&w>=40*k;
+                        return <g key={l.id} onClick={()=>pintarL(l.id)} style={{cursor:"pointer"}}>
+                          <polygon points={l.poly.map(p=>p.join(",")).join(" ")} fill={pint?COLORES_APP[idx]:"#FFFFFF"} fillOpacity={pint?0.85:1} stroke={TINTA} strokeWidth={(pint?2.2:1.2)*k}/>
+                          <g style={{pointerEvents:"none"}}>
+                            <text x={cx} y={cy+(mHa?0:4*k)} fontSize={(w<55*k?11:14)*k} fontWeight="700" textAnchor="middle" fill={pint?"#FFF":TINTA} opacity={pint?1:0.5} style={pint?{paintOrder:"stroke",stroke:"rgba(0,0,0,0.25)",strokeWidth:2*k}:{}}>{l.label}</text>
+                            {mHa&&<text x={cx} y={cy+13*k} fontSize={9.5*k} textAnchor="middle" fill={pint?"#FFF":TINTA} opacity={pint?0.95:0.45}>{l.ha} ha</text>}
+                          </g>
+                        </g>;
+                      })}
+                    </svg>
+                  </div>
+                  <div style={{display:"flex",gap:8,marginTop:10,flexWrap:"wrap"}}>
+                    <button onClick={imprimirOrdenCompleta} style={{padding:"9px 13px",fontSize:12.5,fontWeight:700,cursor:"pointer",border:"none",borderRadius:8,background:TINTA,color:"#F3EFE3",fontFamily:"inherit"}}>🖨️ Descargar orden completa (PDF)</button>
+                    <button onClick={descargarPNG} style={{padding:"9px 13px",fontSize:12.5,fontWeight:600,cursor:"pointer",border:`1.5px solid ${TINTA}`,borderRadius:8,background:"transparent",color:TINTA,fontFamily:"inherit"}}>⬇ PNG mapa actual</button>
+                    <button onClick={limpiarOrd} style={{padding:"9px 13px",fontSize:12.5,fontWeight:600,cursor:"pointer",border:`1.5px solid ${TINTA}`,borderRadius:8,background:"transparent",color:TINTA,fontFamily:"inherit"}}>Limpiar campo</button>
+                    <button onClick={limpiarOrdenCompleta} style={{padding:"9px 13px",fontSize:12.5,fontWeight:600,cursor:"pointer",border:"1.5px solid #C0392B",borderRadius:8,background:"transparent",color:"#C0392B",fontFamily:"inherit"}}>Reset orden</button>
+                  </div>
                 </div>
               </div>
+
+              {/* ─── RECIBOS GENERADOS ─── */}
+              {tratamientosActivos.length > 0 && (
+                <div className="orden-completa-print" style={{display:"flex",flexDirection:"column",gap:14,marginTop:6}}>
+                  <div className="print-only" style={{padding:"10px 0",borderBottom:`2px solid ${TINTA}`,marginBottom:8}}>
+                    <div style={{fontSize:20,fontWeight:700}}>Orden de labor · {new Date(ordFecha).toLocaleDateString("es-AR")}</div>
+                    <div style={{fontSize:13,marginTop:4}}>Productor: <b>{ordProductor}</b> · Labor: <b>{ordTipo}</b> · Total: <b>{fmt(haTotalOrden())} ha</b></div>
+                  </div>
+                  <div className="no-print" style={{fontSize:12,letterSpacing:"0.2em",textTransform:"uppercase",opacity:0.6}}>Recibos generados</div>
+
+                  {/* Mapas resumen por tratamiento (para el print) */}
+                  <div className="print-only" style={{display:"flex",flexDirection:"column",gap:14,marginBottom:10}}>
+                    {tratamientosActivos.map(t => {
+                      const camposDelT = {};
+                      CAMPOS.forEach(c => {
+                        c.lotes.forEach(l => {
+                          if(pintura[clL(c.id, l.id)] === t.idx) {
+                            if(!camposDelT[c.id]) camposDelT[c.id] = {campo: c, lotes: []};
+                            camposDelT[c.id].lotes.push({label: l.label||l.id, ha: Number(l.ha)||0});
+                          }
+                        });
+                      });
+                      const totalHaT = Object.values(camposDelT).reduce((s, {lotes}) => s + lotes.reduce((a,b) => a+b.ha, 0), 0);
+                      return (
+                        <div key={`map-${t.idx}`} style={{border:`1.5px solid ${TINTA}`,borderRadius:8,padding:"8px 12px",background:"#fff"}}>
+                          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                            <span style={{width:14,height:14,borderRadius:3,background:COLORES_APP[t.idx],border:`1px solid ${TINTA}`,flexShrink:0}}/>
+                            <div style={{fontSize:13,fontWeight:700}}>Tratamiento {t.idx+1}{t.etiqueta?` · ${t.etiqueta}`:""} · {t.cultivo}</div>
+                            <div style={{fontSize:12,opacity:0.7,marginLeft:"auto"}}>{fmt(totalHaT)} ha</div>
+                          </div>
+                          <div style={{fontSize:12,paddingLeft:22}}>
+                            {Object.values(camposDelT).map(({campo, lotes}, i) => (
+                              <div key={i} style={{marginBottom:2}}>
+                                <b>{campo.nombre}:</b> lote{lotes.length>1?"s":""} {lotes.map(l => `${l.label} (${l.ha} ha)`).join(", ")}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {tratamientosActivos.map(t => {
+                    // Agrupar lotes de este tratamiento por campo
+                    const camposDelTrat = {};
+                    CAMPOS.forEach(c => {
+                      c.lotes.forEach(l => {
+                        if(pintura[clL(c.id, l.id)] === t.idx) {
+                          if(!camposDelTrat[c.id]) camposDelTrat[c.id] = {campo: c, lotes: []};
+                          camposDelTrat[c.id].lotes.push({label: l.label||l.id, ha: Number(l.ha)||0});
+                        }
+                      });
+                    });
+                    return Object.values(camposDelTrat).map(({campo: c, lotes: lotesC}) => {
+                      const haC = lotesC.reduce((s,x) => s+x.ha, 0);
+                      const lotesLabel = lotesC.map(x => x.label).join(", ");
+                      const costoC = t.filasActivas.reduce((s,p) => s + p.d*haC*p.p, 0);
+                      return (
+                        <div key={`${t.idx}-${c.id}`} style={{background:"#fff",border:`2px solid ${TINTA}`,borderRadius:10,overflow:"hidden"}}>
+                          <div style={{background:COLORES_APP[t.idx],color:"#fff",padding:"5px 12px",fontSize:11,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase"}}>
+                            Tratamiento {t.idx+1} {t.etiqueta && `· ${t.etiqueta}`}
+                          </div>
+                          {/* Header estilo recibo */}
+                          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",borderBottom:`1px solid ${TINTA}`,background:"#F8F5EC"}}>
+                            <div style={{padding:"5px 10px",fontSize:10.5,textTransform:"uppercase",opacity:0.7,borderRight:"1px solid #E5E0D0"}}>PRODUCTOR</div>
+                            <div style={{padding:"5px 10px",fontSize:10.5,textTransform:"uppercase",opacity:0.7,borderRight:"1px solid #E5E0D0"}}></div>
+                            <div style={{padding:"5px 10px",fontSize:10.5,textTransform:"uppercase",opacity:0.7,gridColumn:"3 / span 2"}}>FECHA</div>
+                          </div>
+                          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",borderBottom:"1px solid #E5E0D0"}}>
+                            <div style={{padding:"6px 10px",fontSize:13,fontWeight:700,borderRight:"1px solid #E5E0D0",gridColumn:"1 / span 2"}}>{ordProductor}</div>
+                            <div style={{padding:"6px 10px",fontSize:13,gridColumn:"3 / span 2",textAlign:"center"}}>{new Date(ordFecha).toLocaleDateString("es-AR")}</div>
+                          </div>
+                          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",borderBottom:"1px solid #E5E0D0",background:"#F8F5EC"}}>
+                            <div style={{padding:"5px 10px",fontSize:10.5,textTransform:"uppercase",opacity:0.7,borderRight:"1px solid #E5E0D0"}}>CAMPO</div>
+                            <div style={{padding:"5px 10px",fontSize:10.5,textTransform:"uppercase",opacity:0.7,borderRight:"1px solid #E5E0D0"}}>LOTES</div>
+                            <div style={{padding:"5px 10px",fontSize:10.5,textTransform:"uppercase",opacity:0.7,borderRight:"1px solid #E5E0D0"}}>HAS</div>
+                            <div style={{padding:"5px 10px",fontSize:10.5,opacity:0.7}}>{t.cultivo}</div>
+                          </div>
+                          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",borderBottom:`1.5px solid ${TINTA}`}}>
+                            <div style={{padding:"6px 10px",fontSize:13,fontWeight:700,borderRight:"1px solid #E5E0D0"}}>{c.nombre.toUpperCase()}</div>
+                            <div style={{padding:"6px 10px",fontSize:13,fontWeight:600,borderRight:"1px solid #E5E0D0"}}>{lotesLabel}</div>
+                            <div style={{padding:"6px 10px",fontSize:14,fontWeight:700,borderRight:"1px solid #E5E0D0"}}>{fmt(haC)}</div>
+                            <div style={{padding:"6px 10px",fontSize:12,textAlign:"right",opacity:0.6}}>{ordTipo}</div>
+                          </div>
+                          {/* Productos */}
+                          <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
+                            <thead>
+                              <tr style={{background:"#EEE9DC"}}>
+                                <th style={{textAlign:"left",padding:"5px 10px",fontWeight:700,fontSize:10.5,textTransform:"uppercase",borderBottom:`1px solid ${TINTA}`}}>Producto</th>
+                                <th style={{textAlign:"right",padding:"5px 10px",fontWeight:700,fontSize:10.5,textTransform:"uppercase",borderBottom:`1px solid ${TINTA}`}}>Dosis/ha</th>
+                                <th style={{textAlign:"right",padding:"5px 10px",fontWeight:700,fontSize:10.5,textTransform:"uppercase",borderBottom:`1px solid ${TINTA}`}}>Total</th>
+                                <th className="no-print" style={{textAlign:"right",padding:"5px 10px",fontWeight:700,fontSize:10.5,textTransform:"uppercase",borderBottom:`1px solid ${TINTA}`}}>Precio/{t.filasActivas[0]?.u||"L"}</th>
+                                <th className="no-print" style={{textAlign:"right",padding:"5px 10px",fontWeight:700,fontSize:10.5,textTransform:"uppercase",borderBottom:`1px solid ${TINTA}`}}>USD</th>
+                                <th className="no-print" style={{textAlign:"right",padding:"5px 10px",fontWeight:700,fontSize:10.5,textTransform:"uppercase",borderBottom:`1px solid ${TINTA}`}}>USD/ha</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {t.filasActivas.map((p,i) => {
+                                const totalP = p.d * haC;
+                                const costoP = totalP * p.p;
+                                return (
+                                  <tr key={i} style={{borderBottom:"1px solid #EEE9DC"}}>
+                                    <td style={{padding:"5px 10px",fontWeight:600}}>{p.n}</td>
+                                    <td style={{padding:"5px 10px",textAlign:"right"}}>{p.d.toFixed(3)}</td>
+                                    <td style={{padding:"5px 10px",textAlign:"right"}}>{fmt(totalP)}</td>
+                                    <td className="no-print" style={{padding:"5px 10px",textAlign:"right"}}>{p.p.toFixed(2)}</td>
+                                    <td className="no-print" style={{padding:"5px 10px",textAlign:"right",fontWeight:600}}>{fmt(costoP)}</td>
+                                    <td className="no-print" style={{padding:"5px 10px",textAlign:"right"}}>{(costoP/haC).toFixed(2)}</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                            <tfoot>
+                              <tr className="no-print" style={{background:"#F8F5EC",borderTop:`2px solid ${TINTA}`}}>
+                                <td colSpan={4} style={{padding:"7px 10px",textAlign:"right",fontWeight:700,fontSize:12}}>TOTAL $</td>
+                                <td style={{padding:"7px 10px",textAlign:"right",fontWeight:700,fontSize:14}}>{fmt(costoC)}</td>
+                                <td style={{padding:"7px 10px",textAlign:"right",fontWeight:700,fontSize:14}}>{(costoC/haC).toFixed(2)}</td>
+                              </tr>
+                            </tfoot>
+                          </table>
+                        </div>
+                      );
+                    });
+                  })}
+
+                  {/* Totalizador general */}
+                  <div style={{background:"#FFFDF7",border:`2.5px solid ${TINTA}`,borderRadius:10,padding:"14px 18px"}}>
+                    <div style={{fontSize:13,fontWeight:700,marginBottom:10,textTransform:"uppercase",letterSpacing:"0.1em"}}>Totales {ordProductor.toLowerCase()}:</div>
+                    <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
+                      <tbody>
+                        {listaTotales.map((t,i) => (
+                          <tr key={i} style={{borderBottom:"1px solid #E5E0D0"}}>
+                            <td style={{padding:"6px 4px",fontWeight:600}}>{t.n}</td>
+                            <td style={{padding:"6px 4px",textAlign:"right",fontWeight:700}}>{fmt(t.total)} {t.u}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <tr style={{borderTop:`2px solid ${TINTA}`,background:"#F3EFE3"}}>
+                          <td style={{padding:"10px 4px",fontWeight:700,fontSize:14}}>TOTAL orden: {fmt(haTotalO)} ha</td>
+                          <td className="no-print" style={{padding:"10px 4px",textAlign:"right",fontWeight:700,fontSize:15}}>USD {fmt(costoTotalGeneral)}</td>
+                        </tr>
+                        {haTotalO > 0 && (
+                          <tr className="no-print">
+                            <td style={{padding:"3px 4px",fontSize:11.5,opacity:0.65}}>Costo promedio por ha</td>
+                            <td style={{padding:"3px 4px",textAlign:"right",fontSize:12,opacity:0.65}}>USD {(costoTotalGeneral/haTotalO).toFixed(2)}/ha</td>
+                          </tr>
+                        )}
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {tratamientosActivos.length === 0 && (
+                <div style={{padding:"25px 20px",textAlign:"center",background:"#F8F5EC",border:"1.5px dashed #B5AF9D",borderRadius:12}}>
+                  <div style={{fontSize:14,opacity:0.7}}>Elegí un tratamiento, pintá lotes y armale su receta.</div>
+                  <div style={{fontSize:12.5,opacity:0.55,marginTop:4}}>Podés armar hasta 4 tratamientos distintos en la misma orden.</div>
+                </div>
+              )}
             </div>
           );
         })()}
