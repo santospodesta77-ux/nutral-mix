@@ -2822,18 +2822,53 @@ export default function App(){
                       });
                       const totalHaT = Object.values(camposDelT).reduce((s, {lotes}) => s + lotes.reduce((a,b) => a+b.ha, 0), 0);
                       return (
-                        <div key={`map-${t.idx}`} style={{border:`1.5px solid ${TINTA}`,borderRadius:8,padding:"8px 12px",background:"#fff"}}>
-                          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                        <div key={`map-${t.idx}`} style={{border:`1.5px solid ${TINTA}`,borderRadius:8,padding:"10px 12px",background:"#fff",pageBreakInside:"avoid"}}>
+                          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
                             <span style={{width:14,height:14,borderRadius:3,background:COLORES_APP[t.idx],border:`1px solid ${TINTA}`,flexShrink:0}}/>
                             <div style={{fontSize:13,fontWeight:700}}>Tratamiento {t.idx+1}{t.etiqueta?` · ${t.etiqueta}`:""} · {t.cultivo}</div>
                             <div style={{fontSize:12,opacity:0.7,marginLeft:"auto"}}>{fmt(totalHaT)} ha</div>
                           </div>
-                          <div style={{fontSize:12,paddingLeft:22}}>
-                            {Object.values(camposDelT).map(({campo, lotes}, i) => (
-                              <div key={i} style={{marginBottom:2}}>
-                                <b>{campo.nombre}:</b> lote{lotes.length>1?"s":""} {lotes.map(l => `${l.label} (${l.ha} ha)`).join(", ")}
-                              </div>
-                            ))}
+                          {/* Grid de mapas por campo */}
+                          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:10,marginTop:8}}>
+                            {Object.values(camposDelT).map(({campo, lotes}, i) => {
+                              const lotesPintados = new Set(lotes.map(l => l.label));
+                              const [vx,vy,vw,vh] = campo.vb;
+                              const kk = vw/700;
+                              const haCampoT = lotes.reduce((s,l)=>s+l.ha, 0);
+                              return (
+                                <div key={i} style={{border:"1px solid #D8D2C0",borderRadius:6,padding:"8px",background:"#FFFDF7"}}>
+                                  <div style={{fontSize:11.5,fontWeight:700,marginBottom:4}}>{campo.nombre}</div>
+                                  <div style={{fontSize:10,opacity:0.65,marginBottom:6}}>
+                                    Lote{lotes.length>1?"s":""}: {lotes.map(l => `${l.label} (${l.ha} ha)`).join(", ")} · {fmt(haCampoT)} ha
+                                  </div>
+                                  <svg viewBox={`${vx} ${vy} ${vw} ${vh}`} style={{width:"100%",height:"auto",display:"block",border:`1px solid ${TINTA}`,background:"#fff"}}>
+                                    {(campo.grises||[]).map((g,j)=>(
+                                      <polygon key={`g${j}`} points={g.poly.map(p=>p.join(",")).join(" ")} fill="#EDEBE3" stroke="#B5AF9D" strokeWidth={kk}/>
+                                    ))}
+                                    {campo.lotes.map(l => {
+                                      const [cx,cy] = centro(l.poly);
+                                      const pintado = lotesPintados.has(l.label||l.id);
+                                      const w = anchoP(l.poly);
+                                      return (
+                                        <g key={l.id}>
+                                          <polygon points={l.poly.map(p=>p.join(",")).join(" ")}
+                                            fill={pintado?COLORES_APP[t.idx]:"#fff"}
+                                            fillOpacity={pintado?0.85:1}
+                                            stroke={TINTA}
+                                            strokeWidth={(pintado?2:1)*kk}/>
+                                          {w>=34*kk && (
+                                            <g style={{pointerEvents:"none"}}>
+                                              <text x={cx} y={cy-2*kk} fontSize={(w<55*kk?9.5:11)*kk} fontWeight="700" textAnchor="middle" fill={pintado?"#fff":TINTA} style={pintado?{paintOrder:"stroke",stroke:"rgba(0,0,0,0.25)",strokeWidth:2*kk}:{}}>{l.label}</text>
+                                              {l.ha && <text x={cx} y={cy+9*kk} fontSize={(w<55*kk?7:8)*kk} textAnchor="middle" fill={pintado?"#fff":TINTA} opacity={pintado?0.95:0.6}>{l.ha} ha</text>}
+                                            </g>
+                                          )}
+                                        </g>
+                                      );
+                                    })}
+                                  </svg>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       );
@@ -2855,7 +2890,7 @@ export default function App(){
                       const lotesLabel = lotesC.map(x => x.label).join(", ");
                       const costoC = t.filasActivas.reduce((s,p) => s + p.d*haC*p.p, 0);
                       return (
-                        <div key={`${t.idx}-${c.id}`} style={{background:"#fff",border:`2px solid ${TINTA}`,borderRadius:10,overflow:"hidden"}}>
+                        <div key={`${t.idx}-${c.id}`} style={{background:"#fff",border:`2px solid ${TINTA}`,borderRadius:10,overflow:"hidden",pageBreakInside:"avoid"}}>
                           <div style={{background:COLORES_APP[t.idx],color:"#fff",padding:"5px 12px",fontSize:11,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase"}}>
                             Tratamiento {t.idx+1} {t.etiqueta && `· ${t.etiqueta}`}
                           </div>
