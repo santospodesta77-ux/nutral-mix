@@ -1945,7 +1945,7 @@ export default function App(){
   const [fechaDatos, setFechaDatos] = useState(null);
 
   useEffect(() => {
-    fetch("/datos.json")
+    fetch("/datos.json?t=" + Date.now(), {cache: "no-store"})
       .then(r => r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status)))
       .then(d => {
         setDatosRemotos(d);
