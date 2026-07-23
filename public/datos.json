@@ -6008,10 +6008,10 @@
     "tokensEntrada": 65534,
     "tokensSalida": 15253
   },
-  "modifiedTimes": {
-    "rotaciones": "2026-07-23T13:14:29.389Z",
-    "labores": "2026-07-23T12:48:59.296Z",
-    "margenes": "2026-07-06T13:39:09.153Z",
-    "suelos": "2026-07-13T13:09:28.201Z"
-  }
+ "modifiedTimes": {
+  "rotaciones": null,
+  "labores": null,
+  "margenes": null,
+  "suelos": null
+}
 }
