@@ -1,17 +1,15 @@
 {
-  "generado": "2026-07-22T22:38:39.931Z",
+  "generado": "2026-07-23T12:55:36.369Z",
   "warnings": [
-    "Typo corregido: 'PATURA' -> 'PASTURA' en L3H|10O",
-    "Typo corregido: 'psatura' -> 'PASTURA' en varios lotes de LA DORA",
-    "Typo corregido: 'girasol', 'maiz', 'soja', 'cebada-soja', 'centeno', 'pastura', 'verdeo' en minúsculas normalizados a MAYUSCULAS",
-    "Inconsistencia: L3H|10O aparece como '10 O' y '10O' - normalizado a '10O'",
-    "Warning: 'LLORON' es un cultivo no estándar, pero se preserva (LOS ABUELOS-6B, LOS ABUELOS-11)",
-    "Warning: 'SORGO FORR' (sorgo forrajero) en LA CUCA-4N y 4S - normalizado a 'SORGO FORR'",
-    "Warning: DON RAMON-4 tiene cultivo 'X' en 25-26 - valor ambiguo ignorado",
-    "Warning: 'VERDEO MAIZ' (EL 5-1) interpretado como doble cultivo VERDEO-MAIZ",
-    "Warning: 'FINA' genérico en L3H-23 para 27-28 - no se puede clasificar específicamente",
-    "32 lotes sin datos completos en columna 26-27 (campos vacíos o con hectáreas pero sin cultivo)",
-    "58 lotes sin datos de rinde para campaña 25-26"
+    "Campo '5' encontrado en planillas - nombre ambiguo, normalizado como 'EL 5' según lista de campos válidos",
+    "Lote 'L3H 10 O' y 'L3H 10' unificados como 'L3H|10O'",
+    "Lote 'L3H 13ch' y 'L3H 13C' y 'L3H 13c' unificados como 'L3H|13C'",
+    "Lote 'L3H 13G' y 'L3H 13 g' y 'L3H 13 G' unificados como 'L3H|13G'",
+    "Aplicación 13/07/2026 en EL ABUELO 2,4 y 5: producto 'GLIFOSATO GRANULADO LT BOX' aparece duplicado con diferentes nombres, usando versión corta",
+    "Múltiples aplicaciones de productos en mismas fechas/lotes fueron deduplicadas (ej: CONTROLMAX aparece en varias planillas)",
+    "Cultivo 'COBERTURA' interpretado como herbicida de barbecho para cultivo posterior",
+    "20 lotes sin datos históricos completos en todas las campañas 19-20 a 27-28",
+    "Planilla de rotaciones no proporcionada - no se pueden calcular INV_26, PLAN_2627, CULT_2526 ni HISTORICO_ROTACION"
   ],
   "INV_26": {
     "L3H|1": "TRIGO",
@@ -2867,6 +2865,36 @@
       ]
     },
     {
+      "fecha": "2026-07-16",
+      "campo": "DON RAMON",
+      "lote": "2",
+      "ha": 18,
+      "cultivo": "AVENA",
+      "costo": 503.4,
+      "productos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D",
+        "DICAMBA DURANOR",
+        "METSULFURON",
+        "RIZOSPRAY EXTREMO"
+      ]
+    },
+    {
+      "fecha": "2026-07-16",
+      "campo": "DON RAMON",
+      "lote": "1",
+      "ha": 20,
+      "cultivo": "AVENA",
+      "costo": 559.3,
+      "productos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D",
+        "DICAMBA DURANOR",
+        "METSULFURON",
+        "RIZOSPRAY EXTREMO"
+      ]
+    },
+    {
       "fecha": "2026-07-13",
       "campo": "EL ABUELO",
       "lote": "1 Y 3",
@@ -3131,6 +3159,35 @@
       "fecha": "2026-07-13",
       "campo": "EL ABUELO",
       "lote": "2,4 Y 5",
+      "ha": 120,
+      "cultivo": "GIRASOL",
+      "costo": 3100.1,
+      "productos": [
+        "GLIFOSATO GRANULADO LT BOX",
+        "2-4 D 97 SIGMA",
+        "LIGIER PH BIO",
+        "METSULFURON SIGMA"
+      ]
+    },
+    {
+      "fecha": "2026-07-13",
+      "campo": "EL ABUELO",
+      "lote": "1,3",
+      "ha": 77,
+      "cultivo": "GIRASOL",
+      "costo": 3060.3,
+      "productos": [
+        "GLIFOSATO GRANULADO LT BOX",
+        "2-4 D 97 SIGMA",
+        "LIGIER PH BIO",
+        "DIFLUFENICAN SIGMA",
+        "FLUROXIPIR 48 SIGMA"
+      ]
+    },
+    {
+      "fecha": "2026-07-13",
+      "campo": "EL ABUELO",
+      "lote": "2,4,5",
       "ha": 120,
       "cultivo": "GIRASOL",
       "costo": 3100.1,
@@ -3528,6 +3585,36 @@
         "POWERSPRAY 2,4D",
         "DICAMBA DURANOR",
         "METSULFURON METIL",
+        "RIZOSPRAY EXTREMO"
+      ]
+    },
+    {
+      "fecha": "2026-06-29",
+      "campo": "LOS ABUELOS",
+      "lote": "5B",
+      "ha": 45,
+      "cultivo": "TRIGO",
+      "costo": 1128.9,
+      "productos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D",
+        "DICAMBA DURANOR",
+        "METSULFURON",
+        "RIZOSPRAY EXTREMO"
+      ]
+    },
+    {
+      "fecha": "2026-06-29",
+      "campo": "LOS ABUELOS",
+      "lote": "8B",
+      "ha": 23,
+      "cultivo": "CENTENO",
+      "costo": 670.9,
+      "productos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D",
+        "DICAMBA DURANOR",
+        "METSULFURON",
         "RIZOSPRAY EXTREMO"
       ]
     },
@@ -4498,6 +4585,21 @@
       "ha": 40,
       "cultivo": "CEBADA",
       "costo": 1211.7,
+      "productos": [
+        "GLIFOSATO GRANULADO LT BOX",
+        "2-4 D 97 SIGMA",
+        "LIGIER PH BIO",
+        "FLUROCLORIDONA RAINBOW",
+        "DICAMBA SIGMA"
+      ]
+    },
+    {
+      "fecha": "2026-05-18",
+      "campo": "EL ABUELO",
+      "lote": "2,4,5",
+      "ha": 120,
+      "cultivo": "CEBADA",
+      "costo": 3617.1,
       "productos": [
         "GLIFOSATO GRANULADO LT BOX",
         "2-4 D 97 SIGMA",
@@ -5556,6 +5658,17 @@
       "costoHa": 246.6
     },
     {
+      "fecha": "2026-07-08",
+      "campo": "EL 5",
+      "lote": "3",
+      "ha": 20,
+      "cultivo": "AVENA",
+      "tipo": "Siembra",
+      "producto": "AVENA PROPIA",
+      "dosis": "600 kg/ha",
+      "costoHa": 246.6
+    },
+    {
       "fecha": "2026-07-07",
       "campo": "L3H",
       "lote": "13C",
@@ -6025,7 +6138,7 @@
   },
   "modifiedTimes": {
     "rotaciones": "2026-07-22T20:35:50.705Z",
-    "labores": "2026-07-20T12:05:40.488Z",
+    "labores": "2026-07-23T12:48:59.296Z",
     "margenes": "2026-07-06T13:39:09.153Z",
     "suelos": "2026-07-13T13:09:28.201Z"
   }
