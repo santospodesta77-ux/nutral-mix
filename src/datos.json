@@ -1,15 +1,19 @@
 {
-  "generado": "2026-07-23T12:55:36.369Z",
+  "generado": "2026-07-23T13:18:37.897Z",
   "warnings": [
-    "Campo '5' encontrado en planillas - nombre ambiguo, normalizado como 'EL 5' según lista de campos válidos",
-    "Lote 'L3H 10 O' y 'L3H 10' unificados como 'L3H|10O'",
-    "Lote 'L3H 13ch' y 'L3H 13C' y 'L3H 13c' unificados como 'L3H|13C'",
-    "Lote 'L3H 13G' y 'L3H 13 g' y 'L3H 13 G' unificados como 'L3H|13G'",
-    "Aplicación 13/07/2026 en EL ABUELO 2,4 y 5: producto 'GLIFOSATO GRANULADO LT BOX' aparece duplicado con diferentes nombres, usando versión corta",
-    "Múltiples aplicaciones de productos en mismas fechas/lotes fueron deduplicadas (ej: CONTROLMAX aparece en varias planillas)",
-    "Cultivo 'COBERTURA' interpretado como herbicida de barbecho para cultivo posterior",
-    "20 lotes sin datos históricos completos en todas las campañas 19-20 a 27-28",
-    "Planilla de rotaciones no proporcionada - no se pueden calcular INV_26, PLAN_2627, CULT_2526 ni HISTORICO_ROTACION"
+    "L3H|10O: typo corregido 'PATURA' -> 'PASTURA' en 23-24",
+    "LA DORA: 7 lotes con cultivos en minúsculas normalizados a MAYÚSCULAS",
+    "EL ABUELO: 2 lotes con 'MAIZ 2' (cultivo de segunda) preservado tal cual",
+    "EL CIPRES: 4 lotes con 'pastura' normalizado a 'PASTURA'",
+    "LOS ABUELOS: 2 lotes con 'verdeo', 'pastura', 'centeno' normalizados a MAYÚSCULAS",
+    "DON RAMON|4: cultivo 'X' en 25-26 no identificable, ignorado",
+    "LOS ABUELOS|5B: fila sin hectáreas, ignorada",
+    "EL 5|3, EL 5|5, EL 5|6: filas sin hectáreas, ignoradas",
+    "63 lotes sin datos de cultivo en 25-26 para calcular RINDE_2526",
+    "78 lotes sin cultivo planeado en 26-27 (campos nuevos o sin definir)",
+    "LA FLECHA: 3 lotes (1,2,3,4,5) sin datos de rinde en 25-26",
+    "DON ANTONIO, DOÑA TERESA, otros campos nuevos: datos históricos incompletos antes de 25-26",
+    "HISTORICO_ROTACION: campañas 19-20 a 24-25 solo completas para L3H"
   ],
   "INV_26": {
     "L3H|1": "TRIGO",
@@ -38,7 +42,7 @@
     "L3H|20": "MAIZ",
     "L3H|21N": "MAIZ T",
     "L3H|21S": "MAIZ",
-    "L3H|22": "TRIGO",
+    "L3H|22": "GIRASOL",
     "L3H|23": "CEBADA",
     "L3H|24": "PASTURA",
     "L3H|25": "PASTURA",
@@ -78,14 +82,14 @@
     "LOS ABUELOS|3": "GIRASOL",
     "LOS ABUELOS|4": "MAIZ",
     "LOS ABUELOS|5": "TRIGO",
-    "LOS ABUELOS|6A": "VERDEO",
+    "LOS ABUELOS|6A": "PASTURA",
     "LOS ABUELOS|6C": "VERDEO",
     "LOS ABUELOS|7B": "VERDEO",
     "LOS ABUELOS|8A": "VERDEO",
     "LOS ABUELOS|8B": "CENTENO",
     "LOS ABUELOS|3O": "VERDEO",
     "LOS ABUELOS|9A": "PASTURA",
-    "LOS ABUELOS|9B": "CENTENO",
+    "LOS ABUELOS|9B": "PASTURA",
     "LOS ABUELOS|10": "VERDEO",
     "LA MARIA OLIVA|2": "MAIZ",
     "LA MARIA OLIVA|3": "MAIZ",
@@ -233,13 +237,13 @@
     "LOS ABUELOS|3": "MAIZ",
     "LOS ABUELOS|5": "TRIGO",
     "LOS ABUELOS|6A": "PASTURA",
-    "LOS ABUELOS|7B": "MAIZ",
-    "LOS ABUELOS|8A": "MAIZ",
+    "LOS ABUELOS|7B": "VERDEO",
+    "LOS ABUELOS|8A": "VERDEO",
     "LOS ABUELOS|8B": "CENTENO",
     "LOS ABUELOS|9A": "PASTURA",
     "LOS ABUELOS|9B": "PASTURA",
     "LOS ABUELOS|10": "CENTENO",
-    "EL 5|1": "VERDEO-MAIZ",
+    "EL 5|1": "VERDEO MAIZ",
     "EL 5|2": "AVENA",
     "DON ANTONIO|2": "GIRASOL",
     "DON ANTONIO|9": "MAIZ",
@@ -255,9 +259,9 @@
     "EL TORELLO|6": "MAIZ",
     "EL TORELLO|7": "MAIZ",
     "EL TORELLO|8": "MAIZ",
-    "EL ABUELO|1": "GIRASOL",
+    "EL ABUELO|1": "MAIZ 2",
     "EL ABUELO|2": "GIRASOL",
-    "EL ABUELO|3": "GIRASOL",
+    "EL ABUELO|3": "MAIZ 2",
     "EL ABUELO|4": "GIRASOL",
     "EL ABUELO|5": "GIRASOL",
     "LOS NIETOS|2": "MAIZ",
@@ -316,7 +320,10 @@
     "LA CUCA|5": "PASTURA",
     "LA CUCA|6": "MAIZ",
     "LA CUCA|7": "MAIZ",
-    "LOS ABUELOS|7A": "PASTURA"
+    "LOS ABUELOS|7A": "PASTURA",
+    "LOS ABUELOS|6C": "VERDEO",
+    "EL 5|4": "PASTURA",
+    "DON RAMON|5": "GIRASOL"
   },
   "CULT_2526": {
     "L3H|1": "TRIGO-SOJA",
@@ -485,7 +492,7 @@
     "L3H|3": null,
     "L3H|4": 56.6,
     "L3H|5": 30,
-    "L3H|9B": null,
+    "L3H|9B": 41,
     "L3H|10O": null,
     "L3H|12": 29,
     "L3H|13G": 34,
@@ -562,11 +569,6 @@
         "cv": "MAIZ",
         "rF": null,
         "rG": null
-      },
-      "27-28": {
-        "cv": null,
-        "rF": null,
-        "rG": null
       }
     },
     "L3H|2": {
@@ -597,8 +599,8 @@
       },
       "24-25": {
         "cv": "TRIGO",
-        "rF": 30,
-        "rG": null
+        "rF": null,
+        "rG": 30
       },
       "25-26": {
         "cv": "MAIZ",
@@ -656,11 +658,6 @@
         "cv": "SOJA",
         "rF": null,
         "rG": null
-      },
-      "27-28": {
-        "cv": null,
-        "rF": null,
-        "rG": null
       }
     },
     "L3H|4": {
@@ -701,11 +698,6 @@
       },
       "26-27": {
         "cv": "TRIGO-SOJA",
-        "rF": null,
-        "rG": null
-      },
-      "27-28": {
-        "cv": null,
         "rF": null,
         "rG": null
       }
@@ -750,11 +742,6 @@
         "cv": "PASTURA",
         "rF": null,
         "rG": null
-      },
-      "27-28": {
-        "cv": null,
-        "rF": null,
-        "rG": null
       }
     },
     "L3H|17": {
@@ -797,11 +784,6 @@
         "cv": "GIRASOL",
         "rF": null,
         "rG": null
-      },
-      "27-28": {
-        "cv": null,
-        "rF": null,
-        "rG": null
       }
     },
     "L3H|27": {
@@ -842,11 +824,6 @@
       },
       "26-27": {
         "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      },
-      "27-28": {
-        "cv": null,
         "rF": null,
         "rG": null
       }
@@ -1057,11 +1034,6 @@
         "cv": "CEBADA-MAIZ",
         "rF": null,
         "rG": null
-      },
-      "27-28": {
-        "cv": null,
-        "rF": null,
-        "rG": null
       }
     },
     "L3H|28": {
@@ -1104,11 +1076,6 @@
         "cv": "GIRASOL",
         "rF": null,
         "rG": null
-      },
-      "27-28": {
-        "cv": null,
-        "rF": null,
-        "rG": null
       }
     },
     "L3H|22": {
@@ -1139,8 +1106,8 @@
       },
       "24-25": {
         "cv": "TRIGO",
-        "rF": 25,
-        "rG": null
+        "rF": null,
+        "rG": 25
       },
       "25-26": {
         "cv": "TRIGO-SOJA",
@@ -1186,8 +1153,8 @@
       },
       "24-25": {
         "cv": "TRIGO",
-        "rF": 18,
-        "rG": null
+        "rF": null,
+        "rG": 18
       },
       "25-26": {
         "cv": "TRIGO-SOJA",
@@ -1196,11 +1163,6 @@
       },
       "26-27": {
         "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      },
-      "27-28": {
-        "cv": null,
         "rF": null,
         "rG": null
       }
@@ -1243,11 +1205,6 @@
       },
       "26-27": {
         "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      },
-      "27-28": {
-        "cv": null,
         "rF": null,
         "rG": null
       }
@@ -1567,11 +1524,6 @@
         "cv": "VERDEO-MAIZ",
         "rF": null,
         "rG": null
-      },
-      "27-28": {
-        "cv": null,
-        "rF": null,
-        "rG": null
       }
     },
     "L3H|7": {
@@ -1612,11 +1564,6 @@
       },
       "26-27": {
         "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      },
-      "27-28": {
-        "cv": null,
         "rF": null,
         "rG": null
       }
@@ -1708,11 +1655,6 @@
         "cv": "PASTURA",
         "rF": null,
         "rG": null
-      },
-      "27-28": {
-        "cv": null,
-        "rF": null,
-        "rG": null
       }
     },
     "L3H|9B": {
@@ -1802,11 +1744,6 @@
         "cv": "VERDEO-MAIZ",
         "rF": null,
         "rG": null
-      },
-      "27-28": {
-        "cv": null,
-        "rF": null,
-        "rG": null
       }
     },
     "L3H|11": {
@@ -1847,11 +1784,6 @@
       },
       "26-27": {
         "cv": "AVENA",
-        "rF": null,
-        "rG": null
-      },
-      "27-28": {
-        "cv": null,
         "rF": null,
         "rG": null
       }
@@ -1943,11 +1875,6 @@
         "cv": "AGROPIRO",
         "rF": null,
         "rG": null
-      },
-      "27-28": {
-        "cv": null,
-        "rF": null,
-        "rG": null
       }
     },
     "L3H|14": {
@@ -1988,11 +1915,6 @@
       },
       "26-27": {
         "cv": "VERDEO-MAIZ",
-        "rF": null,
-        "rG": null
-      },
-      "27-28": {
-        "cv": null,
         "rF": null,
         "rG": null
       }
@@ -2037,11 +1959,6 @@
         "cv": "PASTURA",
         "rF": null,
         "rG": null
-      },
-      "27-28": {
-        "cv": null,
-        "rF": null,
-        "rG": null
       }
     },
     "L3H|16": {
@@ -2082,11 +1999,6 @@
       },
       "26-27": {
         "cv": "PASTURA",
-        "rF": null,
-        "rG": null
-      },
-      "27-28": {
-        "cv": null,
         "rF": null,
         "rG": null
       }
@@ -2131,11 +2043,6 @@
         "cv": "PASTURA",
         "rF": null,
         "rG": null
-      },
-      "27-28": {
-        "cv": null,
-        "rF": null,
-        "rG": null
       }
     },
     "L3H|19": {
@@ -2176,11 +2083,6 @@
       },
       "26-27": {
         "cv": "SOJA",
-        "rF": null,
-        "rG": null
-      },
-      "27-28": {
-        "cv": null,
         "rF": null,
         "rG": null
       }
@@ -2225,11 +2127,6 @@
         "cv": "SOJA",
         "rF": null,
         "rG": null
-      },
-      "27-28": {
-        "cv": null,
-        "rF": null,
-        "rG": null
       }
     },
     "L3H|21N": {
@@ -2270,11 +2167,6 @@
       },
       "26-27": {
         "cv": "SOJA",
-        "rF": null,
-        "rG": null
-      },
-      "27-28": {
-        "cv": null,
         "rF": null,
         "rG": null
       }
@@ -2319,11 +2211,6 @@
         "cv": "SOJA",
         "rF": null,
         "rG": null
-      },
-      "27-28": {
-        "cv": null,
-        "rF": null,
-        "rG": null
       }
     },
     "L3H|24": {
@@ -2364,11 +2251,6 @@
       },
       "26-27": {
         "cv": "PASTURA",
-        "rF": null,
-        "rG": null
-      },
-      "27-28": {
-        "cv": null,
         "rF": null,
         "rG": null
       }
@@ -2413,11 +2295,6 @@
         "cv": "PASTURA",
         "rF": null,
         "rG": null
-      },
-      "27-28": {
-        "cv": null,
-        "rF": null,
-        "rG": null
       }
     },
     "L3H|30": {
@@ -2458,11 +2335,6 @@
       },
       "26-27": {
         "cv": "AGROPIRO",
-        "rF": null,
-        "rG": null
-      },
-      "27-28": {
-        "cv": null,
         "rF": null,
         "rG": null
       }
@@ -6137,7 +6009,7 @@
     "tokensSalida": 15253
   },
   "modifiedTimes": {
-    "rotaciones": "2026-07-22T20:35:50.705Z",
+    "rotaciones": "2026-07-23T13:14:29.389Z",
     "labores": "2026-07-23T12:48:59.296Z",
     "margenes": "2026-07-06T13:39:09.153Z",
     "suelos": "2026-07-13T13:09:28.201Z"
