@@ -1,350 +1,234 @@
 {
-  "generado": "2026-07-23T14:04:03.736Z",
+  "generado": "2026-07-24T03:57:21.500254Z",
   "warnings": [
-    "MIRASOL no asignado — campo ambiguo sin lote específico",
-    "Campo 'maiz humed' en LA DORA — formato no estándar, se transcribió literalmente",
-    "5 1 ESTE Y OESTE — formato de lote no estándar",
-    "LOS ABUELOS-5B sin hectáreas en rotaciones pero aparece en labores",
-    "EL 5-6 sin hectáreas en rotaciones",
-    "EL 5-3 sin hectáreas en rotaciones",
-    "EL 5-5 sin hectáreas en rotaciones",
-    "DON ANTONIO 1, 5, 8, 12, 13 sin cultivo 25-26",
-    "DOÑA TERESA 10 sin cultivo 25-26",
-    "EL TORELLO 4 sin cultivo 25-26",
-    "DON RAMON 4 sin cultivo 25-26 (dice 'X')",
-    "LOS NIETOS 1, 3, 6, 8, 10 sin cultivo 25-26",
-    "EL CIPRES 4 sin cultivo 25-26",
-    "LA ADORACION 1, 2 sin cultivo 25-26",
-    "LA CARLOTA 2-8, 10 sin cultivo 25-26",
-    "[margenes] Planilla 'margenes' está en formato Excel (.xlsx). Convertila a Google Sheets nativa y actualizá el ID."
+    "Reconstrucción manual desde planillas (23/07/26). Solo datos que existen literalmente en la base.",
+    "Rotaciones: la lectura cubrió 87 lotes (L3H, LA CUCA, LA CHOLITA, EL DESCANSO, LA DORA, LAS TIAS, LOS ABUELOS, LA MARIA OLIVA). Faltan campos que están más abajo en la planilla.",
+    "LOS ABUELOS|5B: fila sin campo ni ha en la planilla de rotaciones — transcrita igual con el cultivo 26-27 (TRIGO).",
+    "LOS ABUELOS|5A: campaña 25-26 vacía en la planilla.",
+    "LOS ABUELOS|6B y 11: cultivo 26-27 = LLORON.",
+    "LOS ABUELOS|6B, 7A, 10, 11: campaña 25-26 vacía.",
+    "L3H|16: campaña 21-22 vacía en la planilla.",
+    "L3H|10O: typo 'PATURA' en 23-24 corregido a PASTURA.",
+    "L3H|23: campaña 27-28 dice 'FINA' (sin especie definida).",
+    "LA CUCA|4N y 4S: cultivo 25-26 = 'SORGO FORR'.",
+    "Márgenes: la planilla sigue en formato Excel (.xlsx), no se puede leer vía API."
   ],
   "INV_26": {
-    "L3H|L3H-1": "TRIGO",
-    "L3H|L3H-9B": "TRIGO",
-    "L3H|L3H-13G": "CEBADA",
-    "L3H|L3H-13CH": "CEBADA",
-    "L3H|L3H-18": "CEBADA",
-    "L3H|L3H-19": "CEBADA",
-    "L3H|L3H-22": "TRIGO",
-    "L3H|L3H-26": "TRIGO",
-    "L3H|L3H-29": "TRIGO",
-    "LA CHOLITA|LA CHOLITA-4": "CEBADA",
-    "LA CHOLITA|LA CHOLITA-5": "CEBADA",
-    "LA DORA|LA DORA-8": "CEBADA",
-    "LAS TIAS|LAS TIAS-9": "CENTENO",
-    "LOS ABUELOS|LOS ABUELOS-5A": "VERDEO",
-    "LOS ABUELOS|LOS ABUELOS-5B": "TRIGO",
-    "EL 5|EL 5-2": "AVENA",
-    "EL 5|EL 5-3": "AVENA",
-    "EL 5|EL 5-5": "VERDEO",
-    "L3H|L3H-6": "VERDEO",
-    "L3H|L3H-8": "VERDEO",
-    "L3H|L3H-10E": "VERDEO",
-    "L3H|L3H-10O": "CEBADA",
-    "L3H|L3H-11": "AVENA",
-    "L3H|L3H-14": "VERDEO",
-    "L3H|L3H-23": "CEBADA",
-    "LA MARIA OLIVA|LA MARIA OLIVA-1": "VERDEO",
-    "LA MARIA OLIVA|LA MARIA OLIVA-FRANJA 1": "VERDEO",
-    "LA MARIA OLIVA|LA MARIA OLIVA-FRANJA 2": "VERDEO",
-    "LOS ABUELOS|LOS ABUELOS-6B": "LLORON",
-    "LOS ABUELOS|LOS ABUELOS-6C": "VERDEO",
-    "LOS ABUELOS|LOS ABUELOS-7B": "VERDEO",
-    "LOS ABUELOS|LOS ABUELOS-8A": "VERDEO",
-    "LOS ABUELOS|LOS ABUELOS-8B": "CENTENO",
-    "LOS ABUELOS|LOS ABUELOS-3O": "VERDEO",
-    "LOS ABUELOS|LOS ABUELOS-10": "VERDEO",
-    "LOS ABUELOS|LOS ABUELOS-11": "LLORON"
+    "L3H|4": "TRIGO",
+    "L3H|5": "PASTURA",
+    "L3H|6": "VERDEO",
+    "L3H|8": "VERDEO",
+    "L3H|9A": "PASTURA",
+    "L3H|10E": "VERDEO",
+    "L3H|10O": "CEBADA",
+    "L3H|11": "AVENA",
+    "L3H|12": "PASTURA",
+    "L3H|13G": "CEBADA",
+    "L3H|13CH": "CEBADA",
+    "L3H|13CH BAJO": "AGROPIRO",
+    "L3H|14": "VERDEO",
+    "L3H|15": "PASTURA",
+    "L3H|16": "PASTURA",
+    "L3H|18": "PASTURA",
+    "L3H|23": "CEBADA",
+    "L3H|24": "PASTURA",
+    "L3H|25": "PASTURA",
+    "L3H|30": "AGROPIRO",
+    "LA CUCA|2": "PASTURA",
+    "LA CUCA|3S": "PASTURA",
+    "LA CUCA|5": "PASTURA",
+    "LA CHOLITA|4": "CEBADA",
+    "LA CHOLITA|5": "CEBADA",
+    "LA DORA|6": "PASTURA",
+    "LA DORA|8": "CEBADA",
+    "LAS TIAS|9": "CENTENO",
+    "LAS TIAS|12": "PASTURA",
+    "LOS ABUELOS|5A": "VERDEO",
+    "LOS ABUELOS|5B": "TRIGO",
+    "LOS ABUELOS|6A": "PASTURA",
+    "LOS ABUELOS|6B": "LLORON",
+    "LOS ABUELOS|6C": "VERDEO",
+    "LOS ABUELOS|7A": "PASTURA",
+    "LOS ABUELOS|7B": "VERDEO",
+    "LOS ABUELOS|8A": "VERDEO",
+    "LOS ABUELOS|8B": "CENTENO",
+    "LOS ABUELOS|3O": "VERDEO",
+    "LOS ABUELOS|9A": "PASTURA",
+    "LOS ABUELOS|9B": "PASTURA",
+    "LOS ABUELOS|10": "VERDEO",
+    "LOS ABUELOS|11": "LLORON",
+    "LA MARIA OLIVA|1": "VERDEO"
   },
   "PLAN_2627": {
-    "L3H|L3H-1": "MAIZ",
-    "L3H|L3H-2": "GIRASOL",
-    "L3H|L3H-3": "SOJA",
-    "L3H|L3H-4": "TRIGO-SOJA",
-    "L3H|L3H-5": "PASTURA",
-    "L3H|L3H-6": "VERDEO-MAIZ",
-    "L3H|L3H-7": "MAIZ",
-    "L3H|L3H-8": "VERDEO-MAIZ",
-    "L3H|L3H-9A": "PASTURA",
-    "L3H|L3H-9B": "SOJA",
-    "L3H|L3H-10E": "VERDEO-MAIZ",
-    "L3H|L3H-10O": "CEBADA-MAIZ",
-    "L3H|L3H-12": "PASTURA",
-    "L3H|L3H-13G": "CEBADA-SOJA",
-    "L3H|L3H-13CH": "CEBADA-SOJA",
-    "L3H|L3H-14": "VERDEO-MAIZ",
-    "L3H|L3H-15": "PASTURA",
-    "L3H|L3H-16": "PASTURA",
-    "L3H|L3H-17": "GIRASOL",
-    "L3H|L3H-18": "CEBADA-GIRASOL",
-    "L3H|L3H-19": "CEBADA-MAIZ",
-    "L3H|L3H-20": "SOJA",
-    "L3H|L3H-21N": "SOJA",
-    "L3H|L3H-21S": "SOJA",
-    "L3H|L3H-22": "TRIGO-SOJA",
-    "L3H|L3H-24": "PASTURA",
-    "L3H|L3H-25": "PASTURA",
-    "L3H|L3H-26": "MAIZ",
-    "L3H|L3H-27": "MAIZ",
-    "L3H|L3H-28": "GIRASOL",
-    "L3H|L3H-29": "MAIZ",
-    "LA CUCA|LA CUCA-1": "SOJA",
-    "LA CUCA|LA CUCA-2": "PASTURA",
-    "LA CUCA|LA CUCA-3N": "GIRASOL",
-    "LA CUCA|LA CUCA-3S": "PASTURA",
-    "LA CUCA|LA CUCA-4N": "MAIZ",
-    "LA CUCA|LA CUCA-4S": "MAIZ",
-    "LA CUCA|LA CUCA-5": "PASTURA",
-    "LA CUCA|LA CUCA-6": "MAIZ",
-    "LA CUCA|LA CUCA-7": "MAIZ",
-    "LA CHOLITA|LA CHOLITA-1": "GIRASOL",
-    "LA CHOLITA|LA CHOLITA-2": "SOJA",
-    "LA CHOLITA|LA CHOLITA-3": "MAIZ",
-    "EL DESCANSO|EL DESCANSO-1": "MAIZ",
-    "EL DESCANSO|EL DESCANSO-2": "SOJA",
-    "EL DESCANSO|EL DESCANSO-3": "MAIZ",
-    "EL DESCANSO|EL DESCANSO-4": "SOJA",
-    "EL DESCANSO|EL DESCANSO-5": "GIRASOL",
-    "EL DESCANSO|EL DESCANSO-6": "SOJA",
-    "EL DESCANSO|EL DESCANSO-7": "MAIZ",
-    "EL DESCANSO|EL DESCANSO-8": "MAIZ",
-    "LA DORA|LA DORA-1": "GIRASOL",
-    "LA DORA|LA DORA-2": "MAIZ",
-    "LA DORA|LA DORA-4": "SOJA",
-    "LA DORA|LA DORA-5": "SOJA",
-    "LA DORA|LA DORA-6": "PASTURA",
-    "LA DORA|LA DORA-7": "SOJA",
-    "LA DORA|LA DORA-8": "CEBADA-SOJA",
-    "LAS TIAS|LAS TIAS-10": "SOJA",
-    "LAS TIAS|LAS TIAS-11": "MAIZ",
-    "LAS TIAS|LAS TIAS-12": "PASTURA",
-    "LOS ABUELOS|LOS ABUELOS-2": "MAIZ",
-    "LOS ABUELOS|LOS ABUELOS-3": "MAIZ",
-    "LOS ABUELOS|LOS ABUELOS-4": "MAIZ",
-    "LOS ABUELOS|LOS ABUELOS-6A": "PASTURA",
-    "LOS ABUELOS|LOS ABUELOS-7A": "PASTURA",
-    "LOS NIETOS|LOS NIETOS-2": "MAIZ",
-    "LOS NIETOS|LOS NIETOS-4": "MAIZ",
-    "LOS NIETOS|LOS NIETOS-5": "MAIZ",
-    "LOS NIETOS|LOS NIETOS-7": "MAIZ",
-    "LOS NIETOS|LOS NIETOS-9": "GIRASOL",
-    "LOS NIETOS|LOS NIETOS-11": "MAIZ",
-    "EL CIPRES|EL CIPRES-1": "SORGO",
-    "EL CIPRES|EL CIPRES-2N": "PASTURA",
-    "EL CIPRES|EL CIPRES-2S": "PASTURA",
-    "EL CIPRES|EL CIPRES-5": "MAIZ",
-    "EL CIPRES|EL CIPRES-6": "MAIZ",
-    "EL CIPRES|EL CIPRES-7": "PASTURA",
-    "EL CIPRES|EL CIPRES-3": "MAIZ",
-    "EL CIPRES|EL CIPRES-8": "PASTURA",
-    "EL CIPRES|EL CIPRES-9": "PASTURA",
-    "DON MARCELINO|DON MARCELINO-1": "SORGO",
-    "DON MARCELINO|DON MARCELINO-2": "PASTURA",
-    "DON MARCELINO|DON MARCELINO-3": "MAIZ",
-    "DON MARCELINO|DON MARCELINO-4": "PASTURA",
-    "DON MARCELINO|DON MARCELINO-5": "MAIZ",
-    "DON MARCELINO|DON MARCELINO-6": "PASTURA",
-    "LA ADORACION|LA ADORACION-4": "MAIZ",
-    "LA ADORACION|LA ADORACION-5": "MAIZ",
-    "LA CARLOTA|LA CARLOTA-1": "MAIZ",
-    "LA CARLOTA|LA CARLOTA-9": "MAIZ",
-    "LA CARLOTA|LA CARLOTA-11": "MAIZ",
-    "EL 5|EL 5-6": "PASTURA",
-    "EL 5|EL 5-4": "PASTURA",
-    "EL 5|EL 5-1": "VERDEO MAIZ"
+    "L3H|1": "MAIZ",
+    "L3H|2": "GIRASOL",
+    "L3H|3": "SOJA",
+    "L3H|4": "TRIGO-SOJA",
+    "L3H|6": "VERDEO-MAIZ",
+    "L3H|7": "MAIZ",
+    "L3H|8": "VERDEO-MAIZ",
+    "L3H|9B": "SOJA",
+    "L3H|10E": "VERDEO-MAIZ",
+    "L3H|10O": "CEBADA-MAIZ",
+    "L3H|13G": "CEBADA-SOJA",
+    "L3H|13CH": "CEBADA-SOJA",
+    "L3H|14": "VERDEO-MAIZ",
+    "L3H|17": "GIRASOL",
+    "L3H|19": "SOJA",
+    "L3H|20": "SOJA",
+    "L3H|21N": "SOJA",
+    "L3H|21S": "SOJA",
+    "L3H|22": "GIRASOL",
+    "L3H|23": "CEBADA-GIRASOL",
+    "L3H|26": "MAIZ",
+    "L3H|27": "MAIZ",
+    "L3H|28": "GIRASOL",
+    "L3H|29": "MAIZ",
+    "LA CUCA|1": "SOJA",
+    "LA CUCA|3N": "GIRASOL",
+    "LA CUCA|4N": "MAIZ",
+    "LA CUCA|4S": "MAIZ",
+    "LA CUCA|6": "MAIZ",
+    "LA CUCA|7": "MAIZ",
+    "LA CHOLITA|1": "GIRASOL",
+    "LA CHOLITA|2": "SOJA",
+    "LA CHOLITA|3": "MAIZ",
+    "EL DESCANSO|1": "MAIZ",
+    "EL DESCANSO|2": "SOJA",
+    "EL DESCANSO|3": "MAIZ",
+    "EL DESCANSO|4": "SOJA",
+    "EL DESCANSO|5": "GIRASOL",
+    "EL DESCANSO|6": "SOJA",
+    "EL DESCANSO|7": "MAIZ",
+    "EL DESCANSO|8": "MAIZ",
+    "LA DORA|1": "GIRASOL",
+    "LA DORA|2": "MAIZ",
+    "LA DORA|4": "SOJA",
+    "LA DORA|5": "SOJA",
+    "LA DORA|7": "SOJA",
+    "LA DORA|8": "CEBADA-SOJA",
+    "LAS TIAS|10": "SOJA",
+    "LAS TIAS|11": "MAIZ",
+    "LOS ABUELOS|2": "MAIZ",
+    "LOS ABUELOS|3": "MAIZ",
+    "LOS ABUELOS|4": "MAIZ",
+    "LA MARIA OLIVA|2": "MAIZ"
   },
   "CULT_2526": {
-    "L3H|L3H-1": "TRIGO-SOJA",
-    "L3H|L3H-2": "TRIGO",
-    "L3H|L3H-3": "MAIZ",
-    "L3H|L3H-4": "MANI",
-    "L3H|L3H-5": "GIRASOL",
-    "L3H|L3H-6": "PASTURA",
-    "L3H|L3H-7": "MANI",
-    "L3H|L3H-8": "PASTURA",
-    "L3H|L3H-9A": "PASTURA",
-    "L3H|L3H-9B": "TRIGO-MAIZ",
-    "L3H|L3H-10E": "PASTURA",
-    "L3H|L3H-10O": "MAIZ",
-    "L3H|L3H-11": "PASTURA",
-    "L3H|L3H-12": "GIRASOL",
-    "L3H|L3H-13G": "GIRASOL",
-    "L3H|L3H-13CH": "GIRASOL",
-    "L3H|L3H-13CH BAJO": "AGROPIRO",
-    "L3H|L3H-14": "PASTURA",
-    "L3H|L3H-15": "PASTURA",
-    "L3H|L3H-16": "PASTURA",
-    "L3H|L3H-17": "SOJA",
-    "L3H|L3H-18": "CEBADA-GIRASOL",
-    "L3H|L3H-19": "CEBADA-MAIZ",
-    "L3H|L3H-20": "MAIZ",
-    "L3H|L3H-21N": "MAIZ T",
-    "L3H|L3H-21S": "MAIZ",
-    "L3H|L3H-22": "TRIGO-SOJA",
-    "L3H|L3H-23": "SOJA",
-    "L3H|L3H-24": "PASTURA",
-    "L3H|L3H-25": "PASTURA",
-    "L3H|L3H-26": "TRIGO-SOJA",
-    "L3H|L3H-27": "SOJA",
-    "L3H|L3H-28": "SOJA",
-    "L3H|L3H-29": "TRIGO-SOJA",
-    "L3H|L3H-30": "AGROPIRO",
-    "LA CUCA|LA CUCA-1": "MAIZ",
-    "LA CUCA|LA CUCA-2": "GIRASOL",
-    "LA CUCA|LA CUCA-3N": "SOJA",
-    "LA CUCA|LA CUCA-3S": "PASTURA",
-    "LA CUCA|LA CUCA-4N": "SORGO FORR",
-    "LA CUCA|LA CUCA-4S": "SORGO FORR",
-    "LA CUCA|LA CUCA-5": "PASTURA",
-    "LA CUCA|LA CUCA-6": "VERDEO",
-    "LA CUCA|LA CUCA-7": "PASTURA",
-    "LA CHOLITA|LA CHOLITA-1": "SOJA 2",
-    "LA CHOLITA|LA CHOLITA-2": "MAIZ",
-    "LA CHOLITA|LA CHOLITA-3": "GIRASOL",
-    "LA CHOLITA|LA CHOLITA-4": "GIRASOL",
-    "LA CHOLITA|LA CHOLITA-5": "GIRASOL",
-    "EL DESCANSO|EL DESCANSO-1": "SOJA",
-    "EL DESCANSO|EL DESCANSO-2": "MAIZ",
-    "EL DESCANSO|EL DESCANSO-3": "SOJA",
-    "EL DESCANSO|EL DESCANSO-4": "MAIZ",
-    "EL DESCANSO|EL DESCANSO-5": "MAIZ",
-    "EL DESCANSO|EL DESCANSO-6": "MAIZ",
-    "EL DESCANSO|EL DESCANSO-7": "GIRASOL",
-    "EL DESCANSO|EL DESCANSO-8": "GIRASOL",
-    "LA DORA|LA DORA-1": "SOJA",
-    "LA DORA|LA DORA-2": "GIRASOL",
-    "LA DORA|LA DORA-4": "MAIZ",
-    "LA DORA|LA DORA-5": "MAIZ",
-    "LA DORA|LA DORA-6": "PASTURA",
-    "LA DORA|LA DORA-7": "MAIZ",
-    "LA DORA|LA DORA-8": "GIRASOL",
-    "LAS TIAS|LAS TIAS-9": "SORGO",
-    "LAS TIAS|LAS TIAS-10": "MAIZ",
-    "LAS TIAS|LAS TIAS-11": "SOJA",
-    "LAS TIAS|LAS TIAS-12": "PASTURA",
-    "LOS ABUELOS|LOS ABUELOS-2": "GIRASOL",
-    "LOS ABUELOS|LOS ABUELOS-3": "GIRASOL",
-    "LOS ABUELOS|LOS ABUELOS-4": "MAIZ",
-    "LOS ABUELOS|LOS ABUELOS-6A": "VERDEO",
-    "LOS ABUELOS|LOS ABUELOS-6C": "MAIZ",
-    "LOS ABUELOS|LOS ABUELOS-7B": "MAIZ",
-    "LOS ABUELOS|LOS ABUELOS-8A": "MAIZ",
-    "LOS ABUELOS|LOS ABUELOS-8B": "MAIZ",
-    "LOS ABUELOS|LOS ABUELOS-3O": "MAIZ",
-    "LOS ABUELOS|LOS ABUELOS-9A": "PASTURA",
-    "LOS ABUELOS|LOS ABUELOS-9B": "CENTENO",
-    "LA MARIA OLIVA|LA MARIA OLIVA-1": "PASTURA",
-    "LA MARIA OLIVA|LA MARIA OLIVA-2": "MAIZ",
-    "LA MARIA OLIVA|LA MARIA OLIVA-3": "MAIZ",
-    "LA MARIA OLIVA|LA MARIA OLIVA-FRANJA 1": "MAIZ",
-    "LA MARIA OLIVA|LA MARIA OLIVA-FRANJA 2": "MAIZ",
-    "EL 5|EL 5-1": "MAIZ",
-    "EL 5|EL 5-2": "SORGO",
-    "EL 5|EL 5-3": "AVENA",
-    "EL 5|EL 5-4": "PASTURA",
-    "LA FLECHA|LA FLECHA-1": "SORGO",
-    "LA FLECHA|LA FLECHA-2": "SORGO",
-    "LA FLECHA|LA FLECHA-3": "MAIZ",
-    "LA FLECHA|LA FLECHA-4": "MAIZ",
-    "LA FLECHA|LA FLECHA-5": "MAIZ",
-    "DON ANTONIO|DON ANTONIO-2": "GIRASOL",
-    "DON ANTONIO|DON ANTONIO-3": "PASTURA",
-    "DON ANTONIO|DON ANTONIO-4": "PASTURA",
-    "DON ANTONIO|DON ANTONIO-7": "PASTURA",
-    "DON ANTONIO|DON ANTONIO-9": "MAIZ",
-    "DON ANTONIO|DON ANTONIO-10": "SORGO",
-    "DON ANTONIO|DON ANTONIO-11": "SORGO",
-    "DON ANTONIO|DON ANTONIO-14": "MAIZ",
-    "DOÑA TERESA|DOÑA TERESA-1": "MAIZ",
-    "DOÑA TERESA|DOÑA TERESA-2": "MAIZ",
-    "DOÑA TERESA|DOÑA TERESA-4": "GIRASOL",
-    "DOÑA TERESA|DOÑA TERESA-5": "PASTURA",
-    "DOÑA TERESA|DOÑA TERESA-6": "GIRASOL",
-    "DOÑA TERESA|DOÑA TERESA-7": "PASTURA",
-    "DOÑA TERESA|DOÑA TERESA-8": "SORGO",
-    "DOÑA TERESA|DOÑA TERESA-9": "PASTURA",
-    "EL TORELLO|EL TORELLO-1": "MAIZ",
-    "EL TORELLO|EL TORELLO-2": "PASTURA",
-    "EL TORELLO|EL TORELLO-3": "PASTURA",
-    "EL TORELLO|EL TORELLO-5": "SORGO",
-    "EL TORELLO|EL TORELLO-6": "MAIZ",
-    "EL TORELLO|EL TORELLO-7": "MAIZ",
-    "EL TORELLO|EL TORELLO-8": "MAIZ",
-    "EL TORELLO|EL TORELLO-9": "PASTURA",
-    "DON RAMON|DON RAMON-1": "SORGO",
-    "DON RAMON|DON RAMON-2": "SORGO",
-    "DON RAMON|DON RAMON-3": "SORGO",
-    "DON RAMON|DON RAMON-5": "GIRASOL",
-    "DON RAMON|DON RAMON-6": "MAIZ",
-    "EL ABUELO|EL ABUELO-1": "MAIZ 2",
-    "EL ABUELO|EL ABUELO-2": "GIRASOL",
-    "EL ABUELO|EL ABUELO-3": "MAIZ 2",
-    "EL ABUELO|EL ABUELO-4": "GIRASOL",
-    "EL ABUELO|EL ABUELO-5": "GIRASOL",
-    "LOS NIETOS|LOS NIETOS-2": "MAIZ",
-    "LOS NIETOS|LOS NIETOS-4": "MAIZ",
-    "LOS NIETOS|LOS NIETOS-5": "MAIZ",
-    "LOS NIETOS|LOS NIETOS-7": "MAIZ",
-    "LOS NIETOS|LOS NIETOS-9": "GIRASOL",
-    "LOS NIETOS|LOS NIETOS-11": "MAIZ",
-    "EL CIPRES|EL CIPRES-1": "SORGO",
-    "EL CIPRES|EL CIPRES-2N": "PASTURA",
-    "EL CIPRES|EL CIPRES-2S": "PASTURA",
-    "EL CIPRES|EL CIPRES-5": "MAIZ",
-    "EL CIPRES|EL CIPRES-6": "MAIZ",
-    "EL CIPRES|EL CIPRES-7": "PASTURA",
-    "EL CIPRES|EL CIPRES-3": "MAIZ",
-    "EL CIPRES|EL CIPRES-8": "PASTURA",
-    "EL CIPRES|EL CIPRES-9": "PASTURA",
-    "DON MARCELINO|DON MARCELINO-1": "SORGO",
-    "DON MARCELINO|DON MARCELINO-2": "PASTURA",
-    "DON MARCELINO|DON MARCELINO-3": "MAIZ",
-    "DON MARCELINO|DON MARCELINO-4": "PASTURA",
-    "DON MARCELINO|DON MARCELINO-5": "MAIZ",
-    "DON MARCELINO|DON MARCELINO-6": "PASTURA",
-    "LA ADORACION|LA ADORACION-3": "GIRASOL",
-    "LA ADORACION|LA ADORACION-4": "MAIZ",
-    "LA ADORACION|LA ADORACION-5": "MAIZ",
-    "LA CARLOTA|LA CARLOTA-1": "MAIZ",
-    "LA CARLOTA|LA CARLOTA-9": "MAIZ",
-    "LA CARLOTA|LA CARLOTA-11": "MAIZ"
+    "L3H|1": "TRIGO-SOJA",
+    "L3H|2": "MAIZ",
+    "L3H|3": "MAIZ",
+    "L3H|4": "MANI",
+    "L3H|5": "GIRASOL",
+    "L3H|6": "PASTURA",
+    "L3H|7": "MANI",
+    "L3H|8": "PASTURA",
+    "L3H|9A": "PASTURA",
+    "L3H|9B": "TRIGO-MAIZ",
+    "L3H|10E": "PASTURA",
+    "L3H|10O": "MAIZ",
+    "L3H|11": "PASTURA",
+    "L3H|12": "GIRASOL",
+    "L3H|13G": "GIRASOL",
+    "L3H|13CH": "GIRASOL",
+    "L3H|13CH BAJO": "AGROPIRO",
+    "L3H|14": "PASTURA",
+    "L3H|15": "PASTURA",
+    "L3H|16": "PASTURA",
+    "L3H|17": "SOJA",
+    "L3H|18": "CEBADA-GIRASOL",
+    "L3H|19": "CEBADA-MAIZ",
+    "L3H|20": "MAIZ",
+    "L3H|21N": "MAIZ T",
+    "L3H|21S": "MAIZ",
+    "L3H|22": "TRIGO-SOJA",
+    "L3H|23": "SOJA",
+    "L3H|24": "PASTURA",
+    "L3H|25": "PASTURA",
+    "L3H|26": "TRIGO-SOJA",
+    "L3H|27": "SOJA",
+    "L3H|28": "SOJA",
+    "L3H|29": "TRIGO-SOJA",
+    "L3H|30": "AGROPIRO",
+    "LA CUCA|1": "MAIZ",
+    "LA CUCA|2": "GIRASOL",
+    "LA CUCA|3N": "SOJA",
+    "LA CUCA|3S": "PASTURA",
+    "LA CUCA|4N": "SORGO FORR",
+    "LA CUCA|4S": "SORGO FORR",
+    "LA CUCA|5": "PASTURA",
+    "LA CUCA|6": "VERDEO",
+    "LA CUCA|7": "PASTURA",
+    "LA CHOLITA|1": "SOJA 2",
+    "LA CHOLITA|2": "MAIZ",
+    "LA CHOLITA|3": "GIRASOL",
+    "LA CHOLITA|4": "GIRASOL",
+    "LA CHOLITA|5": "GIRASOL",
+    "EL DESCANSO|1": "SOJA",
+    "EL DESCANSO|2": "MAIZ",
+    "EL DESCANSO|3": "SOJA",
+    "EL DESCANSO|4": "MAIZ",
+    "EL DESCANSO|5": "MAIZ",
+    "EL DESCANSO|6": "MAIZ",
+    "EL DESCANSO|7": "GIRASOL",
+    "EL DESCANSO|8": "GIRASOL",
+    "LA DORA|1": "SOJA",
+    "LA DORA|2": "GIRASOL",
+    "LA DORA|4": "MAIZ",
+    "LA DORA|5": "MAIZ",
+    "LA DORA|6": "PASTURA",
+    "LA DORA|7": "MAIZ",
+    "LA DORA|8": "GIRASOL",
+    "LAS TIAS|9": "SORGO",
+    "LAS TIAS|10": "MAIZ",
+    "LAS TIAS|11": "SOJA",
+    "LAS TIAS|12": "PASTURA",
+    "LOS ABUELOS|2": "GIRASOL",
+    "LOS ABUELOS|3": "GIRASOL",
+    "LOS ABUELOS|4": "MAIZ",
+    "LOS ABUELOS|6A": "VERDEO",
+    "LOS ABUELOS|6C": "MAIZ",
+    "LOS ABUELOS|7B": "MAIZ",
+    "LOS ABUELOS|8A": "MAIZ",
+    "LOS ABUELOS|8B": "MAIZ",
+    "LOS ABUELOS|3O": "MAIZ",
+    "LOS ABUELOS|9A": "PASTURA",
+    "LOS ABUELOS|9B": "CENTENO",
+    "LA MARIA OLIVA|1": "PASTURA",
+    "LA MARIA OLIVA|2": "MAIZ"
   },
   "RINDE_2526": {
-    "L3H|L3H-1": 24,
-    "L3H|L3H-2": 30,
-    "L3H|L3H-4": 56.6,
-    "L3H|L3H-5": 30,
-    "L3H|L3H-7": 56.6,
-    "L3H|L3H-9B": 41,
-    "L3H|L3H-12": 29,
-    "L3H|L3H-13G": 34,
-    "L3H|L3H-13CH": 24,
-    "L3H|L3H-17": 30,
-    "L3H|L3H-18": 39,
-    "L3H|L3H-19": 39,
-    "L3H|L3H-21N": 82,
-    "L3H|L3H-22": 29,
-    "L3H|L3H-23": 32,
-    "L3H|L3H-26": 28,
-    "L3H|L3H-27": 36,
-    "L3H|L3H-28": 33,
-    "LA CHOLITA|LA CHOLITA-3": 30,
-    "LA CHOLITA|LA CHOLITA-4": 22,
-    "LA CHOLITA|LA CHOLITA-5": 20,
-    "EL DESCANSO|EL DESCANSO-1": 43,
-    "EL DESCANSO|EL DESCANSO-3": 43,
-    "EL DESCANSO|EL DESCANSO-7": 28,
-    "EL DESCANSO|EL DESCANSO-8": 28,
-    "LA CUCA|LA CUCA-2": 28,
-    "LA CUCA|LA CUCA-3N": 37,
-    "LAS TIAS|LAS TIAS-11": 37,
-    "LOS ABUELOS|LOS ABUELOS-2": 11,
-    "LOS ABUELOS|LOS ABUELOS-3": 7,
-    "DON RAMON|DON RAMON-5": 25,
-    "LA ADORACION|LA ADORACION-3": 19
+    "L3H|1": 24,
+    "L3H|5": 30,
+    "L3H|9B": 41,
+    "L3H|12": 29,
+    "L3H|13G": 34,
+    "L3H|13CH": 24,
+    "L3H|17": 30,
+    "L3H|18": 12,
+    "L3H|19": 39,
+    "L3H|21N": 82,
+    "L3H|22": 31,
+    "L3H|23": 32,
+    "L3H|26": 32,
+    "L3H|27": 36,
+    "L3H|28": 33,
+    "L3H|29": 27,
+    "LA CUCA|2": 28,
+    "LA CUCA|3N": 37,
+    "LA CHOLITA|3": 30,
+    "LA CHOLITA|4": 22,
+    "LA CHOLITA|5": 20,
+    "EL DESCANSO|1": 43,
+    "EL DESCANSO|3": 43,
+    "EL DESCANSO|7": 28,
+    "EL DESCANSO|8": 28,
+    "LAS TIAS|11": 37,
+    "LOS ABUELOS|2": 11,
+    "LOS ABUELOS|3": 7
   },
   "HISTORICO_ROTACION": {
-    "L3H|L3H-1": {
+    "L3H|1": {
       "19-20": {
         "cv": "MAIZ",
         "rF": null,
@@ -379,9 +263,14 @@
         "cv": "TRIGO-SOJA",
         "rF": 37,
         "rG": 24
+      },
+      "26-27": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-2": {
+    "L3H|2": {
       "19-20": {
         "cv": "MAIZ",
         "rF": null,
@@ -416,9 +305,19 @@
         "cv": "MAIZ",
         "rF": null,
         "rG": null
+      },
+      "26-27": {
+        "cv": "GIRASOL",
+        "rF": null,
+        "rG": null
+      },
+      "27-28": {
+        "cv": "PASTURA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-3": {
+    "L3H|3": {
       "19-20": {
         "cv": "PASTURA",
         "rF": null,
@@ -453,9 +352,14 @@
         "cv": "MAIZ",
         "rF": null,
         "rG": null
+      },
+      "26-27": {
+        "cv": "SOJA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-4": {
+    "L3H|4": {
       "19-20": {
         "cv": "PASTURA",
         "rF": null,
@@ -490,9 +394,14 @@
         "cv": "MANI",
         "rF": null,
         "rG": null
+      },
+      "26-27": {
+        "cv": "TRIGO-SOJA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-5": {
+    "L3H|5": {
       "19-20": {
         "cv": "PASTURA",
         "rF": null,
@@ -527,9 +436,14 @@
         "cv": "GIRASOL",
         "rF": null,
         "rG": 30
+      },
+      "26-27": {
+        "cv": "PASTURA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-6": {
+    "L3H|6": {
       "19-20": {
         "cv": "GIRASOL",
         "rF": null,
@@ -564,9 +478,14 @@
         "cv": "PASTURA",
         "rF": null,
         "rG": null
+      },
+      "26-27": {
+        "cv": "VERDEO-MAIZ",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-7": {
+    "L3H|7": {
       "19-20": {
         "cv": "GIRASOL",
         "rF": null,
@@ -601,9 +520,14 @@
         "cv": "MANI",
         "rF": null,
         "rG": null
+      },
+      "26-27": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-8": {
+    "L3H|8": {
       "19-20": {
         "cv": "MAIZ",
         "rF": null,
@@ -638,9 +562,19 @@
         "cv": "PASTURA",
         "rF": null,
         "rG": null
+      },
+      "26-27": {
+        "cv": "VERDEO-MAIZ",
+        "rF": null,
+        "rG": null
+      },
+      "27-28": {
+        "cv": "PASTURA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-9A": {
+    "L3H|9A": {
       "19-20": {
         "cv": "PASTURA",
         "rF": null,
@@ -675,9 +609,14 @@
         "cv": "PASTURA",
         "rF": null,
         "rG": null
+      },
+      "26-27": {
+        "cv": "PASTURA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-9B": {
+    "L3H|9B": {
       "19-20": {
         "cv": "PASTURA",
         "rF": null,
@@ -712,9 +651,19 @@
         "cv": "TRIGO-MAIZ",
         "rF": 41,
         "rG": null
+      },
+      "26-27": {
+        "cv": "SOJA",
+        "rF": null,
+        "rG": null
+      },
+      "27-28": {
+        "cv": "CEBADA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-10E": {
+    "L3H|10E": {
       "19-20": {
         "cv": "PASTURA",
         "rF": null,
@@ -749,9 +698,14 @@
         "cv": "PASTURA",
         "rF": null,
         "rG": null
+      },
+      "26-27": {
+        "cv": "VERDEO-MAIZ",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-10O": {
+    "L3H|10O": {
       "19-20": {
         "cv": "PASTURA",
         "rF": null,
@@ -786,9 +740,14 @@
         "cv": "MAIZ",
         "rF": null,
         "rG": null
+      },
+      "26-27": {
+        "cv": "CEBADA-MAIZ",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-11": {
+    "L3H|11": {
       "19-20": {
         "cv": "PASTURA",
         "rF": null,
@@ -823,9 +782,14 @@
         "cv": "PASTURA",
         "rF": null,
         "rG": null
+      },
+      "26-27": {
+        "cv": "AVENA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-12": {
+    "L3H|12": {
       "19-20": {
         "cv": "PASTURA",
         "rF": null,
@@ -860,9 +824,19 @@
         "cv": "GIRASOL",
         "rF": null,
         "rG": 29
+      },
+      "26-27": {
+        "cv": "PASTURA",
+        "rF": null,
+        "rG": null
+      },
+      "27-28": {
+        "cv": "PASTURA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-13G": {
+    "L3H|13G": {
       "19-20": {
         "cv": "PASTURA",
         "rF": null,
@@ -897,9 +871,19 @@
         "cv": "GIRASOL",
         "rF": null,
         "rG": 34
+      },
+      "26-27": {
+        "cv": "CEBADA-SOJA",
+        "rF": null,
+        "rG": null
+      },
+      "27-28": {
+        "cv": "SOJA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-13CH": {
+    "L3H|13CH": {
       "19-20": {
         "cv": "PASTURA",
         "rF": null,
@@ -934,9 +918,19 @@
         "cv": "GIRASOL",
         "rF": null,
         "rG": 24
+      },
+      "26-27": {
+        "cv": "CEBADA-SOJA",
+        "rF": null,
+        "rG": null
+      },
+      "27-28": {
+        "cv": "SOJA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-13CH BAJO": {
+    "L3H|13CH BAJO": {
       "19-20": {
         "cv": "AGROPIRO",
         "rF": null,
@@ -971,9 +965,14 @@
         "cv": "AGROPIRO",
         "rF": null,
         "rG": null
+      },
+      "26-27": {
+        "cv": "AGROPIRO",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-14": {
+    "L3H|14": {
       "19-20": {
         "cv": "SOJA",
         "rF": null,
@@ -1008,9 +1007,14 @@
         "cv": "PASTURA",
         "rF": null,
         "rG": null
+      },
+      "26-27": {
+        "cv": "VERDEO-MAIZ",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-15": {
+    "L3H|15": {
       "19-20": {
         "cv": "SOJA",
         "rF": null,
@@ -1045,9 +1049,14 @@
         "cv": "PASTURA",
         "rF": null,
         "rG": null
+      },
+      "26-27": {
+        "cv": "PASTURA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-16": {
+    "L3H|16": {
       "19-20": {
         "cv": "MAIZ",
         "rF": null,
@@ -1077,9 +1086,14 @@
         "cv": "PASTURA",
         "rF": null,
         "rG": null
+      },
+      "26-27": {
+        "cv": "PASTURA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-17": {
+    "L3H|17": {
       "19-20": {
         "cv": "SOJA",
         "rF": null,
@@ -1114,9 +1128,14 @@
         "cv": "SOJA",
         "rF": null,
         "rG": 30
+      },
+      "26-27": {
+        "cv": "GIRASOL",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-18": {
+    "L3H|18": {
       "19-20": {
         "cv": "SOJA",
         "rF": null,
@@ -1151,9 +1170,14 @@
         "cv": "CEBADA-GIRASOL",
         "rF": 39,
         "rG": 12
+      },
+      "26-27": {
+        "cv": "PASTURA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-19": {
+    "L3H|19": {
       "19-20": {
         "cv": "PASTURA",
         "rF": null,
@@ -1188,9 +1212,14 @@
         "cv": "CEBADA-MAIZ",
         "rF": 39,
         "rG": null
+      },
+      "26-27": {
+        "cv": "SOJA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-20": {
+    "L3H|20": {
       "19-20": {
         "cv": "SOJA",
         "rF": null,
@@ -1225,9 +1254,14 @@
         "cv": "MAIZ",
         "rF": null,
         "rG": null
+      },
+      "26-27": {
+        "cv": "SOJA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-21N": {
+    "L3H|21N": {
       "19-20": {
         "cv": "MAIZ",
         "rF": null,
@@ -1262,9 +1296,14 @@
         "cv": "MAIZ T",
         "rF": null,
         "rG": 82
+      },
+      "26-27": {
+        "cv": "SOJA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-21S": {
+    "L3H|21S": {
       "19-20": {
         "cv": "MAIZ",
         "rF": null,
@@ -1299,9 +1338,14 @@
         "cv": "MAIZ",
         "rF": null,
         "rG": null
+      },
+      "26-27": {
+        "cv": "SOJA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-22": {
+    "L3H|22": {
       "19-20": {
         "cv": "SOJA",
         "rF": null,
@@ -1336,9 +1380,19 @@
         "cv": "TRIGO-SOJA",
         "rF": 29,
         "rG": 31
+      },
+      "26-27": {
+        "cv": "GIRASOL",
+        "rF": null,
+        "rG": null
+      },
+      "27-28": {
+        "cv": "PASTURA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-23": {
+    "L3H|23": {
       "19-20": {
         "cv": "MAIZ",
         "rF": null,
@@ -1373,9 +1427,19 @@
         "cv": "SOJA",
         "rF": null,
         "rG": 32
+      },
+      "26-27": {
+        "cv": "CEBADA-GIRASOL",
+        "rF": null,
+        "rG": null
+      },
+      "27-28": {
+        "cv": "FINA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-24": {
+    "L3H|24": {
       "19-20": {
         "cv": "MAIZ",
         "rF": null,
@@ -1410,9 +1474,14 @@
         "cv": "PASTURA",
         "rF": null,
         "rG": null
+      },
+      "26-27": {
+        "cv": "PASTURA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-25": {
+    "L3H|25": {
       "19-20": {
         "cv": "MAIZ",
         "rF": null,
@@ -1447,9 +1516,14 @@
         "cv": "PASTURA",
         "rF": null,
         "rG": null
+      },
+      "26-27": {
+        "cv": "PASTURA",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-26": {
+    "L3H|26": {
       "19-20": {
         "cv": "SOJA",
         "rF": null,
@@ -1484,9 +1558,14 @@
         "cv": "TRIGO-SOJA",
         "rF": 28,
         "rG": 32
+      },
+      "26-27": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-27": {
+    "L3H|27": {
       "19-20": {
         "cv": "MAIZ",
         "rF": null,
@@ -1521,9 +1600,14 @@
         "cv": "SOJA",
         "rF": null,
         "rG": 36
+      },
+      "26-27": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-28": {
+    "L3H|28": {
       "19-20": {
         "cv": "GIRASOL",
         "rF": null,
@@ -1558,9 +1642,14 @@
         "cv": "SOJA",
         "rF": null,
         "rG": 33
+      },
+      "26-27": {
+        "cv": "GIRASOL",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-29": {
+    "L3H|29": {
       "19-20": {
         "cv": "SOJA",
         "rF": null,
@@ -1595,9 +1684,14 @@
         "cv": "TRIGO-SOJA",
         "rF": 27,
         "rG": null
+      },
+      "26-27": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
       }
     },
-    "L3H|L3H-30": {
+    "L3H|30": {
       "19-20": {
         "cv": "AGROPIRO",
         "rF": null,
@@ -1632,836 +1726,602 @@
         "cv": "AGROPIRO",
         "rF": null,
         "rG": null
+      },
+      "26-27": {
+        "cv": "AGROPIRO",
+        "rF": null,
+        "rG": null
       }
     },
-    "LA CUCA|LA CUCA-1": {
+    "LA CUCA|1": {
       "25-26": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
+        "cv": "SOJA",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LA CUCA|2": {
+      "25-26": {
+        "cv": "GIRASOL",
+        "rF": null,
+        "rG": 28
+      },
+      "26-27": {
+        "cv": "PASTURA",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LA CUCA|3N": {
+      "25-26": {
+        "cv": "SOJA",
+        "rF": null,
+        "rG": 37
+      },
+      "26-27": {
+        "cv": "GIRASOL",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LA CUCA|3S": {
+      "25-26": {
+        "cv": "PASTURA",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
+        "cv": "PASTURA",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LA CUCA|4N": {
+      "25-26": {
+        "cv": "SORGO FORR",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
         "cv": "MAIZ",
         "rF": null,
         "rG": null
       }
     },
-    "LA CUCA|LA CUCA-2": {
+    "LA CUCA|4S": {
       "25-26": {
-        "cv": "GIRASOL",
+        "cv": "SORGO FORR",
         "rF": null,
-        "rG": 28
+        "rG": null
+      },
+      "26-27": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
       }
     },
-    "LA CUCA|LA CUCA-3N": {
+    "LA CUCA|5": {
       "25-26": {
-        "cv": "SOJA",
+        "cv": "PASTURA",
         "rF": null,
-        "rG": 37
-      }
-    },
-    "LA CUCA|LA CUCA-3S": {
-      "25-26": {
+        "rG": null
+      },
+      "26-27": {
         "cv": "PASTURA",
         "rF": null,
         "rG": null
       }
     },
-    "LA CUCA|LA CUCA-4N": {
-      "25-26": {
-        "cv": "SORGO FORR",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LA CUCA|LA CUCA-4S": {
-      "25-26": {
-        "cv": "SORGO FORR",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LA CUCA|LA CUCA-5": {
-      "25-26": {
-        "cv": "PASTURA",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LA CUCA|LA CUCA-6": {
+    "LA CUCA|6": {
       "25-26": {
         "cv": "VERDEO",
         "rF": null,
         "rG": null
-      }
-    },
-    "LA CUCA|LA CUCA-7": {
-      "25-26": {
-        "cv": "PASTURA",
+      },
+      "26-27": {
+        "cv": "MAIZ",
         "rF": null,
         "rG": null
       }
     },
-    "LA CHOLITA|LA CHOLITA-1": {
+    "LA CUCA|7": {
+      "25-26": {
+        "cv": "PASTURA",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LA CHOLITA|1": {
       "25-26": {
         "cv": "SOJA 2",
         "rF": null,
         "rG": null
-      }
-    },
-    "LA CHOLITA|LA CHOLITA-2": {
-      "25-26": {
-        "cv": "MAIZ",
+      },
+      "26-27": {
+        "cv": "GIRASOL",
         "rF": null,
         "rG": null
       }
     },
-    "LA CHOLITA|LA CHOLITA-3": {
+    "LA CHOLITA|2": {
+      "25-26": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
+        "cv": "SOJA",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LA CHOLITA|3": {
       "25-26": {
         "cv": "GIRASOL",
         "rF": null,
         "rG": 30
+      },
+      "26-27": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
       }
     },
-    "LA CHOLITA|LA CHOLITA-4": {
+    "LA CHOLITA|4": {
       "25-26": {
         "cv": "GIRASOL",
         "rF": null,
         "rG": 22
+      },
+      "26-27": {
+        "cv": "CEBADA",
+        "rF": null,
+        "rG": null
       }
     },
-    "LA CHOLITA|LA CHOLITA-5": {
+    "LA CHOLITA|5": {
       "25-26": {
         "cv": "GIRASOL",
         "rF": null,
         "rG": 20
+      },
+      "26-27": {
+        "cv": "CEBADA",
+        "rF": null,
+        "rG": null
       }
     },
-    "EL DESCANSO|EL DESCANSO-1": {
+    "EL DESCANSO|1": {
       "25-26": {
         "cv": "SOJA",
         "rF": null,
         "rG": 43
-      }
-    },
-    "EL DESCANSO|EL DESCANSO-2": {
-      "25-26": {
+      },
+      "26-27": {
         "cv": "MAIZ",
         "rF": null,
         "rG": null
       }
     },
-    "EL DESCANSO|EL DESCANSO-3": {
+    "EL DESCANSO|2": {
+      "25-26": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
+        "cv": "SOJA",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "EL DESCANSO|3": {
       "25-26": {
         "cv": "SOJA",
         "rF": null,
         "rG": 43
-      }
-    },
-    "EL DESCANSO|EL DESCANSO-4": {
-      "25-26": {
+      },
+      "26-27": {
         "cv": "MAIZ",
         "rF": null,
         "rG": null
       }
     },
-    "EL DESCANSO|EL DESCANSO-5": {
+    "EL DESCANSO|4": {
       "25-26": {
         "cv": "MAIZ",
         "rF": null,
         "rG": null
-      }
-    },
-    "EL DESCANSO|EL DESCANSO-6": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL DESCANSO|EL DESCANSO-7": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": 28
-      }
-    },
-    "EL DESCANSO|EL DESCANSO-8": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": 28
-      }
-    },
-    "LA DORA|LA DORA-1": {
-      "25-26": {
+      },
+      "26-27": {
         "cv": "SOJA",
         "rF": null,
         "rG": null
       }
     },
-    "LA DORA|LA DORA-2": {
+    "EL DESCANSO|5": {
       "25-26": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
         "cv": "GIRASOL",
         "rF": null,
         "rG": null
       }
     },
-    "LA DORA|LA DORA-4": {
+    "EL DESCANSO|6": {
       "25-26": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
+        "cv": "SOJA",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "EL DESCANSO|7": {
+      "25-26": {
+        "cv": "GIRASOL",
+        "rF": null,
+        "rG": 28
+      },
+      "26-27": {
         "cv": "MAIZ",
         "rF": null,
         "rG": null
       }
     },
-    "LA DORA|LA DORA-5": {
+    "EL DESCANSO|8": {
       "25-26": {
+        "cv": "GIRASOL",
+        "rF": null,
+        "rG": 28
+      },
+      "26-27": {
         "cv": "MAIZ",
         "rF": null,
         "rG": null
       }
     },
-    "LA DORA|LA DORA-6": {
+    "LA DORA|1": {
       "25-26": {
+        "cv": "SOJA",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
+        "cv": "GIRASOL",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LA DORA|2": {
+      "25-26": {
+        "cv": "GIRASOL",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LA DORA|4": {
+      "25-26": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
+        "cv": "SOJA",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LA DORA|5": {
+      "25-26": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
+        "cv": "SOJA",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LA DORA|6": {
+      "25-26": {
+        "cv": "PASTURA",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
         "cv": "PASTURA",
         "rF": null,
         "rG": null
       }
     },
-    "LA DORA|LA DORA-7": {
+    "LA DORA|7": {
       "25-26": {
         "cv": "MAIZ",
         "rF": null,
         "rG": null
-      }
-    },
-    "LA DORA|LA DORA-8": {
-      "25-26": {
-        "cv": "GIRASOL",
+      },
+      "26-27": {
+        "cv": "SOJA",
         "rF": null,
         "rG": null
       }
     },
-    "LAS TIAS|LAS TIAS-9": {
+    "LA DORA|8": {
+      "25-26": {
+        "cv": "GIRASOL",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
+        "cv": "CEBADA-SOJA",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LAS TIAS|9": {
       "25-26": {
         "cv": "SORGO",
         "rF": null,
         "rG": null
-      }
-    },
-    "LAS TIAS|LAS TIAS-10": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LAS TIAS|LAS TIAS-11": {
-      "25-26": {
-        "cv": "SOJA",
-        "rF": null,
-        "rG": 37
-      }
-    },
-    "LAS TIAS|LAS TIAS-12": {
-      "25-26": {
-        "cv": "PASTURA",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LOS ABUELOS|LOS ABUELOS-2": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": 11
-      }
-    },
-    "LOS ABUELOS|LOS ABUELOS-3": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": 7
-      }
-    },
-    "LOS ABUELOS|LOS ABUELOS-4": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LOS ABUELOS|LOS ABUELOS-6A": {
-      "25-26": {
-        "cv": "VERDEO",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LOS ABUELOS|LOS ABUELOS-6C": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LOS ABUELOS|LOS ABUELOS-7B": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LOS ABUELOS|LOS ABUELOS-8A": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LOS ABUELOS|LOS ABUELOS-8B": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LOS ABUELOS|LOS ABUELOS-3O": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LOS ABUELOS|LOS ABUELOS-9A": {
-      "25-26": {
-        "cv": "PASTURA",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LOS ABUELOS|LOS ABUELOS-9B": {
-      "25-26": {
+      },
+      "26-27": {
         "cv": "CENTENO",
         "rF": null,
         "rG": null
       }
     },
-    "LA MARIA OLIVA|LA MARIA OLIVA-1": {
+    "LAS TIAS|10": {
       "25-26": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
+        "cv": "SOJA",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LAS TIAS|11": {
+      "25-26": {
+        "cv": "SOJA",
+        "rF": null,
+        "rG": 37
+      },
+      "26-27": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LAS TIAS|12": {
+      "25-26": {
+        "cv": "PASTURA",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
         "cv": "PASTURA",
         "rF": null,
         "rG": null
       }
     },
-    "LA MARIA OLIVA|LA MARIA OLIVA-2": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LA MARIA OLIVA|LA MARIA OLIVA-3": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LA MARIA OLIVA|LA MARIA OLIVA-FRANJA 1": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LA MARIA OLIVA|LA MARIA OLIVA-FRANJA 2": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL 5|EL 5-1": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL 5|EL 5-2": {
-      "25-26": {
-        "cv": "SORGO",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL 5|EL 5-3": {
-      "25-26": {
-        "cv": "AVENA",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL 5|EL 5-4": {
-      "25-26": {
-        "cv": "PASTURA",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LA FLECHA|LA FLECHA-1": {
-      "25-26": {
-        "cv": "SORGO",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LA FLECHA|LA FLECHA-2": {
-      "25-26": {
-        "cv": "SORGO",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LA FLECHA|LA FLECHA-3": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LA FLECHA|LA FLECHA-4": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LA FLECHA|LA FLECHA-5": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "DON ANTONIO|DON ANTONIO-2": {
+    "LOS ABUELOS|2": {
       "25-26": {
         "cv": "GIRASOL",
         "rF": null,
-        "rG": null
-      }
-    },
-    "DON ANTONIO|DON ANTONIO-3": {
-      "25-26": {
-        "cv": "PASTURA",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "DON ANTONIO|DON ANTONIO-4": {
-      "25-26": {
-        "cv": "PASTURA",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "DON ANTONIO|DON ANTONIO-7": {
-      "25-26": {
-        "cv": "PASTURA",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "DON ANTONIO|DON ANTONIO-9": {
-      "25-26": {
+        "rG": 11
+      },
+      "26-27": {
         "cv": "MAIZ",
         "rF": null,
         "rG": null
       }
     },
-    "DON ANTONIO|DON ANTONIO-10": {
-      "25-26": {
-        "cv": "SORGO",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "DON ANTONIO|DON ANTONIO-11": {
-      "25-26": {
-        "cv": "SORGO",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "DON ANTONIO|DON ANTONIO-14": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "DOÑA TERESA|DOÑA TERESA-1": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "DOÑA TERESA|DOÑA TERESA-2": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "DOÑA TERESA|DOÑA TERESA-4": {
+    "LOS ABUELOS|3": {
       "25-26": {
         "cv": "GIRASOL",
         "rF": null,
+        "rG": 7
+      },
+      "26-27": {
+        "cv": "MAIZ",
+        "rF": null,
         "rG": null
       }
     },
-    "DOÑA TERESA|DOÑA TERESA-5": {
+    "LOS ABUELOS|4": {
       "25-26": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LOS ABUELOS|5A": {
+      "26-27": {
+        "cv": "VERDEO",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LOS ABUELOS|5B": {
+      "26-27": {
+        "cv": "TRIGO",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LOS ABUELOS|6A": {
+      "25-26": {
+        "cv": "VERDEO",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
         "cv": "PASTURA",
         "rF": null,
         "rG": null
       }
     },
-    "DOÑA TERESA|DOÑA TERESA-6": {
-      "25-26": {
-        "cv": "GIRASOL",
+    "LOS ABUELOS|6B": {
+      "26-27": {
+        "cv": "LLORON",
         "rF": null,
         "rG": null
       }
     },
-    "DOÑA TERESA|DOÑA TERESA-7": {
+    "LOS ABUELOS|6C": {
       "25-26": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
+        "cv": "VERDEO",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LOS ABUELOS|7A": {
+      "26-27": {
         "cv": "PASTURA",
         "rF": null,
         "rG": null
       }
     },
-    "DOÑA TERESA|DOÑA TERESA-8": {
+    "LOS ABUELOS|7B": {
       "25-26": {
-        "cv": "SORGO",
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
+        "cv": "VERDEO",
         "rF": null,
         "rG": null
       }
     },
-    "DOÑA TERESA|DOÑA TERESA-9": {
+    "LOS ABUELOS|8A": {
       "25-26": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
+        "cv": "VERDEO",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LOS ABUELOS|8B": {
+      "25-26": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
+        "cv": "CENTENO",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LOS ABUELOS|3O": {
+      "25-26": {
+        "cv": "MAIZ",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
+        "cv": "VERDEO",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LOS ABUELOS|9A": {
+      "25-26": {
+        "cv": "PASTURA",
+        "rF": null,
+        "rG": null
+      },
+      "26-27": {
         "cv": "PASTURA",
         "rF": null,
         "rG": null
       }
     },
-    "EL TORELLO|EL TORELLO-1": {
+    "LOS ABUELOS|9B": {
       "25-26": {
-        "cv": "MAIZ",
+        "cv": "CENTENO",
         "rF": null,
         "rG": null
-      }
-    },
-    "EL TORELLO|EL TORELLO-2": {
-      "25-26": {
+      },
+      "26-27": {
         "cv": "PASTURA",
         "rF": null,
         "rG": null
       }
     },
-    "EL TORELLO|EL TORELLO-3": {
+    "LOS ABUELOS|10": {
+      "26-27": {
+        "cv": "VERDEO",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LOS ABUELOS|11": {
+      "26-27": {
+        "cv": "LLORON",
+        "rF": null,
+        "rG": null
+      }
+    },
+    "LA MARIA OLIVA|1": {
       "25-26": {
         "cv": "PASTURA",
         "rF": null,
         "rG": null
-      }
-    },
-    "EL TORELLO|EL TORELLO-5": {
-      "25-26": {
-        "cv": "SORGO",
+      },
+      "26-27": {
+        "cv": "VERDEO",
         "rF": null,
         "rG": null
       }
     },
-    "EL TORELLO|EL TORELLO-6": {
+    "LA MARIA OLIVA|2": {
       "25-26": {
         "cv": "MAIZ",
         "rF": null,
         "rG": null
-      }
-    },
-    "EL TORELLO|EL TORELLO-7": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL TORELLO|EL TORELLO-8": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL TORELLO|EL TORELLO-9": {
-      "25-26": {
-        "cv": "PASTURA",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "DON RAMON|DON RAMON-1": {
-      "25-26": {
-        "cv": "SORGO",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "DON RAMON|DON RAMON-2": {
-      "25-26": {
-        "cv": "SORGO",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "DON RAMON|DON RAMON-3": {
-      "25-26": {
-        "cv": "SORGO",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "DON RAMON|DON RAMON-5": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": 25
-      }
-    },
-    "DON RAMON|DON RAMON-6": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL ABUELO|EL ABUELO-1": {
-      "25-26": {
-        "cv": "MAIZ 2",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL ABUELO|EL ABUELO-2": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL ABUELO|EL ABUELO-3": {
-      "25-26": {
-        "cv": "MAIZ 2",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL ABUELO|EL ABUELO-4": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL ABUELO|EL ABUELO-5": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LOS NIETOS|LOS NIETOS-2": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LOS NIETOS|LOS NIETOS-4": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LOS NIETOS|LOS NIETOS-5": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LOS NIETOS|LOS NIETOS-7": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LOS NIETOS|LOS NIETOS-9": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LOS NIETOS|LOS NIETOS-11": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL CIPRES|EL CIPRES-1": {
-      "25-26": {
-        "cv": "SORGO",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL CIPRES|EL CIPRES-2N": {
-      "25-26": {
-        "cv": "PASTURA",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL CIPRES|EL CIPRES-2S": {
-      "25-26": {
-        "cv": "PASTURA",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL CIPRES|EL CIPRES-5": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL CIPRES|EL CIPRES-6": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL CIPRES|EL CIPRES-7": {
-      "25-26": {
-        "cv": "PASTURA",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL CIPRES|EL CIPRES-3": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL CIPRES|EL CIPRES-8": {
-      "25-26": {
-        "cv": "PASTURA",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "EL CIPRES|EL CIPRES-9": {
-      "25-26": {
-        "cv": "PASTURA",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "DON MARCELINO|DON MARCELINO-1": {
-      "25-26": {
-        "cv": "SORGO",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "DON MARCELINO|DON MARCELINO-2": {
-      "25-26": {
-        "cv": "PASTURA",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "DON MARCELINO|DON MARCELINO-3": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "DON MARCELINO|DON MARCELINO-4": {
-      "25-26": {
-        "cv": "PASTURA",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "DON MARCELINO|DON MARCELINO-5": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "DON MARCELINO|DON MARCELINO-6": {
-      "25-26": {
-        "cv": "PASTURA",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LA ADORACION|LA ADORACION-3": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": 19
-      }
-    },
-    "LA ADORACION|LA ADORACION-4": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LA ADORACION|LA ADORACION-5": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LA CARLOTA|LA CARLOTA-1": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LA CARLOTA|LA CARLOTA-9": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LA CARLOTA|LA CARLOTA-11": {
-      "25-26": {
+      },
+      "26-27": {
         "cv": "MAIZ",
         "rF": null,
         "rG": null
@@ -2469,53 +2329,203 @@
     }
   },
   "SUELOS": {
-    "L3H|L3H-13G": {
-      "fecha": "2026-05-26",
-      "P": 14.57,
+    "L3H|1": {
+      "fecha": "19/12/2017",
+      "P": 20.1,
+      "N": 8.4,
+      "MO": 1.27,
+      "pH": 6.3,
+      "IMO": null
+    },
+    "L3H|2": {
+      "fecha": "01/11/2025",
+      "P": 18.5,
+      "N": 2.68,
+      "MO": 1.21,
+      "pH": 6.22,
+      "IMO": "4.57%"
+    },
+    "L3H|3": {
+      "fecha": "29/10/2025",
+      "P": 21.4,
+      "N": 3.41,
+      "MO": 1.26,
+      "pH": 5.98,
+      "IMO": "3.32%"
+    },
+    "L3H|5": {
+      "fecha": "29/10/2025",
+      "P": 16.33,
+      "N": 4.87,
+      "MO": 0.99,
+      "pH": 6.34,
+      "IMO": "3.70%"
+    },
+    "L3H|7": {
+      "fecha": "30/07/2019",
+      "P": 19.4,
+      "N": 8.3,
+      "MO": 1.52,
+      "pH": 6.3,
+      "IMO": null
+    },
+    "L3H|10": {
+      "fecha": null,
+      "P": 11.4,
+      "N": null,
+      "MO": 1.266,
+      "pH": 6.1,
+      "IMO": null
+    },
+    "L3H|13": {
+      "fecha": "04/11/2025",
+      "P": null,
       "N": 5.1,
       "MO": 1.07,
-      "pH": 6.82,
-      "IMO": "3.5%"
+      "pH": null,
+      "IMO": "3.81%"
+    },
+    "L3H|13G": {
+      "fecha": "04/11/2025",
+      "P": null,
+      "N": 5.1,
+      "MO": 1.07,
+      "pH": null,
+      "IMO": "3.81%"
+    },
+    "L3H|16": {
+      "fecha": null,
+      "P": 17.1,
+      "N": 10.7,
+      "MO": 1.521,
+      "pH": 6.3,
+      "IMO": null
+    },
+    "L3H|17": {
+      "fecha": "14/09/2017",
+      "P": 13.2,
+      "N": null,
+      "MO": 1.159,
+      "pH": 6.4,
+      "IMO": null
+    },
+    "L3H|18": {
+      "fecha": "30/07/2019",
+      "P": 16.6,
+      "N": 9.3,
+      "MO": 1.51,
+      "pH": 6.7,
+      "IMO": null
+    },
+    "L3H|20": {
+      "fecha": "01/11/2025",
+      "P": 9.05,
+      "N": 0.95,
+      "MO": 1.42,
+      "pH": 6.25,
+      "IMO": "4.09%"
+    },
+    "L3H|21N": {
+      "fecha": "29/10/2025",
+      "P": 27.0,
+      "N": 8.85,
+      "MO": 0.98,
+      "pH": 6.43,
+      "IMO": null
+    },
+    "L3H|24": {
+      "fecha": "21/10/2021",
+      "P": 18.05,
+      "N": 10.65,
+      "MO": 1.18,
+      "pH": 6.38,
+      "IMO": "3.03%"
+    },
+    "L3H|25": {
+      "fecha": "21/10/2021",
+      "P": 18.45,
+      "N": 10.55,
+      "MO": 1.1,
+      "pH": 6.43,
+      "IMO": "2.68%"
+    },
+    "L3H|26": {
+      "fecha": null,
+      "P": 16.2,
+      "N": null,
+      "MO": 0.918,
+      "pH": 6.5,
+      "IMO": null
+    },
+    "L3H|27": {
+      "fecha": null,
+      "P": 15.75,
+      "N": 6.8,
+      "MO": 1.1,
+      "pH": 6.4,
+      "IMO": null
+    },
+    "L3H|28": {
+      "fecha": null,
+      "P": 18.9,
+      "N": null,
+      "MO": 1.467,
+      "pH": 6.7,
+      "IMO": null
+    },
+    "L3H|29": {
+      "fecha": null,
+      "P": 12.5,
+      "N": null,
+      "MO": 1.286,
+      "pH": 6.6,
+      "IMO": null
     }
   },
   "TEXTURA_LOTE": {
-    "L3H|L3H-3": [
-      10,
-      25,
+    "L3H|2": [
+      6,
+      20,
+      74
+    ],
+    "L3H|3": [
+      7,
+      31,
+      62
+    ],
+    "L3H|5": [
+      5,
+      22,
+      73
+    ],
+    "L3H|13": [
+      8,
+      20,
+      72
+    ],
+    "L3H|13G": [
+      8,
+      20,
+      72
+    ],
+    "L3H|20": [
+      9,
+      26,
       65
     ],
-    "L3H|L3H-5": [
-      4,
-      21,
-      75
+    "L3H|24": [
+      9,
+      30,
+      61
+    ],
+    "L3H|25": [
+      8,
+      33,
+      59
     ]
   },
   "APLICACIONES": [
     {
-      "fecha": "2026-11-30",
-      "campo": "LA CUCA",
-      "lote": "2",
-      "ha": 112,
-      "cultivo": "GIRASOL",
-      "costo": 705.6,
-      "productos": [
-        "CLEARSOL",
-        "ACEITE METILADO ROCIO"
-      ]
-    },
-    {
-      "fecha": "2026-11-30",
-      "campo": "LA CUCA",
-      "lote": "2",
-      "ha": 112,
-      "cultivo": "GIRASOL",
-      "costo": 705.6,
-      "produtos": [
-        "CLEARSOL",
-        "ACEITE METILADO ROCIO"
-      ]
-    },
-    {
       "fecha": "2026-07-20",
       "campo": "LOS ABUELOS",
       "lote": "2",
@@ -2523,40 +2533,10 @@
       "cultivo": "MAIZ",
       "costo": 1335.6,
       "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D",
-        "DICAMBA DURANOR",
-        "RIZOSPRAY CORRECTOR",
-        "ATRAZINA"
-      ]
-    },
-    {
-      "fecha": "2026-07-20",
-      "campo": "LOS ABUELOS",
-      "lote": "3",
-      "ha": 39,
-      "cultivo": "MAIZ",
-      "costo": 1240.2,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D",
-        "DICAMBA DURANOR",
-        "RIZOSPRAY CORRECTOR",
-        "ATRAZINA"
-      ]
-    },
-    {
-      "fecha": "2026-07-20",
-      "campo": "LOS ABUELOS",
-      "lote": "2",
-      "ha": 42,
-      "cultivo": "MAIZ",
-      "costo": 1335.6,
-      "produtos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
         "Dicamba 70.8 % Duranor Avance",
-        "Coady. RizoSpray Corrector Secuestrante",
+        "Coady. RizoSpray Corrector",
         "Atrazina 90 % solida"
       ]
     },
@@ -2567,21 +2547,21 @@
       "ha": 39,
       "cultivo": "MAIZ",
       "costo": 1240.2,
-      "produtos": [
+      "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
         "Dicamba 70.8 % Duranor Avance",
-        "Coady. RizoSpray Corrector Secuestrante",
+        "Coady. RizoSpray Corrector",
         "Atrazina 90 % solida"
       ]
     },
     {
       "fecha": "2026-07-16",
       "campo": "DON RAMON",
-      "lote": "2",
-      "ha": 18,
+      "lote": "1",
+      "ha": 20,
       "cultivo": "AVENA",
-      "costo": 503.5,
+      "costo": 559.3,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
@@ -2593,10 +2573,10 @@
     {
       "fecha": "2026-07-16",
       "campo": "DON RAMON",
-      "lote": "1",
-      "ha": 20,
+      "lote": "2",
+      "ha": 18,
       "cultivo": "AVENA",
-      "costo": 559.3,
+      "costo": 503.4,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
@@ -2618,366 +2598,6 @@
       ]
     },
     {
-      "fecha": "2026-07-16",
-      "campo": "DON RAMON",
-      "lote": "2",
-      "ha": 18,
-      "cultivo": "AVENA",
-      "costo": 503.4,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D",
-        "DICAMBA DURANOR",
-        "METSULFURON METIL",
-        "RIZOSPRAY EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-07-16",
-      "campo": "DON RAMON",
-      "lote": "1",
-      "ha": 20,
-      "cultivo": "AVENA",
-      "costo": 559.3,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D",
-        "DICAMBA DURANOR",
-        "METSULFURON METIL",
-        "RIZOSPRAY EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-07-16",
-      "campo": "DON RAMON",
-      "lote": "6",
-      "ha": 60,
-      "cultivo": "VERDEO",
-      "costo": 823.2,
-      "productos": [
-        "DICAMBA DURANOR",
-        "POWERSPRAY 2,4D"
-      ]
-    },
-    {
-      "fecha": "2026-07-16",
-      "campo": "DON RAMON",
-      "lote": "2",
-      "ha": 18,
-      "cultivo": "AVENA",
-      "costo": 503.4,
-      "produtos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 % Duranor Avance",
-        "Metsulfuron Metil 60 %",
-        "Coady. RizoSpray EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-07-16",
-      "campo": "DON RAMON",
-      "lote": "1",
-      "ha": 20,
-      "cultivo": "AVENA",
-      "costo": 559.3,
-      "produtos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 % Duranor Avance",
-        "Metsulfuron Metil 60 %",
-        "Coady. RizoSpray EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-07-16",
-      "campo": "DON RAMON",
-      "lote": "6",
-      "ha": 60,
-      "cultivo": "VERDEO",
-      "costo": 823.2,
-      "produtos": [
-        "Dicamba 70.8 % Duranor Avance",
-        "POWERSPRAY 2,4D 68%"
-      ]
-    },
-    {
-      "fecha": "2026-07-16",
-      "campo": "DON RAMON",
-      "lote": "2",
-      "ha": 18,
-      "cultivo": "AVENA",
-      "costo": 503.4,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D",
-        "DICAMBA DURANOR",
-        "METSULFURON",
-        "RIZOSPRAY EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-07-16",
-      "campo": "DON RAMON",
-      "lote": "1",
-      "ha": 20,
-      "cultivo": "AVENA",
-      "costo": 559.3,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D",
-        "DICAMBA DURANOR",
-        "METSULFURON",
-        "RIZOSPRAY EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "1 Y 3",
-      "ha": 77,
-      "cultivo": "GIRASOL",
-      "costo": 3060.3,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "DIFLUFENICAN SIGMA 50%",
-        "FLUROXIPIR 48 SIGMA x 5 Lts"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "2,4 Y 5",
-      "ha": 120,
-      "cultivo": "GIRASOL",
-      "costo": 3344.1,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "METSULFURON SIGMA x kg"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "2,4 y 5",
-      "ha": 120,
-      "cultivo": "GIRASOL",
-      "costo": 3100.5,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "METSULFURON SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "1 y 3",
-      "ha": 77,
-      "cultivo": "GIRASOL",
-      "costo": 2575.7,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DIFLUFENICAN SIGMA",
-        "FLUROXIPIR 48 SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "1 Y 3",
-      "ha": 77,
-      "cultivo": "GIRASOL",
-      "costo": 3060.3,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DIFLUFENICAN SIGMA",
-        "FLUROXIPIR 48 SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "2,4 Y 5",
-      "ha": 120,
-      "cultivo": "GIRASOL",
-      "costo": 3100.5,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "METSULFURON SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "1",
-      "ha": 77,
-      "cultivo": "GIRASOL",
-      "costo": 3331.3,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DIFLUFENICAN SIGMA",
-        "FLUROXIPIR 48 SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "2",
-      "ha": 120,
-      "cultivo": "GIRASOL",
-      "costo": 3100.5,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "METSULFURON SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "1 y 3",
-      "ha": 77,
-      "cultivo": "GIRASOL",
-      "costo": 3060.3,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DIFLUFENICAN SIGMA 50%",
-        "FLUROXIPIR 48 SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "2,4 y 5",
-      "ha": 120,
-      "cultivo": "GIRASOL",
-      "costo": 3100.5,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "METSULFURON SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "1-3",
-      "ha": 77,
-      "cultivo": "GIRASOL",
-      "costo": 3060.3,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DIFLUFENICAN SIGMA",
-        "FLUROXIPIR 48 SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "2-4-5",
-      "ha": 120,
-      "cultivo": "GIRASOL",
-      "costo": 3100.5,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "METSULFURON SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "1",
-      "ha": 25.67,
-      "cultivo": "GIRASOL",
-      "costo": 857.1,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DIFLUFENICAN SIGMA",
-        "FLUROXIPIR 48 SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "3",
-      "ha": 51.33,
-      "cultivo": "GIRASOL",
-      "costo": 1715.4,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DIFLUFENICAN SIGMA",
-        "FLUROXIPIR 48 SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "2",
-      "ha": 40,
-      "cultivo": "GIRASOL",
-      "costo": 959,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "METSULFURON SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "4",
-      "ha": 40,
-      "cultivo": "GIRASOL",
-      "costo": 959,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "METSULFURON SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "5",
-      "ha": 40,
-      "cultivo": "GIRASOL",
-      "costo": 959,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "METSULFURON SIGMA"
-      ]
-    },
-    {
       "fecha": "2026-07-13",
       "campo": "EL ABUELO",
       "lote": "1 Y 3",
@@ -2998,174 +2618,11 @@
       "lote": "2,4 Y 5",
       "ha": 120,
       "cultivo": "GIRASOL",
-      "costo": 3100.1,
+      "costo": 3100.5,
       "productos": [
         "GLIFOSATO GRANULADO LT BOX",
         "2-4 D 97 SIGMA",
         "LIGIER PH BIO",
-        "METSULFURON SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "1,3",
-      "ha": 77,
-      "cultivo": "GIRASOL",
-      "costo": 3060.3,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DIFLUFENICAN SIGMA",
-        "FLUROXIPIR 48 SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "2,4,5",
-      "ha": 120,
-      "cultivo": "GIRASOL",
-      "costo": 3100.1,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "METSULFURON SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-13",
-      "campo": "EL ABUELO",
-      "lote": "2,4 y 5",
-      "ha": 120,
-      "cultivo": "GIRASOL",
-      "costo": 2997.6,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "METSULFURON SIGMA x kg"
-      ]
-    },
-    {
-      "fecha": "2026-07-02",
-      "campo": "EL TORELLO",
-      "lote": "5",
-      "ha": 52,
-      "cultivo": "CEBADA",
-      "costo": 1243.8,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "DICAMBA SIGMA x 10 LT",
-        "METSULFURON SIGMA x 100 GRS"
-      ]
-    },
-    {
-      "fecha": "2026-07-02",
-      "campo": "LOS NIETOS",
-      "lote": "7",
-      "ha": 20,
-      "cultivo": "AVENA",
-      "costo": 478.3,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "DICAMBA SIGMA x 10 LT",
-        "METSULFURON SIGMA x 100 GRS"
-      ]
-    },
-    {
-      "fecha": "2026-07-02",
-      "campo": "EL CIPRES",
-      "lote": "1",
-      "ha": 28,
-      "cultivo": "CEBADA",
-      "costo": 669.6,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "DICAMBA SIGMA x 10 LT",
-        "METSULFURON SIGMA x 100 GRS"
-      ]
-    },
-    {
-      "fecha": "2026-07-02",
-      "campo": "LOS NIETOS",
-      "lote": "4",
-      "ha": 27,
-      "cultivo": "CEBADA",
-      "costo": 645.7,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "DICAMBA SIGMA x 10 LT",
-        "METSULFURON SIGMA x 100 GRS"
-      ]
-    },
-    {
-      "fecha": "2026-07-02",
-      "campo": "EL TORELLO",
-      "lote": "5",
-      "ha": 52,
-      "cultivo": "CEBADA",
-      "costo": 1243.5,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
-        "METSULFURON SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-02",
-      "campo": "LOS NIETOS",
-      "lote": "7",
-      "ha": 20,
-      "cultivo": "AVENA",
-      "costo": 478.3,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
-        "METSULFURON SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-02",
-      "campo": "EL CIPRES",
-      "lote": "1",
-      "ha": 28,
-      "cultivo": "CEBADA",
-      "costo": 669.2,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
-        "METSULFURON SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-07-02",
-      "campo": "LOS NIETOS",
-      "lote": "4",
-      "ha": 27,
-      "cultivo": "CEBADA",
-      "costo": 645.4,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
         "METSULFURON SIGMA"
       ]
     },
@@ -3232,160 +2689,10 @@
     {
       "fecha": "2026-06-29",
       "campo": "LOS ABUELOS",
-      "lote": "5B (SUR)",
-      "ha": 45,
-      "cultivo": "TRIGO",
-      "costo": 1328.9,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 % Duranor Avance x Lt",
-        "Metsulfuron Metil 60 %",
-        "Coady. RizoSpray EXTREMO x 10 Lt"
-      ]
-    },
-    {
-      "fecha": "2026-06-29",
-      "campo": "LOS ABUELOS",
-      "lote": "8B (SUR)",
-      "ha": 23,
-      "cultivo": "CENTENO",
-      "costo": 670.9,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 % Duranor Avance x Lt",
-        "Metsulfuron Metil 60 %",
-        "Coady. RizoSpray EXTREMO x 10 Lt"
-      ]
-    },
-    {
-      "fecha": "2026-06-29",
-      "campo": "LOS ABUELOS",
-      "lote": "5B (SUR)",
-      "ha": 45,
-      "cultivo": "TRIGO",
-      "costo": 1328.9,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 %",
-        "Metsulfuron Metil",
-        "Coady. RizoSpray EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-29",
-      "campo": "LOS ABUELOS",
-      "lote": "8B",
-      "ha": 23,
-      "cultivo": "CENTENO",
-      "costo": 670.9,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 %",
-        "Metsulfuron Metil",
-        "Coady. RizoSpray EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-29",
-      "campo": "LOS ABUELOS",
-      "lote": "5B (SUR)",
-      "ha": 45,
-      "cultivo": "TRIGO",
-      "costo": 1328.9,
-      "produtos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D 68%",
-        "Dicamba Duranor",
-        "Metsulfuron Metil",
-        "Coady RizoSpray EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-29",
-      "campo": "LOS ABUELOS",
-      "lote": "8B (SUR)",
-      "ha": 23,
-      "cultivo": "CENTENO",
-      "costo": 670.9,
-      "produtos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D 68%",
-        "Dicamba Duranor",
-        "Metsulfuron Metil",
-        "Coady RizoSpray EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-29",
-      "campo": "LOS ABUELOS",
-      "lote": "5B",
-      "ha": 45,
-      "cultivo": "TRIGO",
-      "costo": 1328.5,
-      "produtos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D",
-        "Dicamba Duranor",
-        "Metsulfuron",
-        "RizoSpray EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-29",
-      "campo": "LOS ABUELOS",
-      "lote": "8B",
-      "ha": 23,
-      "cultivo": "CENTENO",
-      "costo": 670.9,
-      "produtos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D",
-        "Dicamba Duranor",
-        "Metsulfuron",
-        "RizoSpray EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-29",
-      "campo": "LOS ABUELOS",
       "lote": "5B",
       "ha": 45,
       "cultivo": "TRIGO",
       "costo": 1328.9,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D",
-        "DICAMBA DURANOR AVANCE",
-        "METSULFURON METIL",
-        "RIZOSPRAY EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-29",
-      "campo": "LOS ABUELOS",
-      "lote": "8B",
-      "ha": 23,
-      "cultivo": "CENTENO",
-      "costo": 670.9,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D",
-        "DICAMBA DURANOR AVANCE",
-        "METSULFURON METIL",
-        "RIZOSPRAY EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-29",
-      "campo": "LOS ABUELOS",
-      "lote": "5B",
-      "ha": 45,
-      "cultivo": "TRIGO",
-      "costo": 1129,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
@@ -3400,223 +2707,13 @@
       "lote": "8B",
       "ha": 23,
       "cultivo": "CENTENO",
-      "costo": 671,
+      "costo": 670.9,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
         "Dicamba 70.8 % Duranor Avance",
         "Metsulfuron Metil 60 %",
         "Coady. RizoSpray EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-29",
-      "campo": "LOS ABUELOS",
-      "lote": "5B",
-      "ha": 45,
-      "cultivo": "TRIGO",
-      "costo": 1328.5,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D",
-        "DICAMBA DURANOR",
-        "METSULFURON METIL",
-        "RIZOSPRAY EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-29",
-      "campo": "LOS ABUELOS",
-      "lote": "8B",
-      "ha": 23,
-      "cultivo": "CENTENO",
-      "costo": 670.9,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D",
-        "DICAMBA DURANOR",
-        "METSULFURON METIL",
-        "RIZOSPRAY EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-29",
-      "campo": "LOS ABUELOS",
-      "lote": "5B",
-      "ha": 45,
-      "cultivo": "TRIGO",
-      "costo": 1128.9,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D",
-        "DICAMBA DURANOR",
-        "METSULFURON",
-        "RIZOSPRAY EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-29",
-      "campo": "LOS ABUELOS",
-      "lote": "8B",
-      "ha": 23,
-      "cultivo": "CENTENO",
-      "costo": 670.9,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D",
-        "DICAMBA DURANOR",
-        "METSULFURON",
-        "RIZOSPRAY EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-25",
-      "campo": "L3H",
-      "lote": "23",
-      "ha": 53,
-      "cultivo": "CEBADA",
-      "costo": 2997.6,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 % Duranor Avance x Lt",
-        "Flurocloridona 25 %",
-        "Coady. RizoSpray EXTREMO x 10 Lt"
-      ]
-    },
-    {
-      "fecha": "2026-06-25",
-      "campo": "L3H",
-      "lote": "1",
-      "ha": 60,
-      "cultivo": "MAIZ",
-      "costo": 2092.2,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 % Duranor Avance x Lt",
-        "Atrazina 90 % solida x 15 kg",
-        "Coady. RizoSpray EXTREMO x 10 Lt"
-      ]
-    },
-    {
-      "fecha": "2026-06-25",
-      "campo": "L3H",
-      "lote": "23",
-      "ha": 53,
-      "cultivo": "CEBADA",
-      "costo": 2997.6,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 %",
-        "Flurocloridona 25 %",
-        "Coady. RizoSpray EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-25",
-      "campo": "L3H",
-      "lote": "1",
-      "ha": 60,
-      "cultivo": "MAIZ",
-      "costo": 2492.1,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 %",
-        "Atrazina 90 %",
-        "Coady. RizoSpray EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-25",
-      "campo": "L3H",
-      "lote": "23",
-      "ha": 53,
-      "cultivo": "CEBADA",
-      "costo": 2997.6,
-      "produtos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D 68%",
-        "Dicamba Duranor",
-        "Flurocloridona",
-        "Coady RizoSpray EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-25",
-      "campo": "L3H",
-      "lote": "1",
-      "ha": 60,
-      "cultivo": "MAIZ",
-      "costo": 2287.2,
-      "produtos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D 68%",
-        "Dicamba Duranor",
-        "Atrazina 90",
-        "Coady RizoSpray EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-25",
-      "campo": "L3H",
-      "lote": "23",
-      "ha": 53,
-      "cultivo": "CEBADA",
-      "costo": 2997.6,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8% Duranor Avance",
-        "Flurocloridona 25%",
-        "Coady. RizoSpray EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-25",
-      "campo": "L3H",
-      "lote": "1",
-      "ha": 60,
-      "cultivo": "MAIZ",
-      "costo": 2092.2,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8% Duranor Avance",
-        "Atrazina 90%",
-        "Coady. RizoSpray EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-25",
-      "campo": "L3H",
-      "lote": "23",
-      "ha": 53,
-      "cultivo": "CEBADA",
-      "costo": 2997.6,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D",
-        "DICAMBA DURANOR AVANCE",
-        "FLUROCLORIDONA",
-        "RIZOSPRAY EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-25",
-      "campo": "L3H",
-      "lote": "1",
-      "ha": 60,
-      "cultivo": "MAIZ",
-      "costo": 2092.2,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D",
-        "DICAMBA DURANOR AVANCE",
-        "ATRAZINA 90%",
-        "RIZOSPRAY EXTREMO"
       ]
     },
     {
@@ -3650,126 +2747,6 @@
       ]
     },
     {
-      "fecha": "2026-06-25",
-      "campo": "L3H",
-      "lote": "23",
-      "ha": 53,
-      "cultivo": "CEBADA",
-      "costo": 2997.6,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D",
-        "DICAMBA DURANOR",
-        "FLUROCLORIDONA",
-        "RIZOSPRAY EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-25",
-      "campo": "L3H",
-      "lote": "1",
-      "ha": 60,
-      "cultivo": "MAIZ",
-      "costo": 2092.2,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D",
-        "DICAMBA DURANOR",
-        "ATRAZINA",
-        "RIZOSPRAY EXTREMO"
-      ]
-    },
-    {
-      "fecha": "2026-06-24",
-      "campo": "LA DORA",
-      "lote": "1",
-      "ha": 59,
-      "cultivo": "MAIZ",
-      "costo": 1953.8,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "DICAMBA SIGMA x 10 LT",
-        "ATRAZINA GESAPRIM 90 x 10 KG"
-      ]
-    },
-    {
-      "fecha": "2026-06-24",
-      "campo": "LAS TIAS",
-      "lote": "11",
-      "ha": 63,
-      "cultivo": "MAIX",
-      "costo": 2085.8,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "DICAMBA SIGMA x 10 LT",
-        "ATRAZINA GESAPRIM 90 x 10 KG"
-      ]
-    },
-    {
-      "fecha": "2026-06-24",
-      "campo": "LA DORA",
-      "lote": "MAIZ HUMED",
-      "ha": 34,
-      "cultivo": "MAIZ",
-      "costo": 1007,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "DICAMBA SIGMA x 10 LT",
-        "ATRAZINA GESAPRIM 90 x 10 KG"
-      ]
-    },
-    {
-      "fecha": "2026-06-24",
-      "campo": "LA DORA",
-      "lote": "1",
-      "ha": 59,
-      "cultivo": "MAIZ",
-      "costo": 1953.6,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
-        "ATRAZINA GESAPRIM"
-      ]
-    },
-    {
-      "fecha": "2026-06-24",
-      "campo": "LAS TIAS",
-      "lote": "11",
-      "ha": 63,
-      "cultivo": "MAIZ",
-      "costo": 2085.7,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
-        "ATRAZINA GESAPRIM"
-      ]
-    },
-    {
-      "fecha": "2026-06-24",
-      "campo": "LA DORA",
-      "lote": "MAIZ HUMED",
-      "ha": 34,
-      "cultivo": "MAIZ",
-      "costo": 1222.6,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
-        "ATRAZINA GESAPRIM"
-      ]
-    },
-    {
       "fecha": "2026-06-24",
       "campo": "LA DORA",
       "lote": "1",
@@ -3790,7 +2767,7 @@
       "lote": "11",
       "ha": 63,
       "cultivo": "MAIZ",
-      "costo": 2086.1,
+      "costo": 2085.8,
       "productos": [
         "GLIFOSATO GRANULADO LT BOX",
         "2-4 D 97 SIGMA",
@@ -3815,123 +2792,18 @@
       ]
     },
     {
-      "fecha": "2026-06-24",
-      "campo": "LA DORA",
-      "lote": "1",
-      "ha": 59,
-      "cultivo": "MAIZ",
-      "costo": 1953.7,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
-        "ATRAZINA GESAPRIM 90 x 10 KG"
-      ]
-    },
-    {
-      "fecha": "2026-06-24",
-      "campo": "LAS TIAS",
-      "lote": "11",
-      "ha": 63,
-      "cultivo": "MAIZ",
-      "costo": 2085.8,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
-        "ATRAZINA GESAPRIM 90 x 10 KG"
-      ]
-    },
-    {
       "fecha": "2026-06-15",
       "campo": "EL DESCANSO",
       "lote": "3",
       "ha": 23,
       "cultivo": "MAIZ",
-      "costo": 745.9,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "DICAMBA SIGMA x 10 LT",
-        "ATRAZINA GESAPRIM 90%"
-      ]
-    },
-    {
-      "fecha": "2026-06-15",
-      "campo": "EL DESCANSO",
-      "lote": "3",
-      "ha": 23,
-      "cultivo": "MAIZ",
-      "costo": 746,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
-        "ATRAZINA GESAPRIM"
-      ]
-    },
-    {
-      "fecha": "2026-06-15",
-      "campo": "EL DESCANSO",
-      "lote": "3",
-      "ha": 23,
-      "cultivo": "MAIZ",
-      "costo": 746,
+      "costo": 746.0,
       "productos": [
         "GLIFOSATO GRANULADO LT BOX",
         "2-4 D 97 SIGMA",
         "LIGIER PH BIO",
         "DICAMBA SIGMA",
         "ATRAZINA GESAPRIM"
-      ]
-    },
-    {
-      "fecha": "2026-06-15",
-      "campo": "EL DESCANSO",
-      "lote": "3",
-      "ha": 23,
-      "cultivo": "MAIZ",
-      "costo": 745.9,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
-        "ATRAZINA GESAPRIM 90%"
-      ]
-    },
-    {
-      "fecha": "2026-06-14",
-      "campo": "DOÑA TERESA",
-      "lote": "8",
-      "ha": 14,
-      "cultivo": "CEBADA",
-      "costo": 382.9,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "DICAMBA SIGMA x 10 LT",
-        "METSULFURON SIGMA x 100 GRS"
-      ]
-    },
-    {
-      "fecha": "2026-06-14",
-      "campo": "DOÑA TERESA",
-      "lote": "8",
-      "ha": 14,
-      "cultivo": "CEBADA",
-      "costo": 382.8,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
-        "METSULFURON SIGMA"
       ]
     },
     {
@@ -3955,67 +2827,7 @@
       "lote": "3N",
       "ha": 85,
       "cultivo": "GIRASOL",
-      "costo": 2938,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "FLUROXIPIR 48 SIGMA x 5 Lts",
-        "DIFLUFENICAN SIGMA 50%"
-      ]
-    },
-    {
-      "fecha": "2026-06-13",
-      "campo": "LA CUCA",
-      "lote": "3N",
-      "ha": 85,
-      "cultivo": "GIRASOL",
-      "costo": 2938,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "FLUROXIPIR 48 SIGMA",
-        "DIFLUFENICAN SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-06-13",
-      "campo": "LA CUCA",
-      "lote": "3N",
-      "ha": 85,
-      "cultivo": "GIRASOL",
-      "costo": 2938,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "FLUROXIPIR 48 SIGMA",
-        "DIFLUFENICAN SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-06-12",
-      "campo": "LA CHOLITA",
-      "lote": "1",
-      "ha": 54,
-      "cultivo": "GIRASOL",
-      "costo": 1866.5,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "FLUROXIPIR 48 SIGMA x 5 Lts",
-        "DIFLUFENICAN SIGMA 50%"
-      ]
-    },
-    {
-      "fecha": "2026-06-12",
-      "campo": "LA CHOLITA",
-      "lote": "1",
-      "ha": 54,
-      "cultivo": "GIRASOL",
-      "costo": 1866.5,
+      "costo": 2938.0,
       "productos": [
         "GLIFOSATO GRANULADO LT BOX",
         "2-4 D 97 SIGMA",
@@ -4031,102 +2843,12 @@
       "ha": 54,
       "cultivo": "GIRASOL",
       "costo": 1866.5,
-      "produtos": [
+      "productos": [
         "GLIFOSATO GRANULADO LT BOX",
         "2-4 D 97 SIGMA",
         "LIGIER PH BIO",
         "FLUROXIPIR 48 SIGMA",
-        "DIFLUFENICAN SIGMA 50%"
-      ]
-    },
-    {
-      "fecha": "2026-06-11",
-      "campo": "L3H",
-      "lote": "28",
-      "ha": 47,
-      "cultivo": "GIRASOL",
-      "costo": 1674.7,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "FLUROXIPIR 48 SIGMA x 5 Lts",
-        "DIFLUFENICAN SIGMA 50%"
-      ]
-    },
-    {
-      "fecha": "2026-06-11",
-      "campo": "L3H",
-      "lote": "22",
-      "ha": 51,
-      "cultivo": "GIRASOL",
-      "costo": 1762.8,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "FLUROXIPIR 48 SIGMA x 5 Lts",
-        "DIFLUFENICAN SIGMA 50%"
-      ]
-    },
-    {
-      "fecha": "2026-06-11",
-      "campo": "L3H",
-      "lote": "17",
-      "ha": 112,
-      "cultivo": "GIRASOL",
-      "costo": 3871.2,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "FLUROXIPIR 48 SIGMA x 5 Lts",
-        "DIFLUFENICAN SIGMA 50%"
-      ]
-    },
-    {
-      "fecha": "2026-06-11",
-      "campo": "L3H",
-      "lote": "26",
-      "ha": 53,
-      "cultivo": "MAIZ",
-      "costo": 1718,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "DICAMBA SIGMA x 10 LT",
-        "ATRAZINA GESAPRIM 90%"
-      ]
-    },
-    {
-      "fecha": "2026-06-11",
-      "campo": "L3H",
-      "lote": "27",
-      "ha": 50,
-      "cultivo": "MAIZ",
-      "costo": 1621.6,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "DICAMBA SIGMA x 10 LT",
-        "ATRAZINA GESAPRIM 90%"
-      ]
-    },
-    {
-      "fecha": "2026-06-11",
-      "campo": "L3H",
-      "lote": "29",
-      "ha": 30,
-      "cultivo": "MAIZ",
-      "costo": 973,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "DICAMBA SIGMA x 10 LT",
-        "ATRAZINA GESAPRIM 90%"
+        "DIFLUFENICAN SIGMA"
       ]
     },
     {
@@ -4220,141 +2942,6 @@
       ]
     },
     {
-      "fecha": "2026-06-11",
-      "campo": "L3H",
-      "lote": "28",
-      "ha": 47,
-      "cultivo": "GIRASOL",
-      "costo": 1674.7,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "FLUROXIPIR 48 SIGMA",
-        "DIFLUFENICAN SIGMA 50%"
-      ]
-    },
-    {
-      "fecha": "2026-06-11",
-      "campo": "L3H",
-      "lote": "22",
-      "ha": 51,
-      "cultivo": "GIRASOL",
-      "costo": 1762.8,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "FLUROXIPIR 48 SIGMA",
-        "DIFLUFENICAN SIGMA 50%"
-      ]
-    },
-    {
-      "fecha": "2026-06-11",
-      "campo": "L3H",
-      "lote": "17",
-      "ha": 112,
-      "cultivo": "GIRASOL",
-      "costo": 3871.2,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "FLUROXIPIR 48 SIGMA",
-        "DIFLUFENICAN SIGMA 50%"
-      ]
-    },
-    {
-      "fecha": "2026-06-11",
-      "campo": "L3H",
-      "lote": "26",
-      "ha": 53,
-      "cultivo": "MAIZ",
-      "costo": 1718.9,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
-        "ATRAZINA GESAPRIM 90%"
-      ]
-    },
-    {
-      "fecha": "2026-06-11",
-      "campo": "L3H",
-      "lote": "27",
-      "ha": 50,
-      "cultivo": "MAIZ",
-      "costo": 1621.6,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
-        "ATRAZINA GESAPRIM 90%"
-      ]
-    },
-    {
-      "fecha": "2026-06-11",
-      "campo": "L3H",
-      "lote": "29",
-      "ha": 30,
-      "cultivo": "MAIZ",
-      "costo": 972.9,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
-        "ATRAZINA GESAPRIM 90%"
-      ]
-    },
-    {
-      "fecha": "2026-06-11",
-      "campo": "L3H",
-      "lote": "26",
-      "ha": 53,
-      "cultivo": "MAIZ",
-      "costo": 1719,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
-        "ATRAZINA GESAPRIM 90%"
-      ]
-    },
-    {
-      "fecha": "2026-06-11",
-      "campo": "L3H",
-      "lote": "27",
-      "ha": 50,
-      "cultivo": "MAIZ",
-      "costo": 1621.6,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
-        "ATRAZINA GESAPRIM 90%"
-      ]
-    },
-    {
-      "fecha": "2026-06-11",
-      "campo": "L3H",
-      "lote": "29",
-      "ha": 30,
-      "cultivo": "MAIZ",
-      "costo": 972,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
-        "ATRAZINA GESAPRIM 90%"
-      ]
-    },
-    {
       "fecha": "2026-05-18",
       "campo": "EL ABUELO",
       "lote": "2-4-5",
@@ -4362,146 +2949,11 @@
       "cultivo": "CEBADA",
       "costo": 4373.1,
       "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "FLUROCLORIDONA RAINBOW x 10 LT",
-        "DICAMBA SIGMA x 10 LT"
-      ]
-    },
-    {
-      "fecha": "2026-05-18",
-      "campo": "EL ABUELO",
-      "lote": "2-4-5",
-      "ha": 120,
-      "cultivo": "CEBADA",
-      "costo": 3617.1,
-      "productos": [
         "GLIFOSATO GRANULADO LT BOX",
         "2-4 D 97 SIGMA",
         "LIGIER PH BIO",
         "FLUROCLORIDONA RAINBOW",
         "DICAMBA SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-05-18",
-      "campo": "EL ABUELO",
-      "lote": "2",
-      "ha": 120,
-      "cultivo": "CEBADA",
-      "costo": 3717.1,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "FLUROCLORIDONA RAINBOW",
-        "DICAMBA SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-05-18",
-      "campo": "EL ABUELO",
-      "lote": "2-4-5",
-      "ha": 120,
-      "cultivo": "CEBADA",
-      "costo": 4373.1,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "FLUROCLORIDONA RAINBOW",
-        "DICAMBA SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-05-18",
-      "campo": "EL ABUELO",
-      "lote": "4",
-      "ha": 40,
-      "cultivo": "CEBADA",
-      "costo": 1211.7,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "FLUROCLORIDONA RAINBOW",
-        "DICAMBA SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-05-18",
-      "campo": "EL ABUELO",
-      "lote": "5",
-      "ha": 40,
-      "cultivo": "CEBADA",
-      "costo": 1211.7,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "FLUROCLORIDONA RAINBOW",
-        "DICAMBA SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-05-18",
-      "campo": "EL ABUELO",
-      "lote": "2,4,5",
-      "ha": 120,
-      "cultivo": "CEBADA",
-      "costo": 3617.1,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "FLUROCLORIDONA RAINBOW",
-        "DICAMBA SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-05-15",
-      "campo": "L3H",
-      "lote": "13G",
-      "ha": 120,
-      "cultivo": "CEBADA",
-      "costo": 4961.1,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "FLUROCLORIDONA RAINBOW x 10 LT",
-        "ACEITE METILADO ROCIO x 3 LT"
-      ]
-    },
-    {
-      "fecha": "2026-05-15",
-      "campo": "L3H",
-      "lote": "13C",
-      "ha": 20,
-      "cultivo": "CEBADA",
-      "costo": 646.8,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "FLUROCLORIDONA RAINBOW x 10 LT",
-        "ACEITE METILADO ROCIO x 3 LT"
-      ]
-    },
-    {
-      "fecha": "2026-05-15",
-      "campo": "L3H",
-      "lote": "10 O",
-      "ha": 30,
-      "cultivo": "CEBADA",
-      "costo": 970.2,
-      "productos": [
-        "GLIFOSATO GRANULADO LT BOX x 15 KG",
-        "2-4 D 97 SIGMA x 20 LT",
-        "LIGIER PH BIO x LT",
-        "FLUROCLORIDONA RAINBOW x 10 LT",
-        "ACEITE METILADO ROCIO x 3 LT"
       ]
     },
     {
@@ -4522,7 +2974,7 @@
     {
       "fecha": "2026-05-15",
       "campo": "L3H",
-      "lote": "13C",
+      "lote": "13CH",
       "ha": 20,
       "cultivo": "CEBADA",
       "costo": 646.8,
@@ -4550,51 +3002,6 @@
       ]
     },
     {
-      "fecha": "2026-05-15",
-      "campo": "L3H",
-      "lote": "13G",
-      "ha": 120,
-      "cultivo": "CEBADA",
-      "costo": 4961.1,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "FLUROCLORIDONA RAINBOW",
-        "ACEITE METILADO ROCIO"
-      ]
-    },
-    {
-      "fecha": "2026-05-15",
-      "campo": "L3H",
-      "lote": "13C",
-      "ha": 20,
-      "cultivo": "CEBADA",
-      "costo": 646.8,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "FLUROCLORIDONA RAINBOW",
-        "ACEITE METILADO ROCIO"
-      ]
-    },
-    {
-      "fecha": "2026-05-15",
-      "campo": "L3H",
-      "lote": "10O",
-      "ha": 30,
-      "cultivo": "CEBADA",
-      "costo": 970.2,
-      "produtos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "FLUROCLORIDONA RAINBOW",
-        "ACEITE METILADO ROCIO"
-      ]
-    },
-    {
       "fecha": "2026-04-26",
       "campo": "LA CHOLITA",
       "lote": "4",
@@ -4603,48 +3010,6 @@
       "costo": 2070.7,
       "productos": [
         "GLIFOSATO GRANULADO BOX 72%",
-        "2-4 D 97 SIGMA 64,3%",
-        "LIGIER PH BIO x LT",
-        "METSULFURON SIGMA x 100 GRS"
-      ]
-    },
-    {
-      "fecha": "2026-04-26",
-      "campo": "LA CHOLITA",
-      "lote": "5",
-      "ha": 20,
-      "cultivo": "CEBADA",
-      "costo": 828.3,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX 72%",
-        "2-4 D 97 SIGMA 64,3%",
-        "LIGIER PH BIO x LT",
-        "METSULFURON SIGMA x 100 GRS"
-      ]
-    },
-    {
-      "fecha": "2026-04-26",
-      "campo": "LA CHOLITA",
-      "lote": "3",
-      "ha": 54,
-      "cultivo": "COBERTURA",
-      "costo": 2615,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX 72%",
-        "2-4 D 97 SIGMA 64,3%",
-        "LIGIER PH BIO x LT",
-        "TERBUTILAZINA SIGMA x 20 Lts"
-      ]
-    },
-    {
-      "fecha": "2026-04-26",
-      "campo": "LA CHOLITA",
-      "lote": "4",
-      "ha": 50,
-      "cultivo": "CEBADA",
-      "costo": 2070.7,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX",
         "2-4 D 97 SIGMA",
         "LIGIER PH BIO",
         "METSULFURON SIGMA"
@@ -4658,62 +3023,6 @@
       "cultivo": "CEBADA",
       "costo": 828.3,
       "productos": [
-        "GLIFOSATO GRANULADO BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "METSULFURON SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-04-26",
-      "campo": "LA CHOLITA",
-      "lote": "3",
-      "ha": 54,
-      "cultivo": "COBERTURA",
-      "costo": 2614.7,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "TERBUTILAZINA"
-      ]
-    },
-    {
-      "fecha": "2026-04-26",
-      "campo": "LA CHOLITA",
-      "lote": "3",
-      "ha": 54,
-      "cultivo": "GIRASOL",
-      "costo": 2614.9,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "TERBUTILAZINA SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-04-26",
-      "campo": "LA CHOLITA",
-      "lote": "4",
-      "ha": 50,
-      "cultivo": "CEBADA",
-      "costo": 2070.7,
-      "produtos": [
-        "GLIFOSATO GRANULADO BOX 72%",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "METSULFURON SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-04-26",
-      "campo": "LA CHOLITA",
-      "lote": "5",
-      "ha": 20,
-      "cultivo": "CEBADA",
-      "costo": 828.3,
-      "produtos": [
         "GLIFOSATO GRANULADO BOX 72%",
         "2-4 D 97 SIGMA",
         "LIGIER PH BIO",
@@ -4727,7 +3036,7 @@
       "ha": 54,
       "cultivo": "COBERTURA",
       "costo": 2614.9,
-      "produtos": [
+      "productos": [
         "GLIFOSATO GRANULADO BOX 72%",
         "2-4 D 97 SIGMA",
         "LIGIER PH BIO",
@@ -4740,52 +3049,10 @@
       "lote": "1",
       "ha": 15,
       "cultivo": "COBERTURA",
-      "costo": 684,
+      "costo": 684.0,
       "productos": [
         "GLIFOSATO GRANULADO BOX 72%",
-        "TERBUTILAZINA SIGMA x 20 Lts",
-        "LIGIER PH BIO x LT",
-        "2-4 D 97 SIGMA 64,3%"
-      ]
-    },
-    {
-      "fecha": "2026-04-25",
-      "campo": "EL DESCANSO",
-      "lote": "3",
-      "ha": 23,
-      "cultivo": "COBERTURA",
-      "costo": 1048.7,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX 72%",
-        "TERBUTILAZINA SIGMA x 20 Lts",
-        "LIGIER PH BIO x LT",
-        "2-4 D 97 SIGMA 64,3%"
-      ]
-    },
-    {
-      "fecha": "2026-04-25",
-      "campo": "EL DESCANSO",
-      "lote": "7",
-      "ha": 30,
-      "cultivo": "COBERTURA",
-      "costo": 1367.8,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX 72%",
-        "TERBUTILAZINA SIGMA x 20 Lts",
-        "LIGIER PH BIO x LT",
-        "2-4 D 97 SIGMA 64,3%"
-      ]
-    },
-    {
-      "fecha": "2026-04-25",
-      "campo": "EL DESCANSO",
-      "lote": "1",
-      "ha": 15,
-      "cultivo": "COBERTURA",
-      "costo": 684,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX",
-        "TERBUTILAZINA",
+        "TERBUTILAZINA SIGMA",
         "LIGIER PH BIO",
         "2-4 D 97 SIGMA"
       ]
@@ -4798,90 +3065,6 @@
       "cultivo": "COBERTURA",
       "costo": 1048.8,
       "productos": [
-        "GLIFOSATO GRANULADO BOX",
-        "TERBUTILAZINA",
-        "LIGIER PH BIO",
-        "2-4 D 97 SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-04-25",
-      "campo": "EL DESCANSO",
-      "lote": "7",
-      "ha": 30,
-      "cultivo": "COBERTURA",
-      "costo": 1367.8,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX",
-        "TERBUTILAZINA",
-        "LIGIER PH BIO",
-        "2-4 D 97 SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-04-25",
-      "campo": "EL DESCANSO",
-      "lote": "1",
-      "ha": 15,
-      "cultivo": "MAIZ",
-      "costo": 684,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX",
-        "TERBUTILAZINA SIGMA",
-        "LIGIER PH BIO",
-        "2-4 D 97 SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-04-25",
-      "campo": "EL DESCANSO",
-      "lote": "3",
-      "ha": 23,
-      "cultivo": "MAIZ",
-      "costo": 1048.8,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX",
-        "TERBUTILAZINA SIGMA",
-        "LIGIER PH BIO",
-        "2-4 D 97 SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-04-25",
-      "campo": "EL DESCANSO",
-      "lote": "7",
-      "ha": 30,
-      "cultivo": "MAIZ",
-      "costo": 1367.8,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX",
-        "TERBUTILAZINA SIGMA",
-        "LIGIER PH BIO",
-        "2-4 D 97 SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-04-25",
-      "campo": "EL DESCANSO",
-      "lote": "1",
-      "ha": 15,
-      "cultivo": "COBERTURA",
-      "costo": 684,
-      "produtos": [
-        "GLIFOSATO GRANULADO BOX 72%",
-        "TERBUTILAZINA SIGMA",
-        "LIGIER PH BIO",
-        "2-4 D 97 SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-04-25",
-      "campo": "EL DESCANSO",
-      "lote": "3",
-      "ha": 23,
-      "cultivo": "COBERTURA",
-      "costo": 1048.7,
-      "produtos": [
         "GLIFOSATO GRANULADO BOX 72%",
         "TERBUTILAZINA SIGMA",
         "LIGIER PH BIO",
@@ -4895,7 +3078,7 @@
       "ha": 30,
       "cultivo": "COBERTURA",
       "costo": 1367.8,
-      "produtos": [
+      "productos": [
         "GLIFOSATO GRANULADO BOX 72%",
         "TERBUTILAZINA SIGMA",
         "LIGIER PH BIO",
@@ -4906,125 +3089,13 @@
       "fecha": "2026-04-24",
       "campo": "L3H",
       "lote": "13CH",
-      "ha": 30,
-      "cultivo": "-",
-      "costo": 590.7,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX 72%",
-        "A35T - GOLD x 10 LT",
-        "2-4 D 97 SIGMA 64,3%"
-      ]
-    },
-    {
-      "fecha": "2026-04-24",
-      "campo": "L3H",
-      "lote": "13CH",
       "ha": 20,
       "cultivo": "CEBADA",
       "costo": 590.7,
       "productos": [
-        "GLIFOSATO GRANULADO BOX",
+        "GLIFOSATO GRANULADO BOX 72%",
         "A35T - GOLD",
         "2-4 D 97 SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-04-24",
-      "campo": "L3H",
-      "lote": "13C",
-      "ha": 20,
-      "cultivo": "CEBADA",
-      "costo": 590.7,
-      "produtos": [
-        "GLIFOSATO GRANULADO BOX 72%",
-        "A35T GOLD",
-        "2-4 D 97 SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-04-24",
-      "campo": "L3H",
-      "lote": "13C",
-      "ha": 20,
-      "cultivo": "CEBADA",
-      "costo": 563.3,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX",
-        "A35T GOLD",
-        "2-4 D 97 SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-04-24",
-      "campo": "L3H",
-      "lote": "13C",
-      "ha": 20,
-      "cultivo": "CEBADA",
-      "costo": 590.7,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX",
-        "A35T - GOLD",
-        "2-4 D 97 SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-03-18",
-      "campo": "L3H",
-      "lote": "12",
-      "ha": 78,
-      "cultivo": "PASTURA",
-      "costo": 1732.5,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX 72%",
-        "2-4 D 97 SIGMA 64,3%",
-        "FLUMETSULAN",
-        "ACEITE METILADO ROCIO x 3 LT",
-        "LIGIER PH BIO x LT"
-      ]
-    },
-    {
-      "fecha": "2026-03-18",
-      "campo": "L3H",
-      "lote": "13",
-      "ha": 142,
-      "cultivo": "CEBADA",
-      "costo": 3387.6,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX 72%",
-        "2-4 D 97 SIGMA 64,3%",
-        "METSULFURON SIGMA x 100 GRS",
-        "ACEITE METILADO ROCIO x 3 LT",
-        "LIGIER PH BIO x LT"
-      ]
-    },
-    {
-      "fecha": "2026-03-18",
-      "campo": "L3H",
-      "lote": "12",
-      "ha": 78,
-      "cultivo": "PASTURA",
-      "costo": 1738.2,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX",
-        "2-4 D 97 SIGMA",
-        "FLUMETSULAN",
-        "ACEITE METILADO ROCIO",
-        "LIGIER PH BIO"
-      ]
-    },
-    {
-      "fecha": "2026-03-18",
-      "campo": "L3H",
-      "lote": "13",
-      "ha": 142,
-      "cultivo": "CEBADA",
-      "costo": 3387.9,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX",
-        "2-4 D 97 SIGMA",
-        "METSULFURON SIGMA",
-        "ACEITE METILADO ROCIO",
-        "LIGIER PH BIO"
       ]
     },
     {
@@ -5049,63 +3120,12 @@
       "ha": 142,
       "cultivo": "CEBADA",
       "costo": 3387.9,
-      "produtos": [
+      "productos": [
         "GLIFOSATO GRANULADO BOX 72%",
         "2-4 D 97 SIGMA",
         "METSULFURON SIGMA",
         "ACEITE METILADO ROCIO",
         "LIGIER PH BIO"
-      ]
-    },
-    {
-      "fecha": "2026-03-18",
-      "campo": "L3H",
-      "lote": "13G",
-      "ha": 142,
-      "cultivo": "CEBADA",
-      "costo": 3387.9,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX",
-        "2-4 D 97 SIGMA",
-        "METSULFURON SIGMA",
-        "ACEITE METILADO ROCIO",
-        "LIGIER PH BIO"
-      ]
-    },
-    {
-      "fecha": "2026-03-10",
-      "campo": "L3H",
-      "lote": "13",
-      "ha": 25,
-      "cultivo": "VERDEO",
-      "costo": 227.4,
-      "productos": [
-        "2-4 D 97 SIGMA 64,3%",
-        "METSULFURON SIGMA x 100 GRS"
-      ]
-    },
-    {
-      "fecha": "2026-03-10",
-      "campo": "L3H",
-      "lote": "13",
-      "ha": 25,
-      "cultivo": "CEBADA",
-      "costo": 113.8,
-      "productos": [
-        "METSULFURON SIGMA",
-        "2-4 D 97 SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-03-10",
-      "campo": "L3H",
-      "lote": "13C",
-      "ha": 25,
-      "cultivo": "CEBADA",
-      "costo": 113.8,
-      "produtos": [
-        "METSULFURON SIGMA",
-        "2-4 D 97 SIGMA"
       ]
     },
     {
@@ -5121,90 +3141,18 @@
       ]
     },
     {
-      "fecha": "2026-03-10",
-      "campo": "L3H",
-      "lote": "13C",
-      "ha": 25,
-      "cultivo": "CEBADA",
-      "costo": 113.8,
-      "productos": [
-        "METSULFURON SIGMA",
-        "2-4 D 97 SIGMA"
-      ]
-    },
-    {
       "fecha": "2026-01-02",
       "campo": "LA DORA",
       "lote": "5",
       "ha": 66,
       "cultivo": "MAIZ",
-      "costo": 1647,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX 72%",
-        "ACEITE METILADO ROCIO x 3 LT",
-        "LIGIER PH BIO x LT",
-        "2-4 D 97 SIGMA 64,3%",
-        "ATRAZINA 90% MAX SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-01-02",
-      "campo": "LA DORA",
-      "lote": "5",
-      "ha": 66,
-      "cultivo": "MAIZ",
-      "costo": 1646,
-      "produtos": [
-        "GLIFOSATO GRANULADO BOX",
-        "ACEITE METILADO ROCIO",
-        "LIGIER PH BIO",
-        "2-4 D 97 SIGMA",
-        "ATRAZINA"
-      ]
-    },
-    {
-      "fecha": "2026-01-02",
-      "campo": "LA DORA",
-      "lote": "5",
-      "ha": 66,
-      "cultivo": "MAIZ",
-      "costo": 1647,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX",
-        "ACEITE METILADO ROCIO",
-        "LIGIER PH BIO",
-        "2-4 D 97 SIGMA",
-        "ATRAZINA 90% MAX SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-01-02",
-      "campo": "LA DORA",
-      "lote": "5",
-      "ha": 66,
-      "cultivo": "MAIZ",
-      "costo": 1646.6,
+      "costo": 1647.0,
       "productos": [
         "GLIFOSATO GRANULADO BOX 72%",
         "ACEITE METILADO ROCIO",
         "LIGIER PH BIO",
         "2-4 D 97 SIGMA",
         "ATRAZINA 90% MAX SIGMA"
-      ]
-    },
-    {
-      "fecha": "2026-01-02",
-      "campo": "LA DORA",
-      "lote": "5",
-      "ha": 66,
-      "cultivo": "MAIZ",
-      "costo": 1816.9,
-      "productos": [
-        "GLIFOSATO GRANULADO BOX",
-        "ACEITE METILADO ROCIO",
-        "LIGIER PH BIO",
-        "2-4 D 97 SIGMA",
-        "ATRAZINA MAX SIGMA"
       ]
     },
     {
@@ -5218,32 +3166,9 @@
         "CLEARSOL",
         "ACEITE METILADO ROCIO"
       ]
-    },
-    {
-      "fecha": "2025-11-30",
-      "campo": "LA CUCA",
-      "lote": "2",
-      "ha": 112,
-      "cultivo": "GIRASOL",
-      "costo": 705.6,
-      "productos": [
-        "clearsol",
-        "aceite metilado rocio"
-      ]
     }
   ],
   "FERTILIZACIONES": [
-    {
-      "fecha": "2026-07-21",
-      "campo": "LOS ABUELOS",
-      "lote": "8B",
-      "ha": 20,
-      "cultivo": "CENTENO",
-      "tipo": "Siembra",
-      "producto": "CENTENO PROPIO",
-      "dosis": "50 kg/ha",
-      "costoHa": 20.6
-    },
     {
       "fecha": "2026-07-21",
       "campo": "LOS ABUELOS",
@@ -5256,6 +3181,17 @@
       "costoHa": 27.8
     },
     {
+      "fecha": "2026-07-21",
+      "campo": "LOS ABUELOS",
+      "lote": "8B",
+      "ha": 20,
+      "cultivo": "CENTENO",
+      "tipo": "Siembra",
+      "producto": "CENTENO PROPIO",
+      "dosis": "50 kg/ha",
+      "costoHa": 20.6
+    },
+    {
       "fecha": "2026-07-15",
       "campo": "LA CHOLITA",
       "lote": "5",
@@ -5264,7 +3200,7 @@
       "tipo": "Siembra",
       "producto": "CEBADA PROPIA",
       "dosis": "90 kg/ha",
-      "costoHa": 25
+      "costoHa": 25.0
     },
     {
       "fecha": "2026-07-15",
@@ -5275,7 +3211,7 @@
       "tipo": "Siembra",
       "producto": "CEBADA PROPIA",
       "dosis": "90 kg/ha",
-      "costoHa": 25
+      "costoHa": 25.0
     },
     {
       "fecha": "2026-07-14",
@@ -5297,7 +3233,7 @@
       "tipo": "Siembra",
       "producto": "CEBADA PROPIA",
       "dosis": "90 kg/ha",
-      "costoHa": 25
+      "costoHa": 25.0
     },
     {
       "fecha": "2026-07-14",
@@ -5308,18 +3244,18 @@
       "tipo": "Siembra",
       "producto": "CEBADA PROPIA",
       "dosis": "90 kg/ha",
-      "costoHa": 25
+      "costoHa": 25.0
     },
     {
       "fecha": "2026-07-14",
       "campo": "L3H",
-      "lote": "13C",
+      "lote": "13CH",
       "ha": 20,
       "cultivo": "CEBADA",
       "tipo": "Siembra",
       "producto": "CEBADA PROPIA",
       "dosis": "90 kg/ha",
-      "costoHa": 25
+      "costoHa": 25.0
     },
     {
       "fecha": "2026-07-14",
@@ -5330,18 +3266,7 @@
       "tipo": "Siembra",
       "producto": "CEBADA PROPIA",
       "dosis": "90 kg/ha",
-      "costoHa": 25
-    },
-    {
-      "fecha": "2026-07-14",
-      "campo": "L3H",
-      "lote": "10 O",
-      "ha": 33,
-      "cultivo": "CEBADA",
-      "tipo": "Siembra",
-      "producto": "CEBADA PROPIA",
-      "dosis": "90 kg/ha",
-      "costoHa": 25
+      "costoHa": 25.0
     },
     {
       "fecha": "2026-07-08",
@@ -5360,10 +3285,10 @@
       "lote": "6",
       "ha": 20,
       "cultivo": "CEBADA",
-      "tipo": "Arranque+Incorporada",
-      "producto": "MAP azufrado NUTRIEN + UREA-S NUTRIEN",
-      "dosis": "50+100 kg/ha",
-      "costoHa": 140.4
+      "tipo": "Arranque",
+      "producto": "MAP azufrado NUTRIEN",
+      "dosis": "50 kg/ha",
+      "costoHa": 46.9
     },
     {
       "fecha": "2026-07-08",
@@ -5378,56 +3303,12 @@
     },
     {
       "fecha": "2026-07-08",
-      "campo": "EL ABUELO",
-      "lote": "4",
-      "ha": 100,
-      "cultivo": "TRIGO",
+      "campo": "LA CHOLITA",
+      "lote": "6",
+      "ha": 20,
+      "cultivo": "CEBADA",
       "tipo": "Incorporada",
       "producto": "UREA-S NUTRIEN",
-      "dosis": "100 kg/ha",
-      "costoHa": 87.5
-    },
-    {
-      "fecha": "2026-07-08",
-      "campo": "LA CHOLITA",
-      "lote": "5",
-      "ha": 50,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-08",
-      "campo": "LA CHOLITA",
-      "lote": "6",
-      "ha": 20,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-08",
-      "campo": "LA CHOLITA",
-      "lote": "6",
-      "ha": 20,
-      "cultivo": "CEBADA",
-      "tipo": "Incorporada",
-      "producto": "UREA-S",
-      "dosis": "100 kg/ha",
-      "costoHa": 56.5
-    },
-    {
-      "fecha": "2026-07-08",
-      "campo": "LA CHOLITA",
-      "lote": "5",
-      "ha": 60,
-      "cultivo": "CEBADA",
-      "tipo": "Incorporada",
-      "producto": "UREA-S",
       "dosis": "100 kg/ha",
       "costoHa": 56.5
     },
@@ -5438,86 +3319,9 @@
       "ha": 100,
       "cultivo": "TRIGO",
       "tipo": "Incorporada",
-      "producto": "UREA-S",
-      "dosis": "100 kg/ha",
-      "costoHa": 56.5
-    },
-    {
-      "fecha": "2026-07-08",
-      "campo": "LA CHOLITA",
-      "lote": "5",
-      "ha": 50,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-08",
-      "campo": "LA CHOLITA",
-      "lote": "6",
-      "ha": 20,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-08",
-      "campo": "LA CHOLITA",
-      "lote": "6",
-      "ha": 20,
-      "cultivo": "CEBADA",
-      "tipo": "INCORPORADA",
       "producto": "UREA-S NUTRIEN",
       "dosis": "100 kg/ha",
-      "costoHa": 56.5
-    },
-    {
-      "fecha": "2026-07-08",
-      "campo": "LOS ABUELOS",
-      "lote": "5B",
-      "ha": 40,
-      "cultivo": "CENTENO",
-      "tipo": "Siembra",
-      "producto": "CENTENO PROPIO",
-      "dosis": "50 kg/ha",
-      "costoHa": 20.6
-    },
-    {
-      "fecha": "2026-07-08",
-      "campo": "LOS ABUELOS",
-      "lote": "8B",
-      "ha": 20,
-      "cultivo": "CENTENO",
-      "tipo": "Siembra",
-      "producto": "CENTENO PROPIO",
-      "dosis": "50 kg/ha",
-      "costoHa": 20.6
-    },
-    {
-      "fecha": "2026-07-08",
-      "campo": "LA CHOLITA",
-      "lote": "6",
-      "ha": 20,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque+Incorporada",
-      "producto": "MAP AZURADO NUTRIEN + UREA-S NUTRIEN",
-      "dosis": "50+100 kg/ha",
-      "costoHa": 103.4
-    },
-    {
-      "fecha": "2026-07-08",
-      "campo": "EL 5",
-      "lote": "2 y 3",
-      "ha": 40,
-      "cultivo": "AVENA",
-      "tipo": "Siembra",
-      "producto": "AVENA PROPIA",
-      "dosis": "600 kg/ha",
-      "costoHa": 246.6
+      "costoHa": 87.5
     },
     {
       "fecha": "2026-07-08",
@@ -5526,25 +3330,14 @@
       "ha": 20,
       "cultivo": "AVENA",
       "tipo": "Siembra",
-      "producto": "AVENA PROPIA",
-      "dosis": "600 kg/ha",
-      "costoHa": 246.6
-    },
-    {
-      "fecha": "2026-07-08",
-      "campo": "5",
-      "lote": "2",
-      "ha": 20,
-      "cultivo": "AVENA",
-      "tipo": "Siembra",
-      "producto": "AVENA PROPIA",
+      "producto": "CENTENO PROPIO",
       "dosis": "600 kg/ha",
       "costoHa": 246.6
     },
     {
       "fecha": "2026-07-07",
       "campo": "L3H",
-      "lote": "13C",
+      "lote": "13CH",
       "ha": 25,
       "cultivo": "CEBADA",
       "tipo": "Arranque",
@@ -5566,7 +3359,7 @@
     {
       "fecha": "2026-07-07",
       "campo": "L3H",
-      "lote": "10",
+      "lote": "10O",
       "ha": 30,
       "cultivo": "CEBADA",
       "tipo": "Arranque",
@@ -5610,7 +3403,7 @@
     {
       "fecha": "2026-07-07",
       "campo": "L3H",
-      "lote": "13C",
+      "lote": "13CH",
       "ha": 25,
       "cultivo": "CEBADA",
       "tipo": "Incorporada",
@@ -5621,7 +3414,7 @@
     {
       "fecha": "2026-07-07",
       "campo": "L3H",
-      "lote": "10",
+      "lote": "10O",
       "ha": 25,
       "cultivo": "CEBADA",
       "tipo": "Incorporada",
@@ -5652,215 +3445,6 @@
       "costoHa": 87.5
     },
     {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "13G",
-      "ha": 115,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "13C",
-      "ha": 25,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "13G",
-      "ha": 115,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "10O",
-      "ha": 30,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP",
-      "dosis": "70 kg/ha",
-      "costoHa": 65.6
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "23",
-      "ha": 50,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP",
-      "dosis": "70 kg/ha",
-      "costoHa": 65.6
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "4",
-      "ha": 100,
-      "cultivo": "TRIGO",
-      "tipo": "Arranque",
-      "producto": "MAP",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "13G",
-      "ha": 115,
-      "cultivo": "CEBADA",
-      "tipo": "Incorporada",
-      "producto": "UREA-S",
-      "dosis": "100 kg/ha",
-      "costoHa": 56.5
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "13C",
-      "ha": 25,
-      "cultivo": "CEBADA",
-      "tipo": "Incorporada",
-      "producto": "UREA-S",
-      "dosis": "100 kg/ha",
-      "costoHa": 56.5
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "10O",
-      "ha": 25,
-      "cultivo": "CEBADA",
-      "tipo": "Incorporada",
-      "producto": "UREA-S",
-      "dosis": "150 kg/ha",
-      "costoHa": 84.8
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "23",
-      "ha": 50,
-      "cultivo": "CEBADA",
-      "tipo": "Incorporada",
-      "producto": "UREA-S",
-      "dosis": "100 kg/ha",
-      "costoHa": 56.5
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "4",
-      "ha": 100,
-      "cultivo": "TRIGO",
-      "tipo": "Incorporada",
-      "producto": "UREA-S",
-      "dosis": "100 kg/ha",
-      "costoHa": 56.5
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "13C",
-      "ha": 25,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "10",
-      "ha": 30,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "70 kg/ha",
-      "costoHa": 65.6
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "23",
-      "ha": 50,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "70 kg/ha",
-      "costoHa": 65.6
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "4",
-      "ha": 100,
-      "cultivo": "TRIGO",
-      "tipo": "Arranque",
-      "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "10O",
-      "ha": 30,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "70 kg/ha",
-      "costoHa": 65.6
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "10O",
-      "ha": 25,
-      "cultivo": "CEBADA",
-      "tipo": "Incorporada",
-      "producto": "UREA-S NUTRIEN",
-      "dosis": "150 kg/ha",
-      "costoHa": 84.8
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "13ch",
-      "ha": 25,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "13ch",
-      "ha": 25,
-      "cultivo": "CEBADA",
-      "tipo": "Incorporada",
-      "producto": "UREA-S NUTRIEN",
-      "dosis": "100 kg/ha",
-      "costoHa": 56.5
-    },
-    {
       "fecha": "2026-07-06",
       "campo": "LOS NIETOS",
       "lote": "4",
@@ -5916,125 +3500,25 @@
       "costoHa": 46.9
     },
     {
-      "fecha": "2026-07-06",
-      "campo": "LOS NIETOS",
-      "lote": "4",
-      "ha": 27,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-06",
-      "campo": "EL ABUELO",
-      "lote": "2",
-      "ha": 62,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-06",
-      "campo": "LOS NIETOS",
-      "lote": "4",
-      "ha": 27,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-06",
-      "campo": "EL ABUELO",
-      "lote": "2",
-      "ha": 62,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-06",
-      "campo": "EL ABUELO",
-      "lote": "4",
-      "ha": 17,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-06",
-      "campo": "EL ABUELO",
-      "lote": "5",
-      "ha": 40,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-06",
-      "campo": "EL TORELLO",
-      "lote": "5",
-      "ha": 52,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-06",
-      "campo": "EL ABUELO",
-      "lote": "4",
-      "ha": 17,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-06",
-      "campo": "EL ABUELO",
-      "lote": "5",
-      "ha": 40,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
-    },
-    {
-      "fecha": "2026-07-06",
-      "campo": "EL TORELLO",
-      "lote": "5",
-      "ha": 52,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "50 kg/ha",
-      "costoHa": 46.9
+      "fecha": "2025-11-04",
+      "campo": "L3H",
+      "lote": "13",
+      "ha": 42.1,
+      "cultivo": "TRIGO",
+      "tipo": "Incorporada",
+      "producto": "UREA",
+      "dosis": "149.7 kg/ha",
+      "costoHa": 83.8
     }
   ],
   "stats": {
-    "costoUSD": "0.4254",
-    "tokensEntrada": 65534,
-    "tokensSalida": 15253
+    "origen": "reconstruccion-manual",
+    "costoUSD": "0.0000"
   },
   "modifiedTimes": {
-    "rotaciones": "2026-07-23T13:14:29.389Z",
-    "labores": "2026-07-23T12:48:59.296Z",
-    "margenes": "2026-07-06T13:39:09.153Z",
-    "suelos": "2026-07-13T13:09:28.201Z"
+    "rotaciones": null,
+    "labores": null,
+    "margenes": null,
+    "suelos": null
   }
 }
