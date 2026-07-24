@@ -2147,7 +2147,7 @@ export default function App(){
   };
 
   // herbicidas
-  const aplFilt=useMemo(()=>campoFiltro==="TODOS"?APLICACIONES:APLICACIONES.filter(a=>a.campo===campoFiltro),[campoFiltro]);
+  const aplFilt=useMemo(()=>campoFiltro==="TODOS"?APLICACIONES:APLICACIONES.filter(a=>a.campo===campoFiltro),[campoFiltro,APLICACIONES]);
   const haApl=aplFilt.reduce((s,a)=>s+a.ha,0);
   const costoApl=aplFilt.reduce((s,a)=>s+a.costo,0);
 
