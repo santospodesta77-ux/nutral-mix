@@ -930,7 +930,7 @@ function getFill(campoId, loteId, modo, sueloVar, datos = {}) {
 }
 
 // ── COMPONENTE MAPA ──────────────────────────────────────────
-function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick, datos}){
+function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick, datos, cultivoFiltro=null, cultivosDeLote=null}){
   const [hov,setHov]=useState(null);
   const [vx,vy,vw,vh]=campo.vb;
   const k=vw/700;
@@ -948,13 +948,19 @@ function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick, datos}){
       ))}
       {campo.lotes.map(l=>{
         const info=getFill(campo.id,l.id,modo,sueloVar,datos);
-        const {fill,fill2,label,dim,doble}=info;
+        let {fill,fill2,label,dim,doble}=info;
+        // Filtro por cultivo: si está activo y este lote no lo tiene, atenuar
+        let apagadoPorFiltro=false;
+        if(cultivoFiltro&&cultivosDeLote){
+          const cvs=cultivosDeLote(campo.id,l.id);
+          if(!cvs.includes(cultivoFiltro)){ apagadoPorFiltro=true; dim=true; }
+        }
         const [cx,cy]=centro(l.poly);
         const w=anchoP(l.poly);
         const isH=hov===l.id;
         const patternId=`p_${campo.id.replace(/\s+/g,"")}_${l.id.replace(/\s+/g,"")}`.replace(/[^a-zA-Z0-9_]/g,"");
         return <g key={l.id} onMouseEnter={()=>!mini&&setHov(l.id)} onMouseLeave={()=>setHov(null)} onClick={onLoteClick?()=>onLoteClick(campo,l):undefined}>
-          {doble&&(
+          {doble&&!apagadoPorFiltro&&(
             <defs>
               <pattern id={patternId} patternUnits="userSpaceOnUse" width={12*k} height={12*k} patternTransform="rotate(45)">
                 <rect width={6*k} height={12*k} fill={fill}/>
@@ -963,8 +969,8 @@ function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick, datos}){
             </defs>
           )}
           <polygon points={l.poly.map(p=>p.join(",")).join(" ")}
-            fill={doble?`url(#${patternId})`:fill} stroke={isH?"#1A1610":TINTA}
-            strokeWidth={(isH?2.5:dim?0.8:1.3)*k} opacity={dim?0.75:1}/>
+            fill={apagadoPorFiltro?"#EDEBE3":(doble?`url(#${patternId})`:fill)} stroke={isH?"#1A1610":TINTA}
+            strokeWidth={(isH?2.5:dim?0.8:1.3)*k} opacity={apagadoPorFiltro?0.4:(dim?0.75:1)}/>
           {!mini&&w>=34*k&&(
             <g style={{pointerEvents:"none"}}>
               <text x={cx} y={cy+(dim?-2:label?-6:-2)*k} fontSize={(w<55*k?9.5:12)*k}
@@ -1977,6 +1983,7 @@ export default function App(){
   const [vista,setVista]=useState("mapas");        // mapas | galeria | herbicidas | acciones | ordenes | margenes | protocolos
   const [campoSel,setCampoSel]=useState("L3H");
   const [capaModo,setCapaModo]=useState("campaña"); // campaña|rindes|margenes|suelos
+  const [cultivoFiltro,setCultivoFiltro]=useState(null); // null = sin filtro; "MAIZ", "SOJA", etc.
   const [sueloVar,setSueloVar]=useState("P");
   const [campoFiltro,setCampoFiltro]=useState("TODOS");
   const [acciones,setAcciones]=useState(ACCIONES_INIT);
@@ -2007,6 +2014,35 @@ export default function App(){
 
   const abrirLote=(campo,lote)=>setLoteAbierto({campo,lote});
   const cerrarLote=()=>setLoteAbierto(null);
+
+  // Cultivos que tiene un lote en 26-27 (puede ser 1 o 2 si es doble cultivo)
+  const cultivosDeLote=(campoId,loteId)=>{
+    const k=`${campoId}|${loteId}`;
+    const inv=INV_26[k], plan=PLAN_2627[k];
+    const set=new Set();
+    if(inv) set.add(baseCv(inv));
+    if(plan){
+      if(plan.includes("-")) plan.split("-").forEach(p=>set.add(baseCv(p)));
+      else set.add(baseCv(plan));
+    }
+    return [...set].filter(Boolean);
+  };
+  // Lista de todos los cultivos presentes en 26-27 (para el selector de filtro)
+  const cultivosDisponibles=useMemo(()=>{
+    const set=new Set();
+    CAMPOS.forEach(c=>c.lotes.forEach(l=>cultivosDeLote(c.id,l.id).forEach(cv=>set.add(cv))));
+    return [...set].sort();
+  },[INV_26,PLAN_2627]);
+  // Agrupa lotes por el cultivo filtrado: [{campo, lote, ha, cultivosLote}]
+  const lotesDelCultivo=useMemo(()=>{
+    if(!cultivoFiltro) return [];
+    const res=[];
+    CAMPOS.forEach(c=>c.lotes.forEach(l=>{
+      const cvs=cultivosDeLote(c.id,l.id);
+      if(cvs.includes(cultivoFiltro)) res.push({campo:c,lote:l,ha:Number(l.ha)||0,cvs});
+    }));
+    return res.sort((a,b)=>b.ha-a.ha);
+  },[cultivoFiltro,INV_26,PLAN_2627]);
 
   const caja={background:CREMA,border:`1.5px solid ${TINTA}`,borderRadius:12,padding:"14px 16px"};
   const tab=(a)=>({padding:"8px 14px",fontSize:13,fontWeight:700,cursor:"pointer",borderRadius:8,
@@ -2114,6 +2150,59 @@ export default function App(){
   const tratamientosActivos = tratamientos
     .map((t, i) => ({...t, idx: i, ha: haTratamiento(i), filasActivas: t.productos.filter(p => p.n && p.d > 0)}))
     .filter(t => t.ha > 0 && t.filasActivas.length > 0);
+
+  // Estado de guardado a planilla
+  const [guardando, setGuardando] = useState(false);
+  const [guardadoMsg, setGuardadoMsg] = useState(null); // {ok:bool, texto:string}
+
+  const guardarLaborEnPlanilla = async () => {
+    // Armar payload: cada tratamiento con sus lotes (agrupados por campo) + productos
+    const tratamientosPayload = tratamientosActivos.map(t => {
+      const lotes = [];
+      CAMPOS.forEach(c => c.lotes.forEach(l => {
+        if(pintura[clL(c.id, l.id)] === t.idx){
+          lotes.push({campo: c.id, lote: l.label||l.id, ha: Number(l.ha)||0});
+        }
+      }));
+      return {
+        cultivo: t.cultivo || "",
+        productos: t.filasActivas.map(p => ({n: p.n, d: p.d, p: p.p, u: p.u})),
+        lotes,
+      };
+    }).filter(t => t.lotes.length > 0);
+
+    if(tratamientosPayload.length === 0){
+      setGuardadoMsg({ok:false, texto:"No hay tratamientos con lotes pintados para guardar."});
+      return;
+    }
+
+    const payload = {
+      fecha: ordFecha,
+      productor: ordProductor,
+      tipoLabor: ordTipo,
+      tratamientos: tratamientosPayload,
+    };
+
+    setGuardando(true);
+    setGuardadoMsg(null);
+    try {
+      const resp = await fetch("/api/guardar-labor", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload),
+      });
+      const data = await resp.json();
+      if(resp.ok && data.ok){
+        setGuardadoMsg({ok:true, texto:`✓ ${data.mensaje} Aparecerá en la app tras la próxima corrida del pipeline.`});
+      } else {
+        setGuardadoMsg({ok:false, texto:`Error: ${data.error || "no se pudo guardar"}`});
+      }
+    } catch(err) {
+      setGuardadoMsg({ok:false, texto:`Error de conexión: ${err.message}`});
+    } finally {
+      setGuardando(false);
+    }
+  };
 
 
   const descargarPNG=()=>{
@@ -2239,7 +2328,18 @@ export default function App(){
               </select>
               {CAPAS.map(c=><button key={c.id} style={chip(capaModo===c.id)} onClick={()=>setCapaModo(c.id)}>{c.lbl}</button>)}
             </div>
-            {/* suelo sub-chips */}
+            {/* filtro por cultivo — solo en capa campaña */}
+            {capaModo==="campaña"&&(
+              <div style={{width:"100%",display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+                <span style={{fontSize:12,opacity:0.6,fontWeight:600,marginRight:2}}>Filtrar cultivo:</span>
+                <button onClick={()=>setCultivoFiltro(null)} style={chip(cultivoFiltro===null)}>Todos</button>
+                {cultivosDisponibles.map(cv=>(
+                  <button key={cv} onClick={()=>setCultivoFiltro(cv===cultivoFiltro?null:cv)} style={{...chip(cultivoFiltro===cv),display:"inline-flex",alignItems:"center",gap:5}}>
+                    <span style={{width:9,height:9,borderRadius:2,background:colorCv(cv),flexShrink:0}}/>{cv}
+                  </button>
+                ))}
+              </div>
+            )}
             {capaModo==="suelos"&&(
               <div style={{display:"flex",gap:6}}>
                 {[["P","🟠 Fósforo"],["N","🔵 Nitrógeno"],["MO","🟢 Mat. Orgánica"]].map(([v,l])=>(
@@ -2253,7 +2353,7 @@ export default function App(){
                 <div style={{fontWeight:700,fontSize:15}}>{campo.nombre}</div>
                 <div style={{fontSize:12,opacity:0.6}}>{PRODUCTOR[campo.id]} · {fmt(haCampo(campo))} ha</div>
               </div>
-              <MapaCampo campo={campo} modo={capaModo} sueloVar={sueloVar} onLoteClick={abrirLote} datos={{INV_26,PLAN_2627,RINDE_2526,SUELOS}}/>
+              <MapaCampo campo={campo} modo={capaModo} sueloVar={sueloVar} onLoteClick={abrirLote} datos={{INV_26,PLAN_2627,RINDE_2526,SUELOS}} cultivoFiltro={cultivoFiltro} cultivosDeLote={cultivosDeLote}/>
               <div style={{paddingInline:4}}><Leyenda modo={capaModo} sueloVar={sueloVar}/></div>
               {/* Resumen ha por cultivo — campaña 26-27 */}
               {capaModo==="campaña"&&(()=>{
@@ -2335,10 +2435,52 @@ export default function App(){
                   )}
               </div>
             )}
+            {/* panel lista del cultivo filtrado */}
+            {capaModo==="campaña"&&cultivoFiltro&&(
+              <div style={{flex:"1 1 300px",maxWidth:420,...caja}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+                  <span style={{width:14,height:14,borderRadius:3,background:colorCv(cultivoFiltro),border:`1px solid ${TINTA}`,flexShrink:0}}/>
+                  <div style={{fontSize:13,fontWeight:700}}>Lotes con {cultivoFiltro} · 26-27</div>
+                </div>
+                {lotesDelCultivo.length===0
+                  ?<div style={{fontSize:13,opacity:0.6}}>No hay lotes con {cultivoFiltro} en esta campaña.</div>
+                  :(<>
+                    <div style={{display:"flex",justifyContent:"space-between",padding:"8px 10px",background:"#F3EFE3",borderRadius:8,marginBottom:8,fontSize:13}}>
+                      <span style={{fontWeight:600}}>{lotesDelCultivo.length} lotes · {[...new Set(lotesDelCultivo.map(x=>x.campo.id))].length} campos</span>
+                      <span style={{fontWeight:700}}>{fmt(lotesDelCultivo.reduce((s,x)=>s+x.ha,0))} ha</span>
+                    </div>
+                    <div style={{maxHeight:420,overflow:"auto",display:"flex",flexDirection:"column",gap:4}}>
+                      {(()=>{
+                        // agrupar por campo
+                        const porCampo={};
+                        lotesDelCultivo.forEach(x=>{(porCampo[x.campo.id]=porCampo[x.campo.id]||{campo:x.campo,items:[]}).items.push(x);});
+                        return Object.values(porCampo).map(({campo:cc,items})=>(
+                          <div key={cc.id} style={{marginBottom:6}}>
+                            <div style={{fontSize:11,fontWeight:700,opacity:0.7,textTransform:"uppercase",letterSpacing:"0.05em",padding:"2px 0",borderBottom:"1px solid #E5E0D0",marginBottom:3,display:"flex",justifyContent:"space-between"}}>
+                              <span>{cc.nombre}</span>
+                              <span>{fmt(items.reduce((s,x)=>s+x.ha,0))} ha</span>
+                            </div>
+                            {items.map(x=>{
+                              const esDoble=x.cvs.length>1;
+                              return (
+                                <div key={x.lote.id} onClick={()=>abrirLote(cc,x.lote)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 8px",borderRadius:6,cursor:"pointer",fontSize:12.5,background:"#FFFDF7",border:"1px solid #EEE9DC"}}>
+                                  <span style={{display:"inline-flex",alignItems:"center",gap:6}}>
+                                    <b>Lote {x.lote.label||x.lote.id}</b>
+                                    {esDoble&&<span style={{fontSize:10,opacity:0.6}}>({x.cvs.join(" + ")})</span>}
+                                  </span>
+                                  <span style={{opacity:0.75}}>{x.ha} ha</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ));
+                      })()}
+                    </div>
+                  </>)}
+              </div>
+            )}
           </div>
         )}
-
-        {/* ══ GALERÍA TODOS LOS CAMPOS ══ */}
         {vista==="galeria"&&(
           <div>
             <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:14,alignItems:"center"}}>
@@ -2348,6 +2490,17 @@ export default function App(){
                 <button key={v} style={chip(sueloVar===v)} onClick={()=>setSueloVar(v)}>{l}</button>
               ))}
             </div>
+            {capaModo==="campaña"&&(
+              <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:14,alignItems:"center"}}>
+                <span style={{fontSize:12,opacity:0.6,fontWeight:600}}>Filtrar cultivo:</span>
+                <button onClick={()=>setCultivoFiltro(null)} style={chip(cultivoFiltro===null)}>Todos</button>
+                {cultivosDisponibles.map(cv=>(
+                  <button key={cv} onClick={()=>setCultivoFiltro(cv===cultivoFiltro?null:cv)} style={{...chip(cultivoFiltro===cv),display:"inline-flex",alignItems:"center",gap:5}}>
+                    <span style={{width:9,height:9,borderRadius:2,background:colorCv(cv),flexShrink:0}}/>{cv}
+                  </button>
+                ))}
+              </div>
+            )}
             <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:16}}>
               {CAMPOS.map(c=>(
                 <div key={c.id} style={{background:"#fff",border:`1.5px solid ${TINTA}`,borderRadius:12,padding:10,boxShadow:"0 1px 6px rgba(46,42,34,.08)"}}>
@@ -2355,7 +2508,7 @@ export default function App(){
                     <div style={{fontWeight:700,fontSize:14}}>{c.nombre}</div>
                     <div style={{fontSize:12,opacity:0.55}}>{PRODUCTOR[c.id]} · {fmt(haCampo(c))} ha</div>
                   </div>
-                  <MapaCampo campo={c} modo={capaModo} sueloVar={sueloVar} mini={false} onLoteClick={abrirLote} datos={{INV_26,PLAN_2627,RINDE_2526,SUELOS}}/>
+                  <MapaCampo campo={c} modo={capaModo} sueloVar={sueloVar} mini={false} onLoteClick={abrirLote} datos={{INV_26,PLAN_2627,RINDE_2526,SUELOS}} cultivoFiltro={cultivoFiltro} cultivosDeLote={cultivosDeLote}/>
                   <div style={{marginTop:4}}><Leyenda modo={capaModo} sueloVar={sueloVar}/></div>
                 </div>
               ))}
@@ -2791,11 +2944,17 @@ export default function App(){
                     </svg>
                   </div>
                   <div style={{display:"flex",gap:8,marginTop:10,flexWrap:"wrap"}}>
+                    <button onClick={guardarLaborEnPlanilla} disabled={guardando||tratamientosActivos.length===0} style={{padding:"9px 15px",fontSize:12.5,fontWeight:700,cursor:guardando?"wait":"pointer",border:"none",borderRadius:8,background:tratamientosActivos.length===0?"#B5AF9D":"#2E7D32",color:"#fff",fontFamily:"inherit",opacity:guardando?0.7:1}}>{guardando?"Guardando…":"💾 Guardar en planilla"}</button>
                     <button onClick={imprimirOrdenCompleta} style={{padding:"9px 13px",fontSize:12.5,fontWeight:700,cursor:"pointer",border:"none",borderRadius:8,background:TINTA,color:"#F3EFE3",fontFamily:"inherit"}}>🖨️ Descargar orden completa (PDF)</button>
                     <button onClick={descargarPNG} style={{padding:"9px 13px",fontSize:12.5,fontWeight:600,cursor:"pointer",border:`1.5px solid ${TINTA}`,borderRadius:8,background:"transparent",color:TINTA,fontFamily:"inherit"}}>⬇ PNG mapa actual</button>
                     <button onClick={limpiarOrd} style={{padding:"9px 13px",fontSize:12.5,fontWeight:600,cursor:"pointer",border:`1.5px solid ${TINTA}`,borderRadius:8,background:"transparent",color:TINTA,fontFamily:"inherit"}}>Limpiar campo</button>
                     <button onClick={limpiarOrdenCompleta} style={{padding:"9px 13px",fontSize:12.5,fontWeight:600,cursor:"pointer",border:"1.5px solid #C0392B",borderRadius:8,background:"transparent",color:"#C0392B",fontFamily:"inherit"}}>Reset orden</button>
                   </div>
+                  {guardadoMsg&&(
+                    <div style={{marginTop:8,padding:"9px 12px",borderRadius:8,fontSize:12.5,fontWeight:600,background:guardadoMsg.ok?"#E8F5E9":"#FDECEA",color:guardadoMsg.ok?"#2E7D32":"#C0392B",border:`1px solid ${guardadoMsg.ok?"#A5D6A7":"#F5C6CB"}`}}>
+                      {guardadoMsg.texto}
+                    </div>
+                  )}
                 </div>
               </div>
 
