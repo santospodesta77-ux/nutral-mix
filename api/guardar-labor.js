@@ -11,7 +11,7 @@
 import { google } from "googleapis";
 
 const PLANILLA_LABORES = "1JpAA6bCl_uhizVO4jOVBEs34RRlNuAVHKr8kSFRm5ro";
-const HOJA = "registros";
+const HOJA = "registro";
 
 // Precio por ha de cada tipo de labor (de la planilla insumos)
 const PRECIO_LABOR = {
