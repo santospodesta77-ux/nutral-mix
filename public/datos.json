@@ -1,16 +1,20 @@
 {
-  "generado": "2026-08-06T14:26:39.394Z",
+  "generado": "2026-08-06T14:50:51.478Z",
   "warnings": [
-    "Campo DON ANTONIO con lotes sin hectáreas declaradas: 5, 13",
-    "Campo DOÑA TERESA lote 10 sin hectáreas declaradas",
-    "Campo EL 5 con lotes sin hectáreas declaradas: 3, 6",
-    "Campo LA FLECHA sin rindes 25-26 registrados",
-    "Campo EL TORELLO lote 4 sin hectáreas declaradas",
-    "Lote LOS ABUELOS-5B sin hectáreas declaradas en rotaciones",
-    "Aplicación 30/11/2025 LA CUCA-2: productos sin precio ('clearsol', 'aceite metilado rocio')",
-    "Registro de fertilizaciones con ejemplo de cálculo completo (L3H-13, 04/11/2025) pero sin datos de aplicaciones reales masivas",
-    "Algunos análisis de suelo con campos calculados como #¡DIV/0! en IMO",
-    "[margenes] Planilla 'margenes' está en formato Excel (.xlsx). Convertila a Google Sheets nativa y actualizá el ID."
+    "Campo MIRASOL es ambiguo (Don Antonio, La Flecha o Doña Teresa) — no asignado",
+    "Campo EL 5 referenciado en Cronograma pero no está en lista válida de campos",
+    "Campo LA MARIA OLIVA tiene lotes en CLIENTES Y CAMPOS pero no está en lista válida de campos",
+    "Lote LA DORA-maiz humed: nombre ambiguo, transcrito tal cual",
+    "Lote EL ABUELO-1 y 3: transcrito tal cual, formato inusual",
+    "Lote EL ABUELO-2,4 y 5: transcrito tal cual, formato inusual",
+    "Lote 5 2: campo '5' no válido, no asignado",
+    "Múltiples filas con productos vacíos en tabla plana — ignoradas",
+    "Planilla BH PELAYO contiene lista de precios, no aplicaciones — ignorada",
+    "Planilla BH CEREALES contiene lista de precios, no aplicaciones — ignorada",
+    "Planilla BASE DE LABORES contiene costos unitarios, no aplicaciones — ignorada",
+    "Planilla Estrategias contiene recomendaciones, no aplicaciones — ignorada",
+    "Planilla Cronograma contiene planificación, no aplicaciones — ignorada",
+    "Planilla totales contiene resumen, no aplicaciones — ignorada"
   ],
   "INV_26": {
     "L3H|9B": "CEBADA",
@@ -1701,6 +1705,18 @@
   },
   "APLICACIONES": [
     {
+      "fecha": "2026-11-30",
+      "campo": "LA CUCA",
+      "lote": "2",
+      "ha": 112,
+      "cultivo": "GIRASOL",
+      "costo": 705.6,
+      "produtos": [
+        "clearsol",
+        "aceite metilado rocio"
+      ]
+    },
+    {
       "fecha": "2026-08-06",
       "campo": "L3H",
       "lote": "5",
@@ -1762,6 +1778,90 @@
         "LIGIER PH BIO x LT",
         "FLUROXIPIR 48 SIGMA x 5 Lts",
         "DIFLUFENICAN SIGMA 50%"
+      ]
+    },
+    {
+      "fecha": "2026-08-06",
+      "campo": "L3H",
+      "lote": "5",
+      "ha": 42,
+      "cultivo": "CEBADA",
+      "costo": 1148.1,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "DICAMBA SIGMA x 10 LT",
+        "METSULFURON SIGMA x kg"
+      ]
+    },
+    {
+      "fecha": "2026-08-06",
+      "campo": "L3H",
+      "lote": "4",
+      "ha": 111,
+      "cultivo": "CEBADA",
+      "costo": 3034.4,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "DICAMBA SIGMA x 10 LT",
+        "METSULFURON SIGMA x kg"
+      ]
+    },
+    {
+      "fecha": "2026-08-06",
+      "campo": "L3H",
+      "lote": "13",
+      "ha": 142,
+      "cultivo": "GIRASOL",
+      "costo": 4908,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "FLUROXIPIR 48 SIGMA x 5 Lts",
+        "DIFLUFENICAN SIGMA 50%"
+      ]
+    },
+    {
+      "fecha": "2026-08-06",
+      "campo": "L3H",
+      "lote": "22",
+      "ha": 51,
+      "cultivo": "GIRASOL",
+      "costo": 1762.7,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "FLUROXIPIR 48 SIGMA x 5 Lts",
+        "DIFLUFENICAN SIGMA 50%"
+      ]
+    },
+    {
+      "fecha": "2026-08-06",
+      "campo": "L3H",
+      "lote": "26",
+      "ha": 53,
+      "cultivo": "CEBADA",
+      "costo": 1120.7,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT"
+      ]
+    },
+    {
+      "fecha": "2026-08-06",
+      "campo": "L3H",
+      "lote": "27",
+      "ha": 50,
+      "cultivo": "CEBADA",
+      "costo": 1057.3,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT"
       ]
     },
     {
@@ -1827,6 +1927,36 @@
       ]
     },
     {
+      "fecha": "2026-07-20",
+      "campo": "LOS ABUELOS",
+      "lote": "2",
+      "ha": 42,
+      "cultivo": "MAIZ",
+      "costo": 1335.6,
+      "produtos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Dicamba 70.8 % Duranor Avance x Lt",
+        "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
+        "Atrazina 90 % solida x 15 kg"
+      ]
+    },
+    {
+      "fecha": "2026-07-20",
+      "campo": "LOS ABUELOS",
+      "lote": "3",
+      "ha": 39,
+      "cultivo": "MAIZ",
+      "costo": 1240.5,
+      "produtos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Dicamba 70.8 % Duranor Avance x Lt",
+        "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
+        "Atrazina 90 % solida x 15 kg"
+      ]
+    },
+    {
       "fecha": "2026-07-16",
       "campo": "DON RAMON",
       "lote": "1",
@@ -1909,6 +2039,48 @@
       "costo": 823.2,
       "productos": [
         "PULVERIZADA TERRESTRE",
+        "Dicamba 70.8 % Duranor Avance x Lt",
+        "POWERSPRAY 2,4D 68%"
+      ]
+    },
+    {
+      "fecha": "2026-07-16",
+      "campo": "DON RAMON",
+      "lote": "2",
+      "ha": 18,
+      "cultivo": "AVENA",
+      "costo": 503.4,
+      "produtos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Dicamba 70.8 % Duranor Avance x Lt",
+        "Metsulfuron Metil 60 %",
+        "Coady. RizoSpray EXTREMO x 10 Lt"
+      ]
+    },
+    {
+      "fecha": "2026-07-16",
+      "campo": "DON RAMON",
+      "lote": "1",
+      "ha": 20,
+      "cultivo": "AVENA",
+      "costo": 559.3,
+      "produtos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Dicamba 70.8 % Duranor Avance x Lt",
+        "Metsulfuron Metil 60 %",
+        "Coady. RizoSpray EXTREMO x 10 Lt"
+      ]
+    },
+    {
+      "fecha": "2026-07-16",
+      "campo": "DON RAMON",
+      "lote": "6",
+      "ha": 60,
+      "cultivo": "VERDEO",
+      "costo": 823.2,
+      "produtos": [
         "Dicamba 70.8 % Duranor Avance x Lt",
         "POWERSPRAY 2,4D 68%"
       ]
@@ -1967,6 +2139,35 @@
       "costo": 3344.1,
       "productos": [
         "PULVERIZADA TERRESTRE",
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "METSULFURON SIGMA x kg"
+      ]
+    },
+    {
+      "fecha": "2026-07-13",
+      "campo": "EL ABUELO",
+      "lote": "1 y 3",
+      "ha": 77,
+      "cultivo": "GIRASOL",
+      "costo": 3060.3,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "DIFLUFENICAN SIGMA 50%",
+        "FLUROXIPIR 48 SIGMA x 5 Lts"
+      ]
+    },
+    {
+      "fecha": "2026-07-13",
+      "campo": "EL ABUELO",
+      "lote": "2,4 y 5",
+      "ha": 120,
+      "cultivo": "GIRASOL",
+      "costo": 3100.5,
+      "produtos": [
         "GLIFOSATO GRANULADO LT BOX x 15 KG",
         "2-4 D 97 SIGMA x 20 LT",
         "LIGIER PH BIO x LT",
@@ -2090,6 +2291,66 @@
       "costo": 645.6,
       "productos": [
         "PULVERIZADA TERRESTRE",
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "DICAMBA SIGMA x 10 LT",
+        "METSULFURON SIGMA x 100 GRS"
+      ]
+    },
+    {
+      "fecha": "2026-07-02",
+      "campo": "EL TORELLO",
+      "lote": "5",
+      "ha": 52,
+      "cultivo": "CEBADA",
+      "costo": 1243.9,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "DICAMBA SIGMA x 10 LT",
+        "METSULFURON SIGMA x 100 GRS"
+      ]
+    },
+    {
+      "fecha": "2026-07-02",
+      "campo": "LOS NIETOS",
+      "lote": "7",
+      "ha": 20,
+      "cultivo": "AVENA",
+      "costo": 478.3,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "DICAMBA SIGMA x 10 LT",
+        "METSULFURON SIGMA x 100 GRS"
+      ]
+    },
+    {
+      "fecha": "2026-07-02",
+      "campo": "EL CIPRES",
+      "lote": "1",
+      "ha": 28,
+      "cultivo": "CEBADA",
+      "costo": 669.6,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "DICAMBA SIGMA x 10 LT",
+        "METSULFURON SIGMA x 100 GRS"
+      ]
+    },
+    {
+      "fecha": "2026-07-02",
+      "campo": "LOS NIETOS",
+      "lote": "4",
+      "ha": 27,
+      "cultivo": "CEBADA",
+      "costo": 645.8,
+      "produtos": [
         "GLIFOSATO GRANULADO LT BOX x 15 KG",
         "2-4 D 97 SIGMA x 20 LT",
         "LIGIER PH BIO x LT",
@@ -2160,6 +2421,36 @@
       ]
     },
     {
+      "fecha": "2026-06-29",
+      "campo": "LOS ABUELOS",
+      "lote": "5 b (sur)",
+      "ha": 45,
+      "cultivo": "TRIGO",
+      "costo": 1328.9,
+      "produtos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Dicamba 70.8 % Duranor Avance x Lt",
+        "Metsulfuron Metil 60 %",
+        "Coady. RizoSpray EXTREMO x 10 Lt"
+      ]
+    },
+    {
+      "fecha": "2026-06-29",
+      "campo": "LOS ABUELOS",
+      "lote": "8B (SUR)",
+      "ha": 23,
+      "cultivo": "CENTENO",
+      "costo": 670.9,
+      "produtos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Dicamba 70.8 % Duranor Avance x Lt",
+        "Metsulfuron Metil 60 %",
+        "Coady. RizoSpray EXTREMO x 10 Lt"
+      ]
+    },
+    {
       "fecha": "2026-06-25",
       "campo": "L3H",
       "lote": "23",
@@ -2214,6 +2505,36 @@
       "costo": 2392.5,
       "productos": [
         "PULVERIZADA TERRESTRE",
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Dicamba 70.8 % Duranor Avance x Lt",
+        "Atrazina 90 % solida x 15 kg",
+        "Coady. RizoSpray EXTREMO x 10 Lt"
+      ]
+    },
+    {
+      "fecha": "2026-06-25",
+      "campo": "L3H",
+      "lote": "23",
+      "ha": 53,
+      "cultivo": "CEBADA",
+      "costo": 2997.6,
+      "produtos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Dicamba 70.8 % Duranor Avance x Lt",
+        "Flurocloridona 25 %",
+        "Coady. RizoSpray EXTREMO x 10 Lt"
+      ]
+    },
+    {
+      "fecha": "2026-06-25",
+      "campo": "L3H",
+      "lote": "1",
+      "ha": 60,
+      "cultivo": "MAIZ",
+      "costo": 2091.5,
+      "produtos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
         "Dicamba 70.8 % Duranor Avance x Lt",
@@ -2315,6 +2636,51 @@
       ]
     },
     {
+      "fecha": "2026-06-24",
+      "campo": "LA DORA",
+      "lote": "1",
+      "ha": 59,
+      "cultivo": "MAIZ",
+      "costo": 1953,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "DICAMBA SIGMA x 10 LT",
+        "ATRAZINA GESAPRIM 90 x 10 KG"
+      ]
+    },
+    {
+      "fecha": "2026-06-24",
+      "campo": "LAS TIAS",
+      "lote": "11",
+      "ha": 63,
+      "cultivo": "MAIZ",
+      "costo": 2086.1,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "DICAMBA SIGMA x 10 LT",
+        "ATRAZINA GESAPRIM 90 x 10 KG"
+      ]
+    },
+    {
+      "fecha": "2026-06-24",
+      "campo": "LA DORA",
+      "lote": "maiz humed",
+      "ha": 34,
+      "cultivo": "MAIZ",
+      "costo": 1221.7,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "DICAMBA SIGMA x 10 LT",
+        "ATRAZINA GESAPRIM 90 x 10 KG"
+      ]
+    },
+    {
       "fecha": "2026-06-15",
       "campo": "EL DESCANSO",
       "lote": "3",
@@ -2338,6 +2704,21 @@
       "costo": 746,
       "productos": [
         "PULVERIZADA TERRESTRE",
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "DICAMBA SIGMA x 10 LT",
+        "ATRAZINA GESAPRIM 90%"
+      ]
+    },
+    {
+      "fecha": "2026-06-15",
+      "campo": "EL DESCANSO",
+      "lote": "3",
+      "ha": 23,
+      "cultivo": "MAIZ",
+      "costo": 746,
+      "produtos": [
         "GLIFOSATO GRANULADO LT BOX x 15 KG",
         "2-4 D 97 SIGMA x 20 LT",
         "LIGIER PH BIO x LT",
@@ -2377,6 +2758,21 @@
       ]
     },
     {
+      "fecha": "2026-06-14",
+      "campo": "DOÑA TERESA",
+      "lote": "8",
+      "ha": 14,
+      "cultivo": "CEBADA",
+      "costo": 382.8,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "DICAMBA SIGMA x 10 LT",
+        "METSULFURON SIGMA x 100 GRS"
+      ]
+    },
+    {
       "fecha": "2026-06-13",
       "campo": "LA CUCA",
       "lote": "3N",
@@ -2408,6 +2804,21 @@
       ]
     },
     {
+      "fecha": "2026-06-13",
+      "campo": "LA CUCA",
+      "lote": "3N",
+      "ha": 85,
+      "cultivo": "GIRASOL",
+      "costo": 2938,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "FLUROXIPIR 48 SIGMA x 5 Lts",
+        "DIFLUFENICAN SIGMA 50%"
+      ]
+    },
+    {
       "fecha": "2026-06-12",
       "campo": "LA CHOLITA",
       "lote": "1",
@@ -2431,6 +2842,21 @@
       "costo": 1866.5,
       "productos": [
         "PULVERIZADA TERRESTRE",
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "FLUROXIPIR 48 SIGMA x 5 Lts",
+        "DIFLUFENICAN SIGMA 50%"
+      ]
+    },
+    {
+      "fecha": "2026-06-12",
+      "campo": "LA CHOLITA",
+      "lote": "1",
+      "ha": 54,
+      "cultivo": "GIRASOL",
+      "costo": 1866.1,
+      "productos": [
         "GLIFOSATO GRANULADO LT BOX x 15 KG",
         "2-4 D 97 SIGMA x 20 LT",
         "LIGIER PH BIO x LT",
@@ -2625,6 +3051,96 @@
       ]
     },
     {
+      "fecha": "2026-06-11",
+      "campo": "L3H",
+      "lote": "28",
+      "ha": 47,
+      "cultivo": "GIRASOL",
+      "costo": 1674.7,
+      "productos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "FLUROXIPIR 48 SIGMA x 5 Lts",
+        "DIFLUFENICAN SIGMA 50%"
+      ]
+    },
+    {
+      "fecha": "2026-06-11",
+      "campo": "L3H",
+      "lote": "22",
+      "ha": 51,
+      "cultivo": "GIRASOL",
+      "costo": 1762.8,
+      "productos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "FLUROXIPIR 48 SIGMA x 5 Lts",
+        "DIFLUFENICAN SIGMA 50%"
+      ]
+    },
+    {
+      "fecha": "2026-06-11",
+      "campo": "L3H",
+      "lote": "17",
+      "ha": 112,
+      "cultivo": "GIRASOL",
+      "costo": 3871.2,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "FLUROXIPIR 48 SIGMA x 5 Lts",
+        "DIFLUFENICAN SIGMA 50%"
+      ]
+    },
+    {
+      "fecha": "2026-06-11",
+      "campo": "L3H",
+      "lote": "26",
+      "ha": 53,
+      "cultivo": "MAIZ",
+      "costo": 1718.6,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "DICAMBA SIGMA x 10 LT",
+        "ATRAZINA GESAPRIM 90%"
+      ]
+    },
+    {
+      "fecha": "2026-06-11",
+      "campo": "L3H",
+      "lote": "27",
+      "ha": 50,
+      "cultivo": "MAIZ",
+      "costo": 1621.6,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "DICAMBA SIGMA x 10 LT",
+        "ATRAZINA GESAPRIM 90%"
+      ]
+    },
+    {
+      "fecha": "2026-06-11",
+      "campo": "L3H",
+      "lote": "29",
+      "ha": 30,
+      "cultivo": "MAIZ",
+      "costo": 973,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "DICAMBA SIGMA x 10 LT",
+        "ATRAZINA GESAPRIM 90%"
+      ]
+    },
+    {
       "fecha": "2026-05-18",
       "campo": "EL ABUELO",
       "lote": "2-4-5",
@@ -2648,6 +3164,21 @@
       "costo": 4373.1,
       "productos": [
         "PULVERIZADA TERRESTRE",
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "FLUROCLORIDONA RAINBOW x 10 LT",
+        "DICAMBA SIGMA x 10 LT"
+      ]
+    },
+    {
+      "fecha": "2026-05-18",
+      "campo": "EL ABUELO",
+      "lote": "2-4-5",
+      "ha": 120,
+      "cultivo": "CEBADA",
+      "costo": 4373.1,
+      "productos": [
         "GLIFOSATO GRANULADO LT BOX x 15 KG",
         "2-4 D 97 SIGMA x 20 LT",
         "LIGIER PH BIO x LT",
@@ -2749,6 +3280,51 @@
       ]
     },
     {
+      "fecha": "2026-05-15",
+      "campo": "L3H",
+      "lote": "13G",
+      "ha": 120,
+      "cultivo": "CEBADA",
+      "costo": 4961.1,
+      "productos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "FLUROCLORIDONA RAINBOW x 10 LT",
+        "ACEITE METILADO ROCIO x 3 LT"
+      ]
+    },
+    {
+      "fecha": "2026-05-15",
+      "campo": "L3H",
+      "lote": "13ch",
+      "ha": 20,
+      "cultivo": "CEBADA",
+      "costo": 646.8,
+      "productos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "FLUROCLORIDONA RAINBOW x 10 LT",
+        "ACEITE METILADO ROCIO x 3 LT"
+      ]
+    },
+    {
+      "fecha": "2026-05-15",
+      "campo": "L3H",
+      "lote": "10 O",
+      "ha": 30,
+      "cultivo": "CEBADA",
+      "costo": 970.2,
+      "productos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "FLUROCLORIDONA RAINBOW x 10 LT",
+        "ACEITE METILADO ROCIO x 3 LT"
+      ]
+    },
+    {
       "fecha": "2026-04-26",
       "campo": "LA CHOLITA",
       "lote": "4",
@@ -2829,6 +3405,48 @@
       "costo": 2614.9,
       "productos": [
         "PULVERIZADA TERRESTRE",
+        "GLIFOSATO GRANULADO BOX 72%",
+        "2-4 D 97 SIGMA 64,3%",
+        "LIGIER PH BIO x LT",
+        "TERBUTILAZINA SIGMA x 20 Lts"
+      ]
+    },
+    {
+      "fecha": "2026-04-26",
+      "campo": "LA CHOLITA",
+      "lote": "4",
+      "ha": 50,
+      "cultivo": "CEBADA",
+      "costo": 2070.7,
+      "productos": [
+        "GLIFOSATO GRANULADO BOX 72%",
+        "2-4 D 97 SIGMA 64,3%",
+        "LIGIER PH BIO x LT",
+        "METSULFURON SIGMA x 100 GRS"
+      ]
+    },
+    {
+      "fecha": "2026-04-26",
+      "campo": "LA CHOLITA",
+      "lote": "5",
+      "ha": 20,
+      "cultivo": "CEBADA",
+      "costo": 828.3,
+      "produtos": [
+        "GLIFOSATO GRANULADO BOX 72%",
+        "2-4 D 97 SIGMA 64,3%",
+        "LIGIER PH BIO x LT",
+        "METSULFURON SIGMA x 100 GRS"
+      ]
+    },
+    {
+      "fecha": "2026-04-26",
+      "campo": "LA CHOLITA",
+      "lote": "3",
+      "ha": 54,
+      "cultivo": "COBERTURA",
+      "costo": 2615.1,
+      "productos": [
         "GLIFOSATO GRANULADO BOX 72%",
         "2-4 D 97 SIGMA 64,3%",
         "LIGIER PH BIO x LT",
@@ -2923,6 +3541,48 @@
       ]
     },
     {
+      "fecha": "2026-04-25",
+      "campo": "EL DESCANSO",
+      "lote": "1",
+      "ha": 15,
+      "cultivo": "COBERTURA",
+      "costo": 684,
+      "productos": [
+        "GLIFOSATO GRANULADO BOX 72%",
+        "TERBUTILAZINA SIGMA x 20 Lts",
+        "LIGIER PH BIO x LT",
+        "2-4 D 97 SIGMA 64,3%"
+      ]
+    },
+    {
+      "fecha": "2026-04-25",
+      "campo": "EL DESCANSO",
+      "lote": "3",
+      "ha": 23,
+      "cultivo": "COBERTURA",
+      "costo": 1048.8,
+      "productos": [
+        "GLIFOSATO GRANULADO BOX 72%",
+        "TERBUTILAZINA SIGMA x 20 Lts",
+        "LIGIER PH BIO x LT",
+        "2-4 D 97 SIGMA 64,3%"
+      ]
+    },
+    {
+      "fecha": "2026-04-25",
+      "campo": "EL DESCANSO",
+      "lote": "7",
+      "ha": 30,
+      "cultivo": "COBERTURA",
+      "costo": 1367.8,
+      "productos": [
+        "GLIFOSATO GRANULADO BOX 72%",
+        "TERBUTILAZINA SIGMA x 20 Lts",
+        "LIGIER PH BIO x LT",
+        "2-4 D 97 SIGMA 64,3%"
+      ]
+    },
+    {
       "fecha": "2026-04-24",
       "campo": "L3H",
       "lote": "13CH",
@@ -2944,6 +3604,19 @@
       "costo": 591.1,
       "productos": [
         "PULVERIZADA TERRESTRE",
+        "GLIFOSATO GRANULADO BOX 72%",
+        "A35T - GOLD x 10 LT",
+        "2-4 D 97 SIGMA 64,3%"
+      ]
+    },
+    {
+      "fecha": "2026-04-24",
+      "campo": "L3H",
+      "lote": "13ch",
+      "ha": 20,
+      "cultivo": "CEBADA",
+      "costo": 491.1,
+      "productos": [
         "GLIFOSATO GRANULADO BOX 72%",
         "A35T - GOLD x 10 LT",
         "2-4 D 97 SIGMA 64,3%"
@@ -3012,6 +3685,36 @@
       ]
     },
     {
+      "fecha": "2026-03-18",
+      "campo": "L3H",
+      "lote": "12",
+      "ha": 78,
+      "cultivo": "PASTURA",
+      "costo": 1738.2,
+      "productos": [
+        "GLIFOSATO GRANULADO BOX 72%",
+        "2-4 D 97 SIGMA 64,3%",
+        "FLUMETSULAN",
+        "ACEITE METILADO ROCIO x 3 LT",
+        "LIGIER PH BIO x LT"
+      ]
+    },
+    {
+      "fecha": "2026-03-18",
+      "campo": "L3H",
+      "lote": "13G",
+      "ha": 142,
+      "cultivo": "CEBADA",
+      "costo": 3388.2,
+      "productos": [
+        "GLIFOSATO GRANULADO BOX 72%",
+        "2-4 D 97 SIGMA 64,3%",
+        "METSULFURON SIGMA x 100 GRS",
+        "ACEITE METILADO ROCIO x 3 LT",
+        "LIGIER PH BIO x LT"
+      ]
+    },
+    {
       "fecha": "2026-03-10",
       "campo": "L3H",
       "lote": "13CH",
@@ -3059,6 +3762,21 @@
       "costo": 1647.5,
       "productos": [
         "PULVERIZADA TERRESTRE",
+        "GLIFOSATO GRANULADO BOX 72%",
+        "ACEITE METILADO ROCIO x 3 LT",
+        "LIGIER PH BIO x LT",
+        "2-4 D 97 SIGMA 64,3%",
+        "ATRAZINA 90% MAX SIGMA"
+      ]
+    },
+    {
+      "fecha": "2026-01-02",
+      "campo": "LA DORA",
+      "lote": "5",
+      "ha": 66,
+      "cultivo": "MAIZ",
+      "costo": 1647,
+      "produtos": [
         "GLIFOSATO GRANULADO BOX 72%",
         "ACEITE METILADO ROCIO x 3 LT",
         "LIGIER PH BIO x LT",
@@ -3659,7 +4377,7 @@
   },
   "modifiedTimes": {
     "rotaciones": "2026-08-03T21:45:30.776Z",
-    "labores": "2026-08-06T14:20:02.383Z",
+    "labores": "2026-08-06T14:49:21.051Z",
     "margenes": "2026-07-06T13:39:09.153Z",
     "suelos": "2026-07-13T13:09:28.201Z"
   }
