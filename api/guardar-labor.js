@@ -1,19 +1,20 @@
 // api/guardar-labor.js
 // Vercel Serverless Function — recibe una orden de labor desde la app
-// y la escribe en la hoja "registros" de la planilla LABORES S-MIX 26-27.
+// y la escribe en la hoja "registro" de la planilla LABORES S-MIX 26-27.
 //
-// Escribe UNA fila por labor + UNA fila por cada producto de cada lote,
-// replicando el formato de la tabla plana existente:
-// fecha | productor | campo | lote | campo lote | productos-labores | dosis | ha | total | precio | $us totales | cultivo
+// La hoja "registro" es una tabla plana. Columnas (empezando en A):
+// A fecha | B productor | C campo | D lote | E campo lote | F productos |
+// G dosis | H ha | I total | J precio | K $us totales | L cultivo
 //
-// La columna A de la hoja está vacía: los datos arrancan en la columna B.
+// ESTRATEGIA ROBUSTA: en vez de usar append (que puede caer descolocado si
+// hay datos dispersos en la hoja), leemos la columna A para encontrar la
+// última fila real de la tabla y escribimos con update en posición explícita.
 
 import { google } from "googleapis";
 
 const PLANILLA_LABORES = "1JpAA6bCl_uhizVO4jOVBEs34RRlNuAVHKr8kSFRm5ro";
 const HOJA = "registro";
 
-// Precio por ha de cada tipo de labor (de la planilla insumos)
 const PRECIO_LABOR = {
   "PULVERIZADA TERRESTRE": 6.3,
   "PULVERIZADA AEREA": 6.3,
@@ -27,7 +28,6 @@ const PRECIO_LABOR = {
   "Mz Fert": 55, "Gr Fert": 55, "Sj FERT": 60, "Fina fert": 57,
 };
 
-// Formatea número al estilo de la planilla (coma decimal)
 const fmtNum = (n, dec = 2) =>
   (n == null || isNaN(n)) ? "" : Number(n).toFixed(dec).replace(".", ",");
 
@@ -39,7 +39,6 @@ function getAuth() {
 }
 
 export default async function handler(req, res) {
-  // CORS básico
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -48,20 +47,16 @@ export default async function handler(req, res) {
 
   try {
     const orden = req.body;
-    // Validación mínima
     if (!orden || !orden.fecha || !orden.productor || !Array.isArray(orden.tratamientos)) {
       return res.status(400).json({ error: "Faltan datos: fecha, productor o tratamientos." });
     }
 
-    // Fecha a DD/MM/YYYY (la planilla usa ese formato)
     const [y, m, d] = orden.fecha.split("-");
     const fechaAR = `${d}/${m}/${y}`;
     const tipo = orden.tipoLabor || "PULVERIZADA TERRESTRE";
     const precioLabor = PRECIO_LABOR[tipo] ?? 6.3;
 
     const filas = [];
-
-    // Por cada tratamiento, por cada lote pintado, generamos filas
     for (const trat of orden.tratamientos) {
       const cultivo = trat.cultivo || "";
       const productos = (trat.productos || []).filter(p => p.n && p.d > 0);
@@ -73,21 +68,15 @@ export default async function handler(req, res) {
         const ha = Number(lote.ha) || 0;
         const campoLote = `${campo} ${loteId}`;
 
-        // Fila 1: la labor (ej PULVERIZADA TERRESTRE)
-        // columnas: fecha, productor, campo, lote, campoLote, producto, dosis, ha, total, precio, $us, cultivo
         filas.push([
-          "",                       // col A vacía
           fechaAR, orden.productor, campo, loteId, campoLote,
           tipo, "", fmtNum(ha, 1), "", fmtNum(precioLabor, 2),
           fmtNum(ha * precioLabor, 1), cultivo,
         ]);
-
-        // Filas 2..n: cada producto
         for (const p of productos) {
           const total = p.d * ha;
           const costo = total * (p.p || 0);
           filas.push([
-            "",
             fechaAR, orden.productor, campo, loteId, campoLote,
             p.n, fmtNum(p.d, 3), fmtNum(ha, 1), fmtNum(total, 2),
             fmtNum(p.p, 2), fmtNum(costo, 1), cultivo,
@@ -103,19 +92,34 @@ export default async function handler(req, res) {
     const auth = getAuth();
     const sheets = google.sheets({ version: "v4", auth });
 
-    // Append: agrega al final de la tabla en la hoja "registros"
-    await sheets.spreadsheets.values.append({
+    // 1) Leer SOLO la columna A para saber la última fila real de la tabla
+    const colA = await sheets.spreadsheets.values.get({
       spreadsheetId: PLANILLA_LABORES,
-      range: `${HOJA}!A:M`,
+      range: `${HOJA}!A:A`,
+    });
+    const valoresA = colA.data.values || [];
+    let ultimaFila = 0;
+    for (let i = valoresA.length - 1; i >= 0; i--) {
+      const celda = (valoresA[i] && valoresA[i][0] != null) ? String(valoresA[i][0]).trim() : "";
+      if (celda !== "") { ultimaFila = i + 1; break; }
+    }
+    const filaInicio = ultimaFila + 1;
+    const filaFin = filaInicio + filas.length - 1;
+    const rango = `${HOJA}!A${filaInicio}:L${filaFin}`;
+
+    // 2) Escribir con update en posición explícita
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: PLANILLA_LABORES,
+      range: rango,
       valueInputOption: "USER_ENTERED",
-      insertDataOption: "INSERT_ROWS",
       requestBody: { values: filas },
     });
 
     return res.status(200).json({
       ok: true,
       filasEscritas: filas.length,
-      mensaje: `Se guardaron ${filas.length} filas en la planilla.`,
+      filaInicio,
+      mensaje: `Se guardaron ${filas.length} filas en la planilla (desde la fila ${filaInicio}).`,
     });
   } catch (err) {
     console.error("Error guardando labor:", err);
