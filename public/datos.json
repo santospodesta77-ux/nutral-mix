@@ -1,20 +1,19 @@
 {
-  "generado": "2026-08-06T14:50:51.478Z",
+  "generado": "2026-08-07T19:51:39.406Z",
   "warnings": [
-    "Campo MIRASOL es ambiguo (Don Antonio, La Flecha o Doña Teresa) — no asignado",
-    "Campo EL 5 referenciado en Cronograma pero no está en lista válida de campos",
-    "Campo LA MARIA OLIVA tiene lotes en CLIENTES Y CAMPOS pero no está en lista válida de campos",
-    "Lote LA DORA-maiz humed: nombre ambiguo, transcrito tal cual",
-    "Lote EL ABUELO-1 y 3: transcrito tal cual, formato inusual",
-    "Lote EL ABUELO-2,4 y 5: transcrito tal cual, formato inusual",
-    "Lote 5 2: campo '5' no válido, no asignado",
-    "Múltiples filas con productos vacíos en tabla plana — ignoradas",
-    "Planilla BH PELAYO contiene lista de precios, no aplicaciones — ignorada",
-    "Planilla BH CEREALES contiene lista de precios, no aplicaciones — ignorada",
-    "Planilla BASE DE LABORES contiene costos unitarios, no aplicaciones — ignorada",
-    "Planilla Estrategias contiene recomendaciones, no aplicaciones — ignorada",
-    "Planilla Cronograma contiene planificación, no aplicaciones — ignorada",
-    "Planilla totales contiene resumen, no aplicaciones — ignorada"
+    "MIRASOL aparece en lista de campos pero es ambiguo (alias de Don Antonio, La Flecha o Doña Teresa) - no asignado",
+    "Campo '5' en registro aplicaciones sin mapeo claro a lista válida",
+    "Lote 'maiz humed' en LA DORA no tiene formato estándar",
+    "Lote '1 y 3' en EL ABUELO - formato inusual",
+    "Lote '2,4 y 5' en EL ABUELO - formato inusual",
+    "Múltiples aplicaciones con productos vacíos (filas sin producto) - ignoradas",
+    "Planilla BH PELAYO contiene lista de precios, no aplicaciones - ignorada",
+    "Planilla BH CEREALES contiene lista de precios, no aplicaciones - ignorada",
+    "Planilla 'totales' es resumen agregado - ignorada",
+    "Planilla 'Estrategias' son recomendaciones, no aplicaciones - ignorada",
+    "Planilla 'BASE DE LABORES' son precios de insumos - ignorada",
+    "Planilla 'Cronograma' es planificación futura - ignorada",
+    "Campo 'EL DESCANSO' lote 1 aparece como '1,0' en algunas filas"
   ],
   "INV_26": {
     "L3H|9B": "CEBADA",
@@ -2451,6 +2450,36 @@
       ]
     },
     {
+      "fecha": "2026-06-29",
+      "campo": "LOS ABUELOS",
+      "lote": "5B",
+      "ha": 45,
+      "cultivo": "TRIGO",
+      "costo": 1328.9,
+      "produtos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Dicamba 70.8 % Duranor Avance x Lt",
+        "Metsulfuron Metil 60 %",
+        "Coady. RizoSpray EXTREMO x 10 Lt"
+      ]
+    },
+    {
+      "fecha": "2026-06-29",
+      "campo": "LOS ABUELOS",
+      "lote": "8B",
+      "ha": 23,
+      "cultivo": "CENTENO",
+      "costo": 670.9,
+      "produtos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Dicamba 70.8 % Duranor Avance x Lt",
+        "Metsulfuron Metil 60 %",
+        "Coady. RizoSpray EXTREMO x 10 Lt"
+      ]
+    },
+    {
       "fecha": "2026-06-25",
       "campo": "L3H",
       "lote": "23",
@@ -2865,6 +2894,21 @@
       ]
     },
     {
+      "fecha": "2026-06-12",
+      "campo": "LA CHOLITA",
+      "lote": "1",
+      "ha": 54,
+      "cultivo": "GIRASOL",
+      "costo": 1866.5,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "FLUROXIPIR 48 SIGMA x 5 Lts",
+        "DIFLUFENICAN SIGMA 50%"
+      ]
+    },
+    {
       "fecha": "2026-06-11",
       "campo": "L3H",
       "lote": "28",
@@ -3141,6 +3185,36 @@
       ]
     },
     {
+      "fecha": "2026-06-11",
+      "campo": "L3H",
+      "lote": "28",
+      "ha": 47,
+      "cultivo": "GIRASOL",
+      "costo": 1674.7,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "FLUROXIPIR 48 SIGMA x 5 Lts",
+        "DIFLUFENICAN SIGMA 50%"
+      ]
+    },
+    {
+      "fecha": "2026-06-11",
+      "campo": "L3H",
+      "lote": "22",
+      "ha": 51,
+      "cultivo": "GIRASOL",
+      "costo": 1762.8,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "FLUROXIPIR 48 SIGMA x 5 Lts",
+        "DIFLUFENICAN SIGMA 50%"
+      ]
+    },
+    {
       "fecha": "2026-05-18",
       "campo": "EL ABUELO",
       "lote": "2-4-5",
@@ -3179,6 +3253,21 @@
       "cultivo": "CEBADA",
       "costo": 4373.1,
       "productos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "FLUROCLORIDONA RAINBOW x 10 LT",
+        "DICAMBA SIGMA x 10 LT"
+      ]
+    },
+    {
+      "fecha": "2026-05-18",
+      "campo": "EL ABUELO",
+      "lote": "2-4-5",
+      "ha": 120,
+      "cultivo": "CEBADA",
+      "costo": 4620.1,
+      "produtos": [
         "GLIFOSATO GRANULADO LT BOX x 15 KG",
         "2-4 D 97 SIGMA x 20 LT",
         "LIGIER PH BIO x LT",
@@ -3325,6 +3414,36 @@
       ]
     },
     {
+      "fecha": "2026-05-15",
+      "campo": "L3H",
+      "lote": "13C",
+      "ha": 20,
+      "cultivo": "CEBADA",
+      "costo": 646.8,
+      "productos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "FLUROCLORIDONA RAINBOW x 10 LT",
+        "ACEITE METILADO ROCIO x 3 LT"
+      ]
+    },
+    {
+      "fecha": "2026-05-15",
+      "campo": "L3H",
+      "lote": "10 O",
+      "ha": 30,
+      "cultivo": "CEBADA",
+      "costo": 970.2,
+      "produtos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "FLUROCLORIDONA RAINBOW x 10 LT",
+        "ACEITE METILADO ROCIO x 3 LT"
+      ]
+    },
+    {
       "fecha": "2026-04-26",
       "campo": "LA CHOLITA",
       "lote": "4",
@@ -3451,6 +3570,20 @@
         "2-4 D 97 SIGMA 64,3%",
         "LIGIER PH BIO x LT",
         "TERBUTILAZINA SIGMA x 20 Lts"
+      ]
+    },
+    {
+      "fecha": "2026-04-26",
+      "campo": "LA CHOLITA",
+      "lote": "5",
+      "ha": 20,
+      "cultivo": "CEBADA",
+      "costo": 828.3,
+      "productos": [
+        "GLIFOSATO GRANULADO BOX 72%",
+        "2-4 D 97 SIGMA 64,3%",
+        "LIGIER PH BIO x LT",
+        "METSULFURON SIGMA x 100 GRS"
       ]
     },
     {
@@ -3623,6 +3756,19 @@
       ]
     },
     {
+      "fecha": "2026-04-24",
+      "campo": "L3H",
+      "lote": "13C",
+      "ha": 20,
+      "cultivo": "CEBADA",
+      "costo": 522.3,
+      "productos": [
+        "GLIFOSATO GRANULADO BOX 72%",
+        "A35T - GOLD x 10 LT",
+        "2-4 D 97 SIGMA 64,3%"
+      ]
+    },
+    {
       "fecha": "2026-03-18",
       "campo": "L3H",
       "lote": "12",
@@ -3730,6 +3876,18 @@
       "fecha": "2026-03-10",
       "campo": "L3H",
       "lote": "13ch",
+      "ha": 25,
+      "cultivo": "CEBADA",
+      "costo": 113.8,
+      "productos": [
+        "METSULFURON SIGMA x 100 GRS",
+        "2-4 D 97 SIGMA 64,3%"
+      ]
+    },
+    {
+      "fecha": "2026-03-10",
+      "campo": "L3H",
+      "lote": "13C",
       "ha": 25,
       "cultivo": "CEBADA",
       "costo": 113.8,
@@ -4195,6 +4353,28 @@
       "costoHa": 131.25
     },
     {
+      "fecha": "2026-07-07",
+      "campo": "L3H",
+      "lote": "13C",
+      "ha": 25,
+      "cultivo": "CEBADA",
+      "tipo": "Arranque",
+      "producto": "MAP AZURADO NUTRIEN",
+      "dosis": "0,050",
+      "costoHa": 46.85
+    },
+    {
+      "fecha": "2026-07-07",
+      "campo": "L3H",
+      "lote": "13C",
+      "ha": 25,
+      "cultivo": "CEBADA",
+      "tipo": "Incorporada",
+      "producto": "UREA-S NUTRIEN",
+      "dosis": "0,10",
+      "costoHa": 56.5
+    },
+    {
       "fecha": "2026-07-06",
       "campo": "LOS NIETOS",
       "lote": "4",
@@ -4377,7 +4557,7 @@
   },
   "modifiedTimes": {
     "rotaciones": "2026-08-03T21:45:30.776Z",
-    "labores": "2026-08-06T14:49:21.051Z",
+    "labores": "2026-08-07T13:35:30.094Z",
     "margenes": "2026-07-06T13:39:09.153Z",
     "suelos": "2026-07-13T13:09:28.201Z"
   }
