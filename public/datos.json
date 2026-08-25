@@ -1,107 +1,99 @@
 {
-  "generado": "2026-08-13T20:13:41.986Z",
+  "generado": "2026-08-25T19:29:43.450Z",
   "warnings": [
-    "Lote LOS ABUELOS-5B sin superficie (ha vacía)",
-    "Lote EL 5-6 sin superficie (ha vacía)",
-    "Lote EL 5-3 sin superficie (ha vacía)",
-    "Lote DON ANTONIO-5 sin superficie (ha vacía)",
-    "Lote DON ANTONIO-13 sin superficie (ha vacía)",
-    "Lote DOÑA TERESA-10 sin superficie (ha vacía)",
-    "Lote EL TORELLO-4 sin superficie (ha vacía)",
-    "Lote LA ADORACION-1 sin superficie (ha vacía)",
-    "Lote LA ADORACION-2 sin superficie (ha vacía)",
-    "Campo 'Las 3 hermanas' no está en la lista de campos válidos - se ignora en las keys del JSON",
-    "Múltiples análisis de suelo para algunos lotes - se usa el más reciente",
-    "REGISTRO DE FERTILIZACIONES está vacío en la planilla",
-    "Textura solo disponible para algunos análisis de suelo (los más recientes)"
+    "Campo 'MIRASOL' ambiguo - no se asignó a ningún lote",
+    "DON ANTONIO-5 sin hectáreas especificadas",
+    "DON ANTONIO-13 sin hectáreas especificadas",
+    "DOÑA TERESA-10 sin hectáreas especificadas",
+    "EL TORELLO-4 sin hectáreas especificadas",
+    "DON RAMON-4 con cultivo 'X' (no válido)",
+    "LA ADORACION-1 y LA ADORACION-2 sin hectáreas especificadas",
+    "EL 5-6, EL 5-3, EL 5-5 sin campo válido asignado",
+    "LOS ABUELOS-5B sin campo válido (fila vacía en productor)",
+    "LA FLECHA-1 y LA FLECHA-2 sin hectáreas en 26-27",
+    "Múltiples dobles cultivos interpretados literalmente según celda",
+    "Typo 'PATURA' corregido a 'PASTURA' en L3H-10O",
+    "Algunos lotes con 'SOJA 2' o 'MAIZ 2' - mantenido tal cual",
+    "Cultivo 'LLORON' encontrado (LOS ABUELOS-6B, LOS ABUELOS-11)",
+    "Cultivo 'MAIZ FORRAJERO' encontrado (DON MARCELINO-3, DON MARCELINO-5)",
+    "Cultivo 'CAMPO NATURAL' encontrado (LA CARLOTA-4, LA CARLOTA-5)",
+    "Cultivo 'AVENA + TREBOL' encontrado (LA CARLOTA-6, LA CARLOTA-7, LA CARLOTA-8)",
+    "Cultivo 'TREBOL' encontrado (LA ADORACION-3)",
+    "Cultivo 'SORGO FORR' encontrado (LA CUCA-4N, LA CUCA-4S)",
+    "Productos sin precio en BH PELAYO (clearsol, aceite metilado rocio)",
+    "Algunas aplicaciones con costo 0 en totales",
+    "DEDUP realizado en APLICACIONES por fecha+campo+lote+ha"
   ],
   "INV_26": {
-    "L3H|1": "TRIGO",
-    "L3H|4": "TRIGO",
-    "L3H|6": "VERDEO",
-    "L3H|7": "VERDEO",
-    "L3H|8": "VERDEO",
     "L3H|9B": "CEBADA",
-    "L3H|10E": "VERDEO",
     "L3H|10O": "CEBADA",
     "L3H|11": "AVENA",
     "L3H|13G": "CEBADA",
     "L3H|13CH": "CEBADA",
-    "L3H|14": "VERDEO",
-    "L3H|18": "PASTURA",
-    "L3H|22": "PASTURA",
+    "L3H|19": "CEBADA",
     "L3H|23": "CEBADA",
-    "L3H|24": "PASTURA",
-    "L3H|25": "PASTURA",
     "LA CHOLITA|4": "CEBADA",
     "LA CHOLITA|5": "CEBADA",
-    "LA DORA|8": "CEBADA",
-    "LAS TIAS|9": "CENTENO",
-    "LOS ABUELOS|5A": "VERDEO",
-    "LOS ABUELOS|5B": "TRIGO",
-    "LOS ABUELOS|6A": "PASTURA",
-    "LOS ABUELOS|6C": "VERDEO",
-    "LOS ABUELOS|7B": "VERDEO",
-    "LOS ABUELOS|8A": "VERDEO",
-    "LOS ABUELOS|8B": "CENTENO",
-    "LOS ABUELOS|3O": "VERDEO",
-    "LOS ABUELOS|9B": "PASTURA",
-    "LOS ABUELOS|10": "VERDEO",
-    "LA MARIA OLIVA|1": "VERDEO",
-    "LA MARIA OLIVA|FRANJA 1": "VERDEO",
-    "LA MARIA OLIVA|FRANJA 2": "VERDEO",
-    "EL 5|1": "VERDEO",
-    "EL 5|2": "AVENA",
-    "EL 5|3": "VERDEO",
-    "EL 5|5": "VERDEO",
     "DON ANTONIO|1": "AVENA",
-    "DON ANTONIO|4": "VERDEO",
-    "DON ANTONIO|12": "VERDEO",
     "DOÑA TERESA|8": "CEBADA",
-    "EL TORELLO|3": "VERDEO",
     "EL TORELLO|5": "CEBADA",
-    "EL TORELLO|7": "AVENA",
     "DON RAMON|1": "AVENA",
     "DON RAMON|2": "AVENA",
     "EL ABUELO|2": "CEBADA",
     "EL ABUELO|4": "CEBADA",
     "EL ABUELO|5": "CEBADA",
-    "LOS NIETOS|7": "AVENA",
     "EL CIPRES|1": "CEBADA",
-    "EL CIPRES|4": "AVENA",
-    "DON MARCELINO|2": "AVENA",
-    "LA ADORACION|3": "TREBOL",
-    "LA CARLOTA|6": "AVENA",
-    "LA CARLOTA|7": "AVENA",
-    "LA CARLOTA|8": "AVENA"
+    "LOS NIETOS|4": "CEBADA",
+    "LOS NIETOS|7": "AVENA",
+    "LA DORA|8": "CEBADA",
+    "LAS TIAS|9": "CENTENO",
+    "LOS ABUELOS|8B": "CENTENO",
+    "LOS ABUELOS|5B": "TRIGO",
+    "LA MARIA OLIVA|1": "VERDEO",
+    "DON ANTONIO|4": "VERDEO",
+    "DON ANTONIO|12": "VERDEO",
+    "LOS ABUELOS|6A": "PASTURA",
+    "LOS ABUELOS|7A": "PASTURA",
+    "LOS ABUELOS|9A": "PASTURA",
+    "LOS ABUELOS|9B": "PASTURA"
   },
   "PLAN_2627": {
     "L3H|1": "MAIZ",
     "L3H|2": "GIRASOL",
     "L3H|3": "SOJA",
     "L3H|4": "TRIGO-SOJA",
+    "L3H|5": "PASTURA",
     "L3H|6": "VERDEO-MAIZ",
     "L3H|7": "VERDEO-MAIZ",
     "L3H|8": "VERDEO-MAIZ",
+    "L3H|9A": "PASTURA",
     "L3H|9B": "SOJA",
     "L3H|10E": "VERDEO-MAIZ",
     "L3H|10O": "CEBADA-MAIZ",
+    "L3H|12": "PASTURA",
     "L3H|13G": "CEBADA-SOJA",
     "L3H|13CH": "CEBADA-SOJA",
     "L3H|14": "VERDEO-MAIZ",
+    "L3H|15": "PASTURA",
+    "L3H|16": "PASTURA",
     "L3H|17": "GIRASOL",
-    "L3H|19": "SOJA",
+    "L3H|18": "PASTURA",
+    "L3H|19": "CEBADA-MAIZ",
     "L3H|20": "SOJA",
     "L3H|21N": "SOJA",
     "L3H|21S": "SOJA",
+    "L3H|22": "GIRASOL",
     "L3H|26": "MAIZ",
     "L3H|27": "MAIZ",
     "L3H|28": "GIRASOL",
     "L3H|29": "MAIZ",
     "LA CUCA|1": "SOJA",
+    "LA CUCA|2": "PASTURA",
     "LA CUCA|3N": "GIRASOL",
+    "LA CUCA|3S": "PASTURA",
     "LA CUCA|4N": "MAIZ",
     "LA CUCA|4S": "MAIZ",
+    "LA CUCA|5": "PASTURA",
     "LA CUCA|6": "MAIZ",
     "LA CUCA|7": "MAIZ",
     "LA CHOLITA|1": "GIRASOL",
@@ -115,69 +107,121 @@
     "EL DESCANSO|6": "SOJA",
     "EL DESCANSO|7": "MAIZ",
     "EL DESCANSO|8": "MAIZ",
-    "LA DORA|1": "GIRASOL",
-    "LA DORA|2": "MAIZ",
+    "LA DORA|1": "MAIZ",
+    "LA DORA|2": "PASTURA",
     "LA DORA|4": "SOJA",
-    "LA DORA|5": "SOJA",
+    "LA DORA|5": "GIRASOL",
+    "LA DORA|6": "PASTURA",
     "LA DORA|7": "SOJA",
     "LA DORA|8": "CEBADA-SOJA",
-    "LAS TIAS|10": "SOJA",
+    "LAS TIAS|9": "CENTENO/MAÍZ",
+    "LAS TIAS|10": "GIRASOL",
     "LAS TIAS|11": "MAIZ",
+    "LAS TIAS|12": "PASTURA",
     "LOS ABUELOS|2": "MAIZ",
     "LOS ABUELOS|3": "MAIZ",
     "LOS ABUELOS|4": "MAIZ",
+    "LOS ABUELOS|6C": "VERDEO",
+    "LOS ABUELOS|7B": "VERDEO",
+    "LOS ABUELOS|8A": "VERDEO",
+    "LOS ABUELOS|3O": "VERDEO",
+    "LOS ABUELOS|10": "VERDEO",
     "LA MARIA OLIVA|2": "MAIZ",
     "LA MARIA OLIVA|3": "MAIZ",
-    "LA FLECHA|3": "MAIZ",
-    "LA FLECHA|4": "MAIZ",
-    "LA FLECHA|5": "MAIZ",
+    "LA MARIA OLIVA|FRANJA 1": "VERDEO",
+    "LA MARIA OLIVA|FRANJA 2": "VERDEO",
+    "EL 5|1": "VERDEO MAIZ",
+    "EL 5|4": "PASTURA",
+    "DON ANTONIO|2": "PASTURA",
+    "DON ANTONIO|3": "PASTURA",
+    "DON ANTONIO|7": "PASTURA",
     "DON ANTONIO|8": "GIRASOL",
     "DON ANTONIO|9": "GIRASOL",
+    "DON ANTONIO|10": "AVENA",
+    "DON ANTONIO|11": "AVENA",
+    "DON ANTONIO|14": "PASTURA",
     "DOÑA TERESA|1": "MAIZ",
     "DOÑA TERESA|2": "MAIZ",
+    "DOÑA TERESA|4": "PASTURA",
     "DOÑA TERESA|5": "MAIZ",
-    "EL TORELLO|1": "GIRASOL",
+    "DOÑA TERESA|6": "PASTURA",
+    "DOÑA TERESA|7": "PASTURA",
+    "DOÑA TERESA|9": "PASTURA",
+    "EL TORELLO|1": "PASTURA",
+    "EL TORELLO|2": "PASTURA",
     "EL TORELLO|3": "VERDEO-MAIZ",
     "EL TORELLO|6": "MAIZ",
     "EL TORELLO|7": "AVENA-MAIZ",
     "EL TORELLO|8": "SORGO",
+    "EL TORELLO|9": "PASTURA",
     "DON RAMON|1": "AVENA-MAIZ",
     "DON RAMON|2": "AVENA-MAIZ",
+    "DON RAMON|3": "PASRURA",
+    "DON RAMON|5": "PASTURA",
     "DON RAMON|6": "MAIZ",
     "EL ABUELO|1": "GIRASOL",
-    "EL ABUELO|2": "CEBADA-MAIZ",
     "EL ABUELO|3": "GIRASOL",
-    "EL ABUELO|4": "CEBADA-MAIZ",
-    "EL ABUELO|5": "CEBADA-MAIZ",
+    "LOS NIETOS|1": "PASTURA",
     "LOS NIETOS|2": "SORGO",
-    "LOS NIETOS|4": "CEBADA-MAIZ",
+    "LOS NIETOS|3": "PASTURA",
     "LOS NIETOS|5": "MAIZ",
     "LOS NIETOS|6": "MAIZ",
-    "LOS NIETOS|7": "AVENA-MAIZ",
+    "LOS NIETOS|8": "PASTURA",
+    "LOS NIETOS|9": "PASTURA",
+    "LOS NIETOS|10": "PASTURA",
     "LOS NIETOS|11": "GIRASOL",
-    "EL CIPRES|1": "CEBADA-MAIZ",
+    "EL CIPRES|2N": "PASTURA",
+    "EL CIPRES|2S": "PASTURA",
     "EL CIPRES|4": "AVENA-MAIZ",
     "EL CIPRES|5": "MAIZ",
     "EL CIPRES|6": "MAIZ",
+    "EL CIPRES|7": "PASTURA",
     "EL CIPRES|3": "SORGO",
+    "EL CIPRES|8": "PASTURA",
+    "EL CIPRES|9": "PASTURA",
     "DON MARCELINO|1": "MAIZ",
+    "DON MARCELINO|2": "AVENA",
     "DON MARCELINO|3": "SORGO",
+    "DON MARCELINO|4": "PASTURA",
     "DON MARCELINO|5": "MAIZ",
+    "DON MARCELINO|6": "PASTURA",
+    "LA ADORACION|3": "TREBOL",
     "LA ADORACION|4": "MAIZ",
     "LA ADORACION|5": "MAIZ",
-    "LA CARLOTA|1": "MAIZ"
+    "LA ADORACION|1": "PASTURA",
+    "LA ADORACION|2": "PASTURA",
+    "LA CARLOTA|1": "MAIZ",
+    "LA CARLOTA|2": "PASTURA",
+    "LA CARLOTA|3": "PASTURA",
+    "LA CARLOTA|10": "PASTURA",
+    "LA CARLOTA|11": "PASTURA",
+    "LOS ABUELOS|6B": "LLORON",
+    "LOS ABUELOS|11": "LLORON",
+    "L3H|13CH BAJO": "AGROPIRO",
+    "L3H|30": "AGROPIRO",
+    "LA CARLOTA|9": "AGROPIRO"
   },
   "CULT_2526": {
-    "L3H|1": "TRIGO-SOJA",
-    "L3H|2": "MAIZ",
+    "L3H|1": "GIRASOL",
+    "L3H|2": "TRIGO",
     "L3H|3": "MAIZ",
     "L3H|4": "MANI",
     "L3H|5": "GIRASOL",
+    "L3H|6": "PASTURA",
     "L3H|7": "MANI",
+    "L3H|8": "PASTURA",
+    "L3H|9A": "PASTURA",
     "L3H|9B": "TRIGO-MAIZ",
+    "L3H|10E": "PASTURA",
+    "L3H|10O": "MAIZ",
+    "L3H|11": "PASTURA",
     "L3H|12": "GIRASOL",
     "L3H|13G": "GIRASOL",
     "L3H|13CH": "GIRASOL",
+    "L3H|13CH BAJO": "AGROPIRO",
+    "L3H|14": "PASTURA",
+    "L3H|15": "PASTURA",
+    "L3H|16": "PASTURA",
     "L3H|17": "SOJA",
     "L3H|18": "CEBADA-GIRASOL",
     "L3H|19": "CEBADA-MAIZ",
@@ -186,16 +230,22 @@
     "L3H|21S": "MAIZ",
     "L3H|22": "TRIGO-SOJA",
     "L3H|23": "SOJA",
+    "L3H|24": "PASTURA",
+    "L3H|25": "PASTURA",
     "L3H|26": "TRIGO-SOJA",
     "L3H|27": "SOJA",
     "L3H|28": "SOJA",
     "L3H|29": "TRIGO-SOJA",
+    "L3H|30": "AGROPIRO",
     "LA CUCA|1": "MAIZ",
     "LA CUCA|2": "GIRASOL",
     "LA CUCA|3N": "SOJA",
+    "LA CUCA|3S": "PASTURA",
     "LA CUCA|4N": "SORGO FORR",
     "LA CUCA|4S": "SORGO FORR",
+    "LA CUCA|5": "PASTURA",
     "LA CUCA|6": "VERDEO",
+    "LA CUCA|7": "PASTURA",
     "LA CHOLITA|1": "SOJA 2",
     "LA CHOLITA|2": "MAIZ",
     "LA CHOLITA|3": "GIRASOL",
@@ -241,11 +291,8 @@
     "LA MARIA OLIVA|FRANJA 1": "MAIZ",
     "LA MARIA OLIVA|FRANJA 2": "MAIZ",
     "EL 5|1": "MAIZ",
-    "EL 5|6": "MAIZ",
     "EL 5|2": "SORGO",
-    "EL 5|3": "AVENA",
     "EL 5|4": "PASTURA",
-    "EL 5|5": "PASTURA",
     "DON ANTONIO|2": "GIRASOL",
     "DON ANTONIO|3": "PASTURA",
     "DON ANTONIO|4": "PASTURA",
@@ -264,7 +311,7 @@
     "DOÑA TERESA|7": "PASTURA",
     "DOÑA TERESA|8": "SORGO",
     "DOÑA TERESA|9": "PASTURA",
-    "EL TORELLO|1": "MAIZ",
+    "EL TORELLO|1": "GIRASOL",
     "EL TORELLO|2": "PASTURA",
     "EL TORELLO|3": "PASTURA",
     "EL TORELLO|5": "SORGO",
@@ -324,24 +371,23 @@
     "LA CARLOTA|11": "PASTURA"
   },
   "RINDE_2526": {
-    "L3H|1": 24,
-    "L3H|2": 69,
+    "L3H|1": 14.9,
+    "L3H|2": 30,
     "L3H|5": 30,
+    "L3H|7": null,
     "L3H|9B": 41,
     "L3H|12": 29,
     "L3H|13G": 34,
     "L3H|13CH": 24,
     "L3H|17": 30,
-    "L3H|18": 12,
-    "L3H|19": 41,
+    "L3H|18": 39,
+    "L3H|19": 39,
     "L3H|21N": 82,
-    "L3H|22": 31,
+    "L3H|22": 29,
     "L3H|23": 32,
-    "L3H|26": 32,
+    "L3H|26": 28,
     "L3H|27": 36,
     "L3H|28": 33,
-    "LA CUCA|2": 28,
-    "LA CUCA|3N": 37,
     "LA CHOLITA|3": 30,
     "LA CHOLITA|4": 22,
     "LA CHOLITA|5": 20,
@@ -349,9 +395,13 @@
     "EL DESCANSO|3": 43,
     "EL DESCANSO|7": 28,
     "EL DESCANSO|8": 28,
+    "LA DORA|1": 28,
+    "LA DORA|2": 15,
+    "LA DORA|8": 17,
     "LAS TIAS|11": 37,
     "LOS ABUELOS|2": 11,
     "LOS ABUELOS|3": 7,
+    "LA CUCA|3N": 37,
     "EL TORELLO|1": 70,
     "EL TORELLO|6": 70,
     "EL TORELLO|7": 70,
@@ -359,14 +409,13 @@
     "DON RAMON|5": 25,
     "DON RAMON|6": 40,
     "EL ABUELO|1": 47,
-    "EL ABUELO|3": 47,
-    "EL CIPRES|5": 65,
-    "EL CIPRES|6": 65,
-    "EL CIPRES|3": 65,
     "LA ADORACION|3": 19,
     "LA ADORACION|4": 56,
     "LA ADORACION|5": 56,
-    "LA CARLOTA|1": 40
+    "LA CARLOTA|1": 40,
+    "EL CIPRES|5": 65,
+    "EL CIPRES|6": 65,
+    "EL CIPRES|3": 65
   },
   "HISTORICO_ROTACION": {
     "L3H|1": {
@@ -434,8 +483,8 @@
       },
       "24-25": {
         "cv": "TRIGO",
-        "rF": 30,
-        "rG": null
+        "rF": null,
+        "rG": 30
       },
       "25-26": {
         "cv": "MAIZ",
@@ -1354,8 +1403,8 @@
       },
       "24-25": {
         "cv": "TRIGO",
-        "rF": 25,
-        "rG": null
+        "rF": null,
+        "rG": 25
       },
       "25-26": {
         "cv": "TRIGO-SOJA",
@@ -1502,8 +1551,8 @@
       },
       "24-25": {
         "cv": "TRIGO",
-        "rF": 18,
-        "rG": null
+        "rF": null,
+        "rG": 18
       },
       "25-26": {
         "cv": "TRIGO-SOJA",
@@ -1658,202 +1707,6 @@
         "rF": null,
         "rG": null
       }
-    },
-    "LA CUCA|2": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": 28
-      }
-    },
-    "LA CUCA|3N": {
-      "25-26": {
-        "cv": "SOJA",
-        "rF": null,
-        "rG": 37
-      }
-    },
-    "LA CHOLITA|1": {
-      "25-26": {
-        "cv": "SOJA 2",
-        "rF": null,
-        "rG": null
-      }
-    },
-    "LA CHOLITA|3": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": 30
-      }
-    },
-    "LA CHOLITA|4": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": 22
-      }
-    },
-    "LA CHOLITA|5": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": 20
-      }
-    },
-    "EL DESCANSO|1": {
-      "25-26": {
-        "cv": "SOJA",
-        "rF": null,
-        "rG": 43
-      }
-    },
-    "EL DESCANSO|3": {
-      "25-26": {
-        "cv": "SOJA",
-        "rF": null,
-        "rG": 43
-      }
-    },
-    "EL DESCANSO|7": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": 28
-      }
-    },
-    "EL DESCANSO|8": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": 28
-      }
-    },
-    "LAS TIAS|11": {
-      "25-26": {
-        "cv": "SOJA",
-        "rF": null,
-        "rG": 37
-      }
-    },
-    "LOS ABUELOS|2": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": 11
-      }
-    },
-    "LOS ABUELOS|3": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": 7
-      }
-    },
-    "EL TORELLO|1": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": 70
-      }
-    },
-    "EL TORELLO|6": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": 70
-      }
-    },
-    "EL TORELLO|7": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": 70
-      }
-    },
-    "EL TORELLO|8": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": 70
-      }
-    },
-    "DON RAMON|5": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": 25
-      }
-    },
-    "DON RAMON|6": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": 40
-      }
-    },
-    "EL ABUELO|1": {
-      "25-26": {
-        "cv": "MAIZ 2",
-        "rF": null,
-        "rG": 47
-      }
-    },
-    "EL ABUELO|3": {
-      "25-26": {
-        "cv": "MAIZ 2",
-        "rF": null,
-        "rG": 47
-      }
-    },
-    "EL CIPRES|5": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": 65
-      }
-    },
-    "EL CIPRES|6": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": 65
-      }
-    },
-    "EL CIPRES|3": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": 65
-      }
-    },
-    "LA ADORACION|3": {
-      "25-26": {
-        "cv": "GIRASOL",
-        "rF": null,
-        "rG": 19
-      }
-    },
-    "LA ADORACION|4": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": 56
-      }
-    },
-    "LA ADORACION|5": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": 56
-      }
-    },
-    "LA CARLOTA|1": {
-      "25-26": {
-        "cv": "MAIZ",
-        "rF": null,
-        "rG": 40
-      }
     }
   },
   "SUELOS": {},
@@ -1869,6 +1722,19 @@
       "produtos": [
         "clearsol",
         "aceite metilado rocio"
+      ]
+    },
+    {
+      "fecha": "2026-11-30",
+      "campo": "LA CUCA",
+      "lote": "2",
+      "ha": 112,
+      "cultivo": "GIRASOL",
+      "costo": 705.6,
+      "productos": [
+        "PULVERIZADA TERRESTRE",
+        "CLEARSOL",
+        "ACEITE METILADO ROCIO"
       ]
     },
     {
@@ -2628,6 +2494,22 @@
       "cultivo": "CENTENO",
       "costo": 670.9,
       "produtos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Dicamba 70.8 % Duranor Avance x Lt",
+        "Metsulfuron Metil 60 %",
+        "Coady. RizoSpray EXTREMO x 10 Lt"
+      ]
+    },
+    {
+      "fecha": "2026-06-29",
+      "campo": "LOS ABUELOS",
+      "lote": "5 b (sur)",
+      "ha": 45,
+      "cultivo": "TRIGO",
+      "costo": 1328.5,
+      "productos": [
+        "PULVERIZADA TERRESTRE",
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
         "Dicamba 70.8 % Duranor Avance x Lt",
@@ -4322,6 +4204,17 @@
       "costoHa": 46.9
     },
     {
+      "fecha": "2026-07-08",
+      "campo": "5",
+      "lote": "2",
+      "ha": 20,
+      "cultivo": "AVENA",
+      "tipo": "Fina fert",
+      "producto": "AVENA PROPIA",
+      "dosis": "0.20",
+      "costoHa": 82.2
+    },
+    {
       "fecha": "2026-07-07",
       "campo": "L3H",
       "lote": "13CH",
@@ -4712,8 +4605,8 @@
     "costoUSD": "0.0000"
   },
   "modifiedTimes": {
-    "rotaciones": "2026-08-10T20:33:51.183Z",
-    "labores": "2026-08-07T13:35:30.094Z",
+    "rotaciones": "2026-08-25T13:17:15.598Z",
+    "labores": "2026-08-25T13:02:08.388Z",
     "margenes": "2026-07-06T13:39:09.153Z",
     "suelos": "2026-08-11T12:19:33.998Z"
   }
