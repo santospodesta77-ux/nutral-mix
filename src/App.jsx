@@ -665,7 +665,9 @@ const CAMPOS = [
     {id:"3",label:"3",ha:11,poly:[[15,396],[122,396],[122,455],[15,462]]},
     {id:"1",label:"1",ha:59,poly:[[15,466],[210,456],[210,735],[18,522]]},
     {id:"8",label:"8",ha:42,poly:[[15,526],[225,762],[15,762]]},
-    {id:"2",label:"2",ha:110,poly:[[210,390],[405,390],[405,735],[210,735]]},
+    {id:"2N",label:"2 N",ha:50,poly:[[210,390],[405,390],[405,547],[210,547]]},
+    {id:"2NS",label:"2 NS",ha:20,poly:[[210,547],[405,547],[405,610],[210,610]]},
+    {id:"2S",label:"2 S",ha:40,poly:[[210,610],[405,610],[405,735],[210,735]]},
    ]},
   {id:"LAS TIAS",nombre:"Las Tías",vb:[0,0,380,440],refs:[],
    lotes:[
@@ -2061,7 +2063,23 @@ export default function App(){
   const colEn=COLORES_APP.map((_,i)=>i).filter(i=>lotesDe(campoSel).some(l=>pintura[clL(campoSel,l.id)]===i));
   const tit=titulos[campoSel]??"Orden de aplicación";
   const campoOrd=CAMPOS.find(c=>c.id===campoSel);
-  const pintarL=lid=>{const k2=clL(campoSel,lid);setPintura(p=>{const n={...p};if(n[k2]===brocha)delete n[k2];else n[k2]=brocha;return n;});};
+  const pintarL=lid=>{
+    const k2=clL(campoSel,lid);
+    setPintura(p=>{const n={...p};if(n[k2]===brocha)delete n[k2];else n[k2]=brocha;return n;});
+    // Autocompletar cultivo del tratamiento activo si está vacío
+    setTratamientos(ts => ts.map((t, i) => {
+      if(i !== brocha) return t;
+      if(t.cultivo && t.cultivo.trim() !== "") return t; // ya tiene cultivo, no pisar
+      // Buscar cultivo del lote pintado en los datos de rotación
+      const cvs = cultivosDeLote(campoSel, lid);
+      if(cvs.length === 0) return t;
+      // Priorizar cultivo más representativo: si hay uno solo lo ponemos, si hay dos elegimos el grueso
+      const GRUESAS = ["MAIZ","SOJA","GIRASOL","SORGO","MANI"];
+      const grueso = cvs.find(cv => GRUESAS.includes(cv.toUpperCase()));
+      const cvAuto = grueso || cvs[0];
+      return {...t, cultivo: cvAuto.toLowerCase()};
+    }));
+  };
   const limpiarOrd=()=>setPintura(p=>{const n={...p};lotesDe(campoSel).forEach(l=>delete n[clL(campoSel,l.id)]);return n;});
 
   // === Órdenes: helpers ===
@@ -2099,7 +2117,11 @@ export default function App(){
             const base = PRODUCTOS_BASE.find(pr => pr.n === valor);
             return {n: valor, d: p.d, u: base?.u||"L", p: base?.p||0};
           }
-          if(campoK === "d") return {...p, d: parseFloat(valor)||0};
+          if(campoK === "d") {
+            // Guardamos el texto crudo para que el input pueda mostrar "0," mientras se tipea
+            const dNum = parseFloat((valor||"").toString().replace(",","."));
+            return {...p, d: isNaN(dNum) ? 0 : dNum, dTexto: valor};
+          }
           return p;
         }),
       };
@@ -2112,7 +2134,7 @@ export default function App(){
     receta.productos.forEach((rp, i) => {
       if(i >= 10) return;
       const base = PRODUCTOS_BASE.find(p => p.n === rp.n);
-      filas[i] = {n: rp.n, d: rp.d, u: base?.u||"L", p: base?.p||0};
+      filas[i] = {n: rp.n, d: rp.d, dTexto: String(rp.d), u: base?.u||"L", p: base?.p||0};
     });
     setTratamientos(ts => ts.map((t,i) => i===tratIdx ? {...t, productos: filas} : t));
   };
@@ -2888,7 +2910,7 @@ export default function App(){
                                 <option key={pd.n} value={pd.n}>{pd.n}</option>
                               ))}
                             </select>
-                            <input type="number" step="0.001" value={p.d||""} onChange={e=>updateFila(brocha, fi, "d", e.target.value)} placeholder="0" style={{padding:"5px 6px",fontSize:11.5,border:"none",borderLeft:"1px solid #EEE9DC",background:"transparent",fontFamily:"inherit",color:TINTA,textAlign:"right",width:"100%",minWidth:0}}/>
+                            <input type="text" inputMode="decimal" value={p.dTexto !== undefined ? p.dTexto : (p.d || "")} onChange={e=>updateFila(brocha, fi, "d", e.target.value)} placeholder="0" style={{padding:"5px 6px",fontSize:11.5,border:"none",borderLeft:"1px solid #EEE9DC",background:"transparent",fontFamily:"inherit",color:TINTA,textAlign:"right",width:"100%",minWidth:0}}/>
                             <div style={{padding:"5px 6px",fontSize:11,textAlign:"right",borderLeft:"1px solid #EEE9DC",opacity:total>0?1:0.35}}>{total>0?fmt(total):"—"}</div>
                             <div style={{padding:"5px 6px",fontSize:11,textAlign:"right",borderLeft:"1px solid #EEE9DC",fontWeight:600,opacity:costo>0?1:0.35}}>{costo>0?fmt(costo):"—"}</div>
                           </div>
