@@ -2989,71 +2989,78 @@ export default function App(){
                   </div>
                   <div className="no-print" style={{fontSize:12,letterSpacing:"0.2em",textTransform:"uppercase",opacity:0.6}}>Recibos generados</div>
 
-                  {/* Mapas resumen por tratamiento (para el print) */}
+                  {/* Mapas resumen: un mapa por campo con TODOS los tratamientos pintados */}
                   <div className="print-only" style={{display:"flex",flexDirection:"column",gap:14,marginBottom:10}}>
-                    {tratamientosActivos.map(t => {
-                      const camposDelT = {};
+                    {(() => {
+                      // Agrupar por campo: {campoId: {campo, lotesPorTrat: {tratIdx: [{label,ha}]}}}
+                      const porCampo = {};
                       CAMPOS.forEach(c => {
                         c.lotes.forEach(l => {
-                          if(pintura[clL(c.id, l.id)] === t.idx) {
-                            if(!camposDelT[c.id]) camposDelT[c.id] = {campo: c, lotes: []};
-                            camposDelT[c.id].lotes.push({label: l.label||l.id, ha: Number(l.ha)||0});
-                          }
+                          const idx = pintura[clL(c.id, l.id)];
+                          if(idx === undefined) return;
+                          if(!porCampo[c.id]) porCampo[c.id] = {campo: c, lotesPorTrat: {}};
+                          if(!porCampo[c.id].lotesPorTrat[idx]) porCampo[c.id].lotesPorTrat[idx] = [];
+                          porCampo[c.id].lotesPorTrat[idx].push({label: l.label||l.id, ha: Number(l.ha)||0, loteId: l.id});
                         });
                       });
-                      const totalHaT = Object.values(camposDelT).reduce((s, {lotes}) => s + lotes.reduce((a,b) => a+b.ha, 0), 0);
-                      return (
-                        <div key={`map-${t.idx}`} style={{border:`1.5px solid ${TINTA}`,borderRadius:8,padding:"10px 12px",background:"#fff",pageBreakInside:"avoid"}}>
-                          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-                            <span style={{width:14,height:14,borderRadius:3,background:COLORES_APP[t.idx],border:`1px solid ${TINTA}`,flexShrink:0}}/>
-                            <div style={{fontSize:13,fontWeight:700}}>Tratamiento {t.idx+1}{t.etiqueta?` · ${t.etiqueta}`:""} · {t.cultivo}</div>
-                            <div style={{fontSize:12,opacity:0.7,marginLeft:"auto"}}>{fmt(totalHaT)} ha</div>
-                          </div>
-                          {/* Grid de mapas por campo */}
-                          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:10,marginTop:8}}>
-                            {Object.values(camposDelT).map(({campo, lotes}, i) => {
-                              const lotesPintados = new Set(lotes.map(l => l.label));
-                              const [vx,vy,vw,vh] = campo.vb;
-                              const kk = vw/700;
-                              const haCampoT = lotes.reduce((s,l)=>s+l.ha, 0);
-                              return (
-                                <div key={i} style={{border:"1px solid #D8D2C0",borderRadius:6,padding:"8px",background:"#FFFDF7"}}>
-                                  <div style={{fontSize:11.5,fontWeight:700,marginBottom:4}}>{campo.nombre}</div>
-                                  <div style={{fontSize:10,opacity:0.65,marginBottom:6}}>
-                                    Lote{lotes.length>1?"s":""}: {lotes.map(l => `${l.label} (${l.ha} ha)`).join(", ")} · {fmt(haCampoT)} ha
+                      return Object.values(porCampo).map(({campo, lotesPorTrat}) => {
+                        const [vx,vy,vw,vh] = campo.vb;
+                        const kk = vw/700;
+                        // Mapa de loteId -> tratIdx para pintar
+                        const pintadoPorLote = {};
+                        Object.entries(lotesPorTrat).forEach(([tIdx, lotes]) => {
+                          lotes.forEach(l => { pintadoPorLote[l.loteId] = Number(tIdx); });
+                        });
+                        const haTotalCampo = Object.values(lotesPorTrat).reduce((s,arr) => s + arr.reduce((a,b)=>a+b.ha,0), 0);
+                        return (
+                          <div key={campo.id} style={{border:`1.5px solid ${TINTA}`,borderRadius:8,padding:"10px 12px",background:"#fff",pageBreakInside:"avoid"}}>
+                            <div style={{display:"flex",alignItems:"baseline",gap:10,marginBottom:6,flexWrap:"wrap"}}>
+                              <div style={{fontSize:14,fontWeight:700}}>{campo.nombre}</div>
+                              <div style={{fontSize:12,opacity:0.7}}>{fmt(haTotalCampo)} ha totales</div>
+                            </div>
+                            {/* Leyenda de tratamientos presentes en este campo */}
+                            <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:8,fontSize:11}}>
+                              {Object.entries(lotesPorTrat).map(([tIdx, lotes]) => {
+                                const t = tratamientos[Number(tIdx)];
+                                const haT = lotes.reduce((s,l)=>s+l.ha,0);
+                                return (
+                                  <div key={tIdx} style={{display:"flex",alignItems:"center",gap:5}}>
+                                    <span style={{width:12,height:12,borderRadius:2,background:COLORES_APP[Number(tIdx)],border:`1px solid ${TINTA}`,flexShrink:0}}/>
+                                    <span><b>T{Number(tIdx)+1}</b>{t?.etiqueta?` · ${t.etiqueta}`:""}{t?.cultivo?` · ${t.cultivo}`:""} — lote{lotes.length>1?"s":""} {lotes.map(l=>l.label).join(", ")} ({fmt(haT)} ha)</span>
                                   </div>
-                                  <svg viewBox={`${vx} ${vy} ${vw} ${vh}`} style={{width:"100%",height:"auto",display:"block",border:`1px solid ${TINTA}`,background:"#fff"}}>
-                                    {(campo.grises||[]).map((g,j)=>(
-                                      <polygon key={`g${j}`} points={g.poly.map(p=>p.join(",")).join(" ")} fill="#EDEBE3" stroke="#B5AF9D" strokeWidth={kk}/>
-                                    ))}
-                                    {campo.lotes.map(l => {
-                                      const [cx,cy] = centro(l.poly);
-                                      const pintado = lotesPintados.has(l.label||l.id);
-                                      const w = anchoP(l.poly);
-                                      return (
-                                        <g key={l.id}>
-                                          <polygon points={l.poly.map(p=>p.join(",")).join(" ")}
-                                            fill={pintado?COLORES_APP[t.idx]:"#fff"}
-                                            fillOpacity={pintado?0.85:1}
-                                            stroke={TINTA}
-                                            strokeWidth={(pintado?2:1)*kk}/>
-                                          {w>=34*kk && (
-                                            <g style={{pointerEvents:"none"}}>
-                                              <text x={cx} y={cy-2*kk} fontSize={(w<55*kk?9.5:11)*kk} fontWeight="700" textAnchor="middle" fill={pintado?"#fff":TINTA} style={pintado?{paintOrder:"stroke",stroke:"rgba(0,0,0,0.25)",strokeWidth:2*kk}:{}}>{l.label}</text>
-                                              {l.ha && <text x={cx} y={cy+9*kk} fontSize={(w<55*kk?7:8)*kk} textAnchor="middle" fill={pintado?"#fff":TINTA} opacity={pintado?0.95:0.6}>{l.ha} ha</text>}
-                                            </g>
-                                          )}
-                                        </g>
-                                      );
-                                    })}
-                                  </svg>
-                                </div>
-                              );
-                            })}
+                                );
+                              })}
+                            </div>
+                            <svg viewBox={`${vx} ${vy} ${vw} ${vh}`} style={{width:"100%",height:"auto",display:"block",border:`1px solid ${TINTA}`,background:"#fff",maxHeight:520}}>
+                              {(campo.grises||[]).map((g,j)=>(
+                                <polygon key={`g${j}`} points={g.poly.map(p=>p.join(",")).join(" ")} fill="#EDEBE3" stroke="#B5AF9D" strokeWidth={kk}/>
+                              ))}
+                              {campo.lotes.map(l => {
+                                const [cx,cy] = centro(l.poly);
+                                const tIdx = pintadoPorLote[l.id];
+                                const pintado = tIdx !== undefined;
+                                const w = anchoP(l.poly);
+                                return (
+                                  <g key={l.id}>
+                                    <polygon points={l.poly.map(p=>p.join(",")).join(" ")}
+                                      fill={pintado?COLORES_APP[tIdx]:"#fff"}
+                                      fillOpacity={pintado?0.85:1}
+                                      stroke={TINTA}
+                                      strokeWidth={(pintado?2:1)*kk}/>
+                                    {w>=34*kk && (
+                                      <g style={{pointerEvents:"none"}}>
+                                        <text x={cx} y={cy-2*kk} fontSize={(w<55*kk?9.5:11)*kk} fontWeight="700" textAnchor="middle" fill={pintado?"#fff":TINTA} style={pintado?{paintOrder:"stroke",stroke:"rgba(0,0,0,0.25)",strokeWidth:2*kk}:{}}>{l.label}</text>
+                                        {l.ha && <text x={cx} y={cy+9*kk} fontSize={(w<55*kk?7:8)*kk} textAnchor="middle" fill={pintado?"#fff":TINTA} opacity={pintado?0.95:0.6}>{l.ha} ha</text>}
+                                      </g>
+                                    )}
+                                  </g>
+                                );
+                              })}
+                            </svg>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      });
+                    })()}
                   </div>
                   {tratamientosActivos.map(t => {
                     // Agrupar lotes de este tratamiento por campo
