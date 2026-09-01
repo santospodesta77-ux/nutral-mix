@@ -2297,7 +2297,12 @@ export default function App(){
         @media print {
           body.printing-orden * { visibility: hidden; }
           body.printing-orden .orden-completa-print,
-          body.printing-orden .orden-completa-print * { visibility: visible; }
+          body.printing-orden .orden-completa-print * {
+            visibility: visible;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
           body.printing-orden .orden-completa-print { position:absolute; left:0; top:0; width:100%; padding:0; margin:0; }
           body.printing-orden .no-print, body.printing-orden .no-print * { display:none !important; }
           body.printing-orden .print-only { display:block !important; }
@@ -3025,7 +3030,7 @@ export default function App(){
                                 const haT = lotes.reduce((s,l)=>s+l.ha,0);
                                 return (
                                   <div key={tIdx} style={{display:"flex",alignItems:"center",gap:5}}>
-                                    <span style={{width:12,height:12,borderRadius:2,background:COLORES_APP[Number(tIdx)],border:`1px solid ${TINTA}`,flexShrink:0}}/>
+                                    <svg width="14" height="14" style={{flexShrink:0}}><rect width="14" height="14" fill={COLORES_APP[Number(tIdx)]} stroke={TINTA} strokeWidth="1"/></svg>
                                     <span><b>T{Number(tIdx)+1}</b>{t?.etiqueta?` · ${t.etiqueta}`:""}{t?.cultivo?` · ${t.cultivo}`:""} — lote{lotes.length>1?"s":""} {lotes.map(l=>l.label).join(", ")} ({fmt(haT)} ha)</span>
                                   </div>
                                 );
@@ -3079,8 +3084,9 @@ export default function App(){
                       const costoC = t.filasActivas.reduce((s,p) => s + p.d*haC*p.p, 0);
                       return (
                         <div key={`${t.idx}-${c.id}`} style={{background:"#fff",border:`2px solid ${TINTA}`,borderRadius:10,overflow:"hidden",pageBreakInside:"avoid"}}>
-                          <div style={{background:COLORES_APP[t.idx],color:"#fff",padding:"5px 12px",fontSize:11,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase"}}>
-                            Tratamiento {t.idx+1} {t.etiqueta && `· ${t.etiqueta}`}
+                          <div style={{position:"relative",padding:"6px 12px",fontSize:11,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:"#fff",overflow:"hidden"}}>
+                            <svg style={{position:"absolute",inset:0,width:"100%",height:"100%"}} preserveAspectRatio="none"><rect width="100%" height="100%" fill={COLORES_APP[t.idx]}/></svg>
+                            <span style={{position:"relative"}}>Tratamiento {t.idx+1} {t.etiqueta && `· ${t.etiqueta}`} {t.cultivo && `· ${t.cultivo}`}</span>
                           </div>
                           {/* Header estilo recibo */}
                           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",borderBottom:`1px solid ${TINTA}`,background:"#F8F5EC"}}>
@@ -3096,13 +3102,13 @@ export default function App(){
                             <div style={{padding:"5px 10px",fontSize:10.5,textTransform:"uppercase",opacity:0.7,borderRight:"1px solid #E5E0D0"}}>CAMPO</div>
                             <div style={{padding:"5px 10px",fontSize:10.5,textTransform:"uppercase",opacity:0.7,borderRight:"1px solid #E5E0D0"}}>LOTES</div>
                             <div style={{padding:"5px 10px",fontSize:10.5,textTransform:"uppercase",opacity:0.7,borderRight:"1px solid #E5E0D0"}}>HAS</div>
-                            <div style={{padding:"5px 10px",fontSize:10.5,opacity:0.7}}>{t.cultivo}</div>
+                            <div style={{padding:"5px 10px",fontSize:10.5,textTransform:"uppercase",opacity:0.7}}>CULTIVO</div>
                           </div>
                           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",borderBottom:`1.5px solid ${TINTA}`}}>
                             <div style={{padding:"6px 10px",fontSize:13,fontWeight:700,borderRight:"1px solid #E5E0D0"}}>{c.nombre.toUpperCase()}</div>
                             <div style={{padding:"6px 10px",fontSize:13,fontWeight:600,borderRight:"1px solid #E5E0D0"}}>{lotesLabel}</div>
                             <div style={{padding:"6px 10px",fontSize:14,fontWeight:700,borderRight:"1px solid #E5E0D0"}}>{fmt(haC)}</div>
-                            <div style={{padding:"6px 10px",fontSize:12,textAlign:"right",opacity:0.6}}>{ordTipo}</div>
+                            <div style={{padding:"6px 10px",fontSize:13,fontWeight:700,textTransform:"uppercase"}}>{t.cultivo || "—"}</div>
                           </div>
                           {/* Productos */}
                           <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
