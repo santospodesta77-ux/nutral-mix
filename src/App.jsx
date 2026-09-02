@@ -869,12 +869,37 @@ const CAMPOS = [
 // suelo_var = P | N | MO
 // datos = {INV_26, PLAN_2627, RINDE_2526, SUELOS}
 // Devuelve fill primario, label. Si es doble cultivo devuelve fill2 (para rayado)
+// Busca un valor en un diccionario tolerando distintos formatos de clave.
+// La app usa "CAMPO|LOTE" (ej "L3H|9B"), pero el pipeline a veces escribe
+// "CAMPO|CAMPO-LOTE" (ej "L3H|L3H-9B"). Probamos ambos.
+function buscarKey(dic, campoId, loteId){
+  if(!dic) return undefined;
+  const variantes = [
+    `${campoId}|${loteId}`,
+    `${campoId}|${campoId}-${loteId}`,
+    `${campoId}|${campoId} ${loteId}`,
+  ];
+  for(const v of variantes){
+    if(dic[v] !== undefined) return dic[v];
+  }
+  // Último intento: normalizar (sin espacios, mayúsculas) y comparar el sufijo del lote
+  const objetivo = String(loteId).toUpperCase().replace(/\s+/g,"");
+  for(const key of Object.keys(dic)){
+    const [c, l] = key.split("|");
+    if(!c || !l) continue;
+    if(c.toUpperCase().replace(/\s+/g,"") !== String(campoId).toUpperCase().replace(/\s+/g,"")) continue;
+    // el lote puede venir como "L3H-9B" o "9B"
+    const soloLote = l.toUpperCase().replace(/\s+/g,"").replace(new RegExp(`^${campoId.toUpperCase().replace(/\s+/g,"")}-?`), "");
+    if(soloLote === objetivo) return dic[key];
+  }
+  return undefined;
+}
+
 function getFill(campoId, loteId, modo, sueloVar, datos = {}) {
   const {INV_26 = INV_26_FALLBACK, PLAN_2627 = PLAN_2627_FALLBACK, RINDE_2526 = RINDE_2526_FALLBACK, SUELOS = SUELOS_FALLBACK} = datos;
-  const k=`${campoId}|${loteId}`;
   if(modo==="campaña"){
-    const inv=INV_26[k];       // cultivo fina (invierno)
-    const plan=PLAN_2627[k];    // cultivo gruesa (o doble cultivo con guión)
+    const inv=buscarKey(INV_26, campoId, loteId);       // cultivo fina (invierno)
+    const plan=buscarKey(PLAN_2627, campoId, loteId);    // cultivo gruesa (o doble cultivo con guión)
     // Caso doble cultivo: (a) fina invierno + gruesa distinta, o (b) plan viene "X-Y"
     let fina=inv, gruesa=null;
     if(plan){
@@ -900,12 +925,12 @@ function getFill(campoId, loteId, modo, sueloVar, datos = {}) {
     return {fill:colorCv(cv),label:cv,dim:false};
   }
   if(modo==="rindes"){
-    const r=RINDE_2526[k];
+    const r=buscarKey(RINDE_2526, campoId, loteId);
     if(r==null) return {fill:"#F0EDE5",label:"s/d",dim:true};
     return {fill:escalaColor(r,0,90,"#FFF5CC","#BF4000")||"#FFF5CC",label:`${r} qq/ha`,dim:false};
   }
   if(modo==="margenes"){
-    const m=MB_LOTE[k];
+    const m=buscarKey(MB_LOTE, campoId, loteId);
     if(!m) return {fill:"#F0EDE5",label:"s/d",dim:true};
     const fill=m.mbsa>=0
       ? escalaColor(m.mbsa,0,1200,"#C8E6C9","#1B5E20")||"#C8E6C9"
@@ -913,7 +938,7 @@ function getFill(campoId, loteId, modo, sueloVar, datos = {}) {
     return {fill,label:`${m.mbsa>=0?"+":""}${fmt(m.mbsa)} US$/ha`,dim:false};
   }
   if(modo==="suelos"){
-    const s=SUELOS[k];
+    const s=buscarKey(SUELOS, campoId, loteId);
     if(!s) return {fill:"#F0EDE5",label:"sin análisis",dim:true};
     if(sueloVar==="P"){
       const c=escalaColor(s.P,5,35,"#FFF9C4","#E65100");
@@ -2019,8 +2044,7 @@ export default function App(){
 
   // Cultivos que tiene un lote en 26-27 (puede ser 1 o 2 si es doble cultivo)
   const cultivosDeLote=(campoId,loteId)=>{
-    const k=`${campoId}|${loteId}`;
-    const inv=INV_26[k], plan=PLAN_2627[k];
+    const inv=buscarKey(INV_26, campoId, loteId), plan=buscarKey(PLAN_2627, campoId, loteId);
     const set=new Set();
     if(inv) set.add(baseCv(inv));
     if(plan){
@@ -3214,7 +3238,7 @@ function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, apli
   const HISTORICO_ROTACION = historico || HISTORICO_ROTACION_FALLBACK;
   const {campo,lote}=loteInfo;
   const key=`${campo.id}|${lote.id}`;
-  const hist=HISTORICO_ROTACION[key];
+  const hist=buscarKey(HISTORICO_ROTACION, campo.id, lote.id);
   const camps=["19-20","20-21","21-22","22-23","23-24","24-25","25-26","26-27"];
   const camp=hist&&hist[campSel]?campSel:(hist?camps.filter(c=>hist[c]).slice(-1)[0]:"26-27");
   const dato=hist?hist[camp]:null;
@@ -3284,9 +3308,9 @@ function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, apli
         {/* ── 1. CAMPAÑA ACTUAL 26-27 ── */}
         {(()=>{
           const k=`${campo.id}|${lote.id}`;
-          const fina=inv26[k];
-          const plan=plan2627[k];
-          const suelo=suelos[k];
+          const fina=buscarKey(inv26, campo.id, lote.id);
+          const plan=buscarKey(plan2627, campo.id, lote.id);
+          const suelo=buscarKey(suelos, campo.id, lote.id);
           let cvFina=fina, cvGruesa=null;
           if(plan){
             if(plan.includes("-")){
