@@ -2410,8 +2410,8 @@ export default function App(){
               {capaModo==="campaña"&&(()=>{
                 const acum={};
                 campo.lotes.forEach(l=>{
-                  const inv=INV_26[`${campo.id}|${l.id}`];
-                  const plan=PLAN_2627[`${campo.id}|${l.id}`];
+                  const inv=buscarKey(INV_26, campo.id, l.id);
+                  const plan=buscarKey(PLAN_2627, campo.id, l.id);
                   let fina=inv, gruesa=null;
                   if(plan){
                     if(plan.includes("-")){
