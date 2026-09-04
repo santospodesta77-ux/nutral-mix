@@ -3266,10 +3266,10 @@ export default function App(){
                       return Object.values(porCampo).map(({campo, lotesPorTrat}) => {
                         const [vx,vy,vw,vh] = campo.vb;
                         const kk = vw/700;
-                        // Mapa de loteId -> tratIdx para pintar
-                        const pintadoPorLote = {};
+                        // Mapa de unidad (lote o sector) -> tratIdx para pintar
+                        const pintadoPorUnidad = {};
                         Object.entries(lotesPorTrat).forEach(([tIdx, lotes]) => {
-                          lotes.forEach(l => { pintadoPorLote[l.loteId] = Number(tIdx); });
+                          lotes.forEach(l => { pintadoPorUnidad[l.key] = Number(tIdx); });
                         });
                         const haTotalCampo = Object.values(lotesPorTrat).reduce((s,arr) => s + arr.reduce((a,b)=>a+b.ha,0), 0);
                         return (
@@ -3295,22 +3295,22 @@ export default function App(){
                               {(campo.grises||[]).map((g,j)=>(
                                 <polygon key={`g${j}`} points={g.poly.map(p=>p.join(",")).join(" ")} fill="#EDEBE3" stroke="#B5AF9D" strokeWidth={kk}/>
                               ))}
-                              {campo.lotes.map(l => {
-                                const [cx,cy] = centro(l.poly);
-                                const tIdx = pintadoPorLote[l.id];
+                              {unidadesDe(campo.id).map(u => {
+                                const [cx,cy] = centro(u.poly);
+                                const tIdx = pintadoPorUnidad[u.key];
                                 const pintado = tIdx !== undefined;
-                                const w = anchoP(l.poly);
+                                const w = anchoP(u.poly);
                                 return (
-                                  <g key={l.id}>
-                                    <polygon points={l.poly.map(p=>p.join(",")).join(" ")}
+                                  <g key={u.key}>
+                                    <polygon points={u.poly.map(p=>p.join(",")).join(" ")}
                                       fill={pintado?COLORES_APP[tIdx]:"#fff"}
                                       fillOpacity={pintado?0.85:1}
                                       stroke={TINTA}
                                       strokeWidth={(pintado?2:1)*kk}/>
                                     {w>=34*kk && (
                                       <g style={{pointerEvents:"none"}}>
-                                        <text x={cx} y={cy-2*kk} fontSize={(w<55*kk?9.5:11)*kk} fontWeight="700" textAnchor="middle" fill={pintado?"#fff":TINTA} style={pintado?{paintOrder:"stroke",stroke:"rgba(0,0,0,0.25)",strokeWidth:2*kk}:{}}>{l.label}</text>
-                                        {l.ha && <text x={cx} y={cy+9*kk} fontSize={(w<55*kk?7:8)*kk} textAnchor="middle" fill={pintado?"#fff":TINTA} opacity={pintado?0.95:0.6}>{l.ha} ha</text>}
+                                        <text x={cx} y={cy-2*kk} fontSize={(w<55*kk?9:10.5)*kk} fontWeight="700" textAnchor="middle" fill={pintado?"#fff":TINTA} style={pintado?{paintOrder:"stroke",stroke:"rgba(0,0,0,0.25)",strokeWidth:2*kk}:{}}>{u.label}</text>
+                                        {u.ha>0 && <text x={cx} y={cy+9*kk} fontSize={(w<55*kk?7:8)*kk} textAnchor="middle" fill={pintado?"#fff":TINTA} opacity={pintado?0.95:0.6}>{u.ha} ha</text>}
                                       </g>
                                     )}
                                   </g>
