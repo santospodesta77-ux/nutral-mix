@@ -569,7 +569,7 @@ const RECETAS_BASE = [
     {n:"LIGIER PH BIO x LT", d:0.05},
   ]},
   {nombre:"Barbecho largo girasol", productos:[
-    {n:"GLIFOSATO GRANULADO LT BOX x 15 KG", d:1.5},
+    {n:"GLIFOSATO GRANULADO BOX 72%", d:1.5},
     {n:"2-4 D 97 SIGMA x 20 LT", d:1.0},
     {n:"LIGIER PH BIO x LT", d:0.05},
     {n:"FLUROXIPIR 48 SIGMA x 5 Lts", d:0.3},
