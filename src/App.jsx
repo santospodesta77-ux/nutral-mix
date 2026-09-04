@@ -561,26 +561,19 @@ const PRODUCTORES_BASE = ["ENRIQUE","ANDRES","ENRIQUE - ANDRES","MARIANO","MARIA
 
 // Recetas plantilla (dosis/ha típicas)
 const RECETAS_BASE = [
+  {nombre:"Reseteo maíz y soja", productos:[
+    {n:"GLIFOSATO GRANULADO BOX 72%", d:2.0},
+    {n:"2-4 D 97 SIGMA x 20 LT", d:1.5},
+    {n:"DICAMBA SIGMA x 10 LT", d:0.2},
+    {n:"ACEITE METILADO ROCIO x 3 LT", d:0.1},
+    {n:"LIGIER PH BIO x LT", d:0.05},
+  ]},
   {nombre:"Barbecho largo girasol", productos:[
     {n:"GLIFOSATO GRANULADO LT BOX x 15 KG", d:1.5},
     {n:"2-4 D 97 SIGMA x 20 LT", d:1.0},
     {n:"LIGIER PH BIO x LT", d:0.05},
     {n:"FLUROXIPIR 48 SIGMA x 5 Lts", d:0.3},
     {n:"DIFLUFENICAN SIGMA 50%", d:0.2},
-  ]},
-  {nombre:"Presiembra fina", productos:[
-    {n:"GLIFOSATO GRANULADO LT BOX x 15 KG", d:1.5},
-    {n:"2-4 D 97 SIGMA x 20 LT", d:1.0},
-    {n:"LIGIER PH BIO x LT", d:0.05},
-    {n:"DICAMBA SIGMA x 10 LT", d:0.2},
-    {n:"METSULFURON SIGMA x kg", d:0.005},
-  ]},
-  {nombre:"Presiembra Mayer (jul 26)", productos:[
-    {n:"GLIFOSATO GRANULADO LT BOX x 15 KG", d:1.5},
-    {n:"2-4 D 97 SIGMA x 20 LT", d:0.5},
-    {n:"LIGIER PH BIO x LT", d:0.05},
-    {n:"DICAMBA SIGMA x 10 LT", d:0.1},
-    {n:"METSULFURON SIGMA x kg", d:0.00005},
   ]},
 ];
 
@@ -2025,14 +2018,14 @@ export default function App(){
 
   // === Estado del generador de órdenes ===
   const [ordFecha, setOrdFecha] = useState(new Date().toISOString().split("T")[0]);
-  const [ordProductor, setOrdProductor] = useState("ENRIQUE");
+  const [ordProductor, setOrdProductor] = useState("");
   const [ordCultivo, setOrdCultivo] = useState("cebada");
   const [ordTipo, setOrdTipo] = useState("PULVERIZADA TERRESTRE"); // tipo de labor GLOBAL
   // 4 tratamientos, uno por color. Cada uno con su etiqueta, cultivo y tabla de 10 filas.
   const [tratamientos, setTratamientos] = useState(
     Array(4).fill(null).map(() => ({
       etiqueta: "",
-      cultivo: "cebada",
+      cultivo: "",
       productos: Array(10).fill(null).map(() => ({n:"", d:0})),
     }))
   );
@@ -2165,7 +2158,7 @@ export default function App(){
   const limpiarTratamiento = (tratIdx) => {
     // Limpia productos de un tratamiento Y despinta sus lotes
     setTratamientos(ts => ts.map((t,i) => i===tratIdx
-      ? {etiqueta: "", cultivo: "cebada", productos: Array(10).fill(null).map(() => ({n:"", d:0}))}
+      ? {etiqueta: "", cultivo: "", productos: Array(10).fill(null).map(() => ({n:"", d:0}))}
       : t
     ));
     setPintura(p => {
@@ -2178,7 +2171,7 @@ export default function App(){
     setPintura({});
     setTratamientos(Array(4).fill(null).map(() => ({
       etiqueta: "",
-      cultivo: "cebada",
+      cultivo: "",
       productos: Array(10).fill(null).map(() => ({n:"", d:0})),
     })));
   };
@@ -2202,6 +2195,10 @@ export default function App(){
   const [guardadoMsg, setGuardadoMsg] = useState(null); // {ok:bool, texto:string}
 
   const guardarLaborEnPlanilla = async () => {
+    if(!ordProductor){
+      setGuardadoMsg({ok:false, texto:"Elegí el productor antes de guardar."});
+      return;
+    }
     // Armar payload: cada tratamiento con sus lotes (agrupados por campo) + productos
     const tratamientosPayload = tratamientosActivos.map(t => {
       const lotes = [];
@@ -2858,8 +2855,8 @@ export default function App(){
                   </div>
                   <div>
                     <div style={{fontSize:10.5,opacity:0.55,marginBottom:3}}>Productor</div>
-                    <select value={ordProductor} onChange={e=>setOrdProductor(e.target.value)} style={{...inputB,fontSize:13,fontWeight:600}}>
-                      {PRODUCTORES_BASE.map(p => <option key={p} value={p}>{p}</option>)}
+                    <select value={ordProductor} onChange={e=>setOrdProductor(e.target.value)} style={{...inputB,fontSize:13,fontWeight:600,color:ordProductor?TINTA:"#9A937E"}}>
+                      <option value="">— elegir productor —</option>                      {PRODUCTORES_BASE.map(p => <option key={p} value={p}>{p}</option>)}
                     </select>
                   </div>
                 </div>
