@@ -52,6 +52,46 @@ const centro = poly => {
   return [cx/(6*area), cy/(6*area)];
 };
 const anchoP = poly => Math.max(...poly.map(p=>p[0]))-Math.min(...poly.map(p=>p[0]));
+
+// ── Geometría para dividir lotes ─────────────────────────────
+const areaPoly = poly => {
+  let a = 0;
+  for (let i = 0; i < poly.length; i++) {
+    const [x1,y1] = poly[i], [x2,y2] = poly[(i+1)%poly.length];
+    a += x1*y2 - x2*y1;
+  }
+  return Math.abs(a)/2;
+};
+
+// Corta un polígono con la recta que pasa por a y b. Devuelve [polyA, polyB] o null.
+const cortarPoligono = (poly, a, b) => {
+  const dx = b[0]-a[0], dy = b[1]-a[1];
+  if (Math.abs(dx) < 1e-9 && Math.abs(dy) < 1e-9) return null;
+  const lado = p => (p[0]-a[0])*dy - (p[1]-a[1])*dx;
+  const A = [], B = [];
+  for (let i = 0; i < poly.length; i++) {
+    const p = poly[i], q = poly[(i+1)%poly.length];
+    const lp = lado(p), lq = lado(q);
+    if (lp >= 0) A.push(p);
+    if (lp <= 0) B.push(p);
+    if ((lp > 0 && lq < 0) || (lp < 0 && lq > 0)) {
+      const t = lp/(lp-lq);
+      const ip = [p[0]+t*(q[0]-p[0]), p[1]+t*(q[1]-p[1])];
+      A.push(ip); B.push(ip);
+    }
+  }
+  if (A.length < 3 || B.length < 3) return null;
+  return [A, B];
+};
+
+// Anillo perimetral (cabecera) + centro. fracArea = proporción de la cabecera (0..1)
+const anilloPerimetral = (poly, fracArea) => {
+  const [cx, cy] = centro(poly);
+  const k = Math.sqrt(Math.max(0.02, 1 - fracArea));
+  const dentro = poly.map(([x,y]) => [cx+(x-cx)*k, cy+(y-cy)*k]);
+  return [poly, dentro];   // se dibuja el exterior y encima el interior
+};
+
 const haCampo = c => c.lotes.reduce((s,l)=>s+(Number(l.ha)||0),0);
 
 function escalaColor(val,min,max,c1,c2){
@@ -655,11 +695,9 @@ const CAMPOS = [
     {id:"6",label:"6",ha:56,poly:[[210,8],[405,45],[405,205],[210,205]]},
     {id:"5",label:"5",ha:66,poly:[[15,205],[210,205],[210,390],[15,390]]},
     {id:"4",label:"4",ha:67,poly:[[210,205],[405,205],[405,390],[210,390]]},
-    {id:"3",label:"3",ha:11,poly:[[15,396],[122,396],[122,455],[15,462]]},
-    {id:"1",label:"1",ha:59,poly:[[15,466],[210,456],[210,735],[18,522]]},
+    {id:"1",label:"1",ha:65,poly:[[15,396],[122,396],[122,455],[210,456],[210,735],[18,522]]},
     {id:"8",label:"8",ha:42,poly:[[15,526],[225,762],[15,762]]},
-    {id:"2N",label:"2 N",ha:50,poly:[[210,390],[405,390],[405,547],[210,547]]},
-    {id:"2NS",label:"2 NS",ha:20,poly:[[210,547],[405,547],[405,610],[210,610]]},
+    {id:"2N",label:"2 N",ha:70,poly:[[210,390],[405,390],[405,610],[210,610]]},
     {id:"2S",label:"2 S",ha:40,poly:[[210,610],[405,610],[405,735],[210,735]]},
    ]},
   {id:"LAS TIAS",nombre:"Las Tías",vb:[0,0,380,440],refs:[],
@@ -2019,6 +2057,12 @@ export default function App(){
   // === Estado del generador de órdenes ===
   const [ordFecha, setOrdFecha] = useState(new Date().toISOString().split("T")[0]);
   const [ordProductor, setOrdProductor] = useState("");
+  // Divisiones efímeras de lotes (solo dentro de esta orden)
+  // { "CAMPO|LOTE": [{id, nombre, poly, ha}] }
+  const [divisiones, setDivisiones] = useState({});
+  const [modoDividir, setModoDividir] = useState(false);
+  const [loteDiv, setLoteDiv] = useState(null);       // {campoId, loteId} en edición
+  const [puntosCorte, setPuntosCorte] = useState([]); // [[x,y],[x,y]]
   const [ordCultivo, setOrdCultivo] = useState("cebada");
   const [ordTipo, setOrdTipo] = useState("PULVERIZADA TERRESTRE"); // tipo de labor GLOBAL
   // 4 tratamientos, uno por color. Cada uno con su etiqueta, cultivo y tabla de 10 filas.
@@ -2075,13 +2119,37 @@ export default function App(){
   // órdenes helpers
   const clL=(ci,li)=>`${ci}|${li}`;
   const lotesDe=cid=>CAMPOS.find(c=>c.id===cid).lotes;
-  const haCol=(cid,i)=>lotesDe(cid).filter(l=>pintura[clL(cid,l.id)]===i).reduce((s,l)=>s+(Number(l.ha)||0),0);
+
+  // Unidades pintables de un campo: lotes enteros, o sus sectores si está dividido
+  const unidadesDe = (cid) => {
+    const out = [];
+    lotesDe(cid).forEach(l => {
+      const secs = divisiones[clL(cid, l.id)];
+      if (secs && secs.length) {
+        secs.forEach(s => out.push({
+          key: `${cid}|${l.id}#${s.id}`,
+          loteId: l.id, secId: s.id, nombre: s.nombre,
+          label: `${l.label||l.id} ${s.nombre}`.trim(),
+          ha: Number(s.ha)||0, poly: s.poly, dividido: true,
+        }));
+      } else {
+        out.push({
+          key: clL(cid, l.id),
+          loteId: l.id, secId: null, nombre: "",
+          label: l.label||l.id,
+          ha: Number(l.ha)||0, poly: l.poly, dividido: false,
+        });
+      }
+    });
+    return out;
+  };
+  const haCol=(cid,i)=>unidadesDe(cid).filter(u=>pintura[u.key]===i).reduce((s,u)=>s+u.ha,0);
   const haPint=cid=>COLORES_APP.reduce((s,_,i)=>s+haCol(cid,i),0);
-  const colEn=COLORES_APP.map((_,i)=>i).filter(i=>lotesDe(campoSel).some(l=>pintura[clL(campoSel,l.id)]===i));
+  const colEn=COLORES_APP.map((_,i)=>i).filter(i=>unidadesDe(campoSel).some(u=>pintura[u.key]===i));
   const tit=titulos[campoSel]??"Orden de aplicación";
   const campoOrd=CAMPOS.find(c=>c.id===campoSel);
-  const pintarL=lid=>{
-    const k2=clL(campoSel,lid);
+  const pintarL=(lid, unidadKey)=>{
+    const k2 = unidadKey || clL(campoSel,lid);
     setPintura(p=>{const n={...p};if(n[k2]===brocha)delete n[k2];else n[k2]=brocha;return n;});
     // Autocompletar cultivo del tratamiento activo si está vacío
     setTratamientos(ts => ts.map((t, i) => {
@@ -2097,16 +2165,16 @@ export default function App(){
       return {...t, cultivo: cvAuto.toLowerCase()};
     }));
   };
-  const limpiarOrd=()=>setPintura(p=>{const n={...p};lotesDe(campoSel).forEach(l=>delete n[clL(campoSel,l.id)]);return n;});
+  const limpiarOrd=()=>setPintura(p=>{const n={...p};unidadesDe(campoSel).forEach(u=>delete n[u.key]);return n;});
 
   // === Órdenes: helpers ===
   // Lotes pintados agrupados por campo Y por tratamiento (color)
   const lotesPintadosPorCampo = () => {
     const acc = {};
     CAMPOS.forEach(c => {
-      const pintados = c.lotes.filter(l => pintura[clL(c.id, l.id)] !== undefined);
+      const pintados = unidadesDe(c.id).filter(u => pintura[u.key] !== undefined);
       if (pintados.length > 0) {
-        acc[c.id] = pintados.map(l => ({loteId: l.id, label: l.label||l.id, ha: Number(l.ha)||0, colorIdx: pintura[clL(c.id, l.id)]}));
+        acc[c.id] = pintados.map(u => ({loteId: u.loteId, label: u.label, ha: u.ha, colorIdx: pintura[u.key], key: u.key}));
       }
     });
     return acc;
@@ -2115,13 +2183,86 @@ export default function App(){
   const haTratamiento = (tratIdx) => {
     let total = 0;
     CAMPOS.forEach(c => {
-      c.lotes.forEach(l => {
-        if(pintura[clL(c.id, l.id)] === tratIdx) total += Number(l.ha)||0;
-      });
+      unidadesDe(c.id).forEach(u => { if(pintura[u.key] === tratIdx) total += u.ha; });
     });
     return total;
   };
   const haTotalOrden = () => COLORES_APP.reduce((s,_,i) => s + haTratamiento(i), 0);
+
+  // ── Dividir lotes (efímero, solo esta orden) ──────────────
+  const loteObj = (cid, lid) => lotesDe(cid).find(l => l.id === lid);
+
+  // Aplica un corte recto entre dos puntos al lote en edición
+  const aplicarCorte = (a, b) => {
+    if(!loteDiv) return;
+    const l = loteObj(loteDiv.campoId, loteDiv.loteId);
+    if(!l) return;
+    const partes = cortarPoligono(l.poly, a, b);
+    if(!partes){ setPuntosCorte([]); return; }
+    const [pa, pb] = partes;
+    const aa = areaPoly(pa), ab = areaPoly(pb);
+    const haTot = Number(l.ha)||0;
+    const ha1 = Math.round(haTot * aa/(aa+ab));
+    setDivisiones(d => ({...d, [clL(loteDiv.campoId, loteDiv.loteId)]: [
+      {id:"a", nombre:"sector 1", poly:pa, ha:ha1},
+      {id:"b", nombre:"sector 2", poly:pb, ha:haTot-ha1},
+    ]}));
+    setPuntosCorte([]);
+  };
+
+  // Cabecera: anillo perimetral + centro
+  const aplicarCabecera = (fracPct) => {
+    if(!loteDiv) return;
+    const l = loteObj(loteDiv.campoId, loteDiv.loteId);
+    if(!l) return;
+    const frac = Math.min(0.8, Math.max(0.02, fracPct/100));
+    const [ext, dentro] = anilloPerimetral(l.poly, frac);
+    const haTot = Number(l.ha)||0;
+    const haCab = Math.round(haTot*frac);
+    setDivisiones(d => ({...d, [clL(loteDiv.campoId, loteDiv.loteId)]: [
+      {id:"cab", nombre:"cabecera", poly:ext, ha:haCab, anillo:true},
+      {id:"cen", nombre:"sin cabecera", poly:dentro, ha:haTot-haCab},
+    ]}));
+    setPuntosCorte([]);
+  };
+
+  const quitarDivision = (cid, lid) => {
+    const k = clL(cid, lid);
+    setDivisiones(d => { const n={...d}; delete n[k]; return n; });
+    setPintura(p => { const n={...p};
+      Object.keys(n).forEach(kk => { if(kk.startsWith(k+"#")) delete n[kk]; });
+      return n; });
+  };
+
+  const updateSector = (cid, lid, secId, campoK, valor) => {
+    const k = clL(cid, lid);
+    setDivisiones(d => {
+      const secs = (d[k]||[]).map(s => s.id===secId
+        ? {...s, [campoK]: campoK==="ha" ? (parseFloat(String(valor).replace(",","."))||0) : valor}
+        : s);
+      return {...d, [k]: secs};
+    });
+  };
+
+  // Suma de ha de los sectores vs ha del lote (para avisar descuadres)
+  const chequeoDivision = (cid, lid) => {
+    const secs = divisiones[clL(cid,lid)];
+    if(!secs) return null;
+    const l = loteObj(cid,lid);
+    const suma = secs.reduce((s,x)=>s+(Number(x.ha)||0),0);
+    return {suma, total:Number(l?.ha)||0, ok: Math.abs(suma-(Number(l?.ha)||0)) < 0.5};
+  };
+
+  // Convierte coordenadas de pantalla a coordenadas del viewBox del SVG
+  const puntoSVG = (evt, svgEl) => {
+    if(!svgEl) return null;
+    const pt = svgEl.createSVGPoint();
+    pt.x = evt.clientX; pt.y = evt.clientY;
+    const ctm = svgEl.getScreenCTM();
+    if(!ctm) return null;
+    const p = pt.matrixTransform(ctm.inverse());
+    return [p.x, p.y];
+  };
 
   const updateFila = (tratIdx, filaIdx, campoK, valor) => {
     setTratamientos(ts => ts.map((t, ti) => {
@@ -2169,6 +2310,10 @@ export default function App(){
   };
   const limpiarOrdenCompleta = () => {
     setPintura({});
+    setDivisiones({});
+    setLoteDiv(null);
+    setPuntosCorte([]);
+    setModoDividir(false);
     setTratamientos(Array(4).fill(null).map(() => ({
       etiqueta: "",
       cultivo: "",
@@ -2202,9 +2347,9 @@ export default function App(){
     // Armar payload: cada tratamiento con sus lotes (agrupados por campo) + productos
     const tratamientosPayload = tratamientosActivos.map(t => {
       const lotes = [];
-      CAMPOS.forEach(c => c.lotes.forEach(l => {
-        if(pintura[clL(c.id, l.id)] === t.idx){
-          lotes.push({campo: c.id, lote: l.label||l.id, ha: Number(l.ha)||0});
+      CAMPOS.forEach(c => unidadesDe(c.id).forEach(u => {
+        if(pintura[u.key] === t.idx){
+          lotes.push({campo: c.id, lote: u.label, ha: u.ha});
         }
       }));
       return {
@@ -2964,7 +3109,17 @@ export default function App(){
                     <div style={{fontSize:11,opacity:0.6,flex:1,minWidth:120}}>Pintás con color de <b>T{brocha+1}</b></div>
                   </div>
                   <div style={{background:"#fff",border:`1.5px solid ${TINTA}`,borderRadius:10,padding:8}}>
-                    <svg ref={svgRef} viewBox={`${vx} ${vy} ${vw} ${vh}`} style={{width:"100%",height:"auto",display:"block"}}>
+                    <svg ref={svgRef} viewBox={`${vx} ${vy} ${vw} ${vh}`} style={{width:"100%",height:"auto",display:"block"}}
+                      onClick={(e)=>{
+                        if(!modoDividir || !loteDiv) return;
+                        const p = puntoSVG(e.nativeEvent, svgRef.current);
+                        if(!p) return;
+                        setPuntosCorte(prev=>{
+                          const np=[...prev,p];
+                          if(np.length>=2){ setTimeout(()=>aplicarCorte(np[0],np[1]),0); return np.slice(0,2); }
+                          return np;
+                        });
+                      }}>
                       {(campoOrd.refs||[]).map((r,j)=>(
                         <text key={j} x={r.x} y={r.y} fontSize={11*k} fontStyle="italic" fill="#8A8270" textAnchor="middle" transform={r.rot?`rotate(${r.rot} ${r.x} ${r.y})`:undefined}>{r.t}</text>
                       ))}
@@ -2975,22 +3130,101 @@ export default function App(){
                           {g.label&&<text x={cx} y={cy} fontSize={11*k} fontStyle="italic" textAnchor="middle" fill="#9A937E">{g.label}</text>}
                         </g>;
                       })}
-                      {campoOrd.lotes.map(l=>{
-                        const idx=pintura[clL(campoSel,l.id)];
+                      {unidadesDe(campoSel).map(u=>{
+                        const idx=pintura[u.key];
                         const pint=idx!==undefined;
-                        const [cx,cy]=centro(l.poly);
-                        const w=anchoP(l.poly);
-                        const mHa=Number(l.ha)>0&&w>=40*k;
-                        return <g key={l.id} onClick={()=>pintarL(l.id)} style={{cursor:"pointer"}}>
-                          <polygon points={l.poly.map(p=>p.join(",")).join(" ")} fill={pint?COLORES_APP[idx]:"#FFFFFF"} fillOpacity={pint?0.85:1} stroke={TINTA} strokeWidth={(pint?2.2:1.2)*k}/>
+                        const [cx,cy]=centro(u.poly);
+                        const w=anchoP(u.poly);
+                        const mHa=u.ha>0&&w>=40*k;
+                        const enDiv = modoDividir && loteDiv && loteDiv.campoId===campoSel && loteDiv.loteId===u.loteId;
+                        return <g key={u.key}
+                          onClick={()=>{
+                            if(modoDividir){
+                              setLoteDiv({campoId:campoSel, loteId:u.loteId});
+                              setPuntosCorte([]);
+                            } else pintarL(u.loteId, u.key);
+                          }}
+                          style={{cursor:"pointer"}}>
+                          <polygon points={u.poly.map(p=>p.join(",")).join(" ")}
+                            fill={pint?COLORES_APP[idx]:"#FFFFFF"} fillOpacity={pint?0.85:1}
+                            stroke={enDiv?"#C0392B":TINTA} strokeWidth={(enDiv?3:pint?2.2:1.2)*k}
+                            strokeDasharray={enDiv?`${5*k} ${3*k}`:undefined}/>
                           <g style={{pointerEvents:"none"}}>
-                            <text x={cx} y={cy+(mHa?0:4*k)} fontSize={(w<55*k?11:14)*k} fontWeight="700" textAnchor="middle" fill={pint?"#FFF":TINTA} opacity={pint?1:0.5} style={pint?{paintOrder:"stroke",stroke:"rgba(0,0,0,0.25)",strokeWidth:2*k}:{}}>{l.label}</text>
-                            {mHa&&<text x={cx} y={cy+13*k} fontSize={9.5*k} textAnchor="middle" fill={pint?"#FFF":TINTA} opacity={pint?0.95:0.45}>{l.ha} ha</text>}
+                            <text x={cx} y={cy+(mHa?0:4*k)} fontSize={(w<55*k?10:13)*k} fontWeight="700" textAnchor="middle" fill={pint?"#FFF":TINTA} opacity={pint?1:0.5} style={pint?{paintOrder:"stroke",stroke:"rgba(0,0,0,0.25)",strokeWidth:2*k}:{}}>{u.label}</text>
+                            {mHa&&<text x={cx} y={cy+13*k} fontSize={9.5*k} textAnchor="middle" fill={pint?"#FFF":TINTA} opacity={pint?0.95:0.45}>{u.ha} ha</text>}
                           </g>
                         </g>;
                       })}
+                      {/* puntos del corte en curso */}
+                      {puntosCorte.map((p,i)=>(
+                        <circle key={i} cx={p[0]} cy={p[1]} r={5*k} fill="#C0392B" stroke="#fff" strokeWidth={1.5*k} style={{pointerEvents:"none"}}/>
+                      ))}
+                      {puntosCorte.length===2&&(
+                        <line x1={puntosCorte[0][0]} y1={puntosCorte[0][1]} x2={puntosCorte[1][0]} y2={puntosCorte[1][1]} stroke="#C0392B" strokeWidth={2*k} strokeDasharray={`${4*k} ${3*k}`} style={{pointerEvents:"none"}}/>
+                      )}
                     </svg>
                   </div>
+                  {/* ── Panel dividir lote ── */}
+                  <div style={{marginTop:10,padding:"10px 12px",border:`1.5px solid ${modoDividir?"#C0392B":"#D8D2C0"}`,borderRadius:10,background:modoDividir?"#FDF3F1":"#FFFDF7"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+                      <button onClick={()=>{setModoDividir(m=>!m);setLoteDiv(null);setPuntosCorte([]);}}
+                        style={{padding:"7px 12px",fontSize:12.5,fontWeight:700,cursor:"pointer",border:"none",borderRadius:8,
+                          background:modoDividir?"#C0392B":"transparent",color:modoDividir?"#fff":TINTA,
+                          boxShadow:modoDividir?"none":`inset 0 0 0 1.5px ${TINTA}`,fontFamily:"inherit"}}>
+                        ✂️ {modoDividir?"Salir de dividir":"Dividir lote"}
+                      </button>
+                      {modoDividir && !loteDiv && <span style={{fontSize:12,opacity:0.7}}>Tocá el lote que querés dividir.</span>}
+                      {modoDividir && loteDiv && puntosCorte.length===0 && (
+                        <span style={{fontSize:12,opacity:0.75}}>
+                          Lote <b>{loteObj(loteDiv.campoId,loteDiv.loteId)?.label}</b> · tocá dos puntos del mapa para el corte, o usá cabecera →
+                        </span>
+                      )}
+                      {modoDividir && loteDiv && puntosCorte.length===1 && <span style={{fontSize:12,opacity:0.75}}>Tocá el segundo punto.</span>}
+                      {modoDividir && loteDiv && (
+                        <span style={{display:"inline-flex",alignItems:"center",gap:5,marginLeft:"auto"}}>
+                          <span style={{fontSize:12,opacity:0.7}}>Cabecera</span>
+                          <input type="number" defaultValue={15} min={2} max={80} id="fracCab"
+                            style={{...inputB,width:58,fontSize:12,padding:"4px 6px",textAlign:"right"}}/>
+                          <span style={{fontSize:12,opacity:0.7}}>%</span>
+                          <button onClick={()=>{
+                            const el=document.getElementById("fracCab");
+                            aplicarCabecera(parseFloat(el?.value)||15);
+                          }} style={{padding:"5px 10px",fontSize:12,fontWeight:600,cursor:"pointer",border:`1.5px solid ${TINTA}`,borderRadius:7,background:"transparent",color:TINTA,fontFamily:"inherit"}}>Aplicar</button>
+                        </span>
+                      )}
+                    </div>
+
+                    {/* sectores del lote en edición */}
+                    {loteDiv && divisiones[clL(loteDiv.campoId,loteDiv.loteId)] && (()=>{
+                      const secs = divisiones[clL(loteDiv.campoId,loteDiv.loteId)];
+                      const chk = chequeoDivision(loteDiv.campoId, loteDiv.loteId);
+                      return (
+                        <div style={{marginTop:10,display:"flex",flexDirection:"column",gap:6}}>
+                          {secs.map(s=>(
+                            <div key={s.id} style={{display:"grid",gridTemplateColumns:"1fr 80px 40px",gap:6,alignItems:"center"}}>
+                              <input value={s.nombre} onChange={e=>updateSector(loteDiv.campoId,loteDiv.loteId,s.id,"nombre",e.target.value)}
+                                placeholder="nombre del sector" style={{...inputB,fontSize:12.5,padding:"5px 8px"}}/>
+                              <input type="text" inputMode="decimal" value={s.ha}
+                                onChange={e=>updateSector(loteDiv.campoId,loteDiv.loteId,s.id,"ha",e.target.value)}
+                                style={{...inputB,fontSize:12.5,padding:"5px 8px",textAlign:"right"}}/>
+                              <span style={{fontSize:11.5,opacity:0.6}}>ha</span>
+                            </div>
+                          ))}
+                          <div style={{display:"flex",alignItems:"center",gap:10,fontSize:12}}>
+                            <span style={{fontWeight:600,color:chk&&chk.ok?"#2E7D32":"#C0392B"}}>
+                              {chk ? `${fmt(chk.suma)} de ${fmt(chk.total)} ha` : ""}
+                              {chk && !chk.ok && ` — no cuadra con el lote`}
+                            </span>
+                            <button onClick={()=>{quitarDivision(loteDiv.campoId,loteDiv.loteId);setLoteDiv(null);}}
+                              style={{marginLeft:"auto",padding:"4px 9px",fontSize:11.5,fontWeight:600,cursor:"pointer",border:"1px solid #C0392B",borderRadius:6,background:"transparent",color:"#C0392B",fontFamily:"inherit"}}>
+                              Deshacer división
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
                   <div style={{display:"flex",gap:8,marginTop:10,flexWrap:"wrap"}}>
                     <button onClick={guardarLaborEnPlanilla} disabled={guardando||tratamientosActivos.length===0} style={{padding:"9px 15px",fontSize:12.5,fontWeight:700,cursor:guardando?"wait":"pointer",border:"none",borderRadius:8,background:tratamientosActivos.length===0?"#B5AF9D":"#2E7D32",color:"#fff",fontFamily:"inherit",opacity:guardando?0.7:1}}>{guardando?"Guardando…":"💾 Guardar en planilla"}</button>
                     <button onClick={imprimirOrdenCompleta} style={{padding:"9px 13px",fontSize:12.5,fontWeight:700,cursor:"pointer",border:"none",borderRadius:8,background:TINTA,color:"#F3EFE3",fontFamily:"inherit"}}>🖨️ Descargar orden completa (PDF)</button>
@@ -3021,12 +3255,12 @@ export default function App(){
                       // Agrupar por campo: {campoId: {campo, lotesPorTrat: {tratIdx: [{label,ha}]}}}
                       const porCampo = {};
                       CAMPOS.forEach(c => {
-                        c.lotes.forEach(l => {
-                          const idx = pintura[clL(c.id, l.id)];
+                        unidadesDe(c.id).forEach(u => {
+                          const idx = pintura[u.key];
                           if(idx === undefined) return;
                           if(!porCampo[c.id]) porCampo[c.id] = {campo: c, lotesPorTrat: {}};
                           if(!porCampo[c.id].lotesPorTrat[idx]) porCampo[c.id].lotesPorTrat[idx] = [];
-                          porCampo[c.id].lotesPorTrat[idx].push({label: l.label||l.id, ha: Number(l.ha)||0, loteId: l.id});
+                          porCampo[c.id].lotesPorTrat[idx].push({label: u.label, ha: u.ha, loteId: u.loteId, key: u.key});
                         });
                       });
                       return Object.values(porCampo).map(({campo, lotesPorTrat}) => {
@@ -3092,10 +3326,10 @@ export default function App(){
                     // Agrupar lotes de este tratamiento por campo
                     const camposDelTrat = {};
                     CAMPOS.forEach(c => {
-                      c.lotes.forEach(l => {
-                        if(pintura[clL(c.id, l.id)] === t.idx) {
+                      unidadesDe(c.id).forEach(l => {
+                        if(pintura[l.key] === t.idx) {
                           if(!camposDelTrat[c.id]) camposDelTrat[c.id] = {campo: c, lotes: []};
-                          camposDelTrat[c.id].lotes.push({label: l.label||l.id, ha: Number(l.ha)||0});
+                          camposDelTrat[c.id].lotes.push({label: l.label, ha: l.ha});
                         }
                       });
                     });
