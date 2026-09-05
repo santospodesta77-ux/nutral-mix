@@ -21,6 +21,42 @@ const COLOR_CV = {
   AVENA:"#BFB87A", AGROPIRO:"#8DA86E", VERDEO:"#7A8B6F", FINA:"#C9B458",
 };
 const baseCv = c => c ? c.toUpperCase().replace(/\s*\d+$/,"").replace(/\s*T$/,"").trim() : "";
+
+// Cultivos conocidos (para partir combinaciones tipo "CEBADA-SOJA" o "VERDEO MAIZ")
+const CULTIVOS_CONOCIDOS = ["MAIZ","SOJA","GIRASOL","SORGO","MANI","TRIGO","CEBADA","CENTENO",
+  "AVENA","AGROPIRO","VERDEO","PASTURA","LLORON","TREBOL","FINA"];
+
+// Parte un valor de cultivo en sus componentes reales.
+// "CEBADA-SOJA" -> ["CEBADA","SOJA"] | "VERDEO MAIZ" -> ["VERDEO","MAIZ"]
+// "MAIZ 2" -> ["MAIZ"] | "SORGO FORR" -> ["SORGO"] | "CAMPO NATURAL" -> ["CAMPO NATURAL"]
+const cvPartes = (valor) => {
+  if (!valor) return [];
+  const bruto = String(valor).toUpperCase().trim();
+  // separadores explícitos
+  let trozos = bruto.split(/\s*[-+/]\s*/);
+  // separador por espacio: solo si TODOS los trozos son cultivos conocidos
+  if (trozos.length === 1 && bruto.includes(" ")) {
+    const porEspacio = bruto.split(/\s+/);
+    if (porEspacio.length > 1 && porEspacio.every(p => CULTIVOS_CONOCIDOS.includes(p))) {
+      trozos = porEspacio;
+    }
+  }
+  const out = [];
+  trozos.forEach(t => {
+    const b = baseCv(t);
+    if (!b) return;
+    // "SORGO FORR" -> SORGO ; "MAIZ FORRAJERO" -> MAIZ
+    const primera = b.split(/\s+/)[0];
+    const val = CULTIVOS_CONOCIDOS.includes(primera) ? primera : b;
+    if (!out.includes(val)) out.push(val);
+  });
+  return out;
+};
+// Parte fina (invierno) de un valor: el primer componente si es fina
+const cvFina = (valor) => {
+  const p = cvPartes(valor);
+  return p.length ? p[0] : "";
+};
 const colorCv = c => COLOR_CV[baseCv(c)] || COLOR_CV[c?.toUpperCase?.()] || "#DEDBD3";
 
 // ── helpers ─────────────────────────────────────────────────
@@ -929,21 +965,22 @@ function buscarKey(dic, campoId, loteId){
 function getFill(campoId, loteId, modo, sueloVar, datos = {}) {
   const {INV_26 = INV_26_FALLBACK, PLAN_2627 = PLAN_2627_FALLBACK, RINDE_2526 = RINDE_2526_FALLBACK, SUELOS = SUELOS_FALLBACK} = datos;
   if(modo==="campaña"){
-    const inv=buscarKey(INV_26, campoId, loteId);       // cultivo fina (invierno)
-    const plan=buscarKey(PLAN_2627, campoId, loteId);    // cultivo gruesa (o doble cultivo con guión)
-    // Caso doble cultivo: (a) fina invierno + gruesa distinta, o (b) plan viene "X-Y"
-    let fina=inv, gruesa=null;
-    if(plan){
-      if(plan.includes("-")){
-        const [f,g]=plan.split("-").map(s=>s.trim());
-        fina=fina||f;
-        gruesa=g;
-      } else {
-        gruesa=plan;
-      }
+    const invRaw=buscarKey(INV_26, campoId, loteId);     // cultivo fina (invierno)
+    const planRaw=buscarKey(PLAN_2627, campoId, loteId);  // gruesa, o doble cultivo "X-Y"
+    // Normalizamos: el dato puede venir con el doble cultivo completo en cualquiera
+    // de los dos campos (según cómo lo haya escrito el pipeline).
+    const pInv = cvPartes(invRaw), pPlan = cvPartes(planRaw);
+    let fina = null, gruesa = null;
+    if(pPlan.length >= 2){          // "CEBADA-SOJA" en PLAN
+      fina = pPlan[0]; gruesa = pPlan[1];
+    } else if(pInv.length >= 2){    // "CEBADA-SOJA" en INV
+      fina = pInv[0]; gruesa = pInv[1];
+    } else {
+      fina = pInv[0] || null;
+      gruesa = pPlan[0] || null;
     }
-    // Si el plan es igual a la fina (ej "PASTURA"), no es doble cultivo
-    if(fina&&gruesa&&baseCv(fina)===baseCv(gruesa)) gruesa=null;
+    // Si fina y gruesa son lo mismo (ej PASTURA), no es doble cultivo
+    if(fina&&gruesa&&fina===gruesa) gruesa=null;
     if(!fina&&!gruesa) return {fill:"#F0EDE5",label:"sin sembrar",dim:true};
     if(fina&&gruesa) return {
       fill:colorCv(fina),
@@ -2083,11 +2120,8 @@ export default function App(){
   const cultivosDeLote=(campoId,loteId)=>{
     const inv=buscarKey(INV_26, campoId, loteId), plan=buscarKey(PLAN_2627, campoId, loteId);
     const set=new Set();
-    if(inv) set.add(baseCv(inv));
-    if(plan){
-      if(plan.includes("-")) plan.split("-").forEach(p=>set.add(baseCv(p)));
-      else set.add(baseCv(plan));
-    }
+    cvPartes(inv).forEach(p=>set.add(p));
+    cvPartes(plan).forEach(p=>set.add(p));
     return [...set].filter(Boolean);
   };
   // Lista de todos los cultivos presentes en 26-27 (para el selector de filtro)
@@ -2552,16 +2586,14 @@ export default function App(){
               {capaModo==="campaña"&&(()=>{
                 const acum={};
                 campo.lotes.forEach(l=>{
-                  const inv=buscarKey(INV_26, campo.id, l.id);
-                  const plan=buscarKey(PLAN_2627, campo.id, l.id);
-                  let fina=inv, gruesa=null;
-                  if(plan){
-                    if(plan.includes("-")){
-                      const [f,g]=plan.split("-").map(s=>s.trim());
-                      fina=fina||f; gruesa=g;
-                    } else gruesa=plan;
-                  }
-                  if(fina&&gruesa&&baseCv(fina)===baseCv(gruesa)) gruesa=null;
+                  const invRaw=buscarKey(INV_26, campo.id, l.id);
+                  const planRaw=buscarKey(PLAN_2627, campo.id, l.id);
+                  const pInv=cvPartes(invRaw), pPlan=cvPartes(planRaw);
+                  let fina=null, gruesa=null;
+                  if(pPlan.length>=2){ fina=pPlan[0]; gruesa=pPlan[1]; }
+                  else if(pInv.length>=2){ fina=pInv[0]; gruesa=pInv[1]; }
+                  else { fina=pInv[0]||null; gruesa=pPlan[0]||null; }
+                  if(fina&&gruesa&&fina===gruesa) gruesa=null;
                   // Separar 2da: gruesa que va sobre fina cosechada o sobre verdeo
                   // se etiqueta como "MAIZ 2" o "SOJA 2"
                   let etiquetaGruesa=gruesa;
