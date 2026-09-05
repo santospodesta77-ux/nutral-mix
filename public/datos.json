@@ -1,22 +1,11 @@
 {
-  "generado": "2026-09-04T14:47:09.858Z",
+  "generado": "2026-09-05T20:56:14.454Z",
   "warnings": [
-    "Campo 'MIRASOL' es alias ambiguo — no se asigna",
-    "Campo 'DON JULIAN' no está en lista válida — no se incluye",
-    "Lote '5 2' tiene formato inusual — transcrito como aparece",
-    "Lote 'maiz humed' no es estándar — transcrito literalmente",
-    "Lote 'LA DORA-maiz humed' no sigue patrón estándar",
-    "Producto 'CENTENO PROPIO' con precio 411 USD podría ser error (muy alto para semilla)",
-    "Producto 'TRIGO PROPIO' con precio 278 USD podría ser error",
-    "Producto 'CEBADA PROPIA' con precio 278 USD podría ser error",
-    "Producto 'AVENA PROPIA' con precio 411 USD podría ser error",
-    "Aplicación 31/08/2026 LA ILUSION-6: cultivo 'MAIZ' pero en rotaciones 26-27 no aparece MAIZ en LA ILUSION-6",
-    "Aplicación 31/08/2026 LA ILUSION-8: cultivo 'CEBADA' pero LA ILUSION-8 no existe en rotaciones",
-    "Fertilización 06/07/2026: dosis 0.050 parece muy baja para fertilizante (¿kg o ton?)",
-    "Fertilización 07/07/2026: múltiples lotes con 'INCORPORADA' sin producto asociado claro",
-    "Aplicación 08/07/2026 5-2: campo '5' escrito como '5' en vez de 'EL 5'",
-    "Duplicados detectados en aplicaciones (misma fecha+campo+lote) — se eliminaron",
-    "INV_26 solo incluye finas, PLAN_2627 solo gruesas o dobles",
+    "PLANILLA MARGENES vacía o no contiene datos estructurados",
+    "No se encontró planilla ROTACIONES",
+    "No se encontró planilla LABORES/APLICACIONES",
+    "No se encontró planilla FERTILIZACIONES",
+    "No se encontró planilla ANÁLISIS DE SUELO",
     "[margenes] Planilla 'margenes' está en formato Excel (.xlsx). Convertila a Google Sheets nativa y actualizá el ID."
   ],
   "INV_26": {
@@ -1859,7 +1848,7 @@
   "modifiedTimes": {
     "rotaciones": "2026-09-01T16:47:46.517Z",
     "labores": "2026-09-03T12:47:35.300Z",
-    "margenes": "2026-09-04T02:13:25.814Z",
+    "margenes": "2026-09-05T16:16:15.995Z",
     "suelos": "2026-08-11T12:19:33.998Z"
   }
 }
