@@ -471,7 +471,7 @@ const PRODUCTOR = {
   "LA ADORACION":"—","LA CARLOTA":"—",
 };
 const COLOR_PROV = { PELAYO:"#2E7D32", QUEMU:"#C0392B" };
-const COLORES_APP = ["#E2574C","#3B82C4","#43A047","#F2B707"];
+const COLORES_APP = ["#E2574C","#3B82C4","#43A047","#F2B707","#7E57C2","#00897B"];
 
 // ── BASE DE PRODUCTOS Y PROVEEDORES ────────────────────────
 // Precios USD/L o USD/kg. Categorías: HER (herbicida), INS (insecticida),
@@ -2204,6 +2204,30 @@ export default function App(){
   // Divisiones efímeras de lotes (solo dentro de esta orden)
   // { "CAMPO|LOTE": [{id, nombre, poly, ha}] }
   const [divisiones, setDivisiones] = useState({});
+
+  // ── Borradores de órdenes (se guardan en este dispositivo, 10 días) ──
+  const BORR_KEY = "smix_borradores_v1";
+  const DIAS_BORRADOR = 10;
+  const [ordId, setOrdId] = useState(() => `o${Date.now()}`);
+  const [borradores, setBorradores] = useState([]);
+  const [panelBorr, setPanelBorr] = useState(false);
+
+  const leerBorradores = () => {
+    try {
+      const crudo = window.localStorage.getItem(BORR_KEY);
+      if (!crudo) return [];
+      const lista = JSON.parse(crudo);
+      const corte = Date.now() - DIAS_BORRADOR*24*60*60*1000;
+      return lista.filter(b => (b.guardado||0) > corte);
+    } catch { return []; }
+  };
+  const escribirBorradores = (lista) => {
+    try { window.localStorage.setItem(BORR_KEY, JSON.stringify(lista)); } catch {}
+    setBorradores(lista);
+  };
+
+  // Cargar al iniciar (y purgar los vencidos)
+  useEffect(() => { escribirBorradores(leerBorradores()); }, []);
   const [modoDividir, setModoDividir] = useState(false);
   const [loteDiv, setLoteDiv] = useState(null);       // {campoId, loteId} en edición
   const [puntosCorte, setPuntosCorte] = useState([]); // [[x,y],[x,y]]
@@ -2211,7 +2235,7 @@ export default function App(){
   const [ordTipo, setOrdTipo] = useState("PULVERIZADA TERRESTRE"); // tipo de labor GLOBAL
   // 4 tratamientos, uno por color. Cada uno con su etiqueta, cultivo y tabla de 10 filas.
   const [tratamientos, setTratamientos] = useState(
-    Array(4).fill(null).map(() => ({
+    Array(COLORES_APP.length).fill(null).map(() => ({
       etiqueta: "",
       cultivo: "",
       productos: Array(10).fill(null).map(() => ({n:"", d:0})),
@@ -2329,6 +2353,78 @@ export default function App(){
     return total;
   };
   const haTotalOrden = () => COLORES_APP.reduce((s,_,i) => s + haTratamiento(i), 0);
+
+  // ── Guardado automático del borrador en curso ──
+  const resumenOrden = () => {
+    const ha = haTotalOrden();
+    const trats = tratamientos
+      .map((t,i) => ({...t, i, ha: haTratamiento(i)}))
+      .filter(t => t.ha > 0 && t.productos.some(p => p.n && p.d > 0));
+    const campos = [...new Set(
+      CAMPOS.flatMap(c => unidadesDe(c.id).filter(u => pintura[u.key] !== undefined).map(() => c.nombre))
+    )];
+    return { ha, nTrats: trats.length, campos,
+      etiquetas: trats.map(t => t.etiqueta || `T${t.i+1}`) };
+  };
+
+  useEffect(() => {
+    const r = resumenOrden();
+    const hayAlgo = r.ha > 0 || tratamientos.some(t => t.productos.some(p => p.n));
+    if (!hayAlgo) return;
+    const t = setTimeout(() => {
+      const item = {
+        id: ordId, guardado: Date.now(),
+        fecha: ordFecha, productor: ordProductor, tipo: ordTipo,
+        tratamientos, pintura, divisiones,
+        resumen: { ha: r.ha, nTrats: r.nTrats, campos: r.campos, etiquetas: r.etiquetas },
+      };
+      const lista = leerBorradores().filter(b => b.id !== ordId);
+      escribirBorradores([item, ...lista].slice(0, 30));
+    }, 800);
+    return () => clearTimeout(t);
+  }, [ordId, ordFecha, ordProductor, ordTipo, tratamientos, pintura, divisiones]);
+
+  const cargarBorrador = (b) => {
+    setOrdId(b.id);
+    setOrdFecha(b.fecha || new Date().toISOString().split("T")[0]);
+    setOrdProductor(b.productor || "");
+    setOrdTipo(b.tipo || "PULVERIZADA TERRESTRE");
+    // Un borrador viejo puede tener menos tratamientos que los actuales
+    const vacio = () => ({etiqueta:"", cultivo:"", productos: Array(10).fill(null).map(() => ({n:"", d:0}))});
+    const ts = [...(b.tratamientos || [])];
+    while (ts.length < COLORES_APP.length) ts.push(vacio());
+    setTratamientos(ts.slice(0, COLORES_APP.length));
+    setPintura(b.pintura || {});
+    setDivisiones(b.divisiones || {});
+    setModoDividir(false); setLoteDiv(null); setPuntosCorte([]);
+    setPanelBorr(false);
+    setGuardadoMsg(null);
+  };
+
+  const borrarBorrador = (id) => {
+    escribirBorradores(leerBorradores().filter(b => b.id !== id));
+  };
+
+  const nuevaOrden = () => {
+    setOrdId(`o${Date.now()}`);
+    setPintura({}); setDivisiones({});
+    setTratamientos(Array(COLORES_APP.length).fill(null).map(() => ({
+      etiqueta: "", cultivo: "", productos: Array(10).fill(null).map(() => ({n:"", d:0})),
+    })));
+    setOrdProductor(""); setOrdFecha(new Date().toISOString().split("T")[0]);
+    setModoDividir(false); setLoteDiv(null); setPuntosCorte([]);
+    setGuardadoMsg(null); setPanelBorr(false);
+  };
+
+  const fechaCorta = (ms) => {
+    const d = new Date(ms), h = new Date();
+    const mismoDia = d.toDateString() === h.toDateString();
+    const ayer = new Date(h.getTime()-86400000).toDateString() === d.toDateString();
+    const hora = d.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"});
+    if (mismoDia) return `hoy ${hora}`;
+    if (ayer) return `ayer ${hora}`;
+    return d.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}) + " " + hora;
+  };
 
   // ── Dividir lotes (efímero, solo esta orden) ──────────────
   const loteObj = (cid, lid) => lotesDe(cid).find(l => l.id === lid);
@@ -2455,7 +2551,7 @@ export default function App(){
     setLoteDiv(null);
     setPuntosCorte([]);
     setModoDividir(false);
-    setTratamientos(Array(4).fill(null).map(() => ({
+    setTratamientos(Array(COLORES_APP.length).fill(null).map(() => ({
       etiqueta: "",
       cultivo: "",
       productos: Array(10).fill(null).map(() => ({n:"", d:0})),
@@ -3125,7 +3221,66 @@ export default function App(){
             <div style={{display:"flex",flexDirection:"column",gap:16}}>
               {/* ─── ENCABEZADO GLOBAL ─── */}
               <div style={{...caja}}>
-                <div style={{fontSize:11,letterSpacing:"0.2em",textTransform:"uppercase",opacity:0.6,marginBottom:10}}>Nueva labor</div>
+                <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10,flexWrap:"wrap"}}>
+                  <div style={{fontSize:11,letterSpacing:"0.2em",textTransform:"uppercase",opacity:0.6}}>Nueva labor</div>
+                  <div style={{marginLeft:"auto",display:"flex",gap:6}}>
+                    <button onClick={()=>setPanelBorr(v=>!v)}
+                      style={{padding:"5px 11px",fontSize:12,fontWeight:600,cursor:"pointer",borderRadius:7,
+                        border:`1.5px solid ${TINTA}`,background:panelBorr?TINTA:"transparent",
+                        color:panelBorr?"#F3EFE3":TINTA,fontFamily:"inherit"}}>
+                      📋 Borradores{borradores.length?` (${borradores.length})`:""}
+                    </button>
+                    <button onClick={nuevaOrden}
+                      style={{padding:"5px 11px",fontSize:12,fontWeight:600,cursor:"pointer",borderRadius:7,
+                        border:`1.5px solid ${TINTA}`,background:"transparent",color:TINTA,fontFamily:"inherit"}}>
+                      + Nueva
+                    </button>
+                  </div>
+                </div>
+
+                {panelBorr && (
+                  <div style={{marginBottom:12,padding:"10px 12px",border:"1.5px solid #D8D2C0",borderRadius:10,background:"#FFFDF7"}}>
+                    <div style={{fontSize:11,opacity:0.6,marginBottom:8}}>
+                      Órdenes de los últimos {DIAS_BORRADOR} días · se guardan solas en este dispositivo
+                    </div>
+                    {borradores.length===0
+                      ? <div style={{fontSize:12.5,opacity:0.6,fontStyle:"italic"}}>Todavía no hay borradores.</div>
+                      : (
+                        <div style={{display:"flex",flexDirection:"column",gap:5,maxHeight:280,overflow:"auto"}}>
+                          {borradores.map(b=>{
+                            const esActual = b.id===ordId;
+                            const r=b.resumen||{};
+                            return (
+                              <div key={b.id} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 9px",
+                                borderRadius:7,background:esActual?"#EEF5E9":"#fff",
+                                border:`1px solid ${esActual?"#A5D6A7":"#EEE9DC"}`}}>
+                                <div style={{minWidth:0,flex:1}}>
+                                  <div style={{fontSize:12.5,fontWeight:600,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+                                    {b.productor || "sin productor"} · {fmt(r.ha||0)} ha
+                                    {esActual && <span style={{fontSize:10.5,color:"#2E7D32",marginLeft:6}}>· en edición</span>}
+                                  </div>
+                                  <div style={{fontSize:10.5,opacity:0.6,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+                                    {fechaCorta(b.guardado)} · {(r.campos||[]).join(", ")||"sin lotes"}
+                                    {r.etiquetas&&r.etiquetas.length ? ` · ${r.etiquetas.join(" / ")}` : ""}
+                                  </div>
+                                </div>
+                                {!esActual && (
+                                  <button onClick={()=>cargarBorrador(b)}
+                                    style={{padding:"4px 10px",fontSize:11.5,fontWeight:600,cursor:"pointer",borderRadius:6,
+                                      border:"none",background:TINTA,color:"#F3EFE3",fontFamily:"inherit",flexShrink:0}}>
+                                    Abrir
+                                  </button>
+                                )}
+                                <button onClick={()=>borrarBorrador(b.id)} title="Borrar"
+                                  style={{padding:"2px 7px",fontSize:15,cursor:"pointer",borderRadius:6,
+                                    border:"none",background:"transparent",color:"#C0392B",fontFamily:"inherit",flexShrink:0}}>×</button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                  </div>
+                )}
                 <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:10}}>
                   <div>
                     <div style={{fontSize:10.5,opacity:0.55,marginBottom:3}}>Tipo de labor</div>
@@ -3387,7 +3542,7 @@ export default function App(){
                     <button onClick={imprimirOrdenCompleta} style={{padding:"9px 13px",fontSize:12.5,fontWeight:700,cursor:"pointer",border:"none",borderRadius:8,background:TINTA,color:"#F3EFE3",fontFamily:"inherit"}}>🖨️ Descargar orden completa (PDF)</button>
                     <button onClick={descargarPNG} style={{padding:"9px 13px",fontSize:12.5,fontWeight:600,cursor:"pointer",border:`1.5px solid ${TINTA}`,borderRadius:8,background:"transparent",color:TINTA,fontFamily:"inherit"}}>⬇ PNG mapa actual</button>
                     <button onClick={limpiarOrd} style={{padding:"9px 13px",fontSize:12.5,fontWeight:600,cursor:"pointer",border:`1.5px solid ${TINTA}`,borderRadius:8,background:"transparent",color:TINTA,fontFamily:"inherit"}}>Limpiar campo</button>
-                    <button onClick={limpiarOrdenCompleta} style={{padding:"9px 13px",fontSize:12.5,fontWeight:600,cursor:"pointer",border:"1.5px solid #C0392B",borderRadius:8,background:"transparent",color:"#C0392B",fontFamily:"inherit"}}>Reset orden</button>
+                    <button onClick={nuevaOrden} style={{padding:"9px 13px",fontSize:12.5,fontWeight:600,cursor:"pointer",border:"1.5px solid #C0392B",borderRadius:8,background:"transparent",color:"#C0392B",fontFamily:"inherit"}}>Reset orden</button>
                   </div>
                   {guardadoMsg&&(
                     <div style={{marginTop:8,padding:"9px 12px",borderRadius:8,fontSize:12.5,fontWeight:600,background:guardadoMsg.ok?"#E8F5E9":"#FDECEA",color:guardadoMsg.ok?"#2E7D32":"#C0392B",border:`1px solid ${guardadoMsg.ok?"#A5D6A7":"#F5C6CB"}`}}>
