@@ -470,7 +470,7 @@ const PRODUCTOR = {
   "EL DESCANSO":"Mariano/Andrés","DON RAMON":"—","LA MARIA OLIVA":"—","EL 5":"—",
   "LA ADORACION":"—","LA CARLOTA":"—",
 };
-const COLOR_PROV = { PELAYO:"#2E7D32", QUEMU:"#C0392B" };
+const COLOR_PROV = { PELAYO:"#2E7D32", QUEMU:"#C0392B", PROPIO:"#1E5FA8" };
 const COLORES_APP = ["#E2574C","#3B82C4","#43A047","#F2B707","#7E57C2","#00897B"];
 
 // ── BASE DE PRODUCTOS Y PROVEEDORES ────────────────────────
@@ -2206,6 +2206,22 @@ export default function App(){
   const [divisiones, setDivisiones] = useState({});
 
   // ── Borradores de órdenes (se guardan en este dispositivo, 10 días) ──
+  const PROD_KEY = "smix_productos_propios_v1";
+  const RECE_KEY = "smix_recetas_propias_v1";
+  const [productosPropios, setProductosPropios] = useState([]);
+  const [recetasPropias, setRecetasPropias] = useState([]);
+  const [formProd, setFormProd] = useState(null);   // {fila} cuando se está agregando
+  const [nuevoProd, setNuevoProd] = useState({n:"", u:"L", p:"", cat:"HER"});
+  const [nombreReceta, setNombreReceta] = useState("");
+
+  const leerJSON = (k) => { try { return JSON.parse(window.localStorage.getItem(k)) || []; } catch { return []; } };
+  const guardarJSON = (k, v) => { try { window.localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+  useEffect(() => {
+    setProductosPropios(leerJSON(PROD_KEY));
+    setRecetasPropias(leerJSON(RECE_KEY));
+  }, []);
+
   const BORR_KEY = "smix_borradores_v1";
   const DIAS_BORRADOR = 10;
   const [ordId, setOrdId] = useState(() => `o${Date.now()}`);
@@ -2565,7 +2581,57 @@ export default function App(){
     if(tipo === "VOLEADA" || tipo === "INCORPORADA") return ["FERT"];
     return ["HER","INS","FUN","COAD","FERT","SEM","SGR"];
   };
-  const productosDisponibles = PRODUCTOS_BASE.filter(p => categoriaDelTipo(ordTipo).includes(p.cat));
+  const TODOS_PRODUCTOS = [...PRODUCTOS_BASE, ...productosPropios];
+  const productosDisponibles = TODOS_PRODUCTOS.filter(p => categoriaDelTipo(ordTipo).includes(p.cat));
+
+  // ── Productos propios ──
+  const agregarProductoPropio = () => {
+    const n = (nuevoProd.n||"").trim();
+    const precio = parseFloat(String(nuevoProd.p).replace(",","."));
+    if(!n) return;
+    if(TODOS_PRODUCTOS.some(p => p.n.toLowerCase() === n.toLowerCase())){
+      setFormProd(null); return;   // ya existe, no duplicamos
+    }
+    const item = {n, cat: nuevoProd.cat, u: nuevoProd.u, p: isNaN(precio)?0:precio, prov:"PROPIO"};
+    const lista = [...productosPropios, item];
+    setProductosPropios(lista); guardarJSON(PROD_KEY, lista);
+    // lo dejamos elegido en la fila donde se estaba agregando
+    if(formProd && formProd.fila != null) updateFila(brocha, formProd.fila, "n", n);
+    setFormProd(null);
+    setNuevoProd({n:"", u:"L", p:"", cat:"HER"});
+  };
+  const borrarProductoPropio = (n) => {
+    const lista = productosPropios.filter(p => p.n !== n);
+    setProductosPropios(lista); guardarJSON(PROD_KEY, lista);
+  };
+
+  // ── Recetas propias ──
+  const guardarRecetaActual = () => {
+    const t = tratamientos[brocha];
+    const filas = t.productos.filter(p => p.n && p.d > 0);
+    if(!filas.length) return;
+    const nombre = (nombreReceta || t.etiqueta || "").trim() || `Receta ${recetasPropias.length+1}`;
+    const item = { id:`r${Date.now()}`, nombre, cultivo: t.cultivo||"",
+      productos: filas.map(p => ({n:p.n, d:p.d})) };
+    const lista = [item, ...recetasPropias.filter(r => r.nombre !== nombre)].slice(0,20);
+    setRecetasPropias(lista); guardarJSON(RECE_KEY, lista);
+    setNombreReceta("");
+  };
+  const borrarRecetaPropia = (id) => {
+    const lista = recetasPropias.filter(r => r.id !== id);
+    setRecetasPropias(lista); guardarJSON(RECE_KEY, lista);
+  };
+  const aplicarRecetaPropia = (r) => {
+    const filas = Array(10).fill(null).map(() => ({n:"", d:0}));
+    r.productos.forEach((rp,i) => {
+      if(i>=10) return;
+      const base = TODOS_PRODUCTOS.find(p => p.n === rp.n);
+      filas[i] = {n:rp.n, d:rp.d, dTexto:String(rp.d), u:base?.u||"L", p:base?.p||0, prov:base?.prov||""};
+    });
+    setTratamientos(ts => ts.map((t,i) => i===brocha
+      ? {...t, productos: filas, cultivo: t.cultivo || r.cultivo || ""}
+      : t));
+  };
 
   // Tratamientos que tienen algo (productos + lotes pintados)
   const tratamientosActivos = tratamientos
@@ -3347,14 +3413,71 @@ export default function App(){
                       <input value={tratActual.cultivo} onChange={e=>updateCultivoTrat(brocha, e.target.value)} placeholder="girasol, cebada, maíz, soja…" style={{...inputB,fontSize:12.5,flex:1,padding:"4px 8px"}}/>
                     </div>
                     {/* Recetas rápidas */}
-                    <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:10}}>
+                    <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:6}}>
                       {RECETAS_BASE.map(r => (
                         <button key={r.nombre} onClick={()=>aplicarRecetaAlTrat(brocha, r)} style={{padding:"4px 9px",fontSize:10.5,fontWeight:600,cursor:"pointer",border:"1px solid #C8C2B0",borderRadius:14,background:"transparent",color:TINTA,fontFamily:"inherit"}}>
                           📋 {r.nombre}
                         </button>
                       ))}
+                      {recetasPropias.map(r => (
+                        <span key={r.id} style={{display:"inline-flex",alignItems:"center",border:"1px solid #1E5FA8",borderRadius:14,overflow:"hidden"}}>
+                          <button onClick={()=>aplicarRecetaPropia(r)} style={{padding:"4px 4px 4px 9px",fontSize:10.5,fontWeight:600,cursor:"pointer",border:"none",background:"transparent",color:"#1E5FA8",fontFamily:"inherit"}}>
+                            ⭐ {r.nombre}
+                          </button>
+                          <button onClick={()=>borrarRecetaPropia(r.id)} title="Borrar receta" style={{padding:"2px 7px 3px 3px",fontSize:13,cursor:"pointer",border:"none",background:"transparent",color:"#1E5FA8",fontFamily:"inherit",opacity:0.6}}>×</button>
+                        </span>
+                      ))}
                       <button onClick={()=>limpiarTratamiento(brocha)} style={{padding:"4px 9px",fontSize:10.5,fontWeight:600,cursor:"pointer",border:"1px solid #C0392B",borderRadius:14,background:"transparent",color:"#C0392B",fontFamily:"inherit",marginLeft:"auto"}}>Vaciar T{brocha+1}</button>
                     </div>
+
+                    {/* Guardar el tratamiento actual como receta */}
+                    <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:10}}>
+                      <input value={nombreReceta} onChange={e=>setNombreReceta(e.target.value)}
+                        placeholder={`Guardar T${brocha+1} como receta…`}
+                        style={{...inputB,fontSize:11.5,padding:"4px 8px",flex:1}}/>
+                      <button onClick={guardarRecetaActual}
+                        disabled={!tratActual.productos.some(p=>p.n && p.d>0)}
+                        style={{padding:"5px 11px",fontSize:11.5,fontWeight:700,borderRadius:7,border:"none",
+                          background:tratActual.productos.some(p=>p.n && p.d>0)?"#1E5FA8":"#C8C2B0",
+                          color:"#fff",cursor:tratActual.productos.some(p=>p.n && p.d>0)?"pointer":"default",
+                          fontFamily:"inherit",whiteSpace:"nowrap"}}>
+                        ⭐ Guardar receta
+                      </button>
+                    </div>
+
+                    {/* Formulario de producto nuevo */}
+                    {formProd && (
+                      <div style={{marginBottom:10,padding:"10px 12px",border:"1.5px solid #1E5FA8",borderRadius:9,background:"#F4F8FD"}}>
+                        <div style={{fontSize:11.5,fontWeight:700,marginBottom:8,color:"#1E5FA8"}}>Producto nuevo</div>
+                        <div style={{display:"grid",gridTemplateColumns:"1fr 70px 80px 90px",gap:6,alignItems:"center"}}>
+                          <input autoFocus value={nuevoProd.n} onChange={e=>setNuevoProd(v=>({...v,n:e.target.value}))}
+                            placeholder="Nombre del producto" style={{...inputB,fontSize:12,padding:"5px 8px"}}/>
+                          <select value={nuevoProd.u} onChange={e=>setNuevoProd(v=>({...v,u:e.target.value}))}
+                            style={{...inputB,fontSize:12,padding:"5px 6px"}}>
+                            <option value="L">L</option><option value="kg">kg</option><option value="bolsa">bolsa</option>
+                          </select>
+                          <input value={nuevoProd.p} onChange={e=>setNuevoProd(v=>({...v,p:e.target.value}))}
+                            inputMode="decimal" placeholder="USD" style={{...inputB,fontSize:12,padding:"5px 8px",textAlign:"right"}}/>
+                          <select value={nuevoProd.cat} onChange={e=>setNuevoProd(v=>({...v,cat:e.target.value}))}
+                            style={{...inputB,fontSize:12,padding:"5px 6px"}}>
+                            <option value="HER">Herbicida</option><option value="INS">Insecticida</option>
+                            <option value="FUN">Fungicida</option><option value="COAD">Coadyuvante</option>
+                            <option value="FERT">Fertilizante</option><option value="SEM">Semilla</option>
+                            <option value="SGR">Curasemilla</option>
+                          </select>
+                        </div>
+                        <div style={{display:"flex",gap:6,marginTop:8}}>
+                          <button onClick={agregarProductoPropio} disabled={!nuevoProd.n.trim()}
+                            style={{padding:"5px 12px",fontSize:11.5,fontWeight:700,borderRadius:7,border:"none",
+                              background:nuevoProd.n.trim()?"#1E5FA8":"#C8C2B0",color:"#fff",
+                              cursor:nuevoProd.n.trim()?"pointer":"default",fontFamily:"inherit"}}>Agregar</button>
+                          <button onClick={()=>{setFormProd(null);setNuevoProd({n:"",u:"L",p:"",cat:"HER"});}}
+                            style={{padding:"5px 12px",fontSize:11.5,fontWeight:600,borderRadius:7,
+                              border:"1px solid #9A937E",background:"transparent",color:TINTA,cursor:"pointer",fontFamily:"inherit"}}>Cancelar</button>
+                          <span style={{fontSize:10.5,opacity:0.6,alignSelf:"center"}}>Queda guardado en este dispositivo</span>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Referencia de proveedores */}
                     <div style={{display:"flex",gap:12,marginBottom:6,fontSize:10.5,opacity:0.75,alignItems:"center"}}>
@@ -3364,6 +3487,12 @@ export default function App(){
                       <span style={{display:"inline-flex",alignItems:"center",gap:4}}>
                         <span style={{width:9,height:9,borderRadius:2,background:COLOR_PROV.QUEMU,display:"inline-block"}}/>BH Cereales Quemú
                       </span>
+                      {productosPropios.length>0&&(
+                        <span style={{display:"inline-flex",alignItems:"center",gap:4}}>
+                          <span style={{width:9,height:9,borderRadius:2,background:COLOR_PROV.PROPIO,display:"inline-block"}}/>
+                          Míos ({productosPropios.length})
+                        </span>
+                      )}
                     </div>
                     {/* Tabla estilo recibo */}
                     <div style={{border:`1.5px solid ${TINTA}`,borderRadius:6,overflow:"hidden"}}>
@@ -3380,18 +3509,26 @@ export default function App(){
                         return (
                           <div key={fi} style={{display:"grid",gridTemplateColumns:"7px minmax(0,1fr) 62px 62px 62px",borderBottom:fi<9?"1px solid #EEE9DC":"none",background:fi%2===0?"#fff":"#FDFCF6"}}>
                             <div style={{background:p.prov?COLOR_PROV[p.prov]:"transparent"}}/>
-                            <select value={p.n} onChange={e=>updateFila(brocha, fi, "n", e.target.value)} style={{padding:"5px 6px",fontSize:11.5,border:"none",background:"transparent",fontFamily:"inherit",color:p.prov?COLOR_PROV[p.prov]:TINTA,fontWeight:p.prov?600:400,width:"100%",minWidth:0}}>
+                            <select value={p.n}
+                              onChange={e=>{
+                                if(e.target.value === "__nuevo__"){ setFormProd({fila: fi}); return; }
+                                updateFila(brocha, fi, "n", e.target.value);
+                              }}
+                              style={{padding:"5px 6px",fontSize:11.5,border:"none",background:"transparent",fontFamily:"inherit",color:p.prov?COLOR_PROV[p.prov]:TINTA,fontWeight:p.prov?600:400,width:"100%",minWidth:0}}>
                               <option value="">— vacío —</option>
-                              {["PELAYO","QUEMU",""].map(gr => {
+                              {["PELAYO","QUEMU","PROPIO",""].map(gr => {
                                 const lista = productosDisponibles.filter(pd => (pd.prov||"") === gr);
                                 if(!lista.length) return null;
-                                const etiq = gr==="PELAYO" ? "🟢 BH PELAYO" : gr==="QUEMU" ? "🔴 BH CEREALES QUEMÚ" : "⚪ Otros";
+                                const etiq = gr==="PELAYO" ? "🟢 BH PELAYO"
+                                  : gr==="QUEMU" ? "🔴 BH CEREALES QUEMÚ"
+                                  : gr==="PROPIO" ? "🔵 Míos" : "⚪ Otros";
                                 return (
                                   <optgroup key={gr||"otros"} label={etiq}>
                                     {lista.map(pd => <option key={pd.n} value={pd.n}>{pd.n}</option>)}
                                   </optgroup>
                                 );
                               })}
+                              <option value="__nuevo__">➕ Agregar producto…</option>
                             </select>
                             <input type="text" inputMode="decimal" value={p.dTexto !== undefined ? p.dTexto : (p.d || "")} onChange={e=>updateFila(brocha, fi, "d", e.target.value)} placeholder="0" style={{padding:"5px 6px",fontSize:11.5,border:"none",borderLeft:"1px solid #EEE9DC",background:"transparent",fontFamily:"inherit",color:TINTA,textAlign:"right",width:"100%",minWidth:0}}/>
                             <div style={{padding:"5px 6px",fontSize:11,textAlign:"right",borderLeft:"1px solid #EEE9DC",opacity:total>0?1:0.35}}>{total>0?fmt(total):"—"}</div>
