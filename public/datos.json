@@ -1,45 +1,7 @@
 {
-  "generado": "2026-09-14T22:15:25.162Z",
+  "generado": "2026-09-15T15:26:45.464Z",
   "warnings": [
-    "Filas duplicadas detectadas: 10/3/2026 L3H-13ch (aparece con 13ch y luego posiblemente como 13G)",
-    "Lote ambiguo: L3H-13 vs L3H-13ch vs L3H-13G — verificar si son el mismo lote o distintos",
-    "Cultivo 'COBERTURA' no es un cultivo estándar — probablemente sea una aplicación pre-siembra",
-    "Cultivo 'cobertura' (minúscula) normalizado a COBERTURA",
-    "Tabla de labores: solo registro plano, ignorando formato de recibos si existiera",
-    "Deduplicación aplicada: agrupando por fecha+campo+lote+ha para evitar duplicados",
-    "Deduplicando aplicaciones por fecha+campo+lote+ha",
-    "Normalizando cultivos a MAYÚSCULAS",
-    "Lote 'maiz humed' en LA DORA no sigue formato estándar de numeración",
-    "Lote '5 b (sur)' en LOS ABUELOS contiene descripción entre paréntesis",
-    "Lote '8B (SUR)' en LOS ABUELOS contiene descripción entre paréntesis",
-    "Múltiples variantes de escritura para L3H|13G: 'L3H 13 G', 'L3H 13g', 'L3H 13G' - unificado a 13G",
-    "Múltiples variantes de escritura para L3H|13CH: 'L3H 13 C', 'L3H 13c', 'L3H 13ch' - unificado a 13CH",
-    "Dedup aplicado: filas con misma fecha+campo+lote+ha agrupadas como una sola aplicación",
-    "Fila con lote combinado 'EL ABUELO 1 y 3' - se procesó como lote único",
-    "Fila con lote combinado 'EL ABUELO-2,4 y 5' - se procesó como lote único",
-    "Fila con lote 'L3H 13 g' normalizado a '13G'",
-    "Fila con lote 'L3H 13 c' normalizado a '13C'",
-    "Fila con lote 'L3H 10 O' normalizado a '10 O'",
-    "Lote 'LOS ABUELOS 3' - cultivo 'maiz' normalizado a 'MAIZ'",
-    "Lote 'LOS ABUELOS 8B' - cultivo 'centeno' normalizado a 'CENTENO'",
-    "Lote 'LOS ABUELOS 5B' - cultivo 'trigo' normalizado a 'TRIGO'",
-    "Lote 'EL DESCANSO 8' - cultivo 'vicia con triticale' normalizado a 'VICIA CON TRITICALE'",
-    "Lote 'EL DESCANSO 1' - cultivo 'vicia y triticale' normalizado a 'VICIA Y TRITICALE'",
-    "Lote 'EL DESCANSO 7' - cultivo 'vicia y triticale' normalizado a 'VICIA Y TRITICALE'",
-    "Lote 'EL TORELLO 1' - cultivo 'girasol' normalizado a 'GIRASOL'",
-    "Lote 'LA DORA 5' - cultivo 'soja y maiz' normalizado a 'SOJA Y MAIZ'",
-    "Múltiples aplicaciones deduplicadas por fecha+campo+lote+ha (20/07/2026 LOS ABUELOS 3, 21/07/2026 LOS ABUELOS 8B, 21/07/2026 LOS ABUELOS 5B, 08/07/2026 EL 5 2, 11/05/2026 LA CHOLITA 3, 11/05/2026 LA DORA 8, 11/05/2026 EL DESCANSO 8, 11/05/2026 EL DESCANSO 1, 11/05/2026 EL DESCANSO 7, 31/08/2026 LA ILUSION 8, 31/08/2026 LA ILUSION 1, 31/08/2026 LA ILUSION 7, 31/08/2026 LA ILUSION 6, 01/09/2026 EL TORELLO 1, 02/09/2026 LA DORA 5)",
-    "Columna 'cultivo' contiene valores no normalizados ('soja y maiz', 'girasol', 'cebada'). Se normalizaron a mayúsculas.",
-    "Aplicaciones con mismo lote y fecha se consideraron una sola operación con múltiples productos.",
-    "Los cultivos 'soja y maiz' se registraron tal cual están en la planilla (no se separaron).",
-    "Cultivo 'soja y maiz' encontrado en LA DORA lotes 5, 2 N, 2 NS - posible error de entrada",
-    "Múltiples aplicaciones con misma fecha en mismo lote - se deduplicó por fecha+campo+lote+ha",
-    "Registro de labores procesado: 56 aplicaciones detectadas",
-    "Deduplicación aplicada por fecha+campo+lote+ha",
-    "Lote '1 sin cabecera' - verificar nombre no estándar",
-    "Lote '13ch' - verificar nombre no estándar",
-    "Lote '24 sector 2' - verificar nombre no estándar",
-    "Campo EL DESCANSO no está en la lista de campos válidos predefinidos"
+    "[margenes] Planilla 'margenes' está en formato Excel (.xlsx). Convertila a Google Sheets nativa y actualizá el ID."
   ],
   "INV_26": {
     "L3H|2": "PASTURA",
@@ -6219,7 +6181,7 @@
   "modifiedTimes": {
     "rotaciones": "2026-09-07T12:05:49.159Z",
     "labores": "2026-09-14T21:13:31.895Z",
-    "margenes": "2026-09-05T16:16:15.995Z",
+    "margenes": "2026-09-15T11:26:00.018Z",
     "suelos": "2026-09-10T18:47:15.796Z"
   }
 }
