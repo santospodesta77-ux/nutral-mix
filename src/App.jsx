@@ -62,6 +62,17 @@ const colorCv = c => COLOR_CV[baseCv(c)] || COLOR_CV[c?.toUpperCase?.()] || "#DE
 // ── helpers ─────────────────────────────────────────────────
 const fmt  = n => Math.round(n).toLocaleString("es-AR");
 const fmt1 = n => (Math.round(n*10)/10).toLocaleString("es-AR",{minimumFractionDigits:1});
+// Cantidades de producto: los decimales se adaptan a la magnitud, para que
+// no se pierdan las dosis chicas (0,5 kg de metsulfurón no puede salir "1").
+const fmtCant = n => {
+  if (n == null || isNaN(n)) return "";
+  const a = Math.abs(n);
+  if (a === 0) return "0";
+  if (a < 1)   return n.toLocaleString("es-AR", {minimumFractionDigits:3, maximumFractionDigits:3});
+  if (a < 10)  return n.toLocaleString("es-AR", {minimumFractionDigits:2, maximumFractionDigits:2});
+  if (a < 100) return n.toLocaleString("es-AR", {minimumFractionDigits:1, maximumFractionDigits:1});
+  return Math.round(n).toLocaleString("es-AR");
+};
 const fechaCorta = f => { const[y,m,d]=f.split("-"); return `${d}/${m}/${y.slice(2)}`; };
 const diasHasta  = f => Math.round((new Date(f)-new Date("2026-06-30"))/86400000);
 // Centroide geométrico real (fórmula de área signada) — cae dentro del polígono
@@ -471,6 +482,12 @@ const PRODUCTOR = {
   "LA ADORACION":"—","LA CARLOTA":"—",
 };
 const COLOR_PROV = { PELAYO:"#2E7D32", QUEMU:"#C0392B", PROPIO:"#1E5FA8" };
+// Tipos de tratamiento y cultivos, para los desplegables de la orden
+const TIPOS_TRATAMIENTO = ["Barbecho corto","Barbecho largo","Presiembra","Preemergente",
+  "Postemergente","Insecticida","Fungicida"];
+const CULTIVOS_ORDEN = ["MAIZ","SOJA","GIRASOL","SORGO","MANI","TRIGO","CEBADA","AVENA",
+  "CENTENO","VERDEO","PASTURA","AGROPIRO","COBERTURA"];
+
 const COLORES_APP = ["#E2574C","#3B82C4","#43A047","#F2B707","#7E57C2","#00897B"];
 
 // ── BASE DE PRODUCTOS Y PROVEEDORES ────────────────────────
@@ -2329,9 +2346,45 @@ export default function App(){
   const colEn=COLORES_APP.map((_,i)=>i).filter(i=>unidadesDe(campoSel).some(u=>pintura[u.key]===i));
   const tit=titulos[campoSel]??"Orden de aplicación";
   const campoOrd=CAMPOS.find(c=>c.id===campoSel);
+  // Lotes pintados en un tratamiento cuyo cultivo no coincide con el del tratamiento
+  const conflictosCultivo = (tratIdx) => {
+    const cvTrat = (tratamientos[tratIdx]?.cultivo || "").trim().toUpperCase();
+    if (!cvTrat) return [];
+    const out = [];
+    CAMPOS.forEach(c => unidadesDe(c.id).forEach(u => {
+      if (pintura[u.key] !== tratIdx) return;
+      const cvs = cultivosDeLote(c.id, u.loteId);
+      if (cvs.length === 0) return;                 // lote sin cultivo cargado: no molestamos
+      if (!cvs.includes(cvTrat)) out.push({campo:c.nombre, lote:u.label, cultivos:cvs});
+    }));
+    return out;
+  };
+
+  const [avisoCultivo, setAvisoCultivo] = useState(null);
+
   const pintarL=(lid, unidadKey)=>{
     const k2 = unidadKey || clL(campoSel,lid);
+    const yaEstaba = pintura[k2] === brocha;
+
+    // Al pintar (no al despintar): avisar si el cultivo del lote no es el del tratamiento
+    if (!yaEstaba) {
+      const cvTrat = (tratamientos[brocha]?.cultivo || "").trim().toUpperCase();
+      const cvs = cultivosDeLote(campoSel, lid);
+      if (cvTrat && cvs.length > 0 && !cvs.includes(cvTrat)) {
+        const l = lotesDe(campoSel).find(x => x.id === lid);
+        setAvisoCultivo({
+          lote: l?.label || lid,
+          campo: CAMPOS.find(c=>c.id===campoSel)?.nombre || campoSel,
+          cultivoLote: cvs.join(" / "),
+          cultivoTrat: cvTrat,
+          trat: brocha + 1,
+        });
+        return;   // no lo pinta
+      }
+    }
+
     setPintura(p=>{const n={...p};if(n[k2]===brocha)delete n[k2];else n[k2]=brocha;return n;});
+    setAvisoCultivo(null);
     // Autocompletar cultivo del tratamiento activo si está vacío
     setTratamientos(ts => ts.map((t, i) => {
       if(i !== brocha) return t;
@@ -3405,13 +3458,36 @@ export default function App(){
                     <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
                       <span style={{width:22,height:22,borderRadius:5,background:COLORES_APP[brocha],border:`1.5px solid ${TINTA}`,flexShrink:0}}/>
                       <div style={{fontSize:12,fontWeight:700}}>Tratamiento {brocha+1}</div>
-                      <input value={tratActual.etiqueta} onChange={e=>updateEtiquetaTrat(brocha, e.target.value)} placeholder="ej. Barbecho girasol" style={{...inputB,fontSize:12.5,flex:1}}/>
+                      <select value={tratActual.etiqueta} onChange={e=>updateEtiquetaTrat(brocha, e.target.value)}
+                        style={{...inputB,fontSize:12.5,flex:1,fontWeight:600,color:tratActual.etiqueta?TINTA:"#9A937E"}}>
+                        <option value="">— tipo de tratamiento —</option>
+                        {TIPOS_TRATAMIENTO.map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
                       <div style={{fontSize:12,opacity:0.65,whiteSpace:"nowrap"}}>{fmt(haBrocha)} ha</div>
                     </div>
                     <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
                       <div style={{fontSize:10.5,opacity:0.55,paddingLeft:30}}>Cultivo:</div>
-                      <input value={tratActual.cultivo} onChange={e=>updateCultivoTrat(brocha, e.target.value)} placeholder="girasol, cebada, maíz, soja…" style={{...inputB,fontSize:12.5,flex:1,padding:"4px 8px"}}/>
+                      <select value={(tratActual.cultivo||"").toUpperCase()} onChange={e=>{updateCultivoTrat(brocha, e.target.value); setAvisoCultivo(null);}}
+                        style={{...inputB,fontSize:12.5,flex:1,padding:"4px 8px",fontWeight:600,color:tratActual.cultivo?TINTA:"#9A937E"}}>
+                        <option value="">— cultivo —</option>
+                        {CULTIVOS_ORDEN.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
                     </div>
+                    {(() => {
+                      const conf = conflictosCultivo(brocha);
+                      if (!conf.length) return null;
+                      return (
+                        <div style={{marginBottom:8,padding:"7px 10px",borderRadius:7,background:"#FDECEA",
+                          border:"1px solid #E8A9A2",fontSize:11.5,lineHeight:1.5}}>
+                          <b style={{color:"#C0392B"}}>Hay {conf.length} lote{conf.length>1?"s":""} pintado{conf.length>1?"s":""} que no va{conf.length>1?"n":""} a {(tratActual.cultivo||"").toUpperCase()}:</b>
+                          <div style={{marginTop:2}}>
+                            {conf.map((x,i) => (
+                              <span key={i}>{i>0 && " · "}{x.campo} {x.lote} ({x.cultivos.join("/")})</span>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
                     {/* Recetas rápidas */}
                     <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:6}}>
                       {RECETAS_BASE.map(r => (
@@ -3531,7 +3607,7 @@ export default function App(){
                               <option value="__nuevo__">➕ Agregar producto…</option>
                             </select>
                             <input type="text" inputMode="decimal" value={p.dTexto !== undefined ? p.dTexto : (p.d || "")} onChange={e=>updateFila(brocha, fi, "d", e.target.value)} placeholder="0" style={{padding:"5px 6px",fontSize:11.5,border:"none",borderLeft:"1px solid #EEE9DC",background:"transparent",fontFamily:"inherit",color:TINTA,textAlign:"right",width:"100%",minWidth:0}}/>
-                            <div style={{padding:"5px 6px",fontSize:11,textAlign:"right",borderLeft:"1px solid #EEE9DC",opacity:total>0?1:0.35}}>{total>0?fmt(total):"—"}</div>
+                            <div style={{padding:"5px 6px",fontSize:11,textAlign:"right",borderLeft:"1px solid #EEE9DC",opacity:total>0?1:0.35}}>{total>0?fmtCant(total):"—"}</div>
                             <div style={{padding:"5px 6px",fontSize:11,textAlign:"right",borderLeft:"1px solid #EEE9DC",fontWeight:600,opacity:costo>0?1:0.35}}>{costo>0?fmt(costo):"—"}</div>
                           </div>
                         );
@@ -3613,6 +3689,26 @@ export default function App(){
                       )}
                     </svg>
                   </div>
+                  {/* Aviso: el lote no coincide con el cultivo del tratamiento */}
+                  {avisoCultivo && (
+                    <div style={{marginTop:10,padding:"10px 12px",borderRadius:9,
+                      border:"1.5px solid #C0392B",background:"#FDECEA",display:"flex",gap:10,alignItems:"flex-start"}}>
+                      <span style={{fontSize:17,lineHeight:1}}>⚠️</span>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:12.5,fontWeight:700,color:"#C0392B"}}>
+                          El lote no coincide con el cultivo del tratamiento
+                        </div>
+                        <div style={{fontSize:12,marginTop:3,lineHeight:1.5}}>
+                          <b>{avisoCultivo.campo} · lote {avisoCultivo.lote}</b> va a <b>{avisoCultivo.cultivoLote}</b>,
+                          pero el tratamiento {avisoCultivo.trat} está armado para <b>{avisoCultivo.cultivoTrat}</b>.
+                          <br/>No se pintó. Cambiá el cultivo del tratamiento, usá otro tratamiento, o revisá el lote.
+                        </div>
+                      </div>
+                      <button onClick={()=>setAvisoCultivo(null)}
+                        style={{border:"none",background:"transparent",color:"#C0392B",fontSize:17,cursor:"pointer",padding:0,lineHeight:1}}>×</button>
+                    </div>
+                  )}
+
                   {/* ── Panel dividir lote ── */}
                   <div style={{marginTop:10,padding:"10px 12px",border:`1.5px solid ${modoDividir?"#C0392B":"#D8D2C0"}`,borderRadius:10,background:modoDividir?"#FDF3F1":"#FFFDF7"}}>
                     <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
@@ -3834,7 +3930,7 @@ export default function App(){
                                   <tr key={i} style={{borderBottom:"1px solid #EEE9DC"}}>
                                     <td style={{padding:"5px 10px",fontWeight:600}}>{p.n}</td>
                                     <td style={{padding:"5px 10px",textAlign:"right"}}>{p.d.toFixed(3)}</td>
-                                    <td style={{padding:"5px 10px",textAlign:"right"}}>{fmt(totalP)}</td>
+                                    <td style={{padding:"5px 10px",textAlign:"right"}}>{fmtCant(totalP)}</td>
                                     <td className="no-print" style={{padding:"5px 10px",textAlign:"right"}}>{p.p.toFixed(2)}</td>
                                     <td className="no-print" style={{padding:"5px 10px",textAlign:"right",fontWeight:600}}>{fmt(costoP)}</td>
                                     <td className="no-print" style={{padding:"5px 10px",textAlign:"right"}}>{(costoP/haC).toFixed(2)}</td>
@@ -3863,7 +3959,7 @@ export default function App(){
                         {listaTotales.map((t,i) => (
                           <tr key={i} style={{borderBottom:"1px solid #E5E0D0"}}>
                             <td style={{padding:"6px 4px",fontWeight:600}}>{t.n}</td>
-                            <td style={{padding:"6px 4px",textAlign:"right",fontWeight:700}}>{fmt(t.total)} {t.u}</td>
+                            <td style={{padding:"6px 4px",textAlign:"right",fontWeight:700}}>{fmtCant(t.total)} {t.u}</td>
                           </tr>
                         ))}
                       </tbody>
