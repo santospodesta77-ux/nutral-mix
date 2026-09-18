@@ -1063,6 +1063,41 @@ const CAMPOS = [
 // Busca un valor en un diccionario tolerando distintos formatos de clave.
 // La app usa "CAMPO|LOTE" (ej "L3H|9B"), pero el pipeline a veces escribe
 // "CAMPO|CAMPO-LOTE" (ej "L3H|L3H-9B"). Probamos ambos.
+// ── Matcheo de lotes entre la planilla de labores y los lotes del mapa ──
+// En la planilla el lote viene escrito de muchas formas: "5 b (sur)", "8B (SUR)",
+// "3OESTE", "2-4-5", "2,4 y 5", "13ch", "10 O", "1,0". Acá lo normalizamos.
+const normLoteRef = (s) => {
+  let t = String(s ?? "").toUpperCase();
+  t = t.replace(/\([^)]*\)/g, " ");          // saca "(sur)", "(norte)", etc.
+  t = t.replace(/\s+/g, "");                  // saca espacios
+  t = t.replace(/,0$/, "");                   // "12,0" -> "12"
+  // sufijos cardinales escritos completos
+  t = t.replace(/OESTE$/, "O").replace(/ESTE$/, "E")
+       .replace(/NORTE$/, "N").replace(/SUR$/, "S");
+  return t;
+};
+
+// Devuelve los lotes individuales que menciona una referencia de la planilla.
+// "2,4 y 5" -> ["2","4","5"] | "2-4-5" -> ["2","4","5"] | "5 b (sur)" -> ["5B"]
+const lotesDeReferencia = (s) => {
+  const base = normLoteRef(s);
+  if (!base) return [];
+  // separadores: coma, punto y coma, barra, Y, guión
+  const trozos = base.split(/[,;/]|(?<=\d)-(?=\d)|(?<=[A-Z0-9])Y(?=\d)/)
+    .map(x => x.trim()).filter(Boolean);
+  const out = trozos.length ? trozos : [base];
+  // devolvemos también la referencia entera, por si el lote se llama así
+  if (!out.includes(base)) out.push(base);
+  return out;
+};
+
+// ¿La referencia de la planilla apunta a este lote del mapa?
+const refApuntaALote = (ref, loteId) => {
+  const objetivo = normLoteRef(loteId);
+  if (!objetivo) return false;
+  return lotesDeReferencia(ref).includes(objetivo);
+};
+
 function buscarKey(dic, campoId, loteId){
   if(!dic) return undefined;
   const variantes = [
@@ -1285,15 +1320,7 @@ function deducirEstadoLote(campoId, loteId, ha, cultivoAsignado, aplicaciones, f
   const proto = PROTOCOLOS_DATA[protoKey];
 
   // aplicaciones y fert de este lote (matching exacto o por partes agrupadas)
-  const norm = s => (s||"").toString().toUpperCase().replace(/\s/g,"").replace(/[-_]/g,"");
-  const loteN = norm(loteId);
-  const matchExacto = (loteX) => {
-    const a = norm(loteX);
-    if(a === loteN) return true;
-    // Si el lote de la aplicación agrupa varios (ej "2,4Y5"), split y match exacto
-    const partes = a.split(/[,YY;]/).map(s=>s.trim()).filter(Boolean);
-    return partes.some(p => p === loteN);
-  };
+  const matchExacto = (loteX) => refApuntaALote(loteX, loteId);
   const aplLote = aplicaciones.filter(a =>
     a.campo === campoId && matchExacto(a.lote)
   ).sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
@@ -2193,7 +2220,18 @@ export default function App(){
   const TEXTURA_LOTE = datosRemotos?.TEXTURA_LOTE || TEXTURA_LOTE_FALLBACK;
   const SUELOS = datosRemotos?.SUELOS || SUELOS_FALLBACK;
   const APLICACIONES = datosRemotos?.APLICACIONES ?
-    datosRemotos.APLICACIONES.map((a,i)=>({...a,id:i,costoHa:a.ha?a.costo/a.ha:0})).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha))
+    datosRemotos.APLICACIONES.map((a,i)=>{
+      // Blindaje: el pipeline a veces escribe "produtos" y puede faltar costo o ha
+      const ES_LABOR = /^(PULVERIZADA|INCORPORADA|VOLEADA|PARATIL|RASTRA|ROLOS|SIEMBRA|SG\b|MZ PP|SJ PP|GR PP|SJ 2DA|MZ FERT|GR FERT|SJ FERT|FINA FERT)/i;
+      const bruta = Array.isArray(a.productos) ? a.productos
+        : Array.isArray(a.produtos) ? a.produtos
+        : (typeof a.productos === "string" ? [a.productos] : []);
+      const labor = a.labor || bruta.find(p => ES_LABOR.test(String(p).trim())) || "";
+      const productos = bruta.filter(p => !ES_LABOR.test(String(p).trim()));
+      const ha = Number(a.ha) || 0;
+      const costo = Number(a.costo) || 0;
+      return {...a, id:i, productos, labor, ha, costo, costoHa: ha ? costo/ha : 0};
+    }).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha))
     : APLICACIONES_FALLBACK;
   const FERTILIZACIONES = datosRemotos?.FERTILIZACIONES ?
     datosRemotos.FERTILIZACIONES.map((f,i)=>({...f,id:i})).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha))
@@ -3082,7 +3120,7 @@ export default function App(){
               <div style={{overflowX:"auto"}}>
                 <table style={{width:"100%",borderCollapse:"collapse",fontSize:12.5,minWidth:700}}>
                   <thead><tr style={{background:"#E5E0D0"}}>
-                    {["Fecha","Campo","Lote","Cultivo","Ha","Productos","Costo","$/ha"].map(h=>(
+                    {["Fecha","Campo","Lote","Cultivo","Ha","Labor","Productos","Costo","$/ha"].map(h=>(
                       <th key={h} style={{textAlign:"left",padding:"8px 11px",fontSize:11,textTransform:"uppercase",letterSpacing:"0.06em",opacity:0.7,whiteSpace:"nowrap"}}>{h}</th>
                     ))}
                   </tr></thead>
@@ -3093,6 +3131,7 @@ export default function App(){
                       <td style={{padding:"7px 11px"}}>{a.lote}</td>
                       <td style={{padding:"7px 11px"}}><span style={{display:"inline-flex",alignItems:"center",gap:4}}><span style={{width:8,height:8,borderRadius:2,background:colorCv(a.cultivo),flexShrink:0}}/>{a.cultivo}</span></td>
                       <td style={{padding:"7px 11px"}}>{a.ha}</td>
+                      <td style={{padding:"7px 11px",fontSize:11,opacity:0.7,whiteSpace:"nowrap"}}>{a.labor||"—"}</td>
                       <td style={{padding:"7px 11px",fontSize:11.5,opacity:0.85,maxWidth:260}}>{a.productos.join(", ")}</td>
                       <td style={{padding:"7px 11px",whiteSpace:"nowrap"}}>US$ {fmt(a.costo)}</td>
                       <td style={{padding:"7px 11px",whiteSpace:"nowrap"}}>US$ {fmt1(a.costoHa)}</td>
@@ -4027,16 +4066,7 @@ function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, apli
   const rindesGruesa=hist?Object.entries(hist).filter(([_,d])=>d.rG).map(([c,d])=>({c,r:d.rG})):[];
 
   // Filtrar aplicaciones y fert de este lote (matching flexible)
-  const normLote=s=>(s||"").toString().toUpperCase().replace(/\s/g,"").replace(/[-_]/g,"");
-  const matchLote=(x)=>{
-    if(x.campo!==campo.id) return false;
-    const a=normLote(x.lote), b=normLote(lote.id);
-    if(a===b) return true;
-    // Si el lote de la aplicación agrupa varios (ej "2,4Y5" contiene el lote "2" o "4" o "5")
-    // separamos por comas o "Y" y verificamos si alguno matchea exacto
-    const partes=a.split(/[,YY;]/).map(s=>s.trim()).filter(Boolean);
-    return partes.some(p=>p===b);
-  };
+  const matchLote=(x)=> x.campo===campo.id && refApuntaALote(x.lote, lote.id);
   const aplLote=aplicaciones.filter(matchLote).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
   const fertLote=fertilizaciones.filter(matchLote).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
   const ultimaApl=aplLote[0]||null;
