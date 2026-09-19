@@ -60,6 +60,21 @@ const cvFina = (valor) => {
 const colorCv = c => COLOR_CV[baseCv(c)] || COLOR_CV[c?.toUpperCase?.()] || "#DEDBD3";
 
 // ── helpers ─────────────────────────────────────────────────
+// Las fechas vienen como "2026-06-11". new Date() las toma como UTC y en
+// Argentina (UTC-3) se muestran un día antes. Las parseamos como fecha local.
+const fechaLocal = (s) => {
+  if (!s) return null;
+  if (s instanceof Date) return s;
+  const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  const d = new Date(s);
+  return isNaN(d) ? null : d;
+};
+const fmtFecha = (s, opts = {day:"2-digit", month:"short", year:"numeric"}) => {
+  const d = fechaLocal(s);
+  return d ? d.toLocaleDateString("es-AR", opts) : "";
+};
+
 const fmt  = n => Math.round(n).toLocaleString("es-AR");
 const fmt1 = n => (Math.round(n*10)/10).toLocaleString("es-AR",{minimumFractionDigits:1});
 // Cantidades de producto: los decimales se adaptan a la magnitud, para que
@@ -426,7 +441,7 @@ const APLICACIONES_FALLBACK = [
   {fecha:"2026-06-25",campo:"L3H",lote:"1",ha:60,cultivo:"MAIZ",costo:2092.2,productos:["CONTROLMAX","POWERSPRAY 2-4D 68%","DICAMBA","ATRAZINA 90%","RIZOSPRAY EXTREMO"]},
   {fecha:"2026-06-29",campo:"LOS ABUELOS",lote:"5B (sur)",ha:40,cultivo:"TRIGO",costo:1181,productos:["CONTROLMAX","POWERSPRAY 2-4D 68%","DICAMBA","METSULFURON","RIZOSPRAY EXTREMO"]},
   {fecha:"2026-07-02",campo:"EL TORELLO",lote:"5",ha:52,cultivo:"CEBADA",costo:1243.7,productos:["GLIFOSATO LT BOX","2-4 D 97 SIGMA","LIGIER PH BIO","DICAMBA SIGMA","METSULFURON"]},
-].map((a,i)=>({...a,id:i,costoHa:a.ha?a.costo/a.ha:0})).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+].map((a,i)=>({...a,id:i,costoHa:a.ha?a.costo/a.ha:0})).sort((a,b)=>fechaLocal(b.fecha)-fechaLocal(a.fecha));
 // fertilizaciones realizadas (registro campaña 26-27 y 25-26 relevantes)
 const FERTILIZACIONES_FALLBACK = [
   {fecha:"2026-06-25",campo:"L3H",lote:"13G",ha:142,cultivo:"CEBADA",tipo:"Arranque",producto:"MAP",dosis:"90 kg/ha",costoHa:52.2,notas:"Fertilización a la siembra"},
@@ -461,7 +476,7 @@ const FERTILIZACIONES_FALLBACK = [
   {fecha:"2026-07-08",campo:"EL ABUELO",lote:"4",ha:100,cultivo:"TRIGO",tipo:"N siembra",producto:"UREA-S NUTRIEN incorp.",dosis:"100 kg/ha",costoHa:56.5,notas:""},
   {fecha:"2026-07-08",campo:"LA CHOLITA",lote:"6",ha:20,cultivo:"CEBADA",tipo:"N siembra",producto:"UREA-S NUTRIEN incorp.",dosis:"100 kg/ha",costoHa:56.5,notas:""},
   {fecha:"2026-07-08",campo:"LA CHOLITA",lote:"5",ha:60,cultivo:"CEBADA",tipo:"N siembra",producto:"UREA-S NUTRIEN incorp.",dosis:"100 kg/ha",costoHa:56.5,notas:""},
-].map((f,i)=>({...f,id:i})).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+].map((f,i)=>({...f,id:i})).sort((a,b)=>fechaLocal(b.fecha)-fechaLocal(a.fecha));
 
 
 
@@ -1323,10 +1338,10 @@ function deducirEstadoLote(campoId, loteId, ha, cultivoAsignado, aplicaciones, f
   const matchExacto = (loteX) => refApuntaALote(loteX, loteId);
   const aplLote = aplicaciones.filter(a =>
     a.campo === campoId && matchExacto(a.lote)
-  ).sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
+  ).sort((a,b) => fechaLocal(a.fecha) - fechaLocal(b.fecha));
   const fertLote = fertilizaciones.filter(f =>
     f.campo === campoId && matchExacto(f.lote)
-  ).sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
+  ).sort((a,b) => fechaLocal(a.fecha) - fechaLocal(b.fecha));
 
   // Heurística: mapear cada aplicación/fert a una etapa del protocolo por palabras clave
   const etapaDe = (registro) => {
@@ -2231,10 +2246,10 @@ export default function App(){
       const ha = Number(a.ha) || 0;
       const costo = Number(a.costo) || 0;
       return {...a, id:i, productos, labor, ha, costo, costoHa: ha ? costo/ha : 0};
-    }).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha))
+    }).sort((a,b)=>fechaLocal(b.fecha)-fechaLocal(a.fecha))
     : APLICACIONES_FALLBACK;
   const FERTILIZACIONES = datosRemotos?.FERTILIZACIONES ?
-    datosRemotos.FERTILIZACIONES.map((f,i)=>({...f,id:i})).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha))
+    datosRemotos.FERTILIZACIONES.map((f,i)=>({...f,id:i})).sort((a,b)=>fechaLocal(b.fecha)-fechaLocal(a.fecha))
     : FERTILIZACIONES_FALLBACK;
 
   const [vista,setVista]=useState("mapas");        // mapas | galeria | herbicidas | acciones | ordenes | margenes | protocolos
@@ -3828,7 +3843,7 @@ export default function App(){
               {tratamientosActivos.length > 0 && (
                 <div className="orden-completa-print" style={{display:"flex",flexDirection:"column",gap:14,marginTop:6}}>
                   <div className="print-only" style={{padding:"10px 0",borderBottom:`2px solid ${TINTA}`,marginBottom:8}}>
-                    <div style={{fontSize:20,fontWeight:700}}>Orden de labor · {new Date(ordFecha).toLocaleDateString("es-AR")}</div>
+                    <div style={{fontSize:20,fontWeight:700}}>Orden de labor · {fmtFecha(ordFecha,{day:"2-digit",month:"2-digit",year:"numeric"})}</div>
                     <div style={{fontSize:13,marginTop:4}}>Productor: <b>{ordProductor}</b> · Labor: <b>{ordTipo}</b> · Total: <b>{fmt(haTotalOrden())} ha</b></div>
                   </div>
                   <div className="no-print" style={{fontSize:12,letterSpacing:"0.2em",textTransform:"uppercase",opacity:0.6}}>Recibos generados</div>
@@ -3935,7 +3950,7 @@ export default function App(){
                           </div>
                           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",borderBottom:"1px solid #E5E0D0"}}>
                             <div style={{padding:"6px 10px",fontSize:13,fontWeight:700,borderRight:"1px solid #E5E0D0",gridColumn:"1 / span 2"}}>{ordProductor}</div>
-                            <div style={{padding:"6px 10px",fontSize:13,gridColumn:"3 / span 2",textAlign:"center"}}>{new Date(ordFecha).toLocaleDateString("es-AR")}</div>
+                            <div style={{padding:"6px 10px",fontSize:13,gridColumn:"3 / span 2",textAlign:"center"}}>{fmtFecha(ordFecha,{day:"2-digit",month:"2-digit",year:"numeric"})}</div>
                           </div>
                           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",borderBottom:"1px solid #E5E0D0",background:"#F8F5EC"}}>
                             <div style={{padding:"5px 10px",fontSize:10.5,textTransform:"uppercase",opacity:0.7,borderRight:"1px solid #E5E0D0"}}>CAMPO</div>
@@ -4067,8 +4082,8 @@ function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, apli
 
   // Filtrar aplicaciones y fert de este lote (matching flexible)
   const matchLote=(x)=> x.campo===campo.id && refApuntaALote(x.lote, lote.id);
-  const aplLote=aplicaciones.filter(matchLote).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
-  const fertLote=fertilizaciones.filter(matchLote).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+  const aplLote=aplicaciones.filter(matchLote).sort((a,b)=>fechaLocal(b.fecha)-fechaLocal(a.fecha));
+  const fertLote=fertilizaciones.filter(matchLote).sort((a,b)=>fechaLocal(b.fecha)-fechaLocal(a.fecha));
   const ultimaApl=aplLote[0]||null;
 
   // Sumar kg totales de fertilizante en la campaña actual (26-27, o últimas 12 meses)
@@ -4177,7 +4192,7 @@ function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, apli
                 <div key={a.id||i} style={{background:i===0?"#FFFDF7":"#fff",border:i===0?`1.5px solid ${TINTA}`:"1px solid #E5E0D0",borderRadius:9,padding:"9px 12px"}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",flexWrap:"wrap",gap:6}}>
                     <div style={{fontWeight:700,fontSize:13.5}}>
-                      {new Date(a.fecha).toLocaleDateString("es-AR",{day:"2-digit",month:"short",year:"numeric"})}
+                      {fmtFecha(a.fecha)}
                       {i===0&&<span style={{fontSize:10,marginLeft:6,padding:"2px 6px",background:TINTA,color:"#fff",borderRadius:4,letterSpacing:"0.05em"}}>ÚLTIMA</span>}
                     </div>
                     <div style={{fontSize:12,opacity:0.65}}>
@@ -4224,7 +4239,7 @@ function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, apli
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{fontWeight:700}}>{prod}</div>
                       <div style={{fontSize:11,opacity:0.6}}>
-                        {d.apps} aplicación{d.apps>1?"es":""} · {d.fechas.map(f=>new Date(f).toLocaleDateString("es-AR",{day:"2-digit",month:"short"})).join(", ")}
+                        {d.apps} aplicación{d.apps>1?"es":""} · {d.fechas.map(f=>fmtFecha(f,{day:"2-digit",month:"short"})).join(", ")}
                       </div>
                     </div>
                     <div style={{textAlign:"right",flexShrink:0}}>
