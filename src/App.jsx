@@ -65,10 +65,17 @@ const colorCv = c => COLOR_CV[baseCv(c)] || COLOR_CV[c?.toUpperCase?.()] || "#DE
 const fechaLocal = (s) => {
   if (!s) return null;
   if (s instanceof Date) return s;
-  const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  const t = String(s).trim();
+  // ISO: 2026-09-06
+  let m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
   if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
-  const d = new Date(s);
-  return isNaN(d) ? null : d;
+  // Argentino, día primero: 6/9/2026 · 06/09/26 · 6-9-2026
+  m = t.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+  if (m) {
+    let y = Number(m[3]); if (y < 100) y += 2000;
+    return new Date(y, Number(m[2]) - 1, Number(m[1]));
+  }
+  return null;   // no adivinamos: new Date("6/9/2026") lo leería como 9 de junio
 };
 const fmtFecha = (s, opts = {day:"2-digit", month:"short", year:"numeric"}) => {
   const d = fechaLocal(s);
@@ -88,8 +95,13 @@ const fmtCant = n => {
   if (a < 100) return n.toLocaleString("es-AR", {minimumFractionDigits:1, maximumFractionDigits:1});
   return Math.round(n).toLocaleString("es-AR");
 };
-const fechaCorta = f => { const[y,m,d]=f.split("-"); return `${d}/${m}/${y.slice(2)}`; };
-const diasHasta  = f => Math.round((new Date(f)-new Date("2026-06-30"))/86400000);
+const fechaCorta = f => {
+  const d = fechaLocal(f);
+  if (!d) return String(f ?? "");
+  const p = n => String(n).padStart(2, "0");
+  return `${p(d.getDate())}/${p(d.getMonth()+1)}/${String(d.getFullYear()).slice(2)}`;
+};
+const diasHasta  = f => Math.round((fechaLocal(f)-fechaLocal("2026-06-30"))/86400000);
 // Centroide geométrico real (fórmula de área signada) — cae dentro del polígono
 // para polígonos convexos y cerca del centro visual para irregulares
 const centro = poly => {
@@ -1417,7 +1429,7 @@ function deducirEstadoLote(campoId, loteId, ha, cultivoAsignado, aplicaciones, f
     return e === "siembra";
   });
   if(siembraReg && proxima && proxima.dds > 0){
-    const base = new Date(siembraReg.fecha);
+    const base = fechaLocal(siembraReg.fecha) || new Date();
     base.setDate(base.getDate() + proxima.dds);
     fechaEstimada = base.toISOString().split("T")[0];
   }
@@ -2538,7 +2550,7 @@ export default function App(){
     setGuardadoMsg(null); setPanelBorr(false);
   };
 
-  const fechaCorta = (ms) => {
+  const fechaBorrador = (ms) => {
     const d = new Date(ms), h = new Date();
     const mismoDia = d.toDateString() === h.toDateString();
     const ayer = new Date(h.getTime()-86400000).toDateString() === d.toDateString();
@@ -2833,7 +2845,11 @@ export default function App(){
   };
 
   // herbicidas
-  const aplFilt=useMemo(()=>campoFiltro==="TODOS"?APLICACIONES:APLICACIONES.filter(a=>a.campo===campoFiltro),[campoFiltro,APLICACIONES]);
+  const aplFilt=useMemo(()=>{
+    const lista = campoFiltro==="TODOS" ? APLICACIONES : APLICACIONES.filter(a=>a.campo===campoFiltro);
+    // más reciente arriba; las fechas que no se puedan leer van al final
+    return [...lista].sort((a,b)=>(fechaLocal(b.fecha)?.getTime()||0)-(fechaLocal(a.fecha)?.getTime()||0));
+  },[campoFiltro,APLICACIONES]);
   const haApl=aplFilt.reduce((s,a)=>s+a.ha,0);
   const costoApl=aplFilt.reduce((s,a)=>s+a.costo,0);
 
@@ -3298,7 +3314,7 @@ export default function App(){
                 <div>
                   <div style={{fontSize:11,letterSpacing:"0.2em",textTransform:"uppercase",opacity:0.55,marginTop:6,marginBottom:8}}>Acciones manuales</div>
                   <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                    {[...acciones].sort((a,b)=>new Date(a.fecha)-new Date(b.fecha)).map(a=>{
+                    {[...acciones].sort((a,b)=>fechaLocal(a.fecha)-fechaLocal(b.fecha)).map(a=>{
                       const dias=diasHasta(a.fecha);
                       const venc=dias<0&&!a.hecha;
                       const cp=a.prioridad==="alta"?ROJO:a.prioridad==="media"?NARANJA:AZUL;
@@ -3433,7 +3449,7 @@ export default function App(){
                                     {esActual && <span style={{fontSize:10.5,color:"#2E7D32",marginLeft:6}}>· en edición</span>}
                                   </div>
                                   <div style={{fontSize:10.5,opacity:0.6,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
-                                    {fechaCorta(b.guardado)} · {(r.campos||[]).join(", ")||"sin lotes"}
+                                    {fechaBorrador(b.guardado)} · {(r.campos||[]).join(", ")||"sin lotes"}
                                     {r.etiquetas&&r.etiquetas.length ? ` · ${r.etiquetas.join(" / ")}` : ""}
                                   </div>
                                 </div>
@@ -4089,7 +4105,7 @@ function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, apli
   // Sumar kg totales de fertilizante en la campaña actual (26-27, o últimas 12 meses)
   const haceUnAnio=new Date();
   haceUnAnio.setFullYear(haceUnAnio.getFullYear()-1);
-  const fertRecientes=fertLote.filter(f=>new Date(f.fecha)>=haceUnAnio);
+  const fertRecientes=fertLote.filter(f=>fechaLocal(f.fecha)>=haceUnAnio);
   // Extraer kg/ha del texto de dosis (ej "150 kg/ha" → 150)
   const parseKg=(dosis)=>{
     if(!dosis) return 0;
