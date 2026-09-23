@@ -517,6 +517,232 @@ const CULTIVOS_ORDEN = ["MAIZ","SOJA","GIRASOL","SORGO","MANI","TRIGO","CEBADA",
 
 const COLORES_APP = ["#E2574C","#3B82C4","#43A047","#F2B707","#7E57C2","#00897B"];
 
+// ── RESTRICCIONES DE HERBICIDAS POR CULTIVO Y MOMENTO ───────────
+// Códigos por momento [BL, BC, PS, PRE, POST]:
+//   "1" = va · "0" = NO va (bloquea la orden) · "A" = depende de intervalo/condición (avisa)
+// Las prohibiciones "0" son categóricas y bloquean. Los rangos de dosis son REFERENCIA
+// (formulado/ha), no marbete: nunca bloquean, se marcan en rojo y la orden sigue.
+// dosis: null = sin rango cargado (queda vacío hasta validar contra marbete).
+const MOMENTOS_R = ["BL","BC","PS","PRE","POST"];
+const MOMENTO_LABEL = {BL:"barbecho largo",BC:"barbecho corto",PS:"presiembra",PRE:"preemergencia",POST:"postemergencia"};
+const MOMENTO_DE_TIPO = {"Barbecho largo":"BL","Barbecho corto":"BC","Presiembra":"PS","Preemergente":"PRE","Postemergente":"POST"};
+const CULTIVOS_R = ["MAIZ","SOJA","GIRASOL","TRIGO","CEBADA","SORGO","CENTENO","AVENA"];
+const GRAMINEAS_R = ["MAIZ","TRIGO","CEBADA","SORGO","CENTENO","AVENA"];
+const fill = (cvs, cod) => Object.fromEntries(cvs.map(c => [c, cod]));
+
+const RESTRICCIONES = [
+  { pa:"Glifosato", re:/GLIFOSATO|CONTROLMAX|ROUNDUP|TOUCHDOWN/,
+    m:{ ...fill(CULTIVOS_R,"11110"), MAIZ:"1111A", SOJA:"1111A" },
+    notas:{ MAIZ:"Post solo en maíz RR.", SOJA:"Post solo en soja RR." },
+    escala:[{re:/./, u:"L", f:1.5}],
+    dosis:[{re:/./, u:"kg", min:0.8, max:3.0}, {re:/./, u:"L", min:1.2, max:4.0}] },
+  { pa:"2,4-D colina (Enlist)", re:/ENLIST/,
+    m:{ MAIZ:"111AA", SOJA:"1AA11", GIRASOL:"1AA00", SORGO:"11AAA",
+        TRIGO:"11AA1", CEBADA:"11AA1", CENTENO:"11AA1", AVENA:"11AA1" },
+    notas:{ SOJA:"Pre y post solo en soja Enlist E3." },
+    dosis:[{re:/./, u:null, min:0.3, max:1.5}] },
+  { pa:"2,4-D", re:/2[-, ]?4[ -]?D(?!B)|POWERSPRAY|POWERSRAY|HERBIFEN|VOLERIS/,
+    m:{ MAIZ:"111AA", SOJA:"1AA00", GIRASOL:"1AA00", SORGO:"11AAA",
+        TRIGO:"11AA1", CEBADA:"11AA1", CENTENO:"11AA1", AVENA:"11AA1" },
+    notas:{ MAIZ:"Post temprano y dirigido, según marbete.",
+      SOJA:"Presiembra: intervalo según formulación y dosis. En pre y post solo va 2,4-D colina en soja Enlist E3.",
+      GIRASOL:"Girasol muy sensible: respetar intervalo largo a siembra.",
+      TRIGO:"Post entre macollaje y antes de encañazón.", CEBADA:"Post entre macollaje y antes de encañazón.",
+      SORGO:"Post en 4–6 hojas, según marbete." },
+    dosis:[{re:/./, u:null, min:0.3, max:1.5}] },
+  { pa:"Dicamba", re:/DICAMBA|BANVEL|DURANOR/,
+    m:{ MAIZ:"111AA", SOJA:"1AA0A", GIRASOL:"1AA00", SORGO:"11AAA",
+        TRIGO:"11AA1", CEBADA:"11AA1", CENTENO:"11AAA", AVENA:"11AAA" },
+    escala:[{re:/70[.,]8|DURANOR/, f:1}, {re:/./, f:1.45}],
+    notas:{ SOJA:"Presiembra con intervalo de marbete. Post solo soja tolerante a dicamba.",
+      GIRASOL:"Girasol muy sensible: respetar intervalo largo a siembra.", MAIZ:"Post temprano, según marbete." },
+    dosis:[{re:/70[.,]8|DURANOR/, u:null, min:0.06, max:0.18}, {re:/./, u:null, min:0.08, max:0.25}] },
+  { pa:"Atrazina", re:/ATRAZINA|GESAPRIM/,
+    m:{ ...fill(CULTIVOS_R,"00000"), MAIZ:"11111", SORGO:"11111" },
+    notas:{ SOJA:"Sin lugar en soja: carryover en suelos arenosos.", GIRASOL:"Sin lugar en girasol: carryover." },
+    carry:"Carryover a soja, girasol y fina siguientes.",
+    dosis:[{re:/./, u:null, min:0.5, max:2.5}] },
+  { pa:"Metsulfurón", re:/METSULFURON|\bALLY\b/,
+    m:{ TRIGO:"111A1", CEBADA:"111A1", CENTENO:"111AA", AVENA:"111AA",
+        MAIZ:"AA000", SOJA:"AA000", GIRASOL:"A0000", SORGO:"A0000" },
+    notas:{ GIRASOL:"Solo barbecho largo con intervalo de marbete.", SOJA:"Intervalo a siembra según pH y lluvias." },
+    carry:"Carryover a girasol, sorgo, maíz y soja (pH alto y pocas lluvias lo alargan).",
+    dosis:[{re:/./, u:null, min:0.003, max:0.012}] },
+  { pa:"S-metolaclor", re:/METOLACLOR|DUAL/,
+    m:{ MAIZ:"A111A", SOJA:"A111A", GIRASOL:"A111A", SORGO:"A1AAA",
+        ...fill(["TRIGO","CEBADA","CENTENO","AVENA"],"1A000") },
+    notas:{ SORGO:"Solo con semilla tratada con protector." },
+    dosis:[{re:/./, u:null, min:0.6, max:1.6}] },
+  { pa:"Cletodim", re:/CLETODIM|\bSELECT\b/,
+    m:{ ...fill(GRAMINEAS_R,"1A000"), SOJA:"11111", GIRASOL:"11111" },
+    notas:{ MAIZ:"Graminicida: respetar intervalo a siembra de gramíneas." },
+    dosis:[{re:/./, u:null, min:0.4, max:1.2}] },
+  { pa:"Haloxifop", re:/HALOXIFOP|GALANT/,
+    m:{ ...fill(GRAMINEAS_R,"1A000"), SOJA:"11111", GIRASOL:"11111" },
+    notas:{ MAIZ:"Graminicida: respetar intervalo a siembra de gramíneas." },
+    dosis:null },
+  { pa:"Sulfentrazone", re:/SULFENTRAZON|CAPAZ|SHUTDOWN|AUTHORITY|ENELAN|MILENIAL/,
+    m:{ SOJA:"A1110", GIRASOL:"A1110", MAIZ:"AAA00", SORGO:"AA000",
+        ...fill(["TRIGO","CEBADA","CENTENO","AVENA"],"AA000") },
+    notas:{ GIRASOL:"Dosis según textura: en arenosos usar la baja.", SOJA:"Dosis según textura: en arenosos usar la baja." },
+    carry:"Carryover a maíz, sorgo y fina.",
+    dosis:[{re:/./, u:null, min:0.15, max:0.6}] },
+  { pa:"Adengo", re:/ADENGO|ISOXAFLUTOL/,
+    m:{ MAIZ:"A111A", ...fill(["SOJA","TRIGO","CEBADA","CENTENO","AVENA"],"AA000"), GIRASOL:"A0000", SORGO:"A0000" },
+    notas:{ MAIZ:"Post solo temprano, según marbete." },
+    carry:"Carryover a soja, girasol y fina.",
+    dosis:[{re:/./, u:null, min:0.15, max:0.45}] },
+  { pa:"Flurocloridona", re:/FLUROCLORIDONA|FLUOROCLORIDONA|RAINBOW|RACER|TALIS/,
+    m:{ GIRASOL:"11110", SOJA:"1AAA0", ...fill(["MAIZ","SORGO","TRIGO","CEBADA","CENTENO","AVENA"],"1AA00") },
+    dosis:[{re:/./, u:null, min:0.4, max:2.5}] },
+  { pa:"Diflufenican", re:/DIFLUFEN|PELICAN|TUKEN/,
+    m:{ TRIGO:"1111A", CEBADA:"1111A", CENTENO:"11AAA", AVENA:"11AAA",
+        GIRASOL:"111A0", SOJA:"11AA0", MAIZ:"1AA00", SORGO:"1AA00" },
+    dosis:[{re:/./, u:null, min:0.1, max:0.35}] },
+  { pa:"Fluroxipir", re:/FLUROXIPIR|STARANE/,
+    m:{ TRIGO:"11AA1", CEBADA:"11AA1", CENTENO:"11AAA", AVENA:"11AAA",
+        MAIZ:"11AAA", SORGO:"11AAA", SOJA:"1AA00", GIRASOL:"1AA00" },
+    dosis:[{re:/48/, u:null, min:0.15, max:0.5}] },
+  { pa:"Terbutilazina", re:/TERBUTILAZINA|TERBYNE|KORITSU/,
+    m:{ ...fill(CULTIVOS_R,"A0000"), MAIZ:"11111", SORGO:"AAAAA" },
+    notas:{ SORGO:"Verificar registro en sorgo." },
+    carry:"Carryover a soja, girasol y fina siguientes.",
+    dosis:[{re:/TERBUTILAZINA|KORITSU/, u:null, min:0.8, max:2.5}] },
+  { pa:"Flumioxazin", re:/FLUMIOXAZIN|SUMISOYA|NYAMBI|FIERCE|ESPUELA|GEMMIT|FLOWZIN|OXALIS/,
+    m:{ SOJA:"A1110", GIRASOL:"AAAA0", MAIZ:"AA000", SORGO:"AA000",
+        TRIGO:"AAAA0", CEBADA:"AAAA0", CENTENO:"AAA00", AVENA:"AAA00" },
+    notas:{ SOJA:"Pre: solo antes de emergencia." },
+    dosis:[{re:/48/, u:null, min:0.06, max:0.2}] },
+];
+
+
+// Rangos de referencia por cultivo y momento (formulado/ha) — cargados girasol, soja y maíz.
+// Orden: [BL, BC, PS, PRE, POST]. null = sin rango cargado para ese momento.
+const DOSIS_CM = {
+  "Glifosato": { ref:"kg formulado 72% granulado (×1,5 si es líquido)", cv:{
+    MAIZ:[[1,2.5],[1,2.5],[1,2],[1,2],[0.8,1.5]],
+    SOJA:[[1,2.5],[1,2.5],[1,2],[1,2],[0.8,1.5]],
+    GIRASOL:[[1,2.5],[1,2.5],[1,2],[1,2],null],
+  }},
+  "2,4-D": { ref:"L de 2,4-D 97%", cv:{
+    MAIZ:[[0.5,1.2],[0.5,1.0],[0.4,0.8],[0.3,0.5],[0.3,0.5]],
+    SOJA:[[0.5,1.2],[0.5,1.0],[0.4,0.8],null,null],
+    GIRASOL:[[0.5,1.2],[0.5,1.0],null,null,null],
+  }},
+  "2,4-D colina (Enlist)": { ref:"L de 2,4-D colina", cv:{
+    SOJA:[[0.5,1.2],[0.5,1.0],[0.4,0.8],[1.0,1.5],[1.0,1.5]],
+  }},
+  "Dicamba": { ref:"L de dicamba 70,8% (×1,45 si es 48%)", cv:{
+    MAIZ:[[0.1,0.3],[0.1,0.25],[0.08,0.2],[0.07,0.15],[0.07,0.15]],
+    SOJA:[[0.1,0.3],[0.1,0.2],[0.07,0.1],null,null],
+    GIRASOL:[[0.1,0.3],null,null,null,null],
+  }},
+  "Atrazina": { ref:"kg de atrazina 90%", cv:{
+    MAIZ:[[0.8,2.0],[0.8,2.0],[0.8,2.0],[1.0,2.2],[0.8,1.5]],
+  }},
+  "S-metolaclor": { ref:"L de s-metolaclor 96%", cv:{
+    MAIZ:[null,[0.8,1.4],[1.0,1.6],[1.0,1.6],null],
+    SOJA:[null,[0.8,1.2],[0.8,1.4],[0.8,1.4],[0.8,1.0]],
+    GIRASOL:[null,[0.8,1.2],[0.8,1.4],[0.8,1.4],null],
+  }},
+  "Cletodim": { ref:"L de cletodim 24%", cv:{
+    MAIZ:[[0.4,0.8],null,null,null,null],
+    SOJA:[[0.4,0.8],[0.4,0.8],[0.4,0.8],null,[0.5,1.0]],
+    GIRASOL:[[0.4,0.8],[0.4,0.8],[0.4,0.8],null,[0.5,1.0]],
+  }},
+  "Haloxifop": { ref:"L de haloxifop 54%", cv:{
+    MAIZ:[[0.1,0.15],null,null,null,null],
+    SOJA:[[0.1,0.15],[0.1,0.15],[0.1,0.15],null,[0.1,0.15]],
+    GIRASOL:[[0.1,0.15],[0.1,0.15],[0.1,0.15],null,[0.1,0.15]],
+  }},
+  "Sulfentrazone": { ref:"L de sulfentrazone 50%", cv:{
+    MAIZ:[null,[0.04,0.2],null,null,null],
+    SOJA:[null,[0.25,0.5],[0.25,0.5],[0.25,0.45],null],
+    GIRASOL:[null,[0.2,0.4],[0.2,0.4],[0.2,0.35],null],
+  }},
+  "Adengo": { ref:"L de Adengo", cv:{
+    MAIZ:[null,[0.25,0.4],[0.25,0.4],[0.25,0.4],[0.2,0.3]],
+  }},
+  "Flurocloridona": { ref:"L de flurocloridona 25%", cv:{
+    MAIZ:[[0.4,0.8],null,null,null,null],
+    SOJA:[[0.4,0.8],null,null,null,null],
+    GIRASOL:[[0.4,0.8],[0.5,1.5],[1.0,2.0],[1.0,2.5],null],
+  }},
+  "Diflufenican": { ref:"L de diflufenican 50%", cv:{
+    MAIZ:[[0.15,0.25],null,null,null,null],
+    SOJA:[[0.15,0.25],[0.15,0.25],null,null,null],
+    GIRASOL:[[0.15,0.25],[0.15,0.25],[0.15,0.25],[0.15,0.2],null],
+  }},
+  "Fluroxipir": { ref:"L de fluroxipir 48%", cv:{
+    MAIZ:[[0.2,0.4],[0.2,0.35],null,null,[0.15,0.3]],
+    SOJA:[[0.2,0.4],[0.2,0.35],null,null,null],
+    GIRASOL:[[0.2,0.4],[0.2,0.35],null,null,null],
+  }},
+  "Terbutilazina": { ref:"L de terbutilazina 50%", cv:{
+    MAIZ:[[1.0,2.0],[1.0,2.0],[1.0,2.0],[1.5,2.5],[1.0,1.5]],
+  }},
+  "Flumioxazin": { ref:"L de flumioxazin 48%", cv:{
+    MAIZ:[null,[0.08,0.1],null,null,null],
+    SOJA:[null,[0.08,0.12],[0.08,0.12],[0.08,0.12],null],
+  }},
+};
+
+const normR = (s) => (s||"").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+
+// Evalúa un producto de un tratamiento. Devuelve lista de {nivel:"bloquea"|"aviso"|"info", texto}
+const evaluarProducto = (nombre, dosis, unidad, cultivo, tipoTrat) => {
+  const n = normR(nombre), cv = normR(cultivo);
+  const regla = RESTRICCIONES.find(r => r.re.test(n));
+  if (!regla) return [];
+  const out = [];
+  const cod = regla.m[cv];
+  const mom = MOMENTO_DE_TIPO[tipoTrat];
+  if (cod) {
+    const nota = regla.notas?.[cv];
+    if (mom) {
+      const c = cod[MOMENTOS_R.indexOf(mom)];
+      if (c === "0") out.push({nivel:"bloquea", texto:`${regla.pa} no va en ${cv} en ${MOMENTO_LABEL[mom]}.${nota?" "+nota:""}`});
+      else if (c === "A") out.push({nivel:"aviso", texto:`${regla.pa} en ${cv} (${MOMENTO_LABEL[mom]}): ${nota || "depende de intervalo o condición, verificar marbete."}`});
+    } else if (cod === "00000") {
+      out.push({nivel:"bloquea", texto:`${regla.pa} no va en ${cv} en ningún momento.${nota?" "+nota:""}`});
+    }
+  }
+  const d = Number(dosis) || 0;
+  if (d > 0) {
+    const u = (unidad||"").toLowerCase();
+    let rg = null, refTxt = "";
+    // 1º: rango cargado para ese cultivo y ese momento
+    const tabla = DOSIS_CM[regla.pa];
+    if (tabla && mom && tabla.cv[cv]) {
+      const par = tabla.cv[cv][MOMENTOS_R.indexOf(mom)];
+      if (par) {
+        const es = (regla.escala||[]).find(x => x.re.test(n) && (!x.u || x.u.toLowerCase() === u));
+        const f = es ? es.f : 1;
+        rg = {min: +(par[0]*f).toFixed(3), max: +(par[1]*f).toFixed(3)};
+        refTxt = ` en ${MOMENTO_LABEL[mom]} de ${cv}`;
+      }
+    }
+    // 2º: rango general del producto
+    if (!rg && regla.dosis) rg = regla.dosis.find(x => x.re.test(n) && (!x.u || x.u.toLowerCase() === u)) || null;
+    if (rg) {
+      const refTxt2 = refTxt;
+      // La dosis nunca bloquea: marca en rojo y sigue.
+      if (d > rg.max * 3) out.push({nivel:"alerta", texto:`${regla.pa}: ${d} por ha es más del triple del máximo de referencia${refTxt2} (${rg.min}–${rg.max}). ¿Error de unidad?`});
+      else if (d > rg.max) out.push({nivel:"alerta", texto:`${regla.pa}: ${d} por ha supera el rango de referencia${refTxt2} (${rg.min}–${rg.max}). Validar contra marbete.`});
+    }
+  }
+  if (regla.carry && cv && d > 0 && !out.some(x=>x.nivel==="bloquea")) out.push({nivel:"info", texto:`${regla.pa}: ${regla.carry}`});
+  return out;
+};
+
+// Evalúa un tratamiento completo {etiqueta, cultivo, productos}
+const evaluarTratamiento = (t) => {
+  if (!t || !t.cultivo) return [];
+  return (t.productos||[])
+    .filter(p => p.n && p.d > 0)
+    .flatMap(p => evaluarProducto(p.n, p.d, p.u, t.cultivo, t.etiqueta).map(x => ({...x, producto:p.n})));
+};
+
 // ── BASE DE PRODUCTOS Y PROVEEDORES ────────────────────────
 // Precios USD/L o USD/kg. Categorías: HER (herbicida), INS (insecticida),
 // FUN (fungicida), COAD (coadyuvante), FERT (fertilizante), SEM (semilla), SGR (curasemilla)
@@ -2564,20 +2790,59 @@ export default function App(){
   const loteObj = (cid, lid) => lotesDe(cid).find(l => l.id === lid);
 
   // Aplica un corte recto entre dos puntos al lote en edición
+  // Aplica el corte a los sectores que ya existan: cada corte nuevo suma una parcela.
+  // El primer pedazo conserva el id del sector (así no se pierde lo pintado).
   const aplicarCorte = (a, b) => {
     if(!loteDiv) return;
     const l = loteObj(loteDiv.campoId, loteDiv.loteId);
     if(!l) return;
-    const partes = cortarPoligono(l.poly, a, b);
-    if(!partes){ setPuntosCorte([]); return; }
-    const [pa, pb] = partes;
-    const aa = areaPoly(pa), ab = areaPoly(pb);
+    const k = clL(loteDiv.campoId, loteDiv.loteId);
     const haTot = Number(l.ha)||0;
-    const ha1 = Math.round(haTot * aa/(aa+ab));
-    setDivisiones(d => ({...d, [clL(loteDiv.campoId, loteDiv.loteId)]: [
-      {id:"a", nombre:"sector 1", poly:pa, ha:ha1},
-      {id:"b", nombre:"sector 2", poly:pb, ha:haTot-ha1},
-    ]}));
+    const previas = divisiones[k];
+
+    // Primer corte: el lote entero en dos
+    if(!previas || !previas.length){
+      const partes = cortarPoligono(l.poly, a, b);
+      if(!partes){ setPuntosCorte([]); return; }
+      const [pa, pb] = partes;
+      const aa = areaPoly(pa), ab = areaPoly(pb);
+      const ha1 = Math.round(haTot * aa/(aa+ab));
+      setDivisiones(d => ({...d, [k]: [
+        {id:"a", nombre:"sector 1", poly:pa, ha:ha1},
+        {id:"b", nombre:"sector 2", poly:pb, ha:haTot-ha1},
+      ]}));
+      setPuntosCorte([]);
+      return;
+    }
+
+    // Cortes siguientes: parte cada sector que la línea cruce
+    const usados = new Set(previas.map(s=>s.id));
+    const nuevoId = () => {
+      for(let i=0;i<40;i++){ const id = String.fromCharCode(97+i); if(!usados.has(id)){ usados.add(id); return id; } }
+      return "s"+Date.now();
+    };
+    let cortoAlguno = false;
+    const salida = [];
+    previas.forEach(s => {
+      const partes = s.anillo ? null : cortarPoligono(s.poly, a, b);
+      if(!partes){ salida.push(s); return; }
+      cortoAlguno = true;
+      const [pa, pb] = partes;
+      const aa = areaPoly(pa), ab = areaPoly(pb);
+      const haS = Number(s.ha)||0;
+      const ha1 = Math.round(haS * aa/(aa+ab) * 10)/10;
+      salida.push({...s, poly:pa, ha:ha1});
+      salida.push({id:nuevoId(), nombre:"parcela", poly:pb, ha:Math.round((haS-ha1)*10)/10});
+    });
+    if(!cortoAlguno){ setPuntosCorte([]); return; }
+    // Renombra las que quedaron con nombre automático, de arriba hacia abajo
+    let nro = 0;
+    const final = salida.map(s => {
+      const auto = /^(sector|parcela)( \d+)?$/.test(s.nombre||"");
+      nro += 1;
+      return auto ? {...s, nombre:`parcela ${nro}`} : s;
+    });
+    setDivisiones(d => ({...d, [k]: final}));
     setPuntosCorte([]);
   };
 
@@ -2756,11 +3021,20 @@ export default function App(){
     .map((t, i) => ({...t, idx: i, ha: haTratamiento(i), filasActivas: t.productos.filter(p => p.n && p.d > 0)}))
     .filter(t => t.ha > 0 && t.filasActivas.length > 0);
 
+  // Bloqueos de restricciones en tratamientos con lotes pintados
+  const bloqueosOrden = tratamientosActivos.flatMap(t =>
+    evaluarTratamiento(t).filter(x => x.nivel === "bloquea").map(x => ({...x, trat: t.idx + 1})));
+  const textoBloqueos = () => "No se puede: " + bloqueosOrden.map(b => `T${b.trat} · ${b.texto}`).join(" | ");
+
   // Estado de guardado a planilla
   const [guardando, setGuardando] = useState(false);
   const [guardadoMsg, setGuardadoMsg] = useState(null); // {ok:bool, texto:string}
 
   const guardarLaborEnPlanilla = async () => {
+    if(bloqueosOrden.length){
+      setGuardadoMsg({ok:false, texto: textoBloqueos()});
+      return;
+    }
     if(!ordProductor){
       setGuardadoMsg({ok:false, texto:"Elegí el productor antes de guardar."});
       return;
@@ -2836,6 +3110,7 @@ export default function App(){
     };img.src=url;
   };
   const imprimirOrdenCompleta=()=>{
+    if(bloqueosOrden.length){ window.alert(textoBloqueos()); return; }
     // Imprime toda la sección de recibos con estilo aplicado. El usuario puede "Guardar como PDF" desde la impresora.
     document.body.classList.add("printing-orden");
     setTimeout(()=>{
@@ -3558,6 +3833,30 @@ export default function App(){
                         </div>
                       );
                     })()}
+                    {(() => {
+                      const ev = evaluarTratamiento(tratActual);
+                      if (!ev.length) return null;
+                      const est = {
+                        bloquea:{bg:"#FDECEA",bd:"#E8A9A2",c:"#C0392B",ic:"⛔"},
+                        alerta:{bg:"#FDECEA",bd:"#E8A9A2",c:"#C0392B",ic:"🔴"},
+                        aviso:{bg:"#FFF6DD",bd:"#E9CF7A",c:"#8A6200",ic:"⚠️"},
+                        info:{bg:"#F1EFE8",bd:"#D6D1C2",c:"#6B6452",ic:"ℹ️"},
+                      };
+                      const orden = {bloquea:0, alerta:1, aviso:2, info:3};
+                      return (
+                        <div style={{marginBottom:8,display:"flex",flexDirection:"column",gap:4}}>
+                          {[...ev].sort((a,b)=>orden[a.nivel]-orden[b.nivel]).map((x,i) => (
+                            <div key={i} style={{padding:"6px 10px",borderRadius:7,background:est[x.nivel].bg,
+                              border:`1px solid ${est[x.nivel].bd}`,fontSize:11.5,lineHeight:1.45,color:est[x.nivel].c}}>
+                              {est[x.nivel].ic} {x.texto}
+                            </div>
+                          ))}
+                          {!tratActual.etiqueta && (
+                            <div style={{fontSize:10.5,opacity:0.6}}>Elegí el tipo de tratamiento para validar por momento.</div>
+                          )}
+                        </div>
+                      );
+                    })()}
                     {/* Recetas rápidas */}
                     <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:6}}>
                       {RECETAS_BASE.map(r => (
@@ -3652,8 +3951,11 @@ export default function App(){
                       {tratActual.productos.map((p, fi) => {
                         const total = p.d * haBrocha;
                         const costo = total * p.p;
+                        const evF = p.n && p.d > 0 ? evaluarProducto(p.n, p.d, p.u, tratActual.cultivo, tratActual.etiqueta) : [];
+                        const rojoF = evF.some(x=>x.nivel==="bloquea" || x.nivel==="alerta");
+                        const bgF = rojoF ? "#FBE3E0" : evF.some(x=>x.nivel==="aviso") ? "#FFF8E6" : (fi%2===0?"#fff":"#FDFCF6");
                         return (
-                          <div key={fi} style={{display:"grid",gridTemplateColumns:"7px minmax(0,1fr) 62px 62px 62px",borderBottom:fi<9?"1px solid #EEE9DC":"none",background:fi%2===0?"#fff":"#FDFCF6"}}>
+                          <div key={fi} style={{display:"grid",gridTemplateColumns:"7px minmax(0,1fr) 62px 62px 62px",borderBottom:fi<9?"1px solid #EEE9DC":"none",background:bgF}}>
                             <div style={{background:p.prov?COLOR_PROV[p.prov]:"transparent"}}/>
                             <select value={p.n}
                               onChange={e=>{
@@ -3676,7 +3978,7 @@ export default function App(){
                               })}
                               <option value="__nuevo__">➕ Agregar producto…</option>
                             </select>
-                            <input type="text" inputMode="decimal" value={p.dTexto !== undefined ? p.dTexto : (p.d || "")} onChange={e=>updateFila(brocha, fi, "d", e.target.value)} placeholder="0" style={{padding:"5px 6px",fontSize:11.5,border:"none",borderLeft:"1px solid #EEE9DC",background:"transparent",fontFamily:"inherit",color:TINTA,textAlign:"right",width:"100%",minWidth:0}}/>
+                            <input type="text" inputMode="decimal" value={p.dTexto !== undefined ? p.dTexto : (p.d || "")} onChange={e=>updateFila(brocha, fi, "d", e.target.value)} placeholder="0" style={{padding:"5px 6px",fontSize:11.5,border:"none",borderLeft:"1px solid #EEE9DC",background:"transparent",fontFamily:"inherit",color:evF.some(x=>x.nivel==="alerta")?"#C0392B":TINTA,fontWeight:evF.some(x=>x.nivel==="alerta")?700:400,textAlign:"right",width:"100%",minWidth:0}}/>
                             <div style={{padding:"5px 6px",fontSize:11,textAlign:"right",borderLeft:"1px solid #EEE9DC",opacity:total>0?1:0.35}}>{total>0?fmtCant(total):"—"}</div>
                             <div style={{padding:"5px 6px",fontSize:11,textAlign:"right",borderLeft:"1px solid #EEE9DC",fontWeight:600,opacity:costo>0?1:0.35}}>{costo>0?fmt(costo):"—"}</div>
                           </div>
@@ -3792,6 +4094,7 @@ export default function App(){
                       {modoDividir && loteDiv && puntosCorte.length===0 && (
                         <span style={{fontSize:12,opacity:0.75}}>
                           Lote <b>{loteObj(loteDiv.campoId,loteDiv.loteId)?.label}</b> · tocá dos puntos del mapa para el corte, o usá cabecera →
+                          {divisiones[clL(loteDiv.campoId,loteDiv.loteId)]?.length > 1 && <span style={{marginLeft:6,color:"#C0392B",fontWeight:600}}>Otro corte lo divide de nuevo.</span>}
                         </span>
                       )}
                       {modoDividir && loteDiv && puntosCorte.length===1 && <span style={{fontSize:12,opacity:0.75}}>Tocá el segundo punto.</span>}
