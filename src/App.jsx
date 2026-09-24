@@ -1010,6 +1010,40 @@ const PRODUCTOS_BASE = [
   {n:"SJ PROPIA", cat:"SEM", u:"kg", p:0.04},
 ];
 
+
+// ── INSUMOS: semillas y fertilizantes ──────────────────────────
+// Salen de la hoja "BASE DE LABORES" de la planilla LABORES (snapshot 22/09/2026).
+// Si el pipeline algún día publica datos.INSUMOS, la app usa eso y esta lista queda de respaldo.
+// u: unidad de compra (bolsa o tn) · p: USD por esa unidad · cv: cultivo sugerido
+const INSUMOS_BASE = [
+  // Semillas girasol
+  {n:"ADV 5505 CL B2", cat:"SEM", u:"bolsa", p:280, cv:"GIRASOL"},
+  {n:"ADV 5407 CL B1", cat:"SEM", u:"bolsa", p:295, cv:"GIRASOL"},
+  {n:"ADV 5310 CL B1", cat:"SEM", u:"bolsa", p:290, cv:"GIRASOL"},
+  {n:"ADV 5310 CL B2", cat:"SEM", u:"bolsa", p:250, cv:"GIRASOL"},
+  {n:"SYN 3970 CL", cat:"SEM", u:"bolsa", p:296, cv:"GIRASOL"},
+  // Semillas maíz
+  {n:"DK7210", cat:"SEM", u:"bolsa", p:160, cv:"MAIZ"},
+  {n:"DK7303", cat:"SEM", u:"bolsa", p:130, cv:"MAIZ"},
+  {n:"DK6962", cat:"SEM", u:"bolsa", p:195, cv:"MAIZ"},
+  {n:"KWS", cat:"SEM", u:"bolsa", p:140, cv:"MAIZ"},
+  {n:"Promedio maíz", cat:"SEM", u:"bolsa", p:161.67, cv:"MAIZ"},
+  // Semillas soja
+  {n:"DM46i20", cat:"SEM", u:"bolsa", p:40, cv:"SOJA"},
+  {n:"SJ PROPIA", cat:"SEM", u:"bolsa", p:40, cv:"SOJA"},
+  // Sin cultivo asignado en la planilla
+  {n:"Relincho", cat:"SEM", u:"bolsa", p:10, cv:""},
+  // Fertilizantes (USD por tonelada)
+  {n:"NITROCOMPLEX", cat:"FERT", u:"tn", p:990},
+  {n:"Nitrodoble", cat:"FERT", u:"tn", p:562},
+  {n:"Urea", cat:"FERT", u:"tn", p:572},
+  {n:"UREA-S NUTRIEN", cat:"FERT", u:"tn", p:585},
+  {n:"MAP LARTY", cat:"FERT", u:"tn", p:950},
+  {n:"MAP AZUFRADO NUTRIEN", cat:"FERT", u:"tn", p:937},
+  {n:"DAP-S NUTRIEN", cat:"FERT", u:"tn", p:919},
+  {n:"SJ NUTRIEN", cat:"FERT", u:"tn", p:716},
+];
+
 const PRODUCTORES_BASE = ["ENRIQUE","ANDRES","ENRIQUE - ANDRES","MARIANO","MARIANO - ANDRES","MARIANO - MATIAS - ANDRES","HAYDEE","HAYDEE - MARIANO","MATIAS","LORENZO","FAROUX MARIA GRACIELA","MATEAN SAS","SUC"];
 
 // Recetas plantilla (dosis/ha típicas)
@@ -1291,6 +1325,10 @@ const CAMPOS = [
     {id:"4",label:"4",ha:50,poly:[[15,15],[280,15],[280,250],[15,250]]},
     {id:"5",label:"5",ha:50,poly:[[280,15],[525,15],[525,250],[280,250]]},
     {id:"3",label:"3",ha:50,poly:[[280,250],[525,250],[525,475],[280,475]]},
+    {id:"2",label:"2",ha:13,poly:[[15,250],[172,250],[172,360],[15,360]]},
+    {id:"1",label:"1",ha:17,poly:[[15,360],[172,360],[172,475],[15,475]]},
+    // 6 y 7 unificados: se sacó el alambre del medio
+    {id:"6",label:"6",ha:10,poly:[[172,250],[280,250],[280,475],[172,475]]},
    ]},
   {id:"LA CARLOTA",nombre:"La Carlota",vb:[0,0,960,440],refs:[{x:480,y:433,t:"Calle"}],
    grises:[{poly:[[20,20],[450,20],[450,190],[20,190]],label:"C. Yurk"},{poly:[[20,190],[335,190],[335,300],[20,300]],label:"Gette"}],
@@ -2596,6 +2634,88 @@ export default function App(){
     return res.sort((a,b)=>b.ha-a.ha);
   },[cultivoFiltro,INV_26,PLAN_2627]);
 
+  // ── INSUMOS: carga por lote y resúmenes ──────────────────────
+  const INS_KEY = "smix_insumos_v2";
+  // ins[CAMPO|LOTE] = {cv, sem, dSem, f1, dF1, f2, dF2}   (dosis en kg/ha)
+  const [insumosLote, setInsumosLote] = useState({});
+  const [insCultivoFiltro, setInsCultivoFiltro] = useState("TODOS");
+  const [insCampoFiltro, setInsCampoFiltro] = useState("TODOS");
+  const [insSoloCargados, setInsSoloCargados] = useState(false);
+
+  useEffect(() => {
+    try { setInsumosLote(JSON.parse(window.localStorage.getItem(INS_KEY)) || {}); } catch {}
+  }, []);
+  useEffect(() => {
+    try { window.localStorage.setItem(INS_KEY, JSON.stringify(insumosLote)); } catch {}
+  }, [insumosLote]);
+
+  const INSUMOS = datosRemotos?.INSUMOS || INSUMOS_BASE;
+  const numIns = (v) => { const x = parseFloat(String(v).replace(",",".")); return isNaN(x) ? 0 : x; };
+  const setIns = (k, campoK, valor) => setInsumosLote(l => ({...l, [k]: {...(l[k]||{}), [campoK]: valor}}));
+  // Copia semilla, fertilizantes y dosis de un lote a todos los que tengan el mismo cultivo
+  const copiarInsumosACultivo = (fila, filas) => {
+    const src = insumosLote[fila.key] || {};
+    const campos = ["sem","dSem","f1","dF1","f2","dF2"];
+    setInsumosLote(l => {
+      const n = {...l};
+      filas.filter(f => f.cultivo === fila.cultivo).forEach(f => {
+        n[f.key] = {...(n[f.key]||{})};
+        campos.forEach(c => { n[f.key][c] = src[c]; });
+      });
+      return n;
+    });
+  };
+
+  // Una fila por lote y cultivo. Los lotes sin cultivo en la rotación también aparecen,
+  // con el cultivo a elegir a mano.
+  const filasInsumos = useMemo(() => {
+    const out = [];
+    CAMPOS.forEach(c => c.lotes.forEach(l => {
+      const cvs = cultivosDeLote(c.id, l.id);
+      const lista = cvs.length ? cvs : [""];
+      const ha = Number(l.ha) || 0;
+      lista.forEach(cvRot => {
+        const k = `${c.id}|${l.id}${cvRot ? "|"+cvRot : ""}`;
+        const g = insumosLote[k] || {};
+        const cv = g.cv || cvRot || "";
+        const dSem = numIns(g.dSem), dF1 = numIns(g.dF1), dF2 = numIns(g.dF2);
+        out.push({
+          campoId: c.id, campo: c.nombre, lote: l.label || l.id, key: k, loteKey: `${c.id}|${l.id}`, ha,
+          cultivo: cv, cvRot, dobleCultivo: cvs.length > 1 ? cvs.join(" / ") : null,
+          productor: PRODUCTOR[c.id] || "—",
+          sem: g.sem || "", f1: g.f1 || "", f2: g.f2 || "",
+          dSem, dF1, dF2,
+          totSem: dSem * ha, totF1: dF1 * ha, totF2: dF2 * ha,
+          cargado: !!((g.sem && dSem) || (g.f1 && dF1) || (g.f2 && dF2)),
+        });
+      });
+    }));
+    return out.sort((a,b) => a.campo.localeCompare(b.campo) || String(a.lote).localeCompare(String(b.lote), undefined, {numeric:true}));
+  }, [insumosLote, INV_26, PLAN_2627]);
+
+  // Suma kg por producto agrupando por campo, productor o cultivo
+  const agruparInsumos = (filas, clave) => {
+    const acc = {};
+    filas.forEach(f => {
+      const g = f[clave] || "—";
+      acc[g] = acc[g] || {ha:0, prod:{}, lotes:new Set()};
+      if(!acc[g].lotes.has(f.loteKey)){ acc[g].lotes.add(f.loteKey); acc[g].ha += f.ha; }
+      [[f.sem,f.totSem,"SEM"],[f.f1,f.totF1,"FERT"],[f.f2,f.totF2,"FERT"]].forEach(([n,kg,cat]) => {
+        if(!n || kg <= 0) return;
+        acc[g].prod[n] = acc[g].prod[n] || {kg:0, cat};
+        acc[g].prod[n].kg += kg;
+      });
+    });
+    return Object.entries(acc).filter(([,d]) => Object.keys(d.prod).length).sort((a,b) => b[1].ha - a[1].ha);
+  };
+  const precioIns = (n) => INSUMOS.find(i => i.n === n);
+  // Fertilizante: precio por tonelada. La semilla está por bolsa en la planilla, así que va sin USD.
+  const usdInsumo = (n, kg) => {
+    const i = precioIns(n);
+    if(!i || i.cat !== "FERT" || !i.p) return null;
+    return kg/1000 * i.p;
+  };
+
   const caja={background:CREMA,border:`1.5px solid ${TINTA}`,borderRadius:12,padding:"14px 16px"};
   const tab=(a)=>({padding:"8px 14px",fontSize:13,fontWeight:700,cursor:"pointer",borderRadius:8,
     border:`1.5px solid ${TINTA}`,background:a?TINTA:"transparent",color:a?CREMA:TINTA,fontFamily:"inherit",whiteSpace:"nowrap"});
@@ -3207,6 +3327,7 @@ export default function App(){
           <button style={tab(vista==="acciones")} onClick={()=>setVista("acciones")}>📅 Próximas acciones</button>
           <button style={tab(vista==="margenes")} onClick={()=>setVista("margenes")}>💵 Márgenes</button>
           <button style={tab(vista==="ordenes")} onClick={()=>setVista("ordenes")}>🚜 Nueva labor</button>
+          <button style={tab(vista==="insumos")} onClick={()=>setVista("insumos")}>📦 Insumos</button>
           <button style={tab(vista==="protocolos")} onClick={()=>setVista("protocolos")}>📋 Protocolos</button>
         </div>
 
@@ -4368,6 +4489,136 @@ export default function App(){
         </div>
 
         {/* ══ PROTOCOLOS ══ */}
+        {vista==="insumos"&&(()=>{
+          const cultivosLista = [...new Set(filasInsumos.map(f=>f.cultivo).filter(Boolean))].sort();
+          const camposLista = [...new Set(filasInsumos.map(f=>f.campo))].sort();
+          let filas = filasInsumos;
+          if(insCampoFiltro!=="TODOS") filas = filas.filter(f=>f.campo===insCampoFiltro);
+          if(insCultivoFiltro!=="TODOS") filas = filas.filter(f=>f.cultivo===insCultivoFiltro);
+          if(insSoloCargados) filas = filas.filter(f=>f.cargado);
+          const semillas = INSUMOS.filter(i=>i.cat==="SEM");
+          const ferts = INSUMOS.filter(i=>i.cat==="FERT");
+          const th = {padding:"6px 6px",fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.04em",borderBottom:`1.5px solid ${TINTA}`,textAlign:"left",whiteSpace:"nowrap"};
+          const td = {padding:"3px 6px",fontSize:11.5,borderBottom:"1px solid #EEE9DC"};
+          const inp = {...inputB,fontSize:11.5,padding:"3px 5px",width:52,textAlign:"right"};
+          const selP = {...inputB,fontSize:11.5,padding:"3px 5px",minWidth:120};
+          const haFiltradas = [...new Map(filas.map(f=>[f.loteKey,f.ha]))].reduce((s,[,h])=>s+h,0);
+          const cargadas = filas.filter(f=>f.cargado).length;
+          const selSem = (f) => (
+            <select value={f.sem} onChange={e=>setIns(f.key,"sem",e.target.value)} style={selP}>
+              <option value="">—</option>
+              {semillas.filter(s=>!s.cv || s.cv===f.cultivo).map(s=><option key={s.n} value={s.n}>{s.n}</option>)}
+              {semillas.filter(s=>s.cv && s.cv!==f.cultivo).map(s=><option key={s.n} value={s.n}>{s.n} ({s.cv})</option>)}
+            </select>
+          );
+          const selFert = (f, campoK) => (
+            <select value={f[campoK]} onChange={e=>setIns(f.key,campoK,e.target.value)} style={selP}>
+              <option value="">—</option>
+              {ferts.map(x=><option key={x.n} value={x.n}>{x.n}</option>)}
+            </select>
+          );
+          const bloqueTotales = (titulo, clave) => {
+            const grupos = agruparInsumos(filas, clave);
+            return (
+              <div style={caja}>
+                <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55,marginBottom:8}}>{titulo}</div>
+                {!grupos.length && <div style={{fontSize:11.5,opacity:0.5}}>Todavía no cargaste insumos.</div>}
+                <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                  {grupos.map(([g, dat]) => (
+                    <div key={g}>
+                      <div style={{fontSize:12.5,fontWeight:700,marginBottom:3}}>{g} <span style={{opacity:0.55,fontWeight:400}}>· {fmt(dat.ha)} ha</span></div>
+                      {Object.entries(dat.prod).sort((a,b)=>b[1].kg-a[1].kg).map(([n,x]) => {
+                        const usd = usdInsumo(n, x.kg);
+                        return (
+                          <div key={n} style={{display:"flex",justifyContent:"space-between",gap:8,fontSize:11.5,padding:"2px 0",borderBottom:"1px solid #F1EDE1"}}>
+                            <span>{x.cat==="SEM"?"🌾":"🧂"} {n}</span>
+                            <span style={{fontWeight:600,whiteSpace:"nowrap"}}>
+                              {fmt(Math.round(x.kg))} kg{x.kg>=1000 && <span style={{opacity:0.55,fontWeight:400}}> · {(x.kg/1000).toFixed(1)} tn</span>}
+                              {usd!==null && <span style={{opacity:0.6,fontWeight:400}}> · USD {fmt(Math.round(usd))}</span>}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          };
+          return (
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
+              <div style={caja}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8,flexWrap:"wrap"}}>
+                  <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55}}>Carga por lote · kg/ha</div>
+                  <select value={insCampoFiltro} onChange={e=>setInsCampoFiltro(e.target.value)} style={{...inputB,fontSize:12,padding:"4px 8px",width:"auto"}}>
+                    <option value="TODOS">Todos los campos</option>
+                    {camposLista.map(c=><option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <select value={insCultivoFiltro} onChange={e=>setInsCultivoFiltro(e.target.value)} style={{...inputB,fontSize:12,padding:"4px 8px",width:"auto"}}>
+                    <option value="TODOS">Todos los cultivos</option>
+                    {cultivosLista.map(cv=><option key={cv} value={cv}>{cv}</option>)}
+                  </select>
+                  <label style={{fontSize:11.5,display:"flex",alignItems:"center",gap:4,cursor:"pointer"}}>
+                    <input type="checkbox" checked={insSoloCargados} onChange={e=>setInsSoloCargados(e.target.checked)}/> solo cargados
+                  </label>
+                  <div style={{fontSize:12,opacity:0.6,marginLeft:"auto"}}>{cargadas}/{filas.length} filas · {fmt(haFiltradas)} ha</div>
+                </div>
+                <div style={{overflowX:"auto"}}>
+                  <table style={{borderCollapse:"collapse",width:"100%",minWidth:900}}>
+                    <thead><tr>
+                      <th style={th}>Campo</th><th style={th}>Lote</th><th style={{...th,textAlign:"right"}}>ha</th><th style={th}>Cultivo</th>
+                      <th style={th}>Semilla</th><th style={{...th,textAlign:"right"}}>kg/ha</th><th style={{...th,textAlign:"right"}}>total</th>
+                      <th style={th}>Fertilizante 1</th><th style={{...th,textAlign:"right"}}>kg/ha</th><th style={{...th,textAlign:"right"}}>total</th>
+                      <th style={th}>Fertilizante 2</th><th style={{...th,textAlign:"right"}}>kg/ha</th><th style={{...th,textAlign:"right"}}>total</th>
+                      <th style={th}></th>
+                    </tr></thead>
+                    <tbody>
+                      {filas.map(f => (
+                        <tr key={f.key} style={{background:f.cargado?"#F6FAF6":"transparent"}}>
+                          <td style={td}>{f.campo}</td>
+                          <td style={td}>{f.lote}</td>
+                          <td style={{...td,textAlign:"right"}}>{fmt(f.ha)}</td>
+                          <td style={td}>
+                            {f.cvRot
+                              ? <span>{f.cultivo}{f.dobleCultivo && <span title={f.dobleCultivo} style={{opacity:0.5}}> ·2</span>}</span>
+                              : <select value={f.cultivo} onChange={e=>setIns(f.key,"cv",e.target.value)} style={{...inputB,fontSize:11.5,padding:"3px 5px",minWidth:90,color:f.cultivo?TINTA:"#9A937E"}}>
+                                  <option value="">— cultivo —</option>
+                                  {CULTIVOS_ORDEN.map(cv=><option key={cv} value={cv}>{cv}</option>)}
+                                </select>}
+                          </td>
+                          <td style={td}>{selSem(f)}</td>
+                          <td style={{...td,textAlign:"right"}}><input inputMode="decimal" value={insumosLote[f.key]?.dSem??""} onChange={e=>setIns(f.key,"dSem",e.target.value)} placeholder="0" style={inp}/></td>
+                          <td style={{...td,textAlign:"right",fontWeight:600}}>{f.totSem>0?fmt(Math.round(f.totSem)):"—"}</td>
+                          <td style={td}>{selFert(f,"f1")}</td>
+                          <td style={{...td,textAlign:"right"}}><input inputMode="decimal" value={insumosLote[f.key]?.dF1??""} onChange={e=>setIns(f.key,"dF1",e.target.value)} placeholder="0" style={inp}/></td>
+                          <td style={{...td,textAlign:"right",fontWeight:600}}>{f.totF1>0?fmt(Math.round(f.totF1)):"—"}</td>
+                          <td style={td}>{selFert(f,"f2")}</td>
+                          <td style={{...td,textAlign:"right"}}><input inputMode="decimal" value={insumosLote[f.key]?.dF2??""} onChange={e=>setIns(f.key,"dF2",e.target.value)} placeholder="0" style={inp}/></td>
+                          <td style={{...td,textAlign:"right",fontWeight:600}}>{f.totF2>0?fmt(Math.round(f.totF2)):"—"}</td>
+                          <td style={td}>
+                            {f.cargado && f.cultivo && (
+                              <button onClick={()=>copiarInsumosACultivo(f, filasInsumos)} title={`Copiar esta carga a todos los lotes de ${f.cultivo}`}
+                                style={{padding:"2px 7px",fontSize:10.5,fontWeight:600,cursor:"pointer",border:"1px solid #1E5FA8",borderRadius:12,background:"transparent",color:"#1E5FA8",fontFamily:"inherit",whiteSpace:"nowrap"}}>
+                                ⤵ {f.cultivo}
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div style={{fontSize:10.5,opacity:0.6,marginTop:6}}>Cargá un lote y con ⤵ copiás esa semilla, fertilizantes y dosis a todos los lotes del mismo cultivo. Los lotes sin cultivo en la rotación te dejan elegirlo a mano.</div>
+              </div>
+
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:14}}>
+                {bloqueTotales("Total por campo","campo")}
+                {bloqueTotales("Total por productor","productor")}
+                {bloqueTotales("Total por cultivo","cultivo")}
+              </div>
+            </div>
+          );
+        })()}
         {vista==="protocolos"&&<VistaProtocolos/>}
 
         <div style={{fontSize:11,opacity:0.45,marginTop:20,textAlign:"center"}}>
