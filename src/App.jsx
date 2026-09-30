@@ -2573,6 +2573,9 @@ export default function App(){
   const [ordId, setOrdId] = useState(() => `o${Date.now()}`);
   const [borradores, setBorradores] = useState([]);
   const [panelBorr, setPanelBorr] = useState(false);
+  const [autor, setAutor] = useState(() => { try { return window.localStorage.getItem("smix_autor") || ""; } catch { return ""; } });
+  const [sincro, setSincro] = useState({estado:"", txt:""});   // estado: ok | error | subiendo
+  const cambiarAutor = (v) => { setAutor(v); try { window.localStorage.setItem("smix_autor", v); } catch {} };
 
   const leerBorradores = () => {
     try {
@@ -2588,8 +2591,50 @@ export default function App(){
     setBorradores(lista);
   };
 
+  // Borradores compartidos: se guardan también en la hoja "borradores" de la planilla,
+  // así los ve cualquiera de los dos. El localStorage queda como copia local y respaldo
+  // si la app está sin señal.
+  const subirBorrador = async (item) => {
+    try {
+      setSincro({estado:"subiendo", txt:"guardando…"});
+      const r = await fetch("/api/borradores", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+          id: item.id, autor: item.autor || autor, pdf: item.pdf || "",
+          titulo: `${item.productor || "sin productor"} · ${item.resumen?.ha || 0} ha`,
+          datos: item,
+        }),
+      });
+      if(!r.ok) throw new Error((await r.json()).error || "error");
+      setSincro({estado:"ok", txt:"guardado para los dos"});
+    } catch (e) {
+      setSincro({estado:"error", txt:"solo en este equipo"});
+    }
+  };
+
+  const bajarBorradores = async () => {
+    try {
+      const r = await fetch("/api/borradores");
+      if(!r.ok) throw new Error("error");
+      const { borradores: remotos } = await r.json();
+      const locales = leerBorradores();
+      const mapa = new Map();
+      [...locales, ...(remotos||[]).map(b => ({...(b.datos||{}), id:b.id, autor:b.autor, pdf:b.pdf}))]
+        .forEach(b => {
+          const previo = mapa.get(b.id);
+          if(!previo || (b.guardado||0) > (previo.guardado||0)) mapa.set(b.id, b);
+        });
+      const lista = [...mapa.values()].sort((a,b)=>(b.guardado||0)-(a.guardado||0)).slice(0,60);
+      escribirBorradores(lista);
+      setSincro({estado:"ok", txt:"al día"});
+    } catch {
+      escribirBorradores(leerBorradores());
+      setSincro({estado:"error", txt:"sin conexión con la planilla"});
+    }
+  };
+
   // Cargar al iniciar (y purgar los vencidos)
-  useEffect(() => { escribirBorradores(leerBorradores()); }, []);
+  useEffect(() => { bajarBorradores(); }, []);
   const [modoDividir, setModoDividir] = useState(false);
   const [loteDiv, setLoteDiv] = useState(null);       // {campoId, loteId} en edición
   const [puntosCorte, setPuntosCorte] = useState([]); // [[x,y],[x,y]]
@@ -2852,17 +2897,19 @@ export default function App(){
     const hayAlgo = r.ha > 0 || tratamientos.some(t => t.productos.some(p => p.n));
     if (!hayAlgo) return;
     const t = setTimeout(() => {
+      const previo = leerBorradores().find(b => b.id === ordId) || {};
       const item = {
-        id: ordId, guardado: Date.now(),
+        id: ordId, guardado: Date.now(), autor: autor || previo.autor || "", pdf: previo.pdf || "",
         fecha: ordFecha, productor: ordProductor, tipo: ordTipo,
         tratamientos, pintura, divisiones,
         resumen: { ha: r.ha, nTrats: r.nTrats, campos: r.campos, etiquetas: r.etiquetas },
       };
       const lista = leerBorradores().filter(b => b.id !== ordId);
-      escribirBorradores([item, ...lista].slice(0, 30));
+      escribirBorradores([item, ...lista].slice(0, 60));
+      subirBorrador(item);
     }, 800);
     return () => clearTimeout(t);
-  }, [ordId, ordFecha, ordProductor, ordTipo, tratamientos, pintura, divisiones]);
+  }, [ordId, ordFecha, ordProductor, ordTipo, tratamientos, pintura, divisiones, autor]);
 
   const cargarBorrador = (b) => {
     setOrdId(b.id);
@@ -2883,6 +2930,8 @@ export default function App(){
 
   const borrarBorrador = (id) => {
     escribirBorradores(leerBorradores().filter(b => b.id !== id));
+    fetch("/api/borradores", {method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({id, borrar:true})}).catch(()=>{});
   };
 
   const nuevaOrden = () => {
@@ -3229,6 +3278,58 @@ export default function App(){
       a.href=cv.toDataURL("image/png");a.click();URL.revokeObjectURL(url);
     };img.src=url;
   };
+  // Carga una librería por CDN una sola vez
+  const cargarScript = (url) => new Promise((ok, fail) => {
+    if(document.querySelector(`script[src="${url}"]`)) return ok();
+    const s = document.createElement("script");
+    s.src = url; s.onload = () => ok(); s.onerror = () => fail(new Error("No se pudo cargar "+url));
+    document.body.appendChild(s);
+  });
+
+  const [pdfMsg, setPdfMsg] = useState(null);
+
+  // Genera el PDF de la orden, lo descarga y lo archiva en la carpeta de Drive
+  const descargarPDFOrden = async () => {
+    if(bloqueosOrden.length){ window.alert(textoBloqueos()); return; }
+    const nodo = document.querySelector(".orden-completa-print");
+    if(!nodo){ window.alert("No encuentro la orden en pantalla."); return; }
+    try{
+      setPdfMsg({ok:true, texto:"Armando el PDF…"});
+      await cargarScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
+      await cargarScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+      const canvas = await window.html2canvas(nodo, {scale:2, backgroundColor:"#FFFFFF", useCORS:true});
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({unit:"mm", format:"a4", orientation:"portrait"});
+      const anchoP = 210, altoP = 297;
+      const alto = canvas.height * anchoP / canvas.width;
+      const img = canvas.toDataURL("image/jpeg", 0.92);
+      let resta = alto, y = 0;
+      pdf.addImage(img, "JPEG", 0, 0, anchoP, alto);
+      resta -= altoP;
+      while(resta > 0){ y -= altoP; pdf.addPage(); pdf.addImage(img, "JPEG", 0, y, anchoP, alto); resta -= altoP; }
+      const nombre = `orden ${ordFecha} ${(ordProductor||"sin productor").toLowerCase()}.pdf`;
+      pdf.save(nombre);
+
+      // Archivo en Drive, para que quede la orden tal cual se descargó
+      setPdfMsg({ok:true, texto:"Guardando copia en Drive…"});
+      const base64 = pdf.output("datauristring").split(",")[1];
+      const r = await fetch("/api/guardar-pdf", {method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({nombre, base64, id: ordId})});
+      const data = await r.json();
+      if(!r.ok) throw new Error(data.error || "no se pudo archivar");
+      // El link queda pegado al borrador, así Andrés abre el PDF desde la lista
+      const previo = leerBorradores().find(b => b.id === ordId);
+      if(previo){
+        const item = {...previo, pdf: data.link};
+        escribirBorradores([item, ...leerBorradores().filter(b=>b.id!==ordId)]);
+        subirBorrador(item);
+      }
+      setPdfMsg({ok:true, texto:"PDF descargado y archivado en Drive."});
+    }catch(e){
+      setPdfMsg({ok:false, texto:`PDF descargado, pero no se archivó: ${e.message}`});
+    }
+  };
+
   const imprimirOrdenCompleta=()=>{
     if(bloqueosOrden.length){ window.alert(textoBloqueos()); return; }
     // Imprime toda la sección de recibos con estilo aplicado. El usuario puede "Guardar como PDF" desde la impresora.
@@ -3825,8 +3926,22 @@ export default function App(){
 
                 {panelBorr && (
                   <div style={{marginBottom:12,padding:"10px 12px",border:"1.5px solid #D8D2C0",borderRadius:10,background:"#FFFDF7"}}>
-                    <div style={{fontSize:11,opacity:0.6,marginBottom:8}}>
-                      Órdenes de los últimos {DIAS_BORRADOR} días · se guardan solas en este dispositivo
+                    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8,flexWrap:"wrap"}}>
+                      <div style={{fontSize:11,opacity:0.6}}>Órdenes compartidas de los últimos 30 días</div>
+                      <select value={autor} onChange={e=>cambiarAutor(e.target.value)}
+                        style={{...inputB,fontSize:11.5,padding:"3px 6px",width:"auto"}}>
+                        <option value="">¿quién sos?</option>
+                        <option value="Santos">Santos</option>
+                        <option value="Andrés">Andrés</option>
+                      </select>
+                      <button onClick={bajarBorradores}
+                        style={{padding:"3px 9px",fontSize:11,fontWeight:600,cursor:"pointer",borderRadius:6,
+                          border:`1px solid ${TINTA}`,background:"transparent",color:TINTA,fontFamily:"inherit"}}>↻ actualizar</button>
+                      {sincro.txt && (
+                        <span style={{fontSize:11,marginLeft:"auto",color:sincro.estado==="error"?"#C0392B":"#2E7D32"}}>
+                          {sincro.estado==="error"?"⚠️":"●"} {sincro.txt}
+                        </span>
+                      )}
                     </div>
                     {borradores.length===0
                       ? <div style={{fontSize:12.5,opacity:0.6,fontStyle:"italic"}}>Todavía no hay borradores.</div>
@@ -3845,10 +3960,14 @@ export default function App(){
                                     {esActual && <span style={{fontSize:10.5,color:"#2E7D32",marginLeft:6}}>· en edición</span>}
                                   </div>
                                   <div style={{fontSize:10.5,opacity:0.6,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
-                                    {fechaBorrador(b.guardado)} · {(r.campos||[]).join(", ")||"sin lotes"}
+                                    {fechaBorrador(b.guardado)}{b.autor ? ` · ${b.autor}` : ""} · {(r.campos||[]).join(", ")||"sin lotes"}
                                     {r.etiquetas&&r.etiquetas.length ? ` · ${r.etiquetas.join(" / ")}` : ""}
                                   </div>
                                 </div>
+                                {b.pdf && (
+                                  <a href={b.pdf} target="_blank" rel="noreferrer" title="Abrir el PDF archivado"
+                                    style={{fontSize:14,textDecoration:"none",flexShrink:0}}>📄</a>
+                                )}
                                 {!esActual && (
                                   <button onClick={()=>cargarBorrador(b)}
                                     style={{padding:"4px 10px",fontSize:11.5,fontWeight:600,cursor:"pointer",borderRadius:6,
@@ -4266,11 +4385,17 @@ export default function App(){
 
                   <div style={{display:"flex",gap:8,marginTop:10,flexWrap:"wrap"}}>
                     <button onClick={guardarLaborEnPlanilla} disabled={guardando||tratamientosActivos.length===0} style={{padding:"9px 15px",fontSize:12.5,fontWeight:700,cursor:guardando?"wait":"pointer",border:"none",borderRadius:8,background:tratamientosActivos.length===0?"#B5AF9D":"#2E7D32",color:"#fff",fontFamily:"inherit",opacity:guardando?0.7:1}}>{guardando?"Guardando…":"💾 Guardar en planilla"}</button>
-                    <button onClick={imprimirOrdenCompleta} style={{padding:"9px 13px",fontSize:12.5,fontWeight:700,cursor:"pointer",border:"none",borderRadius:8,background:TINTA,color:"#F3EFE3",fontFamily:"inherit"}}>🖨️ Descargar orden completa (PDF)</button>
+                    <button onClick={descargarPDFOrden} style={{padding:"9px 13px",fontSize:12.5,fontWeight:700,cursor:"pointer",border:"none",borderRadius:8,background:TINTA,color:"#F3EFE3",fontFamily:"inherit"}}>⬇️ Descargar PDF y archivar</button>
+                    <button onClick={imprimirOrdenCompleta} style={{padding:"9px 13px",fontSize:12.5,fontWeight:600,cursor:"pointer",border:`1.5px solid ${TINTA}`,borderRadius:8,background:"transparent",color:TINTA,fontFamily:"inherit"}}>🖨️ Imprimir</button>
                     <button onClick={descargarPNG} style={{padding:"9px 13px",fontSize:12.5,fontWeight:600,cursor:"pointer",border:`1.5px solid ${TINTA}`,borderRadius:8,background:"transparent",color:TINTA,fontFamily:"inherit"}}>⬇ PNG mapa actual</button>
                     <button onClick={limpiarOrd} style={{padding:"9px 13px",fontSize:12.5,fontWeight:600,cursor:"pointer",border:`1.5px solid ${TINTA}`,borderRadius:8,background:"transparent",color:TINTA,fontFamily:"inherit"}}>Limpiar campo</button>
                     <button onClick={nuevaOrden} style={{padding:"9px 13px",fontSize:12.5,fontWeight:600,cursor:"pointer",border:"1.5px solid #C0392B",borderRadius:8,background:"transparent",color:"#C0392B",fontFamily:"inherit"}}>Reset orden</button>
                   </div>
+                  {pdfMsg&&(
+                    <div style={{marginTop:8,padding:"9px 12px",borderRadius:8,fontSize:12.5,fontWeight:600,background:pdfMsg.ok?"#E8F5E9":"#FFF6DD",color:pdfMsg.ok?"#2E7D32":"#8A6200",border:`1px solid ${pdfMsg.ok?"#A5D6A7":"#E9CF7A"}`}}>
+                      {pdfMsg.texto}
+                    </div>
+                  )}
                   {guardadoMsg&&(
                     <div style={{marginTop:8,padding:"9px 12px",borderRadius:8,fontSize:12.5,fontWeight:600,background:guardadoMsg.ok?"#E8F5E9":"#FDECEA",color:guardadoMsg.ok?"#2E7D32":"#C0392B",border:`1px solid ${guardadoMsg.ok?"#A5D6A7":"#F5C6CB"}`}}>
                       {guardadoMsg.texto}
