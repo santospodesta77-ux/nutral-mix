@@ -1201,46 +1201,40 @@ const CAMPOS = [
     {id:"5",label:"5",ha:25,poly:[[15,100],[210,100],[210,250],[15,250]]},
     {id:"4",label:"4",ha:25,poly:[[210,120],[330,120],[330,250],[210,250]]},
    ]},
-  {id:"DON ANTONIO",nombre:"Don Antonio",vb:[0,0,430,430],refs:[{x:422,y:215,t:"Ruta N° 7",rot:90}],
+  {id:"DON ANTONIO",nombre:"Don Antonio",vb:[0,0,600,575],refs:[{x:594,y:290,t:"Ruta N° 7",rot:90}],
    grises:[
-     // laguna dentro del lote 13
-     {poly:[[45,105],[145,95],[175,140],[165,215],[120,240],[65,225],[35,175]],label:"laguna"},
+     // laguna dentro del lote 13, calcada de la imagen satelital (~24 ha de espejo)
+     {poly:[[267,146],[257,139],[247,151],[226,150],[210,134],[196,95],[181,85],[151,90],[128,113],[121,138],[51,202],[38,228],[39,251],[129,257],[191,204],[247,174]],label:"laguna"},
    ],
    lotes:[
     // ── Fila superior ───────────────────────────────────
-    // 12: 21ha, esquina NO, con borde SO diagonal hacia la laguna
-    {id:"12",label:"12",ha:21,poly:[[10,10],[195,10],[195,90],[75,90],[10,60]]},
-    // 9: 15ha, arriba centro-este, con borde S diagonal que sigue la laguna
-    {id:"9",label:"9",ha:15,poly:[[195,10],[300,10],[300,95],[240,110],[195,90]]},
-    // 8: ~5ha, arriba a la derecha, franja fina
-    {id:"8",label:"8",ha:5,poly:[[300,10],[420,10],[420,55],[300,55]]},
-    // 8A: 7.5ha, debajo de 8
-    {id:"8A",label:"8a",ha:7.5,poly:[[300,55],[420,55],[420,115],[300,115]]},
+    {id:"12",label:"12",ha:21,poly:[[4,6],[323,5],[323,48],[295,38],[274,74],[206,74],[200,66],[177,41],[138,36],[41,77],[4,103]]},
+    {id:"9",label:"9",ha:15,poly:[[323,5],[438,6],[438,122],[381,122],[358,122],[350,123],[350,111],[330,71],[323,48]]},
+    // esquina NE: dos lotes rectangulares, 8a la franja angosta y 8 el bloque grande
+    {id:"8A",label:"8a",ha:7.5,poly:[[438,6],[484,6],[484,134],[438,134]]},
+    {id:"8",label:"8",ha:5,poly:[[484,6],[577,6],[577,134],[484,134]]},
 
     // ── Fila media ──────────────────────────────────────
-    // 13: 82ha, gran lote oeste que rodea la laguna. Comparte bordes: diagonal con 11 (dos tramos) e inferior con 5
-    {id:"13",label:"13",ha:82,poly:[[10,60],[75,90],[195,90],[210,225],[195,260],[10,260]]},
-    // 10: 10ha, alto y angosto, pegado al 7 por su izquierda, baja desde el 9 hasta la altura del 7
-    {id:"10",label:"10",ha:10,poly:[[240,110],[300,95],[300,260],[240,260]]},
-    // 11: 21ha, pentágono - lado corto arriba con 9, dos lados con 13 (diagonal+vertical), abajo con 5, derecha con 10
-    {id:"11",label:"11",ha:21,poly:[[195,90],[240,110],[240,260],[195,260],[210,225]]},
-    // 7: 25ha, este bajo la 8A
-    {id:"7",label:"7",ha:25,poly:[[300,115],[420,115],[420,260],[300,260]]},
+    // 13: gran lote oeste con la laguna. Perdió 16 ha al abrirse los lotes 14 y 15
+    {id:"13",label:"13",ha:66,poly:[[4,103],[41,77],[138,36],[177,41],[200,66],[206,74],[274,74],[295,38],[323,48],[330,71],[350,111],[350,123],[254,194],[133,281],[4,283],[2,268],[59,183],[150,108],[4,106]]},
+    // 15: cuña al oeste, entre la línea de arriba y la diagonal
+    {id:"15",label:"15",ha:8,poly:[[4,106],[150,108],[59,183],[2,268]]},
+    // 14: triángulo contra el 11 y la línea del medio
+    {id:"14",label:"14",ha:8,poly:[[253,190],[254,283],[133,281]]},
+    {id:"11",label:"11",ha:21,poly:[[254,194],[350,123],[381,122],[381,283],[254,283]]},
+    {id:"10",label:"10",ha:10,poly:[[381,122],[438,122],[439,248],[413,248],[410,268],[381,268]]},
+    {id:"7",label:"7",ha:25,poly:[[439,134],[577,134],[577,278],[443,278],[443,248],[439,248]]},
 
-    // ── Franja delgada 5 (3ha) ──────────────────────────
-    {id:"5",label:"5",ha:3,poly:[[145,260],[300,260],[300,285],[145,285]]},
+    // ── Franja delgada 5 ────────────────────────────────
+    {id:"5",label:"5",ha:5.3,poly:[[288,283],[381,283],[402,285],[402,319],[288,319]]},
 
-    // ── Fila baja (13 termina aquí al oeste) ────────────
-    // 4: 20ha, centro-oeste bajo la franja 5
-    {id:"4",label:"4",ha:20,poly:[[145,285],[300,285],[300,355],[145,355]]},
-    // 3: 20ha, este bajo la 7
-    {id:"3",label:"3",ha:20,poly:[[300,260],[420,260],[420,355],[300,355]]},
+    // ── Fila baja ───────────────────────────────────────
+    {id:"4",label:"4",ha:20,poly:[[288,319],[443,319],[443,421],[288,421]]},
+    {id:"3",label:"3",ha:20,poly:[[443,319],[581,319],[581,421],[443,421]]},
 
     // ── Fila inferior ───────────────────────────────────
-    // 2: 27ha, SO, lote más al oeste
-    {id:"2",label:"2",ha:27,poly:[[145,355],[300,355],[300,425],[145,425]]},
-    // 1: 25ha, SE
-    {id:"1",label:"1",ha:25,poly:[[300,355],[420,355],[420,425],[300,425]]},
+    {id:"2",label:"2",ha:27,poly:[[288,421],[443,421],[443,565],[293,565],[288,558]]},
+    {id:"1",label:"1",ha:25,poly:[[443,421],[581,421],[584,439],[584,565],[443,565]]},
    ]},
   {id:"DOÑA TERESA",nombre:"Doña Teresa",vb:[0,0,315,655],refs:[],
    lotes:[
