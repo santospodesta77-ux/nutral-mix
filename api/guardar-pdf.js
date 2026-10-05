@@ -42,7 +42,13 @@ export default async function handler(req, res) {
     const texto = await r.text();
     let data;
     try { data = JSON.parse(texto); }
-    catch { throw new Error(`El Apps Script no respondió bien (HTTP ${r.status}). ¿Está publicado con acceso "Cualquier usuario"?`); }
+    catch {
+      // Se muestra qué contestó Google, para saber si es un login, una página de error u otra cosa
+      const resumen = texto.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 160);
+      let destino = "";
+      try { destino = new URL(r.url).host; } catch {}
+      throw new Error(`El Apps Script no respondió bien (HTTP ${r.status}${destino ? ` desde ${destino}` : ""}). Respuesta: "${resumen}"`);
+    }
     if (!data.ok) throw new Error(data.error || "El Apps Script no pudo guardar el PDF.");
 
     return res.status(200).json({ ok: true, fileId: data.fileId, link: data.link });
