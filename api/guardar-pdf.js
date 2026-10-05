@@ -1,23 +1,17 @@
 // api/guardar-pdf.js
-// Vercel Serverless Function — recibe el PDF de una orden (base64) y lo sube a una
-// carpeta de Google Drive, para que quede archivado y lo vean Santos y Andrés.
+// Vercel Serverless Function — recibe el PDF de una orden (base64) y lo archiva en
+// Google Drive, para que quede guardado y lo vean Santos y Andrés.
 //
 // POST { nombre, base64, id }  → { ok:true, link, fileId }
 //
+// No sube directo con la cuenta de servicio: esas cuentas no tienen espacio en Drive y
+// Google rechaza el archivo. Se lo pasa a un Apps Script que corre con la cuenta de
+// Santos (ver apps-script/guardar-pdf.gs) y que lo guarda en su carpeta.
+//
 // Envs:
-//   GOOGLE_CREDENTIALS      (la misma del resto)
-//   DRIVE_ORDENES_FOLDER    id de la carpeta de Drive donde se guardan los PDF
-// La carpeta tiene que estar compartida como EDITOR con el mail del service account.
-
-import { google } from "googleapis";
-import { Readable } from "stream";
-
-function getAuth() {
-  const creds = JSON.parse(process.env.GOOGLE_CREDENTIALS);
-  return new google.auth.JWT(creds.client_email, null, creds.private_key, [
-    "https://www.googleapis.com/auth/drive.file",
-  ]);
-}
+//   APPS_SCRIPT_PDF_URL     URL /exec de la aplicación web del Apps Script
+//   APPS_SCRIPT_PDF_TOKEN   la misma clave que CLAVE en el Apps Script
+//   DRIVE_ORDENES_FOLDER    (opcional) id de la carpeta de Drive donde se guardan los PDF
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -26,31 +20,32 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const carpeta = process.env.DRIVE_ORDENES_FOLDER;
-  if (!carpeta) return res.status(500).json({ error: "Falta configurar DRIVE_ORDENES_FOLDER." });
+  const url = process.env.APPS_SCRIPT_PDF_URL;
+  const token = process.env.APPS_SCRIPT_PDF_TOKEN;
+  if (!url || !token) {
+    return res.status(500).json({ error: "Falta configurar APPS_SCRIPT_PDF_URL y APPS_SCRIPT_PDF_TOKEN." });
+  }
 
   try {
     const { nombre, base64 } = req.body || {};
     if (!base64) return res.status(400).json({ error: "Falta el PDF." });
 
-    const buffer = Buffer.from(base64.replace(/^data:application\/pdf;base64,/, ""), "base64");
-    if (buffer.length > 8 * 1024 * 1024) return res.status(413).json({ error: "El PDF pesa más de 8 MB." });
+    const limpio = base64.replace(/^data:application\/pdf;base64,/, "");
+    if (limpio.length * 0.75 > 8 * 1024 * 1024) return res.status(413).json({ error: "El PDF pesa más de 8 MB." });
 
-    const auth = getAuth();
-    await auth.authorize();
-    const drive = google.drive({ version: "v3", auth });
-
-    const archivo = await drive.files.create({
-      requestBody: {
-        name: (nombre || `orden-${Date.now()}`).replace(/[\\/]/g, "-") + (nombre?.endsWith(".pdf") ? "" : ".pdf"),
-        parents: [carpeta],
-        mimeType: "application/pdf",
-      },
-      media: { mimeType: "application/pdf", body: Readable.from(buffer) },
-      fields: "id, webViewLink",
+    // Apps Script responde con una redirección a googleusercontent.com; fetch la sigue sola.
+    const r = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, nombre, base64: limpio, carpeta: process.env.DRIVE_ORDENES_FOLDER || "" }),
     });
+    const texto = await r.text();
+    let data;
+    try { data = JSON.parse(texto); }
+    catch { throw new Error(`El Apps Script no respondió bien (HTTP ${r.status}). ¿Está publicado con acceso "Cualquier usuario"?`); }
+    if (!data.ok) throw new Error(data.error || "El Apps Script no pudo guardar el PDF.");
 
-    return res.status(200).json({ ok: true, fileId: archivo.data.id, link: archivo.data.webViewLink });
+    return res.status(200).json({ ok: true, fileId: data.fileId, link: data.link });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: e.message || "Error subiendo el PDF." });
