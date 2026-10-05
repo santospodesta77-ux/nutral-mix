@@ -506,7 +506,7 @@ const PRODUCTOR = {
   "LAS TIAS":"Lorenzo","LOS NIETOS":"Enrique/Andrés","EL TORELLO":"Mariano/Andrés",
   "EL CIPRES":"Mariano/Matías/Andrés","DON MARCELINO":"Enrique","EL ABUELO":"Enrique",
   "EL DESCANSO":"Mariano/Andrés","DON RAMON":"—","LA MARIA OLIVA":"—","EL 5":"—",
-  "LA ADORACION":"—","LA CARLOTA":"—",
+  "LA ADORACION":"—","LA CARLOTA":"—","LA ILUSION":"—",
 };
 const COLOR_PROV = { PELAYO:"#2E7D32", QUEMU:"#C0392B", PROPIO:"#1E5FA8" };
 // Tipos de tratamiento y cultivos, para los desplegables de la orden
@@ -1336,6 +1336,18 @@ const CAMPOS = [
     {id:"3",label:"3",ha:26,poly:[[335,300],[565,300],[565,415],[335,415]]},
     {id:"5",label:"5",ha:38,poly:[[565,300],[690,300],[690,415],[565,415]]},
     {id:"7",label:"7",ha:40,poly:[[690,300],[945,300],[945,415],[690,415]]},
+   ]},
+  {id:"LA ILUSION",nombre:"La Ilusión",vb:[0,0,375,530],refs:[],
+   lotes:[
+    {id:"1",label:"1",ha:50,poly:[[185,10],[272,10],[272,178],[185,178]]},
+    {id:"2",label:"2",ha:50,poly:[[272,10],[357,10],[357,178],[272,178]]},
+    {id:"3",label:"3",ha:42,poly:[[18,178],[185,178],[185,248],[18,248]]},
+    // el 4 tiene un escalón abajo a la derecha, donde queda una franja entre el 4 y el 6
+    {id:"4",label:"4",ha:42,poly:[[185,178],[357,178],[357,262],[292,262],[292,248],[185,248]]},
+    {id:"5",label:"5",ha:55,poly:[[18,248],[185,248],[185,345],[18,345]]},
+    {id:"6",label:"6",ha:50,poly:[[185,248],[272,248],[272,270],[357,266],[357,345],[185,345]]},
+    {id:"7",label:"7",ha:48,poly:[[18,345],[185,345],[185,432],[18,432]]},
+    {id:"8",label:"8",ha:50,poly:[[18,432],[185,432],[185,518],[18,518]]},
    ]},
 ];
 
