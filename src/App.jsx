@@ -2487,6 +2487,114 @@ function VistaProtocolos() {
     </div>
   );
 }
+// Pasa a minúsculas y saca tildes, para buscar sin que importen mayúsculas ni acentos
+const normBusca = s => String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+
+// Selector de producto con buscador: al escribir se filtra la lista ("glifo" → todos los glifosatos).
+// Varias palabras se combinan: "glifo box" encuentra "GLIFOSATO GRANULADO LT BOX".
+function BuscadorProducto({valor, lista, color, negrita, onElegir, onNuevo}){
+  const [abierto, setAbierto] = useState(false);
+  const [texto, setTexto] = useState("");
+  const [activo, setActivo] = useState(0);
+  const [caja, setCaja] = useState(null);   // dónde está el campo en pantalla, para ubicar la lista
+  const inputRef = useRef(null);
+  const listaRef = useRef(null);
+
+  const filtrados = useMemo(() => {
+    const palabras = normBusca(texto).split(/\s+/).filter(Boolean);
+    if(!palabras.length) return lista;
+    return lista.filter(pd => { const n = normBusca(pd.n); return palabras.every(w => n.includes(w)); });
+  }, [lista, texto]);
+  const grupos = useMemo(() => ["PELAYO","QUEMU","PROPIO",""]
+    .map(gr => ({gr, items: filtrados.filter(pd => (pd.prov||"") === gr)}))
+    .filter(g => g.items.length), [filtrados]);
+  const planas = useMemo(() => grupos.flatMap(g => g.items), [grupos]);
+
+  const medir = () => {
+    const r = inputRef.current && inputRef.current.getBoundingClientRect();
+    if(!r) return;
+    const ancho = Math.min(Math.max(r.width, 300), window.innerWidth - 16);
+    const abajo = window.innerHeight - r.bottom - 8, arriba = r.top - 8;
+    const sobre = abajo < 180 && arriba > abajo;   // casi sin lugar abajo (teclado): se abre hacia arriba
+    setCaja({
+      left: Math.max(8, Math.min(r.left, window.innerWidth - ancho - 8)), ancho, sobre,
+      top: sobre ? null : r.bottom + 2, bottom: sobre ? window.innerHeight - r.top + 2 : null,
+      alto: Math.max(120, Math.min(300, sobre ? arriba : abajo)),
+    });
+  };
+  useEffect(() => {
+    if(!abierto) return;
+    const alMover = e => { if(!(listaRef.current && listaRef.current.contains(e.target))) medir(); };
+    window.addEventListener("scroll", alMover, true);
+    window.addEventListener("resize", medir);
+    return () => { window.removeEventListener("scroll", alMover, true); window.removeEventListener("resize", medir); };
+  }, [abierto]);
+  useEffect(() => {
+    if(!abierto || !listaRef.current) return;
+    const el = listaRef.current.querySelector(`[data-idx="${activo}"]`);
+    if(el && el.scrollIntoView) el.scrollIntoView({block:"nearest"});
+  }, [activo, abierto]);
+
+  const cerrar = () => { setAbierto(false); setTexto(""); };
+  const elegir = n => { onElegir(n); cerrar(); if(inputRef.current) inputRef.current.blur(); };
+  const nuevo = () => { onNuevo(planas.length ? "" : texto.trim()); cerrar(); if(inputRef.current) inputRef.current.blur(); };
+  const teclas = e => {
+    if(e.key === "ArrowDown"){ e.preventDefault(); setActivo(i => Math.min(i+1, Math.max(planas.length-1, 0))); }
+    else if(e.key === "ArrowUp"){ e.preventDefault(); setActivo(i => Math.max(i-1, 0)); }
+    else if(e.key === "Enter"){ e.preventDefault(); if(planas[activo]) elegir(planas[activo].n); }
+    else if(e.key === "Escape"){ cerrar(); if(inputRef.current) inputRef.current.blur(); }
+  };
+  // mouseDown con preventDefault: el campo no pierde el foco al tocar una opción
+  const sinFoco = e => e.preventDefault();
+  const etiqGrupo = gr => gr==="PELAYO" ? "🟢 BH PELAYO" : gr==="QUEMU" ? "🔴 BH CEREALES QUEMÚ" : gr==="PROPIO" ? "🔵 Míos" : "⚪ Otros";
+
+  let idx = -1;
+  return (
+    <div style={{position:"relative",minWidth:0}}>
+      <input ref={inputRef} type="text" value={abierto ? texto : valor}
+        autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false}
+        placeholder={abierto ? (valor || "Buscar producto…") : "— vacío —"}
+        onFocus={() => { setAbierto(true); setTexto(""); setActivo(0); medir(); }}
+        onBlur={cerrar}
+        onChange={e => { setTexto(e.target.value); setActivo(0); }}
+        onKeyDown={teclas}
+        style={{padding:"5px 16px 5px 6px",fontSize:11.5,border:"none",background:"transparent",fontFamily:"inherit",
+          color:color,fontWeight:negrita?600:400,width:"100%",minWidth:0,boxSizing:"border-box",textOverflow:"ellipsis"}}/>
+      <span style={{position:"absolute",right:5,top:"50%",transform:"translateY(-50%)",fontSize:9,opacity:0.5,pointerEvents:"none"}}>▾</span>
+      {abierto && caja && (
+        <div ref={listaRef} style={{position:"fixed",left:caja.left,top:caja.top ?? "auto",bottom:caja.bottom ?? "auto",
+          width:caja.ancho,maxHeight:caja.alto,overflowY:"auto",zIndex:1000,background:"#fff",border:`1.5px solid ${TINTA}`,
+          borderRadius:8,boxShadow:"0 6px 18px rgba(0,0,0,0.18)"}}>
+          {valor && !texto && (
+            <div onMouseDown={sinFoco} onClick={() => elegir("")}
+              style={{padding:"7px 10px",fontSize:12,cursor:"pointer",opacity:0.65,borderBottom:"1px solid #F1EDE0"}}>— vacío —</div>
+          )}
+          {grupos.map(g => (
+            <div key={g.gr||"otros"}>
+              <div style={{padding:"4px 10px",fontSize:10.5,fontWeight:700,background:"#F8F5EC",color:TINTA}}>{etiqGrupo(g.gr)}</div>
+              {g.items.map(pd => {
+                idx += 1; const mi = idx;
+                return (
+                  <div key={pd.n} data-idx={mi} onMouseDown={sinFoco} onClick={() => elegir(pd.n)} onMouseEnter={() => setActivo(mi)}
+                    style={{padding:"7px 10px",fontSize:12,cursor:"pointer",borderBottom:"1px solid #F1EDE0",
+                      background:mi===activo?"#EAF1DF":"transparent",color:pd.prov?COLOR_PROV[pd.prov]:TINTA,fontWeight:pd.n===valor?700:400}}>
+                    {pd.n}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+          {!planas.length && <div style={{padding:"8px 10px",fontSize:12,opacity:0.6}}>Sin resultados para “{texto.trim()}”</div>}
+          <div onMouseDown={sinFoco} onClick={nuevo}
+            style={{padding:"8px 10px",fontSize:12,fontWeight:600,cursor:"pointer",color:"#1E5FA8",background:"#F4F8FD",position:"sticky",bottom:0}}>
+            ➕ Agregar producto{!planas.length && texto.trim() ? ` “${texto.trim()}”` : "…"}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function App(){
   // ── DATOS DINÁMICOS: cargados desde /datos.json (pipeline automático) ──
   const [datosOK, setDatosOK] = useState(null); // null=cargando, true=cargado, false=falló
@@ -4203,27 +4311,10 @@ export default function App(){
                         return (
                           <div key={fi} style={{display:"grid",gridTemplateColumns:"7px minmax(0,1fr) 62px 62px 62px",borderBottom:fi<9?"1px solid #EEE9DC":"none",background:bgF}}>
                             <div style={{background:p.prov?COLOR_PROV[p.prov]:"transparent"}}/>
-                            <select value={p.n}
-                              onChange={e=>{
-                                if(e.target.value === "__nuevo__"){ setFormProd({fila: fi}); return; }
-                                updateFila(brocha, fi, "n", e.target.value);
-                              }}
-                              style={{padding:"5px 6px",fontSize:11.5,border:"none",background:"transparent",fontFamily:"inherit",color:p.prov?COLOR_PROV[p.prov]:TINTA,fontWeight:p.prov?600:400,width:"100%",minWidth:0}}>
-                              <option value="">— vacío —</option>
-                              {["PELAYO","QUEMU","PROPIO",""].map(gr => {
-                                const lista = productosDisponibles.filter(pd => (pd.prov||"") === gr);
-                                if(!lista.length) return null;
-                                const etiq = gr==="PELAYO" ? "🟢 BH PELAYO"
-                                  : gr==="QUEMU" ? "🔴 BH CEREALES QUEMÚ"
-                                  : gr==="PROPIO" ? "🔵 Míos" : "⚪ Otros";
-                                return (
-                                  <optgroup key={gr||"otros"} label={etiq}>
-                                    {lista.map(pd => <option key={pd.n} value={pd.n}>{pd.n}</option>)}
-                                  </optgroup>
-                                );
-                              })}
-                              <option value="__nuevo__">➕ Agregar producto…</option>
-                            </select>
+                            <BuscadorProducto valor={p.n} lista={productosDisponibles}
+                              color={p.prov?COLOR_PROV[p.prov]:TINTA} negrita={!!p.prov}
+                              onElegir={n=>updateFila(brocha, fi, "n", n)}
+                              onNuevo={t=>{ if(t) setNuevoProd(v=>({...v,n:t})); setFormProd({fila: fi}); }}/>
                             <input type="text" inputMode="decimal" value={p.dTexto !== undefined ? p.dTexto : (p.d || "")} onChange={e=>updateFila(brocha, fi, "d", e.target.value)} placeholder="0" style={{padding:"5px 6px",fontSize:11.5,border:"none",borderLeft:"1px solid #EEE9DC",background:"transparent",fontFamily:"inherit",color:evF.some(x=>x.nivel==="alerta")?"#C0392B":TINTA,fontWeight:evF.some(x=>x.nivel==="alerta")?700:400,textAlign:"right",width:"100%",minWidth:0}}/>
                             <div style={{padding:"5px 6px",fontSize:11,textAlign:"right",borderLeft:"1px solid #EEE9DC",opacity:total>0?1:0.35}}>{total>0?fmtCant(total):"—"}</div>
                             <div style={{padding:"5px 6px",fontSize:11,textAlign:"right",borderLeft:"1px solid #EEE9DC",fontWeight:600,opacity:costo>0?1:0.35}}>{costo>0?fmt(costo):"—"}</div>
