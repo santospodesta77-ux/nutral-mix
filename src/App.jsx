@@ -492,13 +492,6 @@ const FERTILIZACIONES_FALLBACK = [
 
 
 
-// próximas acciones
-const ACCIONES_INIT = [
-  {id:1,campo:"L3H",lote:"21-2-3-9-23-27-28-17",accion:"Post emergente maíz — atención arañuela",fecha:"2026-07-10",prioridad:"alta",hecha:false},
-  {id:2,campo:"LOS ABUELOS",lote:"todos (soja 2da)",accion:"Post emergente — defoliante",fecha:"2026-07-09",prioridad:"media",hecha:false},
-  {id:3,campo:"LA MARIA OLIVA",lote:"todos",accion:"Post emergente sorgo",fecha:"2026-07-09",prioridad:"media",hecha:false},
-  {id:4,campo:"EL 5",lote:"todos",accion:"Post emergente pastura — control tucura",fecha:"2026-07-09",prioridad:"media",hecha:false},
-];
 
 const PRODUCTOR = {
   "L3H":"Sucesión/Haydee","LA CUCA":"Andrés","LOS ABUELOS":"Haydee","DOÑA TERESA":"Enrique",
@@ -1602,903 +1595,8 @@ function GradBar({min,max,c1,c2,label}){
 
 // ── COMPONENTE PRINCIPAL ──────────────────────────────────────
 
-// ============================================================
-// MOTOR DE DEDUCCIÓN — próximas acciones automáticas
-// Toma un lote con cultivo, revisa aplicaciones+fertilizaciones
-// realizadas, y deduce la próxima etapa del protocolo
-// ============================================================
-
-// Mapeo cultivo asignado → clave de PROTOCOLOS_DATA
-const cultivoAProto = (cv) => {
-  if(!cv) return null;
-  const b = baseCv(cv);
-  if(b === "TRIGO" || b === "CENTENO" || b === "AVENA") return "TRIGO";
-  if(b === "CEBADA" || b === "FINA") return "CEBADA";
-  if(b === "GIRASOL") return "GIRASOL";
-  if(b === "SOJA") return "SOJA";
-  if(b === "MAIZ") return "MAIZ";
-  return null;
-};
-
-// Deduce el estado de un lote: qué etapas hizo, cuál toca ahora
-function deducirEstadoLote(campoId, loteId, ha, cultivoAsignado, aplicaciones, fertilizaciones){
-  const protoKey = cultivoAProto(cultivoAsignado);
-  if(!protoKey || !PROTOCOLOS_DATA[protoKey]) return null;
-  const proto = PROTOCOLOS_DATA[protoKey];
-
-  // aplicaciones y fert de este lote (matching exacto o por partes agrupadas)
-  const matchExacto = (loteX) => refApuntaALote(loteX, loteId);
-  const aplLote = aplicaciones.filter(a =>
-    a.campo === campoId && matchExacto(a.lote)
-  ).sort((a,b) => fechaLocal(a.fecha) - fechaLocal(b.fecha));
-  const fertLote = fertilizaciones.filter(f =>
-    f.campo === campoId && matchExacto(f.lote)
-  ).sort((a,b) => fechaLocal(a.fecha) - fechaLocal(b.fecha));
-
-  // Heurística: mapear cada aplicación/fert a una etapa del protocolo por palabras clave
-  const etapaDe = (registro) => {
-    const s = ((registro.cultivo||"") + " " + (registro.producto||"") + " " + (registro.notas||"") + " " + (registro.tipo||"")).toUpperCase();
-    const prods = (registro.productos||[]).join(" ").toUpperCase();
-    const all = s + " " + prods;
-
-    // Heurísticas por cultivo
-    if(protoKey === "TRIGO" || protoKey === "CEBADA"){
-      if(all.includes("COSECHA")) return "cosecha";
-      if(all.includes("FUNGICIDA") || all.includes("ELATUS") || all.includes("TEBUCONAZOLE")) return "fung";
-      if(registro.tipo === "N tardía" || (all.includes("UREA") && !all.includes("AZUFRADA"))) return "fert2";
-      if(registro.tipo === "N temprana" || all.includes("UREA AZUFRADA")) return "fert1";
-      if(registro.tipo === "Arranque" || all.includes("MAP") || all.includes("NUTRIMAP")) return "siembra";
-      if(all.includes("FLUROCLORIDONA") && !all.includes("BARBECHO")) return "presiembra";
-      if(all.includes("SIEMBRA")) return "siembra";
-      // Barbecho: si es glifosato + metsulfuron + 2-4D, sin fluro fuerte → barbecho_largo
-      if(all.includes("GLIFOSATO") || all.includes("CONTROLMAX") || all.includes("2-4 D") || all.includes("2,4D")) return "barbecho_largo";
-    }
-
-    if(protoKey === "GIRASOL"){
-      if(all.includes("COSECHA")) return "cosecha";
-      if(all.includes("CLEARSOL") || all.includes("IMAZAPIR") || all.includes("FLUROXIPIR") || all.includes("DIFLUFENICAN")) return "post_emergencia";
-      if(all.includes("UREA") || registro.tipo === "N") return "fert_n";
-      if(all.includes("S-METOLACLORO") || all.includes("METOLACLORO")) return "pre_emergencia";
-      if(all.includes("SIEMBRA") || registro.tipo === "Arranque") return "siembra";
-      if(all.includes("CARFENTRAZONE") || all.includes("CLETODIM")) return "reseteo";
-      if(all.includes("GLIFOSATO") || all.includes("ATRAZINA")) return "barbecho_largo";
-    }
-
-    if(protoKey === "SOJA"){
-      if(all.includes("COSECHA")) return "cosecha";
-      if(all.includes("AMPLIGO") || all.includes("INSECTICIDA")) return "post2";
-      if(all.includes("CLETODIM") || all.includes("SULFENTRAZONE")) return "post1";
-      if(all.includes("SIEMBRA") || all.includes("INOCULANTE")) return "siembra";
-      if(all.includes("VORAXOR")) return "presiembra";
-      if(all.includes("GLIFOSATO") || all.includes("2-4 D")) return "barbecho";
-    }
-
-    if(protoKey === "MAIZ"){
-      if(all.includes("COSECHA")) return "cosecha";
-      if(all.includes("ATRAZINA") && all.includes("POST")) return "post";
-      if(all.includes("AMPLIGO") || all.includes("INSECTICIDA")) return "post";
-      if(all.includes("SIEMBRA") || registro.tipo === "Arranque") return "siembra";
-      if(all.includes("TERBUTILAZINA")) return "presiembra";
-      if(all.includes("GLIFOSATO") || all.includes("ATRAZINA")) return "barbecho";
-    }
-    return null;
-  };
-
-  // Etapas completadas (por índice)
-  const etapasCompletadas = new Set();
-  [...aplLote, ...fertLote].forEach(r => {
-    const e = etapaDe(r);
-    if(e) etapasCompletadas.add(e);
-  });
-
-  // Encontrar la próxima etapa: primer etapa del protocolo que no esté en completadas
-  const etapasOrden = proto.etapas.map(e => e.id);
-  let proximaIdx = -1;
-  for(let i = 0; i < etapasOrden.length; i++){
-    if(!etapasCompletadas.has(etapasOrden[i])){
-      proximaIdx = i;
-      break;
-    }
-  }
-  const proxima = proximaIdx >= 0 ? proto.etapas[proximaIdx] : null;
-
-  // Fecha estimada: si hay siembra registrada, dds relativo. Si no, mes indicativo.
-  let fechaEstimada = null;
-  const siembraReg = [...aplLote, ...fertLote].find(r => {
-    const e = etapaDe(r);
-    return e === "siembra";
-  });
-  if(siembraReg && proxima && proxima.dds > 0){
-    const base = fechaLocal(siembraReg.fecha) || new Date();
-    base.setDate(base.getDate() + proxima.dds);
-    fechaEstimada = base.toISOString().split("T")[0];
-  }
-
-  return {
-    protoKey,
-    proto,
-    etapasCompletadas: [...etapasCompletadas],
-    proximaEtapa: proxima,
-    fechaEstimada,
-    ultimaAplicacion: aplLote[aplLote.length - 1] || null,
-    ultimaFertilizacion: fertLote[fertLote.length - 1] || null,
-    aplTotal: aplLote.length,
-    fertTotal: fertLote.length,
-    ha
-  };
-}
-
-// Genera lista completa de próximas acciones deducidas para todos los lotes
-function generarProximasAcciones(CAMPOS_DATA, INV_26_DATA, PLAN_2627_DATA, APLICACIONES_DATA, FERT_DATA){
-  const acciones = [];
-  CAMPOS_DATA.forEach(campo => {
-    campo.lotes.forEach(lote => {
-      const key = campo.id + "|" + lote.id;
-      const cvInvierno = INV_26_DATA[key];
-      const cvPlan = PLAN_2627_DATA[key];
-      const cultivo = cvInvierno || cvPlan;
-      if(!cultivo) return;
-      const estado = deducirEstadoLote(campo.id, lote.id, lote.ha, cultivo, APLICACIONES_DATA, FERT_DATA);
-      if(!estado || !estado.proximaEtapa) return;
-      acciones.push({
-        campo: campo.id,
-        campoNombre: campo.nombre,
-        lote: lote.label || lote.id,
-        loteId: lote.id,
-        ha: lote.ha,
-        cultivo,
-        etapa: estado.proximaEtapa,
-        fechaEstimada: estado.fechaEstimada,
-        completadas: estado.etapasCompletadas.length,
-        totalEtapas: estado.proto.etapas.length,
-        protoKey: estado.protoKey,
-        color: estado.proto.color,
-      });
-    });
-  });
-  return acciones;
-}
-
-// ============================================================
-// MÓDULO PROTOCOLOS — integrar en GestionCamposSmix.jsx
-// Agregarlo como nueva pestaña "📋 Protocolos"
-// ============================================================
-
-// ── DATOS DE PROTOCOLOS ─────────────────────────────────────
-
-const PROTOCOLOS_DATA = {
-
-  TRIGO: {
-    nombre: "Trigo",
-    color: "#D4AF37",
-    etapas: [
-      {
-        id: "barbecho_largo", label: "Barbecho largo", mes: "Mar–Jun", dds: -90,
-        descripcion: "Inicio barbecho. Mineralización activa con temperatura alta. Mantener lotes limpios desde cosecha del antecesor.",
-        alertas: ["Evitar gramíneas (corta enfermedades: pietin, virosis, ácaros, pulgones)", "Revisar residuos ALS si antecesor fue girasol CL o soja con Spider"],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Metsulfuron", dosis: "7 gr/ha", tipo: "HERBICIDA" },
-              { nombre: "Glifosato", dosis: "1.5–2 L/ha", tipo: "HERBICIDA" },
-              { nombre: "2-4D Advance", dosis: "600–800 cc/ha", tipo: "HERBICIDA" },
-            ]
-          },
-          "Lote sucio / antecesor girasol": {
-            productos: [
-              { nombre: "Rolo (si hay RN seca)", dosis: "—", tipo: "LABOR" },
-              { nombre: "Glifosato", dosis: "2 L/ha", tipo: "HERBICIDA" },
-              { nombre: "Metsulfuron", dosis: "7 gr/ha", tipo: "HERBICIDA" },
-              { nombre: "2-4D Advance", dosis: "1.2 L/ha", tipo: "HERBICIDA" },
-            ]
-          },
-
-
-
-        }
-      },
-      {
-        id: "presiembra", label: "Pre-siembra", mes: "May–Jun", dds: -20,
-        descripcion: "Barbecho presiembra. Control crucíferas con triple resistencia si es necesario.",
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Glifosato", dosis: "1.5 L/ha", tipo: "HERBICIDA" },
-              { nombre: "2-4D Advance", dosis: "600 cc/ha", tipo: "HERBICIDA" },
-              { nombre: "Metsulfuron", dosis: "7 gr/ha", tipo: "HERBICIDA" },
-              { nombre: "Dicamba", dosis: "150 cc/ha", tipo: "HERBICIDA" },
-            ]
-          },
-
-        }
-      },
-      {
-        id: "siembra", label: "Siembra", mes: "Jun", dds: 0,
-        descripcion: "Siembra con fertilización fosforada a la siembra.",
-        alertas: ["Curasemilla recomendado", "Análisis de suelo y semilla previo"],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Siembra fina", dosis: "1 pasada", tipo: "LABOR", costo: 40 },
-              { nombre: "Semilla (B620 u otra)", dosis: "130 kg/ha", tipo: "SEMILLA", costo: 0.26 },
-              { nombre: "Curasemilla Scenic", dosis: "195 cc/100kg", tipo: "CURASEMILLA", costo: 40.9 },
-              { nombre: "Nutrimap (fert. arranque)", dosis: "130 kg/ha", tipo: "FERTILIZANTE", costo: 0.76 },
-            ]
-          },
-
-        }
-      },
-      {
-        id: "fert1", label: "Fertil. N temprana", mes: "Jul", dds: 30,
-        descripcion: "Fertilización nitrogenada temprana. Macollaje. Dejar franja testigo (0N) y franja de suficiencia (2xN).",
-        alertas: ["Inicio monitoreo malezas", "Dejar franja TESTIGO y franja SUFICIENCIA para diagnóstico N"],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Fertilización sólida", dosis: "1 pasada", tipo: "LABOR", costo: 11 },
-              { nombre: "Urea azufrada", dosis: "150 kg/ha", tipo: "FERTILIZANTE", costo: 0.58 },
-            ]
-          },
-        }
-      },
-      {
-        id: "post_herb", label: "Post-emergente", mes: "Jul–Ago", dds: 45,
-        descripcion: "Control hoja ancha post-emergente. Hasta fin de macollaje para hormonales.",
-        alertas: ["Finalización aplicación herbicidas hormonales: OCTUBRE", "No aplicar hormonales con heladas"],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "2-4D Advance", dosis: "300 cc/ha", tipo: "HERBICIDA" },
-              { nombre: "Dicamba", dosis: "120 cc/ha", tipo: "HERBICIDA" },
-            ]
-          },
-
-
-        }
-      },
-      {
-        id: "fert2", label: "Fertil. N 2-nudos", mes: "Oct", dds: 100,
-        descripcion: "Segunda fertilización nitrogenada en encañazón (Z31-Z32).",
-        alertas: ["Recuento de plántulas antes", "Inicio monitoreo enfermedades"],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Fertilización sólida", dosis: "1 pasada", tipo: "LABOR", costo: 11 },
-              { nombre: "Urea", dosis: "100 kg/ha", tipo: "FERTILIZANTE", costo: 0.6 },
-            ]
-          },
-        }
-      },
-      {
-        id: "fung", label: "Fungicida + Insecticida", mes: "Nov", dds: 130,
-        descripcion: "Aplicación fungicida en antesis (Z65). Monitoreo pulgón espiga, oruga militar y desgranadora.",
-        alertas: ["Monitoreo pulgón espiga + oruga militar + oruga desgranadora"],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Fumigación aérea", dosis: "1 pasada", tipo: "LABOR", costo: 11 },
-              { nombre: "Elatus Ace", dosis: "0.5 L/ha", tipo: "FUNGICIDA", costo: 57 },
-              { nombre: "Aceite agrícola", dosis: "250 cc/ha", tipo: "ADITIVO", costo: 3.2 },
-              { nombre: "Fullcontrol", dosis: "5 cc/ha", tipo: "ADITIVO", costo: 25 },
-            ]
-          },
-        }
-      },
-      {
-        id: "cosecha", label: "Cosecha", mes: "Dic", dds: 180,
-        descripcion: "Madurez fisiológica y cosecha.",
-        alertas: [],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Cosecha trigo", dosis: "1 pasada", tipo: "COSECHA", costo: 65 },
-            ]
-          },
-        }
-      },
-    ]
-  },
-
-  CEBADA: {
-    nombre: "Cebada",
-    color: "#C9B458",
-    etapas: [
-      {
-        id: "barbecho_largo", label: "Barbecho largo", mes: "Mar–Jun", dds: -90,
-        descripcion: "Igual que trigo. Sin antecedentes de WSMV en cebada. Más sensible a residuos ALS que el trigo.",
-        alertas: ["Mayor sensibilidad a ALS que trigo", "Si hay gramíneas encañadas en lotes vecinos: cambiar a cebada o controlar"],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Metsulfuron", dosis: "7 gr/ha", tipo: "HERBICIDA" },
-              { nombre: "Glifosato", dosis: "1.5–2 L/ha", tipo: "HERBICIDA" },
-              { nombre: "2-4D Advance", dosis: "600 cc/ha", tipo: "HERBICIDA" },
-            ]
-          },
-
-        }
-      },
-      {
-        id: "siembra", label: "Siembra", mes: "Jun", dds: 0,
-        descripcion: "Siembra cebada. Análisis pureza y poder germinativo de semilla.",
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Siembra fina", dosis: "1 pasada", tipo: "LABOR", costo: 40 },
-              { nombre: "Semilla certificada", dosis: "120–140 kg/ha", tipo: "SEMILLA" },
-              { nombre: "Curasemilla", dosis: "según marbete", tipo: "CURASEMILLA" },
-              { nombre: "Fertilizante arranque", dosis: "100–130 kg/ha MAP", tipo: "FERTILIZANTE" },
-            ]
-          },
-        }
-      },
-      {
-        id: "fert1", label: "Fertil. N temprana", mes: "Jul", dds: 30,
-        descripcion: "Fertilización N en macollaje temprano.",
-        alertas: ["Franja testigo y suficiencia obligatoria"],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Urea azufrada", dosis: "150 kg/ha", tipo: "FERTILIZANTE", costo: 0.58 },
-            ]
-          },
-        }
-      },
-      {
-        id: "fert2", label: "Fertil. N 2-nudos", mes: "Ago–Sep", dds: 75,
-        descripcion: "Segunda dosis de N en encañazón.",
-        alertas: [],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Urea", dosis: "80–100 kg/ha", tipo: "FERTILIZANTE", costo: 0.6 },
-            ]
-          },
-        }
-      },
-      {
-        id: "fung", label: "Fungicida antesis", mes: "Oct", dds: 100,
-        descripcion: "Tebuconazole en antesis. Cebada es más sensible a Fusarium que trigo.",
-        alertas: ["No Hussar en cebada", "Axial y Merit funcionan en avena"],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Fumigación aérea", dosis: "1 pasada", tipo: "LABOR", costo: 11 },
-              { nombre: "Tebuconazole", dosis: "0.5 L/ha", tipo: "FUNGICIDA" },
-              { nombre: "Insecticida", dosis: "según monitoreo", tipo: "INSECTICIDA" },
-            ]
-          },
-        }
-      },
-      {
-        id: "cosecha", label: "Cosecha", mes: "Nov–Dic", dds: 150,
-        descripcion: "Madurez fisiológica. Cosecha cebada.",
-        alertas: [],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Cosecha cebada", dosis: "1 pasada", tipo: "COSECHA", costo: 65 },
-            ]
-          },
-        }
-      },
-    ]
-  },
-
-  GIRASOL: {
-    nombre: "Girasol",
-    color: "#D97B29",
-    etapas: [
-      {
-        id: "barbecho_largo", label: "Barbecho largo", mes: "Mar–Jun", dds: -90,
-        descripcion: "Barbecho largo. Control de malezas temprano. Reserva de híbridos.",
-        alertas: ["Definir híbrido: Convencional vs CL (Clearfield)", "Reservar híbridos en Mar–Jun"],
-        malezas: {
-          "Híbrido convencional": {
-            productos: [
-              { nombre: "Glifosato", dosis: "1.5–2 L/ha", tipo: "HERBICIDA" },
-              { nombre: "2-4D", dosis: "600 cc/ha", tipo: "HERBICIDA" },
-              { nombre: "Atrazina 90%", dosis: "1 kg/ha", tipo: "HERBICIDA" },
-              { nombre: "Aceite metilado", dosis: "400 cc/ha", tipo: "ADITIVO" },
-            ]
-          },
-          "Híbrido CL (Clearfield)": {
-            productos: [
-              { nombre: "Glifosato", dosis: "1.5–2 L/ha", tipo: "HERBICIDA" },
-              { nombre: "2-4D", dosis: "600 cc/ha", tipo: "HERBICIDA" },
-              { nombre: "Atrazina 90%", dosis: "1 kg/ha", tipo: "HERBICIDA" },
-              { nombre: "Aceite metilado", dosis: "400 cc/ha", tipo: "ADITIVO" },
-              { nombre: "Control RG (manchones): Cletodim", dosis: "500 cc/ha + aceite", tipo: "HERBICIDA" },
-            ]
-          },
-        }
-      },
-      {
-        id: "reseteo", label: "Reseteo crucíferas/RG", mes: "Ago–Sep", dds: -25,
-        descripcion: "Segunda pasada de barbecho. Quemado de verdeo invernal si lo hay.",
-        alertas: ["Monitoreo bicho bolita y babosa (30 días antes siembra)", "Análisis P y N (15 días antes siembra)"],
-        malezas: {
-          "Híbrido convencional": {
-            productos: [
-              { nombre: "Glifosato", dosis: "1.5 L/ha", tipo: "HERBICIDA" },
-              { nombre: "2-4D", dosis: "600 cc/ha", tipo: "HERBICIDA" },
-              { nombre: "Carfentrazone", dosis: "30 cc/ha", tipo: "HERBICIDA" },
-              { nombre: "Cletodim", dosis: "500 cc/ha", tipo: "HERBICIDA" },
-              { nombre: "Aceite metilado soja", dosis: "400 cc/ha", tipo: "ADITIVO" },
-            ]
-          },
-          "Híbrido CL (Clearfield)": {
-            productos: [
-              { nombre: "Glifosato", dosis: "1.5 L/ha", tipo: "HERBICIDA" },
-              { nombre: "2-4D", dosis: "600 cc/ha", tipo: "HERBICIDA" },
-              { nombre: "Carfentrazone", dosis: "30 cc/ha", tipo: "HERBICIDA" },
-              { nombre: "Cletodim", dosis: "500 cc/ha", tipo: "HERBICIDA" },
-              { nombre: "Aceite metilado soja", dosis: "400 cc/ha", tipo: "ADITIVO" },
-            ]
-          },
-        }
-      },
-      {
-        id: "siembra", label: "Siembra", mes: "Oct–Nov", dds: 0,
-        descripcion: "Siembra girasol. Ventana óptima 25/10 al 10/11.",
-        alertas: ["Contactar sembrador 45 días antes", "Control siembra y GPS del lote", "Asegurar cultivo granizo/viento en V2–V4"],
-        malezas: {
-          "Híbrido convencional": {
-            productos: [
-              { nombre: "Siembra gruesa", dosis: "1 pasada", tipo: "LABOR", costo: 40 },
-              { nombre: "Semilla convencional", dosis: "4–5 kg/ha", tipo: "SEMILLA" },
-              { nombre: "Curasemilla (insecticida)", dosis: "según marbete", tipo: "CURASEMILLA" },
-            ]
-          },
-          "Híbrido CL (Clearfield)": {
-            productos: [
-              { nombre: "Siembra gruesa", dosis: "1 pasada", tipo: "LABOR", costo: 40 },
-              { nombre: "Semilla CL (syn 3970 / adv 5310)", dosis: "4–5 kg/ha", tipo: "SEMILLA" },
-              { nombre: "Curasemilla (insecticida)", dosis: "según marbete", tipo: "CURASEMILLA" },
-            ]
-          },
-        }
-      },
-      {
-        id: "pre_emergencia", label: "Pre-emergencia", mes: "Nov", dds: 5,
-        descripcion: "Control de malezas en pre-emergencia del cultivo.",
-        alertas: ["Monitoreo de nacimientos en V2"],
-        malezas: {
-          "Híbrido convencional": {
-            productos: [
-              { nombre: "S-metolacloro", dosis: "0.9 L/ha", tipo: "HERBICIDA", nota: "Residual gramíneas" },
-              { nombre: "Diflufenican", dosis: "150–200 cc/ha", tipo: "HERBICIDA" },
-              { nombre: "Fluroxipir", dosis: "350–500 cc/ha", tipo: "HERBICIDA" },
-            ]
-          },
-          "Híbrido CL (Clearfield)": {
-            productos: [
-              { nombre: "S-metolacloro", dosis: "0.9 L/ha", tipo: "HERBICIDA" },
-              { nombre: "Diflufenican", dosis: "150–200 cc/ha", tipo: "HERBICIDA" },
-            ]
-          },
-        }
-      },
-      {
-        id: "fert_n", label: "Fertilización N", mes: "Nov", dds: 20,
-        descripcion: "Fertilización nitrogenada a los 20 DDS (FASA). Recuento de plantas.",
-        alertas: ["Recuento plantas en V2", "Estimación rinde en MF"],
-        malezas: {
-          "Híbrido convencional": {
-            productos: [
-              { nombre: "Fertilización sólida", dosis: "1 pasada", tipo: "LABOR" },
-              { nombre: "Urea", dosis: "80–120 kg/ha", tipo: "FERTILIZANTE" },
-            ]
-          },
-          "Híbrido CL (Clearfield)": {
-            productos: [
-              { nombre: "Fertilización sólida", dosis: "1 pasada", tipo: "LABOR" },
-              { nombre: "Urea", dosis: "80–120 kg/ha", tipo: "FERTILIZANTE" },
-            ]
-          },
-        }
-      },
-      {
-        id: "post_emergencia", label: "Post-emergente", mes: "Nov", dds: 25,
-        descripcion: "Control post-emergente a los 25 DDS. El Clearsol SOLO para híbridos CL.",
-        alertas: ["Clearsol (Imazapir) SOLO en CL Clearfield", "Monitoreo enfermedades R1–R3", "Monitoreo plagas tardías BF–R3"],
-        malezas: {
-          "Híbrido convencional": {
-            productos: [
-              { nombre: "Fluroxipir 48", dosis: "350–500 cc/ha", tipo: "HERBICIDA" },
-              { nombre: "Diflufenican 50%", dosis: "150–200 cc/ha", tipo: "HERBICIDA" },
-              { nombre: "Aceite metilado", dosis: "400 cc/ha", tipo: "ADITIVO" },
-            ]
-          },
-          "Híbrido CL (Clearfield)": {
-            productos: [
-              { nombre: "Clearsol (Imazapir)", dosis: "80 cc/ha", tipo: "HERBICIDA", nota: "SOLO en híbridos CL. Con aceite metilado" },
-              { nombre: "Aceite metilado", dosis: "500 cc/ha", tipo: "ADITIVO" },
-            ]
-          },
-        }
-      },
-      {
-        id: "cosecha", label: "Cosecha", mes: "Feb–Mar", dds: 125,
-        descripcion: "Monitoreo pre-cosecha. Control de cosecha.",
-        alertas: ["Monitoreo pre-cosecha en MF"],
-        malezas: {
-          "Híbrido convencional": {
-            productos: [
-              { nombre: "Cosecha girasol", dosis: "1 pasada", tipo: "COSECHA", costo: 65 },
-            ]
-          },
-          "Híbrido CL (Clearfield)": {
-            productos: [
-              { nombre: "Cosecha girasol", dosis: "1 pasada", tipo: "COSECHA", costo: 65 },
-            ]
-          },
-        }
-      },
-    ]
-  },
-
-  SOJA: {
-    nombre: "Soja",
-    color: "#43A047",
-    etapas: [
-      {
-        id: "barbecho", label: "Barbecho", mes: "Abr–Sep", dds: -90,
-        descripcion: "Barbecho largo. Estrategia según maleza problema del lote.",
-        alertas: ["No usar diclosulam si antecesor usó fomesafen (limita rotación a fina y maíz temprano)", "Fomesafen limita rotación a fina, maíz temprano y girasol el año siguiente"],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Glifosato", dosis: "1.5–2 L/ha", tipo: "HERBICIDA" },
-              { nombre: "2-4D Advance", dosis: "800 cc/ha", tipo: "HERBICIDA" },
-              { nombre: "Atrazina 90%", dosis: "1 kg/ha", tipo: "HERBICIDA" },
-              { nombre: "Dicamba", dosis: "150 cc (si hace falta)", tipo: "HERBICIDA" },
-            ]
-          },
-
-
-          "Morenita (Gomphrena)": {
-            productos: [
-              { nombre: "Glifosato", dosis: "2 L/ha", tipo: "HERBICIDA" },
-              { nombre: "2-4D Advance", dosis: "800 cc/ha", tipo: "HERBICIDA" },
-              { nombre: "Fluroxipir", dosis: "350 cc/ha", tipo: "HERBICIDA", nota: "7 días pre-siembra" },
-              { nombre: "Atrazina 90%", dosis: "1 kg/ha", tipo: "HERBICIDA" },
-            ]
-          },
-        }
-      },
-      {
-        id: "presiembra", label: "Pre-siembra", mes: "Oct–Nov", dds: -7,
-        descripcion: "Quemado presiembra con residual.",
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Glifosato", dosis: "1.3–1.5 L/ha", tipo: "HERBICIDA" },
-              { nombre: "Sulfentrazone", dosis: "300–400 cc/ha", tipo: "HERBICIDA" },
-              { nombre: "2-4D Advance", dosis: "500 cc/ha", tipo: "HERBICIDA" },
-            ]
-          },
-
-        }
-      },
-      {
-        id: "siembra", label: "Siembra", mes: "Oct–Nov", dds: 0,
-        descripcion: "Siembra soja. Soja temprana hasta 20/10, tardía post 20/10.",
-        alertas: ["Zona CREA: siembra 15/10 en hileras estrechas", "Lotes con escapes de YC: hileras estrechas o pasar a noviembre"],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Siembra gruesa", dosis: "1 pasada", tipo: "LABOR", costo: 40 },
-              { nombre: "Semilla (DM46i20 u otra)", dosis: "80–90 kg/ha", tipo: "SEMILLA", costo: 0.44 },
-              { nombre: "Inoculante (Rizopack)", dosis: "0.03 pack/ha", tipo: "INOCULANTE", costo: 240 },
-            ]
-          },
-        }
-      },
-      {
-        id: "post1", label: "Post 1 (V2–V3)", mes: "Nov–Dic", dds: 15,
-        descripcion: "Primera post-emergente. Glifosato + residual.",
-        alertas: [],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Pulverización terrestre", dosis: "1 pasada", tipo: "LABOR", costo: 5.5 },
-              { nombre: "Glifosato", dosis: "1.3 kg/ha", tipo: "HERBICIDA", costo: 6.7 },
-              { nombre: "Sulfentrazone", dosis: "300 cc/ha", tipo: "HERBICIDA" },
-              { nombre: "2-4D Advance", dosis: "800 cc/ha", tipo: "HERBICIDA" },
-            ]
-          },
-          "Gramíneas": {
-            productos: [
-              { nombre: "Glifosato", dosis: "1.3 kg/ha", tipo: "HERBICIDA" },
-              { nombre: "Cletodim", dosis: "500 cc/ha + aceite", tipo: "HERBICIDA" },
-            ]
-          },
-        }
-      },
-      {
-        id: "post2", label: "Post 2 (R1)", mes: "Ene", dds: 60,
-        descripcion: "Segunda post con insecticida si hay oruga.",
-        alertas: ["Ampligo si hay oruga / trips"],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Pulverización terrestre", dosis: "1 pasada", tipo: "LABOR", costo: 5.5 },
-              { nombre: "Glifosato", dosis: "1.3 kg/ha", tipo: "HERBICIDA" },
-              { nombre: "Ampligo (si hay oruga)", dosis: "45 cc/ha", tipo: "INSECTICIDA", costo: 130 },
-            ]
-          },
-        }
-      },
-      {
-        id: "cosecha", label: "Cosecha", mes: "Mar–Abr", dds: 130,
-        descripcion: "Cosecha soja.",
-        alertas: [],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Cosecha soja", dosis: "1 pasada", tipo: "COSECHA", costo: 70 },
-            ]
-          },
-        }
-      },
-    ]
-  },
-
-  MAIZ: {
-    nombre: "Maíz",
-    color: "#E8B83E",
-    etapas: [
-      {
-        id: "barbecho", label: "Barbecho", mes: "Abr–Sep", dds: -90,
-        descripcion: "Barbecho con atrazina como base residual. Controlar gramíneas y crucíferas.",
-        alertas: ["Atrazina es la base residual del sistema", "En maíz tardío (21N): agregar Terbutilazina en pre"],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Glifosato granulado", dosis: "1.7 L/ha", tipo: "HERBICIDA" },
-              { nombre: "2-4D 97%", dosis: "600 cc/ha", tipo: "HERBICIDA" },
-              { nombre: "Dicamba", dosis: "200 cc/ha", tipo: "HERBICIDA" },
-              { nombre: "Atrazina 90%", dosis: "1 kg/ha", tipo: "HERBICIDA" },
-              { nombre: "Aceite metilado", dosis: "400 cc/ha", tipo: "ADITIVO" },
-              { nombre: "Ligier PH Bio", dosis: "400 cc/ha", tipo: "ADITIVO" },
-            ]
-          },
-        }
-      },
-      {
-        id: "presiembra", label: "Pre-siembra", mes: "Sep–Oct", dds: -15,
-        descripcion: "Repaso con atrazina. Suelo limpio a la siembra.",
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Glifosato", dosis: "1.5 L/ha", tipo: "HERBICIDA" },
-              { nombre: "Atrazina 90%", dosis: "1 kg/ha", tipo: "HERBICIDA" },
-            ]
-          },
-          "Maíz tardío (doble cultivo)": {
-            productos: [
-              { nombre: "Glifosato", dosis: "1.5 L/ha", tipo: "HERBICIDA" },
-              { nombre: "Terbutilazina", dosis: "1.5 L/ha", tipo: "HERBICIDA" },
-              { nombre: "Atrazina 90%", dosis: "1 kg/ha", tipo: "HERBICIDA" },
-            ]
-          },
-        }
-      },
-      {
-        id: "siembra", label: "Siembra", mes: "Oct–Nov", dds: 0,
-        descripcion: "Siembra maíz temprano. Tardío (doble cultivo): Dic–Ene.",
-        alertas: ["Fertilización N + fósforo a la siembra", "Semilla tratada con Concep si se usa atrazina post"],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Siembra gruesa", dosis: "1 pasada", tipo: "LABOR", costo: 40 },
-              { nombre: "Semilla maíz (DK/Dekalb u otra)", dosis: "80.000 sem/ha", tipo: "SEMILLA" },
-              { nombre: "Fertilizante arranque (MAP)", dosis: "100–150 kg/ha", tipo: "FERTILIZANTE" },
-              { nombre: "Inoculante (Nitrobiot FULL)", dosis: "según marbete", tipo: "INOCULANTE" },
-            ]
-          },
-        }
-      },
-      {
-        id: "post", label: "Post-emergente", mes: "Nov–Dic", dds: 25,
-        descripcion: "Control post-emergente V3–V6. Atención arañuela.",
-        alertas: ["Atención arañuela en estrés hídrico", "Ampligo (0.1 L) según monitoreo de oruga / trips"],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Pulverización terrestre", dosis: "1 pasada", tipo: "LABOR", costo: 5.5 },
-              { nombre: "Atrazina 90%", dosis: "1 kg/ha", tipo: "HERBICIDA" },
-              { nombre: "Ampligo (si hay plagas)", dosis: "100 cc/ha", tipo: "INSECTICIDA", costo: 130 },
-            ]
-          },
-        }
-      },
-      {
-        id: "cosecha", label: "Cosecha", mes: "Mar–Abr", dds: 150,
-        descripcion: "Cosecha maíz.",
-        alertas: [],
-        malezas: {
-          "Sin maleza problema": {
-            productos: [
-              { nombre: "Cosecha maíz", dosis: "1 pasada", tipo: "COSECHA", costo: 65 },
-            ]
-          },
-        }
-      },
-    ]
-  },
-};
-
-// Colores por tipo de producto
-const TIPO_COLOR = {
-  HERBICIDA: "#E08A2B",
-  FUNGICIDA: "#9C6FD4",
-  INSECTICIDA: "#C0392B",
-  FERTILIZANTE: "#3B82C4",
-  FERTILIZACION: "#3B82C4",
-  ADITIVO: "#78909C",
-  SEMILLA: "#43A047",
-  CURASEMILLA: "#26A69A",
-  INOCULANTE: "#26A69A",
-  LABOR: "#2E2A22",
-  COSECHA: "#795548",
-};
-const tipoBadge = tipo => TIPO_COLOR[tipo?.toUpperCase()] || "#B5AF9D";
-
-// ── COMPONENTE PROTOCOLOS ────────────────────────────────────
-function VistaProtocolos() {
-  const [cultivo, setCultivo] = useState("TRIGO");
-  const [malezaSel, setMalezaSel] = useState("Sin maleza problema");
-  const [etapaAbierta, setEtapaAbierta] = useState(null);
-
-  const proto = PROTOCOLOS_DATA[cultivo];
-  if (!proto) return null;
-
-  // Obtener todas las malezas únicas del protocolo
-  const todasMalezas = [...new Set(
-    proto.etapas.flatMap(e => Object.keys(e.malezas))
-  )];
-
-  // Si la maleza seleccionada no existe en el cultivo actual, resetear
-  const malezaActual = todasMalezas.includes(malezaSel) ? malezaSel : todasMalezas[0];
-
-  const TINTA = "#2E2A22";
-  const CREMA = "#F8F5EC";
-  const FONDO = "#EFEBDF";
-  const caja = { background: CREMA, border: `1.5px solid ${TINTA}`, borderRadius: 12, padding: "14px 16px" };
-  const chip = (a, color) => ({
-    padding: "6px 13px", fontSize: 12.5, fontWeight: 700, cursor: "pointer", borderRadius: 20,
-    border: `1.5px solid ${color || TINTA}`,
-    background: a ? (color || TINTA) : "transparent",
-    color: a ? "#fff" : (color || TINTA),
-    fontFamily: "inherit", whiteSpace: "nowrap",
-  });
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
-      {/* Selector cultivo */}
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-        <span style={{ fontSize: 13, opacity: 0.6, marginRight: 4 }}>Cultivo:</span>
-        {Object.entries(PROTOCOLOS_DATA).map(([key, p]) => (
-          <button key={key} style={chip(cultivo === key, p.color)} onClick={() => { setCultivo(key); setEtapaAbierta(null); }}>
-            {p.nombre}
-          </button>
-        ))}
-      </div>
-
-      {/* Selector maleza */}
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-        <span style={{ fontSize: 13, opacity: 0.6, marginRight: 4 }}>Situación:</span>
-        {todasMalezas.map(m => (
-          <button key={m} style={chip(malezaActual === m)} onClick={() => setMalezaSel(m)}>
-            {m}
-          </button>
-        ))}
-      </div>
-
-      {/* Timeline */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-        {proto.etapas.map((etapa, idx) => {
-          const productos = etapa.malezas[malezaActual] || etapa.malezas[Object.keys(etapa.malezas)[0]];
-          const abierta = etapaAbierta === etapa.id;
-          const costoTotal = (productos?.productos || []).reduce((s, p) => s + (p.costo && p.dosis && !isNaN(parseFloat(p.dosis)) ? p.costo * parseFloat(p.dosis) : (p.costo || 0)), 0);
-
-          return (
-            <div key={etapa.id}>
-              {/* Conector vertical */}
-              {idx > 0 && (
-                <div style={{ display: "flex", alignItems: "stretch", gap: 0, height: 24 }}>
-                  <div style={{ width: 36, display: "flex", justifyContent: "center" }}>
-                    <div style={{ width: 3, background: proto.color, opacity: 0.4, flex: 1 }} />
-                  </div>
-                </div>
-              )}
-
-              {/* Tarjeta etapa */}
-              <div style={{ display: "flex", gap: 0, alignItems: "flex-start" }}>
-                {/* Ícono timeline */}
-                <div style={{ width: 36, display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: proto.color, border: `3px solid ${CREMA}`, boxShadow: `0 0 0 2px ${proto.color}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#fff" }}>
-                    {idx + 1}
-                  </div>
-                </div>
-
-                {/* Contenido */}
-                <div style={{ flex: 1, marginLeft: 12 }}>
-                  <div onClick={() => setEtapaAbierta(abierta ? null : etapa.id)}
-                    style={{ ...caja, cursor: "pointer", padding: "12px 14px", borderLeft: `5px solid ${proto.color}` }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-                      <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <span style={{ fontWeight: 700, fontSize: 15 }}>{etapa.label}</span>
-                          <span style={{ fontSize: 11.5, background: "#E5E0D0", borderRadius: 5, padding: "2px 7px", fontWeight: 600 }}>{etapa.mes}</span>
-                          {etapa.dds !== undefined && (
-                            <span style={{ fontSize: 11, opacity: 0.5 }}>DDS {etapa.dds >= 0 ? `+${etapa.dds}` : etapa.dds}</span>
-                          )}
-                        </div>
-                        <div style={{ fontSize: 12.5, opacity: 0.7, marginTop: 3 }}>{etapa.descripcion}</div>
-                      </div>
-                      <span style={{ fontSize: 18, opacity: 0.4, flexShrink: 0 }}>{abierta ? "−" : "+"}</span>
-                    </div>
-
-                    {/* Alertas */}
-                    {etapa.alertas?.length > 0 && (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 8 }}>
-                        {etapa.alertas.map((a, i) => (
-                          <span key={i} style={{ fontSize: 11.5, background: "#FFF8E1", border: "1px solid #F9A825", borderRadius: 5, padding: "2px 8px", color: "#795548" }}>
-                            ⚠ {a}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Detalle expandido */}
-                  {abierta && (
-                    <div style={{ background: "#FFFDF7", border: `1px solid #D8D2C0`, borderTop: "none", borderRadius: "0 0 10px 10px", padding: "12px 14px" }}>
-                      <div style={{ fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", opacity: 0.5, marginBottom: 10 }}>
-                        Productos — {malezaActual}
-                      </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-                        {(productos?.productos || []).map((p, i) => (
-                          <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "8px 10px", background: "#fff", border: "1px solid #EEE9DC", borderRadius: 8 }}>
-                            <span style={{ fontSize: 10.5, fontWeight: 700, color: "#fff", background: tipoBadge(p.tipo), borderRadius: 5, padding: "2px 7px", flexShrink: 0, marginTop: 1 }}>
-                              {p.tipo}
-                            </span>
-                            <div style={{ flex: 1 }}>
-                              <div style={{ fontWeight: 700, fontSize: 13.5 }}>{p.nombre}</div>
-                              <div style={{ fontSize: 12.5, opacity: 0.7, marginTop: 1 }}>
-                                <span style={{ fontWeight: 600 }}>{p.dosis}</span>
-                                {p.nota && <span style={{ marginLeft: 8, fontStyle: "italic", opacity: 0.8 }}>· {p.nota}</span>}
-                              </div>
-                            </div>
-                            {p.costo && (
-                              <span style={{ fontSize: 12, fontWeight: 700, color: "#3B82C4", flexShrink: 0 }}>
-                                US$ {p.costo}/u
-                              </span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div style={{ fontSize: 11.5, opacity: 0.5, marginTop: 4 }}>
-        Fuentes: Protocolo CREA Trigo/Cebada 2023 · Protocolo Girasol 2023 · Manejo malezas CREA. Dosis referenciales — ajustar según análisis de suelo y monitoreo.
-      </div>
-    </div>
-  );
-}
 // Pasa a minúsculas y saca tildes, para buscar sin que importen mayúsculas ni acentos
-const normBusca = s => String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+const normBusca = s => String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 
 // Selector de producto con buscador: al escribir se filtra la lista ("glifo" → todos los glifosatos).
 // Varias palabras se combinan: "glifo box" encuentra "GLIFOSATO GRANULADO LT BOX".
@@ -2605,6 +1703,549 @@ function BuscadorProducto({valor, lista, color, negrita, onElegir, onNuevo}){
   );
 }
 
+// ============================================================
+// PROTOCOLO DE RESIDUALES — editable desde la pestaña "Protocolo"
+// Cada cultivo tiene pasos con ventana (dd/mm) y "clave": los activos que
+// tienen que aparecer en la planilla para dar el paso por hecho.
+// En la clave, "+" = y, "|" = o. Ej: "flurocloridona + metolacloro | paraquat + sulfentrazone"
+// ============================================================
+const PROTOCOLO_BASE = {
+  version: 1,
+  campania: "26-27",
+  criterios: [
+    "Suelo limpio: si hay malezas nacidas, el residual va con quemante (glifosato/ControlMax + 2,4-D, o paraquat 2 L).",
+    "Coadyuvante: aceite sólo cuando la mezcla lleva un foliar; un residual solo no lo necesita.",
+    "Activación: sin 10–15 mm dentro de los 10–15 días, el residual no carga; el siguiente se adelanta.",
+    "Dosis: en L o kg de formulado por ha (sulfentrazone 50%, flurocloridona 25%, atrazina 90%, diflufenican 50%, flumioxazin 48%).",
+  ].join("\n"),
+  cultivos: [
+    {id:"girasol", nombre:"Girasol", aplicaA:"GIRASOL, *-GIRASOL", pasos:[
+      {id:"girasol-1", nombre:"Barbecho largo", desde:"10/06", hasta:"15/07", clave:"diflufenican",
+        mezcla:"Glifosato 1,5 kg + 2,4-D 1,0 L + Fluroxipir 0,3 L + Diflufenican 0,2 L"},
+      {id:"girasol-2", nombre:"Barbecho intermedio", desde:"01/09", hasta:"25/09", clave:"sulfentrazone",
+        mezcla:"ControlMax 1,5 + 2,4-D 0,8–1,0 L + Fluroxipir 0,3 L + Sulfentrazone 0,3 L"},
+      {id:"girasol-3", nombre:"Presiembra / preemergencia", desde:"05/10", hasta:"25/10", clave:"flurocloridona + metolacloro | paraquat + sulfentrazone",
+        mezcla:"Paraquat 2 L (o glifosato 1,5) + Flurocloridona 0,5 L + S-metolacloro 0,65–0,9 L (+ Ampligo 0,1 L si hay isoca). Variante sin flurocloridona: Paraquat 2 L + Sulfentrazone 0,25 L.",
+        nota:"Hasta 72 h post siembra. Si el lote no recibió el paso 2, sumar sulfentrazone 0,2 L."},
+    ]},
+    {id:"soja1", nombre:"Soja de primera", aplicaA:"SOJA", pasos:[
+      {id:"soja1-1", nombre:"Barbecho intermedio", desde:"10/09", hasta:"10/10", clave:"clorimuron",
+        mezcla:"ControlMax 2 + 2,4-D 1,5 L + Dicamba 0,1 L + Clorimuron 75% 10 g (o clorimuron 25% 40–50 g)"},
+      {id:"soja1-2", nombre:"Preemergencia", desde:"25/10", hasta:"15/11", clave:"flumioxazin + metolacloro | fierce | texaro",
+        mezcla:"Glifosato 1,5 + Flumioxazin 0,15 L + S-metolacloro 0,9 L + Sulfentrazone 0,35 L (+ 2,4-D 0,3 L si hay nacidas). Variantes: Fierce RM 0,4 L · Texaro 36 g + Sulfentrazone 0,2 L.",
+        nota:"Sin atrazina en ningún paso."},
+    ]},
+    {id:"soja2", nombre:"Soja de segunda", aplicaA:"*-SOJA, SOJA 2", pasos:[
+      {id:"soja2-1", nombre:"A la siembra", desde:"10/12", hasta:"20/12", clave:"sulfentrazone + metolacloro | heat + metolacloro",
+        mezcla:"Glifosato 1,7 + 2,4-D 0,3 L + Sulfentrazone 0,3 L + S-metolacloro 0,8 L. Alternativa: Heat 35 g + S-metolacloro 0,9 L.", hastaSiembra:true},
+    ]},
+    {id:"maiz1", nombre:"Maíz temprano", aplicaA:"MAIZ", pasos:[
+      {id:"maiz1-1", nombre:"Barbecho con atrazina", desde:"10/06", hasta:"25/09", clave:"atrazina",
+        mezcla:"Junio: Glifosato 1,5 + 2,4-D 1,0 L + Dicamba 0,2 L + Atrazina 1 kg. Si no entró en junio, en septiembre: ControlMax 1,5–2 + 2,4-D 0,8–1,2 L + Dicamba 0,1–0,13 L + Atrazina 1 kg."},
+      {id:"maiz1-2", nombre:"Preemergencia", desde:"01/10", hasta:"15/10", clave:"metolacloro + sulfentrazone | terbutilazina",
+        mezcla:"ControlMax 1,2 + S-metolacloro 0,8 L + Sulfentrazone 0,3 L (+ carfentrazone 75 cc en cabeceras). Variante: Terbutilazina 1 L.",
+        nota:"A la siembra (1–15 oct).", hastaSiembra:true},
+    ]},
+    {id:"maiz2", nombre:"Maíz tardío", aplicaA:"MAIZ 2, MAIZ T, *-MAIZ", pasos:[
+      {id:"maiz2-1", nombre:"Barbecho", desde:"15/09", hasta:"20/10", clave:"atrazina",
+        mezcla:"Glifosato 1,5–2 + 2,4-D 0,5–1 L + Dicamba 0,2 L + Atrazina 1 kg"},
+      {id:"maiz2-2", nombre:"Barbecho intermedio", desde:"10/11", hasta:"25/11", clave:"atrazina | sulfentrazone",
+        mezcla:"Glifosato 1,8–2,2 + 2,4-D 0,5–0,8 L + Atrazina 0,5 kg o Sulfentrazone 0,2 L (+ Haloxifop 0,08 L si hay gramíneas)"},
+      {id:"maiz2-3", nombre:"Preemergencia", desde:"25/11", hasta:"15/12", clave:"metolacloro | adengo | terbutilazina",
+        mezcla:"A: S-metolacloro 1 L + Atrazina 1 kg + Sulfentrazone 0,2 L · B: Adengo 0,3 L + Terbutilazina 1–1,5 L", hastaSiembra:true},
+      {id:"maiz2-4", nombre:"Post temprano (V2–V4)", desde:"20/12", hasta:"15/01", clave:"atrazina | laudis | brucia",
+        mezcla:"Glifosato 1,7–2 + 2,4-D 0,3–0,5 L + Atrazina 1–1,5 kg · variantes Laudis 0,3 L o Brucia 90 cc + Atrazina 1 kg",
+        nota:"Tope: no más de 2 kg de atrazina por lote en la campaña si el lote puede ir a soja la siguiente."},
+    ]},
+    {id:"sorgo", nombre:"Sorgo", aplicaA:"SORGO, *-SORGO", pasos:[
+      {id:"sorgo-1", nombre:"Barbecho", desde:"20/09", hasta:"20/10", clave:"atrazina",
+        mezcla:"ControlMax 2 + 2,4-D 1,2–1,3 L + Dicamba 0,1–0,13 L + Atrazina 1 kg"},
+      {id:"sorgo-2", nombre:"Preemergencia", desde:"15/11", hasta:"15/12", clave:"metolacloro",
+        mezcla:"S-metolacloro 0,8 L + Atrazina 0,5 kg",
+        nota:"A la siembra, sólo con semilla curada con protector (Concep).", hastaSiembra:true},
+    ]},
+    {id:"fina", nombre:"Fina (cebada / trigo)", aplicaA:"CEBADA, TRIGO, CEBADA-*, TRIGO-*", pasos:[
+      {id:"fina-1", nombre:"Presiembra de otoño", desde:"15/05", hasta:"31/05", clave:"flurocloridona",
+        mezcla:"Glifosato 1–2 + 2,4-D 0,5–0,8 L + Flurocloridona 1 L"},
+    ]},
+    {id:"cobertura", nombre:"Coberturas (vicia + triticale)", aplicaA:"", pasos:[
+      {id:"cobertura-1", nombre:"Presiembra", desde:"20/04", hasta:"30/04", clave:"terbutilazina",
+        mezcla:"Glifosato 1,5 + Terbutilazina 2 L"},
+    ]},
+    {id:"pastura", nombre:"Pasturas / alfalfa (implantación)", aplicaA:"", pasos:[
+      {id:"pastura-1", nombre:"Presiembra", desde:"01/03", hasta:"30/04", clave:"flumetsulam",
+        mezcla:"Glifosato 1,7–1,8 + 2,4-D 0,5 L + Flumetsulam 0,25–0,3 L"},
+    ]},
+  ],
+};
+
+// Nombres comerciales con los que cada activo aparece en la planilla
+const SINONIMOS_ACTIVO = {
+  "metolacloro": ["metolaclor", "dual"],
+  "s-metolacloro": ["metolaclor", "dual"],
+  "atrazina": ["atrazina", "gesaprim"],
+  "diflufenican": ["diflufenican", "brodal"],
+  "flurocloridona": ["flurocloridona", "rainbow", "racer"],
+  "sulfentrazone": ["sulfentrazone", "capaz", "authority"],
+  "flumioxazin": ["flumioxazin", "sumisoya", "flumyzin"],
+  "clorimuron": ["clorimuron", "classic"],
+  "terbutilazina": ["terbutilazina", "terbyne"],
+  "paraquat": ["paraquat", "gramoxone"],
+  "heat": ["heat", "saflufenacil"],
+  "flumetsulam": ["flumetsulam", "flumetsulan"],
+  "laudis": ["laudis", "tembotrione"],
+  "carfentrazone": ["carfentrazone", "shark"],
+};
+
+const DIA_MS = 86400000;
+
+// "flurocloridona + metolacloro | paraquat + sulfentrazone" → [["flurocloridona","metolacloro"],["paraquat","sulfentrazone"]]
+const parseClave = clave => String(clave||"").split(/\||\bo\b/i)
+  .map(alt => alt.split("+").map(t => normBusca(t).trim()).filter(Boolean))
+  .filter(alt => alt.length);
+
+const productosTienen = (productos, termino) => {
+  const variantes = SINONIMOS_ACTIVO[termino] || [termino.replace(/^s-/, "")];
+  return productos.some(p => { const n = normBusca(p); return variantes.some(v => n.includes(v)); });
+};
+const cumpleClave = (productos, alternativas) =>
+  alternativas.length > 0 && alternativas.some(alt => alt.every(t => productosTienen(productos, t)));
+
+// "26-27" + "10/06" → 10 jun 2026; enero y febrero caen en el segundo año
+const fechaDelPaso = (ddmm, campania) => {
+  const m = String(ddmm||"").match(/^(\d{1,2})\/(\d{1,2})$/);
+  if(!m) return null;
+  const y1 = 2000 + (parseInt(String(campania||"").split("-")[0], 10) || 26);
+  const dia = parseInt(m[1], 10), mes = parseInt(m[2], 10);
+  return new Date(mes >= 3 ? y1 : y1 + 1, mes - 1, dia);
+};
+
+const normCultivo = cv => normBusca(cv).toUpperCase().replace(/\s+/g, " ").trim();
+const cultivoCoincide = (aplicaA, cv) => {
+  const c = normCultivo(cv);
+  if(!c) return false;
+  return String(aplicaA||"").split(",").map(p => normCultivo(p)).filter(Boolean).some(p => {
+    const re = new RegExp("^" + p.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*") + "$");
+    return re.test(c);
+  });
+};
+
+// La planilla a veces anota una parte del lote: "26 sin cabecera", "24 SECTOR 2", "7 FRANJA MAIZ".
+// Si no coincide tal cual, se prueba sin el agregado y se marca como parte del lote.
+const sinAgregadoLote = ref => String(ref||"").replace(/\s+(SIN\s+CABECERAS?|CABECERAS?|SECTOR\b.*|FRANJA\b.*|PARC\w*\b.*)$/i, "").trim();
+const loteDeAplicacion = (ref, loteId) => refApuntaALote(ref, loteId) ? "entero"
+  : (sinAgregadoLote(ref) !== String(ref||"").trim() && refApuntaALote(sinAgregadoLote(ref), loteId)) ? "parte" : null;
+
+const ddmm = d => d ? `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}` : "—";
+
+// Cruza el protocolo con las labores de la planilla, lote por lote.
+// Estado de cada paso: hecho | ventana | atrasado (cerró y no abrió el siguiente) |
+// salteado (cerró sin hacerse pero ya se pasó al siguiente) | proximo
+function evaluarProtocolo(protocolo, campos, cultivoDe, aplicaciones, hoy){
+  const resultado = [];
+  const porCampo = {};
+  aplicaciones.forEach(a => { (porCampo[a.campo] = porCampo[a.campo] || []).push(a); });
+  campos.forEach(campo => campo.lotes.forEach(lote => {
+    const cv = cultivoDe(campo.id, lote.id);
+    const protos = (protocolo.cultivos||[]).filter(p => cultivoCoincide(p.aplicaA, cv));
+    if(!protos.length) return;
+    const apls = (porCampo[campo.id] || []).map(a => ({a, m: loteDeAplicacion(a.lote, lote.id)}))
+      .filter(x => x.m).map(x => x.m === "parte" ? {...x.a, parte:true} : x.a);
+    protos.forEach(prot => {
+      const pasos = (prot.pasos||[]).map(p => ({...p, alts: parseClave(p.clave),
+        ini: fechaDelPaso(p.desde, protocolo.campania), fin: fechaDelPaso(p.hasta, protocolo.campania)}))
+        .filter(p => p.ini && p.fin).sort((a,b) => a.ini - b.ini);
+      // Cada aplicación cuenta para el paso cuya ventana le queda más cerca (entre los que cumple)
+      const asignadas = pasos.map(() => []);
+      apls.forEach(a => {
+        const f = fechaLocal(a.fecha);
+        if(!f) return;
+        let mejor = Infinity, idxs = [];
+        pasos.forEach((p, i) => {
+          if(f < p.ini - 30*DIA_MS || f > p.fin.getTime() + 60*DIA_MS) return;
+          if(!cumpleClave(a.productos||[], p.alts)) return;
+          const dist = f < p.ini ? p.ini - f : f > p.fin ? f - p.fin : 0;
+          if(dist < mejor){ mejor = dist; idxs = [i]; } else if(dist === mejor) idxs.push(i);
+        });
+        idxs.forEach(i => asignadas[i].push(a));
+      });
+      const haLote = Number(lote.ha) || 0;
+      const estados = pasos.map((p, i) => {
+        if(asignadas[i].length){
+          // Si lo aplicado cubre menos del 80% del lote (ej. 3 ha de 91), queda "hecho en parte"
+          const haHecha = asignadas[i].reduce((s, a) => s + (Number(a.ha) || haLote), 0);
+          const parcial = haLote > 0 && haHecha < 0.8 * haLote;
+          const vigente = hoy <= p.fin.getTime() + 30*DIA_MS || p.hastaSiembra;
+          return {paso:p, estado: parcial && vigente ? "parcial" : "hecho", apls:asignadas[i], haHecha};
+        }
+        if(hoy < p.ini) return {paso:p, estado:"proximo", dias:Math.ceil((p.ini - hoy)/DIA_MS)};
+        if(hoy <= p.fin) return {paso:p, estado:"ventana", dias:Math.ceil((p.fin - hoy)/DIA_MS)};
+        const dias = Math.floor((hoy - p.fin)/DIA_MS);
+        const yaSiguio = pasos.slice(i+1).some((q, j) => hoy >= q.ini || asignadas[i+1+j].length);
+        if(yaSiguio) return {paso:p, estado:"salteado", dias};
+        if(p.hastaSiembra) return {paso:p, estado: dias <= 120 ? "siembra" : "salteado", dias};
+        return {paso:p, estado: dias <= 30 ? "atrasado" : "salteado", dias};
+      });
+      resultado.push({campo, lote, cv, prot, estados});
+    });
+  }));
+  return resultado;
+}
+
+const ESTADO_PASO = {
+  hecho:    {txt:"Hecho",     color:"#2E7D32", fondo:"#E8F5E9", icono:"✓"},
+  ventana:  {txt:"En ventana", color:"#8A6200", fondo:"#FFF6DD", icono:"●"},
+  siembra:  {txt:"Antes de sembrar", color:"#A0522D", fondo:"#FCEBDD", icono:"◆"},
+  parcial:  {txt:"Hecho en parte", color:"#6D5BA8", fondo:"#EFEAF8", icono:"◐"},
+  atrasado: {txt:"Atrasado",  color:"#C0392B", fondo:"#FBE3E0", icono:"!"},
+  salteado: {txt:"No se hizo", color:"#8C8572", fondo:"#F1EEE6", icono:"–"},
+  proximo:  {txt:"Próximo",   color:"#5B6B7A", fondo:"#EEF2F6", icono:"○"},
+};
+
+const cajaV = {background:CREMA,border:`1.5px solid ${TINTA}`,borderRadius:12,padding:"14px 16px"};
+const chipV = a => ({padding:"5px 11px",fontSize:12,fontWeight:700,cursor:"pointer",borderRadius:20,
+  border:`1.5px solid ${TINTA}`,background:a?TINTA:"transparent",color:a?CREMA:TINTA,fontFamily:"inherit"});
+const selectV = {padding:"8px 11px",fontSize:13.5,fontWeight:600,border:`1.5px solid ${TINTA}`,borderRadius:8,background:CREMA,color:TINTA,fontFamily:"inherit"};
+const nombreCampo = id => (CAMPOS.find(c => c.id === id) || {}).nombre || id;
+
+// ============================================================
+// LABORES PENDIENTES — lo que falta según el protocolo
+// ============================================================
+function VistaPendientes({protocolo, cultivoDe, aplicaciones, fechaDatos, onEditar}){
+  const [campoF, setCampoF] = useState("TODOS");
+  const [protF, setProtF] = useState("TODOS");
+  const [verLotes, setVerLotes] = useState(false);
+  const hoy = useMemo(() => { const d = new Date(); d.setHours(0,0,0,0); return d; }, []);
+  const evaluacion = useMemo(() => evaluarProtocolo(protocolo, CAMPOS, cultivoDe, aplicaciones, hoy),
+    [protocolo, aplicaciones, cultivoDe, hoy]);
+  const filtrada = evaluacion.filter(e => (campoF === "TODOS" || e.campo.id === campoF) && (protF === "TODOS" || e.prot.id === protF));
+
+  // Tarjetas: lotes agrupados por paso y estado. De cada lote sólo cuenta el paso que toca ahora.
+  const grupos = {};
+  filtrada.forEach(e => {
+    const actuales = e.estados.filter(s => ["ventana","atrasado","siembra","parcial"].includes(s.estado));
+    const prox = e.estados.find(s => s.estado === "proximo" && s.dias <= 30);
+    const lista = actuales.length ? actuales : (prox && !e.estados.some(s => s.estado === "ventana") ? [prox] : []);
+    lista.forEach(s => {
+      const k = `${s.estado}|${e.prot.id}|${s.paso.id}`;
+      if(!grupos[k]) grupos[k] = {estado:s.estado, prot:e.prot, paso:s.paso, dias:s.dias, lotes:[]};
+      const falto = e.estados.filter(x => x.estado === "salteado" && x.paso.ini < s.paso.ini).map(x => x.paso.nombre);
+      const extra = s.estado === "parcial" ? `hecho en ${fmt(s.haHecha)} de ${fmt(Number(e.lote.ha)||0)} ha` : "";
+      grupos[k].lotes.push({campo:e.campo, lote:e.lote, cv:e.cv, falto, extra});
+    });
+  });
+  const orden = {atrasado:0, ventana:1, parcial:2, siembra:3, proximo:4};
+  const tarjetas = Object.values(grupos).sort((a,b) => orden[a.estado]-orden[b.estado] || a.paso.fin - b.paso.fin);
+  const resumen = ["atrasado","ventana","siembra","proximo"].map(est => {
+    const ts = tarjetas.filter(t => t.estado === est);
+    return {est, n: ts.reduce((s,t)=>s+t.lotes.length,0), ha: ts.reduce((s,t)=>s+t.lotes.reduce((x,l)=>x+(Number(l.lote.ha)||0),0),0)};
+  });
+  const alDia = filtrada.filter(e => !e.estados.some(s => ["ventana","atrasado","siembra","parcial"].includes(s.estado))).length;
+  const camposCon = [...new Set(evaluacion.map(e => e.campo.id))];
+
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:14}}>
+      <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center"}}>
+        <select value={campoF} onChange={e=>setCampoF(e.target.value)} style={selectV}>
+          <option value="TODOS">Todos los campos</option>
+          {camposCon.map(c => <option key={c} value={c}>{nombreCampo(c)}</option>)}
+        </select>
+        <select value={protF} onChange={e=>setProtF(e.target.value)} style={selectV}>
+          <option value="TODOS">Todos los cultivos</option>
+          {(protocolo.cultivos||[]).filter(p => evaluacion.some(e => e.prot.id === p.id)).map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+        </select>
+        <div style={{fontSize:12,opacity:0.65,flex:"1 1 260px"}}>
+          Protocolo cruzado con las labores de la planilla{fechaDatos ? ` (datos al ${fechaDatos})` : ""}. Hoy: {ddmm(hoy)}.{" "}
+          <button onClick={onEditar} style={{border:"none",background:"none",padding:0,color:"#1E5FA8",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:12}}>Editar protocolo</button>
+        </div>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:10}}>
+        {resumen.map(r => { const st = ESTADO_PASO[r.est]; return (
+          <div key={r.est} style={{...cajaV,textAlign:"center",borderColor:st.color,background:st.fondo}}>
+            <div style={{fontSize:22,fontWeight:700,color:st.color}}>{r.n} <span style={{fontSize:13}}>lotes</span></div>
+            <div style={{fontSize:11.5,opacity:0.75,marginTop:2}}>{r.est==="proximo"?"Abren en 30 días":st.txt} · {fmt(r.ha)} ha</div>
+          </div>
+        );})}
+        <div style={{...cajaV,textAlign:"center"}}>
+          <div style={{fontSize:22,fontWeight:700}}>{alDia} <span style={{fontSize:13}}>lotes</span></div>
+          <div style={{fontSize:11.5,opacity:0.75,marginTop:2}}>Sin nada pendiente hoy</div>
+        </div>
+      </div>
+
+      {!tarjetas.length && <div style={{...cajaV,textAlign:"center",opacity:0.7}}>No hay labores pendientes con estos filtros.</div>}
+      {tarjetas.map(t => {
+        const st = ESTADO_PASO[t.estado];
+        const ha = t.lotes.reduce((s,l)=>s+(Number(l.lote.ha)||0),0);
+        const cuando = t.estado==="atrasado" ? `venció el ${t.paso.hasta} (hace ${t.dias} días)`
+          : t.estado==="siembra" ? `ventana ${t.paso.desde}–${t.paso.hasta} · se hace a la siembra`
+          : t.estado==="parcial" ? `ventana ${t.paso.desde}–${t.paso.hasta} · falta completar el lote`
+          : t.estado==="ventana" ? `hasta el ${t.paso.hasta} · quedan ${t.dias} días`
+          : `abre el ${t.paso.desde} (en ${t.dias} días)`;
+        return (
+          <div key={`${t.estado}${t.prot.id}${t.paso.id}`} style={{...cajaV,borderLeft:`6px solid ${st.color}`}}>
+            <div style={{display:"flex",justifyContent:"space-between",gap:10,flexWrap:"wrap",alignItems:"baseline"}}>
+              <div>
+                <span style={{fontSize:10.5,fontWeight:700,color:st.color,background:st.fondo,borderRadius:5,padding:"2px 7px",marginRight:8,textTransform:"uppercase"}}>{st.txt}</span>
+                <span style={{fontSize:15,fontWeight:700}}>{t.prot.nombre} · {t.paso.nombre}</span>
+              </div>
+              <div style={{fontSize:12.5,fontWeight:600,color:st.color}}>{cuando}</div>
+            </div>
+            <div style={{fontSize:12.5,marginTop:6}}><b>Mezcla:</b> {t.paso.mezcla}</div>
+            {t.paso.nota && <div style={{fontSize:12,marginTop:3,opacity:0.75}}>{t.paso.nota}</div>}
+            <div style={{fontSize:11.5,fontWeight:700,marginTop:10,opacity:0.7}}>{t.lotes.length} lotes · {fmt(ha)} ha</div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:6}}>
+              {t.lotes.map(l => (
+                <span key={`${l.campo.id}|${l.lote.id}`} title={l.cv} style={{fontSize:12,border:"1px solid #C8C2B0",borderRadius:7,padding:"3px 8px",background:"#fff"}}>
+                  <b>{l.campo.nombre}</b> {l.lote.label||l.lote.id} <span style={{opacity:0.6}}>{fmt(Number(l.lote.ha)||0)} ha</span>
+                  {l.extra && <span style={{color:"#6D5BA8",fontSize:11}}> · {l.extra}</span>}
+                  {l.falto.length>0 && <span style={{color:"#C0392B",fontSize:11}}> · faltó {l.falto.join(", ").toLowerCase()}</span>}
+                </span>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+
+      <div style={cajaV}>
+        <button onClick={()=>setVerLotes(v=>!v)} style={{...chipV(verLotes)}}>{verLotes?"Ocultar":"Ver"} estado por lote ({filtrada.length})</button>
+        {verLotes && (
+          <div style={{overflowX:"auto",marginTop:10}}>
+            <table style={{width:"100%",borderCollapse:"collapse",fontSize:12,minWidth:640}}>
+              <thead><tr style={{background:"#E5E0D0"}}>
+                {["Campo","Lote","Ha","Cultivo 26-27","Protocolo","Pasos"].map(h => <th key={h} style={{textAlign:"left",padding:"7px 9px",fontSize:10.5,textTransform:"uppercase",opacity:0.7}}>{h}</th>)}
+              </tr></thead>
+              <tbody>{filtrada.map(e => (
+                <tr key={`${e.campo.id}|${e.lote.id}|${e.prot.id}`} style={{borderTop:"1px solid #E5E0D0"}}>
+                  <td style={{padding:"6px 9px",fontWeight:600,whiteSpace:"nowrap"}}>{e.campo.nombre}</td>
+                  <td style={{padding:"6px 9px"}}>{e.lote.label||e.lote.id}</td>
+                  <td style={{padding:"6px 9px"}}>{fmt(Number(e.lote.ha)||0)}</td>
+                  <td style={{padding:"6px 9px",whiteSpace:"nowrap"}}><span style={{display:"inline-block",width:8,height:8,borderRadius:2,background:colorCv(e.cv),marginRight:4}}/>{e.cv}</td>
+                  <td style={{padding:"6px 9px",whiteSpace:"nowrap"}}>{e.prot.nombre}</td>
+                  <td style={{padding:"6px 9px"}}>
+                    <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+                      {e.estados.map(s => { const st = ESTADO_PASO[s.estado]; return (
+                        <span key={s.paso.id} title={s.apls ? s.apls.map(a=>`${fechaCorta(a.fecha)}: ${a.productos.join(", ")}`).join("\n") : st.txt}
+                          style={{fontSize:11,color:st.color,background:st.fondo,border:`1px solid ${st.color}33`,borderRadius:5,padding:"1px 6px",whiteSpace:"nowrap"}}>
+                          {st.icono} {s.paso.nombre}{s.apls ? ` ${fechaCorta(s.apls[0].fecha)}${s.apls.every(a=>a.parte) ? ` (${s.apls.map(a=>a.lote).join(" + ")})` : ""}` : ""}
+                        </span>
+                      );})}
+                    </div>
+                  </td>
+                </tr>
+              ))}</tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// LABORES REALIZADAS — por lote, campo o cultivo
+// ============================================================
+function VistaRealizadas({aplicaciones, fertilizaciones}){
+  const [campoF, setCampoF] = useState("TODOS");
+  const [loteF, setLoteF] = useState("TODOS");
+  const [cultivoF, setCultivoF] = useState("TODOS");
+  const [tipoF, setTipoF] = useState("todas");
+  const [busca, setBusca] = useState("");
+  const [agrupar, setAgrupar] = useState("lote");
+
+  const registros = useMemo(() => [
+    ...aplicaciones.map(a => ({key:`a${a.id}`, fecha:a.fecha, campo:a.campo, lote:String(a.lote), cultivo:a.cultivo||"", ha:Number(a.ha)||0,
+      tipo:"pulverizacion", labor:a.labor ? a.labor.charAt(0) + a.labor.slice(1).toLowerCase() : "Labor", detalle:(a.productos||[]).join(" · "), costo:Number(a.costo)||0})),
+    ...fertilizaciones.map(f => ({key:`f${f.id}`, fecha:f.fecha, campo:f.campo, lote:String(f.lote), cultivo:f.cultivo||"", ha:Number(f.ha)||0,
+      tipo:"fertilizacion", labor:f.tipo||"Fertilización", detalle:[f.producto, f.dosis].filter(Boolean).join(" · "), costo:(Number(f.ha)||0)*(Number(f.costoHa)||0)})),
+  ].sort((a,b) => fechaLocal(b.fecha) - fechaLocal(a.fecha)), [aplicaciones, fertilizaciones]);
+
+  const campos = [...new Set(registros.map(r => r.campo))].sort((a,b)=>nombreCampo(a).localeCompare(nombreCampo(b)));
+  const lotes = campoF === "TODOS" ? [] : [...new Set(registros.filter(r => r.campo === campoF).map(r => r.lote))].sort((a,b)=>a.localeCompare(b,"es",{numeric:true}));
+  const cultivos = [...new Set(registros.map(r => baseCv(r.cultivo)).filter(Boolean))].sort();
+  const palabras = normBusca(busca).split(/\s+/).filter(Boolean);
+  const filtrados = registros.filter(r =>
+    (campoF === "TODOS" || r.campo === campoF) && (loteF === "TODOS" || r.lote === loteF) &&
+    (cultivoF === "TODOS" || baseCv(r.cultivo) === cultivoF) && (tipoF === "todas" || r.tipo === tipoF) &&
+    (!palabras.length || palabras.every(w => normBusca(r.detalle + " " + r.labor).includes(w))));
+
+  const claveGrupo = r => agrupar === "lote" ? `${r.campo}|${r.lote}` : agrupar === "campo" ? r.campo : agrupar === "cultivo" ? (baseCv(r.cultivo) || "SIN CULTIVO") : r.fecha.slice(0,7);
+  const tituloGrupo = (k, r) => agrupar === "lote" ? `${nombreCampo(r.campo)} · Lote ${r.lote}` : agrupar === "campo" ? nombreCampo(k)
+    : agrupar === "cultivo" ? k : (fechaLocal(r.fecha) || new Date()).toLocaleDateString("es-AR",{month:"long",year:"numeric"});
+  const grupos = [];
+  const idx = {};
+  filtrados.forEach(r => { const k = claveGrupo(r); if(idx[k] === undefined){ idx[k] = grupos.length; grupos.push({k, titulo:tituloGrupo(k, r), cultivo:r.cultivo, filas:[]}); } grupos[idx[k]].filas.push(r); });
+  const total = {n:filtrados.length, ha:filtrados.reduce((s,r)=>s+r.ha,0), costo:filtrados.reduce((s,r)=>s+r.costo,0),
+    lotes:new Set(filtrados.map(r=>`${r.campo}|${r.lote}`)).size};
+
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:14}}>
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+        <select value={campoF} onChange={e=>{setCampoF(e.target.value); setLoteF("TODOS");}} style={selectV}>
+          <option value="TODOS">Todos los campos</option>
+          {campos.map(c => <option key={c} value={c}>{nombreCampo(c)}</option>)}
+        </select>
+        {campoF !== "TODOS" && (
+          <select value={loteF} onChange={e=>setLoteF(e.target.value)} style={selectV}>
+            <option value="TODOS">Todos los lotes</option>
+            {lotes.map(l => <option key={l} value={l}>Lote {l}</option>)}
+          </select>
+        )}
+        <select value={cultivoF} onChange={e=>setCultivoF(e.target.value)} style={selectV}>
+          <option value="TODOS">Todos los cultivos</option>
+          {cultivos.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <select value={tipoF} onChange={e=>setTipoF(e.target.value)} style={selectV}>
+          <option value="todas">Pulverizaciones y fertilizaciones</option>
+          <option value="pulverizacion">Sólo pulverizaciones</option>
+          <option value="fertilizacion">Sólo fertilizaciones</option>
+        </select>
+        <input value={busca} onChange={e=>setBusca(e.target.value)} placeholder="Buscar producto (ej: atrazina)"
+          style={{...selectV,fontWeight:400,flex:"1 1 180px",minWidth:0}}/>
+      </div>
+      <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+        <span style={{fontSize:12,opacity:0.6,fontWeight:600}}>Agrupar por:</span>
+        {[["lote","Lote"],["campo","Campo"],["cultivo","Cultivo"],["mes","Mes"]].map(([k,l]) =>
+          <button key={k} onClick={()=>setAgrupar(k)} style={chipV(agrupar===k)}>{l}</button>)}
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:10}}>
+        {[{l:"Labores",v:total.n},{l:"Lotes trabajados",v:total.lotes},{l:"Ha trabajadas",v:`${fmt(total.ha)} ha`},{l:"Costo total",v:`US$ ${fmt(total.costo)}`}]
+          .map(s => <div key={s.l} style={{...cajaV,textAlign:"center"}}><div style={{fontSize:20,fontWeight:700}}>{s.v}</div><div style={{fontSize:11.5,opacity:0.65,marginTop:2}}>{s.l}</div></div>)}
+      </div>
+      {!grupos.length && <div style={{...cajaV,textAlign:"center",opacity:0.7}}>No hay labores con estos filtros.</div>}
+      {grupos.map(g => {
+        const haG = g.filas.reduce((s,r)=>s+r.ha,0), costoG = g.filas.reduce((s,r)=>s+r.costo,0);
+        return (
+          <div key={g.k} style={{...cajaV,padding:0,overflow:"hidden"}}>
+            <div style={{display:"flex",justifyContent:"space-between",gap:10,flexWrap:"wrap",padding:"10px 14px",background:"#EEE9DC",borderBottom:`1.5px solid ${TINTA}`}}>
+              <div style={{fontWeight:700,fontSize:14.5,display:"flex",alignItems:"center",gap:7}}>
+                {agrupar==="lote" && <span style={{width:10,height:10,borderRadius:2,background:colorCv(g.cultivo)}}/>}
+                {g.titulo}{agrupar==="lote" && g.cultivo ? <span style={{fontWeight:500,fontSize:12,opacity:0.7}}>{g.cultivo}</span> : null}
+              </div>
+              <div style={{fontSize:12,opacity:0.75}}>{g.filas.length} labores · {fmt(haG)} ha · US$ {fmt(costoG)}</div>
+            </div>
+            {g.filas.map(r => (
+              <div key={r.key} style={{display:"grid",gridTemplateColumns:"64px minmax(0,1fr) auto",gap:10,padding:"8px 14px",borderTop:"1px solid #E5E0D0",fontSize:12.5,alignItems:"baseline"}}>
+                <div style={{fontWeight:700,whiteSpace:"nowrap"}}>{fechaCorta(r.fecha)}</div>
+                <div style={{minWidth:0}}>
+                  <span style={{fontSize:10.5,fontWeight:700,borderRadius:5,padding:"1px 6px",marginRight:6,
+                    background:r.tipo==="fertilizacion"?"#E3F2FD":"#EEF5E6",color:r.tipo==="fertilizacion"?"#0D47A1":"#2E7D32"}}>{r.labor}</span>
+                  {agrupar!=="lote" && <b>{nombreCampo(r.campo)} {r.lote} · </b>}
+                  {agrupar!=="cultivo" && agrupar!=="lote" && r.cultivo && <span style={{opacity:0.7}}>{r.cultivo} · </span>}
+                  <span style={{opacity:0.85}}>{r.detalle || "—"}</span>
+                </div>
+                <div style={{whiteSpace:"nowrap",textAlign:"right",fontSize:12}}>{fmt(r.ha)} ha{r.costo ? <span style={{opacity:0.65}}> · US$ {fmt(r.costo)}</span> : null}</div>
+              </div>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ============================================================
+// EDITOR DEL PROTOCOLO — se guarda compartido en la planilla
+// ============================================================
+function VistaProtocoloEditor({protocolo, sync, onGuardar}){
+  const [borrador, setBorrador] = useState(protocolo);
+  const [abierto, setAbierto] = useState(null);
+  useEffect(() => { setBorrador(protocolo); }, [protocolo]);
+  const cambiado = JSON.stringify(borrador) !== JSON.stringify(protocolo);
+  const fechaOK = s => /^\d{1,2}\/\d{1,2}$/.test(String(s||"").trim());
+  const errores = (borrador.cultivos||[]).flatMap(c => (c.pasos||[]).filter(p => !fechaOK(p.desde) || !fechaOK(p.hasta)).map(p => `${c.nombre} · ${p.nombre||"paso sin nombre"}`));
+
+  const setCultivo = (ci, cambios) => setBorrador(b => ({...b, cultivos: b.cultivos.map((c,i) => i===ci ? {...c, ...cambios} : c)}));
+  const setPaso = (ci, pi, cambios) => setCultivo(ci, {pasos: borrador.cultivos[ci].pasos.map((p,i) => i===pi ? {...p, ...cambios} : p)});
+  const nuevoId = () => `p${Date.now().toString(36)}`;
+  const campoTxt = {width:"100%",boxSizing:"border-box",padding:"6px 8px",fontSize:12.5,border:"1px solid #C8C2B0",borderRadius:6,background:"#FFFDF7",color:TINTA,fontFamily:"inherit"};
+  const etiqueta = t => <div style={{fontSize:10.5,fontWeight:700,textTransform:"uppercase",opacity:0.6,marginBottom:3}}>{t}</div>;
+  const btn = (fondo, color) => ({padding:"7px 13px",fontSize:12.5,fontWeight:700,borderRadius:8,border:`1.5px solid ${TINTA}`,background:fondo,color,cursor:"pointer",fontFamily:"inherit"});
+
+  const estadoSync = sync.estado === "guardando" ? "Guardando…" : sync.estado === "cargando" ? "Cargando el protocolo compartido…"
+    : sync.estado === "error" ? `No se pudo sincronizar${sync.txt ? `: ${sync.txt}` : ""}. Queda guardado en este equipo.`
+    : sync.actualizado ? `Guardado para todos el ${new Date(sync.actualizado).toLocaleString("es-AR",{dateStyle:"short",timeStyle:"short"})}${sync.autor ? ` por ${sync.autor}` : ""}` : "Protocolo original (sin cambios guardados)";
+
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:14}}>
+      <div style={{...cajaV,display:"flex",gap:10,flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:5}}>
+        <div>
+          <div style={{fontSize:15,fontWeight:700}}>Protocolo de residuales · campaña {borrador.campania}</div>
+          <div style={{fontSize:11.5,opacity:0.7,marginTop:2,color:sync.estado==="error"?"#C0392B":TINTA}}>{estadoSync}</div>
+        </div>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          <button onClick={()=>{ if(window.confirm("¿Volver al protocolo original del PDF? Se pierden los cambios guardados.")) onGuardar(PROTOCOLO_BASE); }} style={btn("transparent",TINTA)}>Restaurar original</button>
+          <button disabled={!cambiado} onClick={()=>setBorrador(protocolo)} style={{...btn("transparent",TINTA),opacity:cambiado?1:0.4}}>Descartar cambios</button>
+          <button disabled={!cambiado || errores.length>0} onClick={()=>onGuardar(borrador)}
+            style={{...btn(cambiado&&!errores.length?"#2E7D32":"#B5AF9D","#fff"),border:"none"}}>💾 Guardar protocolo</button>
+        </div>
+        {errores.length>0 && <div style={{width:"100%",fontSize:12,color:"#C0392B"}}>Revisá las fechas (formato dd/mm) en: {errores.join("; ")}</div>}
+      </div>
+
+      <div style={cajaV}>
+        <div style={{display:"grid",gridTemplateColumns:"120px 1fr",gap:10,alignItems:"start"}}>
+          <div>{etiqueta("Campaña")}<input value={borrador.campania} onChange={e=>setBorrador(b=>({...b,campania:e.target.value}))} style={campoTxt}/></div>
+          <div>{etiqueta("Base y criterios")}<textarea value={borrador.criterios} rows={4} onChange={e=>setBorrador(b=>({...b,criterios:e.target.value}))} style={{...campoTxt,resize:"vertical"}}/></div>
+        </div>
+        <div style={{fontSize:11.5,opacity:0.7,marginTop:8,lineHeight:1.5}}>
+          <b>Cómo se detecta si un paso se hizo:</b> en "Activos clave" van los residuales que tienen que figurar en la planilla para ese lote dentro de la ventana.
+          Usá <b>+</b> para "y" y <b>|</b> para "o". Ej: <i>flurocloridona + metolacloro | paraquat + sulfentrazone</i>. Se reconocen también nombres comerciales (Gesaprim, Brodal, Rainbow, Terbyne…).
+          En "Se aplica a" van los cultivos de la planilla 26-27, separados por coma; <b>*</b> es comodín (<i>*-SOJA</i> = soja de segunda después de cualquier fina). Si queda vacío, no genera pendientes.
+        </div>
+      </div>
+
+      {(borrador.cultivos||[]).map((c, ci) => (
+        <div key={c.id} style={cajaV}>
+          <div style={{display:"flex",gap:10,alignItems:"center",justifyContent:"space-between",flexWrap:"wrap"}}>
+            <button onClick={()=>setAbierto(abierto===c.id?null:c.id)} style={{border:"none",background:"none",padding:0,cursor:"pointer",fontFamily:"inherit",color:TINTA,textAlign:"left"}}>
+              <span style={{fontSize:16,fontWeight:700}}>{abierto===c.id?"▾":"▸"} {c.nombre}</span>
+              <span style={{fontSize:12,opacity:0.65,marginLeft:8}}>{c.pasos.length} pasos · {c.aplicaA || "sin cultivos asignados"}</span>
+            </button>
+            {abierto===c.id && <button onClick={()=>{ if(window.confirm(`¿Borrar ${c.nombre} del protocolo?`)) setBorrador(b=>({...b,cultivos:b.cultivos.filter((_,i)=>i!==ci)})); }}
+              style={{...btn("transparent","#C0392B"),borderColor:"#C0392B",padding:"4px 10px",fontSize:11.5}}>Borrar cultivo</button>}
+          </div>
+          {abierto!==c.id && (
+            <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:8}}>
+              {c.pasos.map(p => <span key={p.id} style={{fontSize:11.5,background:"#fff",border:"1px solid #C8C2B0",borderRadius:6,padding:"2px 8px"}}>{p.nombre} · {p.desde}–{p.hasta}</span>)}
+            </div>
+          )}
+          {abierto===c.id && (
+            <div style={{display:"flex",flexDirection:"column",gap:10,marginTop:10}}>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:10}}>
+                <div>{etiqueta("Nombre")}<input value={c.nombre} onChange={e=>setCultivo(ci,{nombre:e.target.value})} style={campoTxt}/></div>
+                <div>{etiqueta("Se aplica a (cultivos de la planilla)")}<input value={c.aplicaA} onChange={e=>setCultivo(ci,{aplicaA:e.target.value})} placeholder="ej: SOJA, *-SOJA" style={campoTxt}/></div>
+              </div>
+              {c.pasos.map((p, pi) => (
+                <div key={p.id} style={{border:"1px solid #C8C2B0",borderRadius:9,padding:10,background:"#FFFDF7"}}>
+                  <div style={{display:"grid",gridTemplateColumns:"minmax(160px,2fr) 80px 80px minmax(180px,2fr)",gap:8}}>
+                    <div>{etiqueta(`Paso ${pi+1}`)}<input value={p.nombre} onChange={e=>setPaso(ci,pi,{nombre:e.target.value})} style={campoTxt}/></div>
+                    <div>{etiqueta("Desde")}<input value={p.desde} placeholder="dd/mm" onChange={e=>setPaso(ci,pi,{desde:e.target.value})} style={{...campoTxt,borderColor:fechaOK(p.desde)?"#C8C2B0":"#C0392B"}}/></div>
+                    <div>{etiqueta("Hasta")}<input value={p.hasta} placeholder="dd/mm" onChange={e=>setPaso(ci,pi,{hasta:e.target.value})} style={{...campoTxt,borderColor:fechaOK(p.hasta)?"#C8C2B0":"#C0392B"}}/></div>
+                    <div>{etiqueta("Activos clave")}<input value={p.clave} onChange={e=>setPaso(ci,pi,{clave:e.target.value})} style={campoTxt}/></div>
+                  </div>
+                  <div style={{marginTop:8}}>{etiqueta("Mezcla (por ha)")}<textarea value={p.mezcla} rows={2} onChange={e=>setPaso(ci,pi,{mezcla:e.target.value})} style={{...campoTxt,resize:"vertical"}}/></div>
+                  <div style={{marginTop:8,display:"flex",gap:8,alignItems:"flex-end",flexWrap:"wrap"}}>
+                    <label style={{fontSize:12,display:"flex",gap:5,alignItems:"center",paddingBottom:6}}>
+                      <input type="checkbox" checked={!!p.hastaSiembra} onChange={e=>setPaso(ci,pi,{hastaSiembra:e.target.checked})}/>
+                      Se hace a la siembra (si vence, queda "antes de sembrar")
+                    </label>
+                    <div style={{flex:"1 1 200px"}}>{etiqueta("Nota")}<input value={p.nota||""} onChange={e=>setPaso(ci,pi,{nota:e.target.value})} style={campoTxt}/></div>
+                    <button onClick={()=>setCultivo(ci,{pasos:c.pasos.filter((_,i)=>i!==pi)})} style={{...btn("transparent","#C0392B"),borderColor:"#C0392B",padding:"5px 10px",fontSize:11.5}}>Borrar paso</button>
+                  </div>
+                </div>
+              ))}
+              <button onClick={()=>setCultivo(ci,{pasos:[...c.pasos,{id:nuevoId(),nombre:"Nuevo paso",desde:"01/09",hasta:"30/09",clave:"",mezcla:""}]})}
+                style={{...btn("transparent",TINTA),alignSelf:"flex-start"}}>+ Agregar paso</button>
+            </div>
+          )}
+        </div>
+      ))}
+      <button onClick={()=>{ const id = nuevoId(); setBorrador(b=>({...b,cultivos:[...b.cultivos,{id,nombre:"Nuevo cultivo",aplicaA:"",pasos:[]}]})); setAbierto(id); }}
+        style={{...btn("transparent",TINTA),alignSelf:"flex-start"}}>+ Agregar cultivo</button>
+    </div>
+  );
+}
+
 export default function App(){
   // ── DATOS DINÁMICOS: cargados desde /datos.json (pipeline automático) ──
   const [datosOK, setDatosOK] = useState(null); // null=cargando, true=cargado, false=falló
@@ -2652,15 +2293,12 @@ export default function App(){
     datosRemotos.FERTILIZACIONES.map((f,i)=>({...f,id:i})).sort((a,b)=>fechaLocal(b.fecha)-fechaLocal(a.fecha))
     : FERTILIZACIONES_FALLBACK;
 
-  const [vista,setVista]=useState("mapas");        // mapas | galeria | herbicidas | acciones | ordenes | margenes | protocolos
+  const [vista,setVista]=useState("mapas");        // mapas | galeria | realizadas | pendientes | herbicidas | fertilizaciones | ordenes | margenes | insumos | protocolo
   const [campoSel,setCampoSel]=useState("L3H");
   const [capaModo,setCapaModo]=useState("campaña"); // campaña|rindes|margenes|suelos
   const [cultivoFiltro,setCultivoFiltro]=useState(null); // null = sin filtro; "MAIZ", "SOJA", etc.
   const [sueloVar,setSueloVar]=useState("P");
   const [campoFiltro,setCampoFiltro]=useState("TODOS");
-  const [acciones,setAcciones]=useState(ACCIONES_INIT);
-  const [nuevaAcc,setNuevaAcc]=useState({campo:"L3H",lote:"",accion:"",fecha:"2026-07-15",prioridad:"media"});
-  const [showForm,setShowForm]=useState(false);
   const [pintura,setPintura]=useState({});
   const [brocha,setBrocha]=useState(0);
   const [etiquetas,setEtiquetas]=useState(["","","",""]);
@@ -2759,6 +2397,43 @@ export default function App(){
 
   // Cargar al iniciar (y purgar los vencidos)
   useEffect(() => { bajarBorradores(); }, []);
+
+  // ── Protocolo de residuales: compartido en la planilla, con copia local por si no hay señal ──
+  const PROTO_KEY = "smix_protocolo_v1";
+  const [protocolo, setProtocolo] = useState(() => {
+    try { const p = JSON.parse(window.localStorage.getItem(PROTO_KEY)); if(p && Array.isArray(p.cultivos)) return p; } catch {}
+    return PROTOCOLO_BASE;
+  });
+  const [protoSync, setProtoSync] = useState({estado:"cargando"});
+  useEffect(() => {
+    fetch("/api/protocolo").then(r => r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status)))
+      .then(d => {
+        if(d.protocolo && Array.isArray(d.protocolo.cultivos)){
+          setProtocolo(d.protocolo);
+          try { window.localStorage.setItem(PROTO_KEY, JSON.stringify(d.protocolo)); } catch {}
+        }
+        setProtoSync({estado:"ok", actualizado:d.actualizado, autor:d.autor});
+      })
+      .catch(e => setProtoSync({estado:"error", txt:e.message}));
+  }, []);
+  const guardarProtocolo = async (p) => {
+    setProtocolo(p);
+    try { window.localStorage.setItem(PROTO_KEY, JSON.stringify(p)); } catch {}
+    setProtoSync({estado:"guardando"});
+    try {
+      const r = await fetch("/api/protocolo", {method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({protocolo:p, autor})});
+      const d = await r.json();
+      if(!r.ok) throw new Error(d.error || "error");
+      setProtoSync({estado:"ok", actualizado:d.actualizado, autor});
+    } catch(e) {
+      setProtoSync({estado:"error", txt:e.message});
+    }
+  };
+  // Cultivo 26-27 de cada lote: el plan, y si no está, la rotación histórica
+  const cultivoDe = useMemo(() => (campoId, loteId) =>
+    buscarKey(PLAN_2627, campoId, loteId) || (buscarKey(HISTORICO_ROTACION, campoId, loteId) || {})["26-27"]?.cv || "",
+    [PLAN_2627, HISTORICO_ROTACION]);
   const [modoDividir, setModoDividir] = useState(false);
   const [loteDiv, setLoteDiv] = useState(null);       // {campoId, loteId} en edición
   const [puntosCorte, setPuntosCorte] = useState([]); // [[x,y],[x,y]]
@@ -3473,16 +3148,6 @@ export default function App(){
   const haApl=aplFilt.reduce((s,a)=>s+a.ha,0);
   const costoApl=aplFilt.reduce((s,a)=>s+a.costo,0);
 
-  // acciones
-  const toggleH=id=>setAcciones(p=>p.map(a=>a.id===id?{...a,hecha:!a.hecha}:a));
-  const elimA=id=>setAcciones(p=>p.filter(a=>a.id!==id));
-  const agregarA=()=>{
-    if(!nuevaAcc.accion.trim())return;
-    setAcciones(p=>[...p,{...nuevaAcc,id:Date.now(),hecha:false}]);
-    setNuevaAcc({campo:"L3H",lote:"",accion:"",fecha:"2026-07-15",prioridad:"media"});
-    setShowForm(false);
-  };
-
   // suelos tabla
   const suelosTabla=Object.entries(SUELOS).map(([k,s])=>{
     const[ci,li]=k.split("|");return {...s,campo:ci,lote:li};
@@ -3546,14 +3211,15 @@ export default function App(){
         {/* TABS PRINCIPALES */}
         <div style={{display:"flex",gap:7,marginBottom:18,overflowX:"auto",paddingBottom:4}}>
           <button style={tab(vista==="mapas")} onClick={()=>setVista("mapas")}>🗺️ Mapa por campo</button>
+          <button style={tab(vista==="realizadas")} onClick={()=>setVista("realizadas")}>✅ Labores realizadas</button>
+          <button style={tab(vista==="pendientes")} onClick={()=>setVista("pendientes")}>⏳ Labores pendientes</button>
           <button style={tab(vista==="galeria")} onClick={()=>setVista("galeria")}>🗂️ Todos los campos</button>
           <button style={tab(vista==="herbicidas")} onClick={()=>setVista("herbicidas")}>🧪 Herbicidas</button>
           <button style={tab(vista==="fertilizaciones")} onClick={()=>setVista("fertilizaciones")}>🌱 Fertilizaciones</button>
-          <button style={tab(vista==="acciones")} onClick={()=>setVista("acciones")}>📅 Próximas acciones</button>
           <button style={tab(vista==="margenes")} onClick={()=>setVista("margenes")}>💵 Márgenes</button>
           <button style={tab(vista==="ordenes")} onClick={()=>setVista("ordenes")}>🚜 Nueva labor</button>
           <button style={tab(vista==="insumos")} onClick={()=>setVista("insumos")}>📦 Insumos</button>
-          <button style={tab(vista==="protocolos")} onClick={()=>setVista("protocolos")}>📋 Protocolos</button>
+          <button style={tab(vista==="protocolo")} onClick={()=>setVista("protocolo")}>📝 Protocolo</button>
         </div>
 
         {/* ══ MAPA POR CAMPO ══ */}
@@ -3754,6 +3420,14 @@ export default function App(){
         )}
 
         {/* ══ HERBICIDAS ══ */}
+        {vista==="realizadas"&&<VistaRealizadas aplicaciones={APLICACIONES} fertilizaciones={FERTILIZACIONES}/>}
+
+        {vista==="pendientes"&&<VistaPendientes protocolo={protocolo} cultivoDe={cultivoDe} aplicaciones={APLICACIONES}
+          fechaDatos={fechaDatos ? new Date(fechaDatos).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}) : null}
+          onEditar={()=>setVista("protocolo")}/>}
+
+        {vista==="protocolo"&&<VistaProtocoloEditor protocolo={protocolo} sync={protoSync} onGuardar={guardarProtocolo}/>}
+
         {vista==="herbicidas"&&(
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
             <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center"}}>
@@ -3840,121 +3514,6 @@ export default function App(){
                   </table>
                 </div>
               </div>
-            </div>
-          );
-        })()}
-
-        {/* ══ ACCIONES (deducidas + manuales) ══ */}
-        {vista==="acciones"&&(()=>{
-          const accionesDeducidas = generarProximasAcciones(CAMPOS, INV_26, PLAN_2627, APLICACIONES, FERTILIZACIONES);
-          // Agrupar por cultivo → etapa
-          const porCultivo = {};
-          accionesDeducidas.forEach(a=>{
-            const cvBase = baseCv(a.cultivo);
-            if(!porCultivo[cvBase]) porCultivo[cvBase] = { color: a.color, etapas: {} };
-            const eKey = a.etapa.id;
-            if(!porCultivo[cvBase].etapas[eKey]) porCultivo[cvBase].etapas[eKey] = { etapa: a.etapa, lotes: [], haTotal: 0 };
-            porCultivo[cvBase].etapas[eKey].lotes.push(a);
-            porCultivo[cvBase].etapas[eKey].haTotal += a.ha;
-          });
-          return (
-            <div style={{display:"flex",flexDirection:"column",gap:14}}>
-              <div style={{...caja,fontSize:13,opacity:0.85,lineHeight:1.5}}>
-                <b>🤖 Acciones auto-deducidas</b> a partir del cultivo asignado, las aplicaciones realizadas y el protocolo. Los lotes se agrupan por cultivo y próxima etapa. Cada grupo indica los productos sugeridos del protocolo.
-              </div>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <div style={{fontSize:13,opacity:0.7}}>{accionesDeducidas.length} lotes con próxima acción · {acciones.filter(a=>!a.hecha).length} manuales pendientes</div>
-                <button onClick={()=>setShowForm(v=>!v)} style={{padding:"9px 14px",fontSize:13.5,fontWeight:700,cursor:"pointer",borderRadius:9,border:`1.5px solid ${TINTA}`,background:showForm?"transparent":TINTA,color:showForm?TINTA:CREMA,fontFamily:"inherit"}}>{showForm?"Cancelar":"+ Acción manual"}</button>
-              </div>
-              {showForm&&(
-                <div style={{...caja,display:"flex",flexWrap:"wrap",gap:10,alignItems:"flex-end"}}>
-                  {[["Campo","select",[...CAMPOS.map(c=>c.id)],"campo"],["Lote(s)","text","ej: 5, 8B","lote"],["Acción","text","ej: Monitoreo","accion"],["Fecha","date","","fecha"]].map(([lbl,type,opts,key])=>(
-                    <div key={key} style={{display:"flex",flexDirection:"column",gap:4,flex:type==="text"&&key==="accion"?"1 1 200px":"initial"}}>
-                      <label style={{fontSize:11,opacity:0.6}}>{lbl}</label>
-                      {type==="select"
-                        ?<select value={nuevaAcc[key]} onChange={e=>setNuevaAcc(p=>({...p,[key]:e.target.value}))} style={{padding:"7px 9px",fontSize:13,border:"1px solid #C8C2B0",borderRadius:6,background:"#FFFDF7",color:TINTA,fontFamily:"inherit"}}>{opts.map(o=><option key={o} value={o}>{o}</option>)}</select>
-                        :<input type={type} value={nuevaAcc[key]} placeholder={opts} onChange={e=>setNuevaAcc(p=>({...p,[key]:e.target.value}))} style={{...inputB,width:type==="date"?"auto":type==="text"&&key!=="accion"?"110px":"auto"}}/>}
-                    </div>
-                  ))}
-                  <div style={{display:"flex",flexDirection:"column",gap:4}}>
-                    <label style={{fontSize:11,opacity:0.6}}>Prioridad</label>
-                    <select value={nuevaAcc.prioridad} onChange={e=>setNuevaAcc(p=>({...p,prioridad:e.target.value}))} style={{padding:"7px 9px",fontSize:13,border:"1px solid #C8C2B0",borderRadius:6,background:"#FFFDF7",color:TINTA,fontFamily:"inherit"}}>
-                      <option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja</option>
-                    </select>
-                  </div>
-                  <button onClick={agregarA} style={{padding:"8px 16px",fontSize:13,fontWeight:700,cursor:"pointer",borderRadius:7,border:"none",background:VERDE,color:"#fff",fontFamily:"inherit"}}>Guardar</button>
-                </div>
-              )}
-
-              {/* Acciones auto-deducidas agrupadas */}
-              {Object.entries(porCultivo).map(([cvBase, data])=>(
-                <div key={cvBase} style={{...caja,borderLeft:`5px solid ${data.color}`,padding:"14px 16px"}}>
-                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-                    <span style={{width:14,height:14,borderRadius:3,background:data.color}}/>
-                    <span style={{fontWeight:700,fontSize:15}}>{cvBase}</span>
-                    <span style={{fontSize:12,opacity:0.6}}>{Object.keys(data.etapas).length} etapa(s) pendiente(s)</span>
-                  </div>
-                  {Object.entries(data.etapas).map(([eKey,eData])=>{
-                    // productos sugeridos: usar primera situación de la etapa (por defecto "Sin maleza problema" o similar)
-                    const primeraSit = Object.keys(eData.etapa.malezas)[0];
-                    const productos = eData.etapa.malezas[primeraSit]?.productos || [];
-                    return (
-                      <div key={eKey} style={{background:"#FFFDF7",border:"1px solid #E2DDCD",borderRadius:9,padding:"10px 12px",marginBottom:8}}>
-                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",flexWrap:"wrap",gap:6}}>
-                          <div style={{fontWeight:700,fontSize:14}}>➜ {eData.etapa.label}</div>
-                          <div style={{fontSize:12,opacity:0.6}}>{eData.lotes.length} lotes · {fmt(eData.haTotal)} ha · {eData.etapa.mes}</div>
-                        </div>
-                        <div style={{fontSize:12,opacity:0.7,marginTop:3}}>{eData.etapa.descripcion}</div>
-                        <div style={{display:"flex",flexWrap:"wrap",gap:5,marginTop:8}}>
-                          {eData.lotes.sort((a,b)=>b.ha-a.ha).map((l,i)=>(
-                            <span key={i} style={{fontSize:11.5,background:"#fff",border:"1px solid #D8D2C0",borderRadius:6,padding:"3px 8px"}} title={`${l.campoNombre} · ${l.cultivo} · ${l.completadas}/${l.totalEtapas} etapas`}>
-                              {l.campo}-{l.lote} <span style={{opacity:0.5}}>· {l.ha} ha</span>
-                            </span>
-                          ))}
-                        </div>
-                        {productos.length>0&&(
-                          <div style={{marginTop:8,paddingTop:8,borderTop:"1px dashed #D8D2C0"}}>
-                            <div style={{fontSize:10.5,letterSpacing:"0.1em",textTransform:"uppercase",opacity:0.55,marginBottom:5}}>Sugerencia protocolo</div>
-                            <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
-                              {productos.map((p,i)=>(
-                                <span key={i} style={{fontSize:11,background:"#F3EFE3",borderRadius:5,padding:"2px 7px"}}>
-                                  <b>{p.nombre}</b> · {p.dosis}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
-
-              {/* Acciones manuales */}
-              {acciones.length>0&&(
-                <div>
-                  <div style={{fontSize:11,letterSpacing:"0.2em",textTransform:"uppercase",opacity:0.55,marginTop:6,marginBottom:8}}>Acciones manuales</div>
-                  <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                    {[...acciones].sort((a,b)=>fechaLocal(a.fecha)-fechaLocal(b.fecha)).map(a=>{
-                      const dias=diasHasta(a.fecha);
-                      const venc=dias<0&&!a.hecha;
-                      const cp=a.prioridad==="alta"?ROJO:a.prioridad==="media"?NARANJA:AZUL;
-                      return <div key={a.id} style={{...caja,display:"flex",alignItems:"center",gap:12,opacity:a.hecha?0.5:1,borderLeft:`5px solid ${venc?ROJO:cp}`}}>
-                        <input type="checkbox" checked={a.hecha} onChange={()=>toggleH(a.id)} style={{width:18,height:18,cursor:"pointer",flexShrink:0}}/>
-                        <div style={{flex:1,minWidth:0}}>
-                          <div style={{fontWeight:700,fontSize:14,textDecoration:a.hecha?"line-through":"none"}}>{a.accion}</div>
-                          <div style={{fontSize:12.5,opacity:0.7,marginTop:1}}>
-                            {a.campo} · lote {a.lote||"—"} · {fechaCorta(a.fecha)}
-                            {!a.hecha&&(venc?<span style={{color:ROJO,fontWeight:700}}> · vencida</span>:dias<=7?<span style={{color:NARANJA,fontWeight:700}}> · en {dias} días</span>:` · en ${dias} días`)}
-                          </div>
-                        </div>
-                        <span style={{fontSize:11,fontWeight:700,color:cp,textTransform:"uppercase",flexShrink:0}}>{a.prioridad}</span>
-                        <button onClick={()=>elimA(a.id)} style={{border:"none",background:"none",cursor:"pointer",fontSize:16,opacity:0.4,flexShrink:0}}>✕</button>
-                      </div>;
-                    })}
-                  </div>
-                </div>
-              )}
             </div>
           );
         })()}
@@ -4851,7 +4410,6 @@ export default function App(){
             </div>
           );
         })()}
-        {vista==="protocolos"&&<VistaProtocolos/>}
 
         <div style={{fontSize:11,opacity:0.45,marginTop:20,textAlign:"center"}}>
         </div>
