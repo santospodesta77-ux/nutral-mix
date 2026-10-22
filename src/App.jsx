@@ -1004,38 +1004,6 @@ const PRODUCTOS_BASE = [
 ];
 
 
-// ── INSUMOS: semillas y fertilizantes ──────────────────────────
-// Salen de la hoja "BASE DE LABORES" de la planilla LABORES (snapshot 22/09/2026).
-// Si el pipeline algún día publica datos.INSUMOS, la app usa eso y esta lista queda de respaldo.
-// u: unidad de compra (bolsa o tn) · p: USD por esa unidad · cv: cultivo sugerido
-const INSUMOS_BASE = [
-  // Semillas girasol
-  {n:"ADV 5505 CL B2", cat:"SEM", u:"bolsa", p:280, cv:"GIRASOL"},
-  {n:"ADV 5407 CL B1", cat:"SEM", u:"bolsa", p:295, cv:"GIRASOL"},
-  {n:"ADV 5310 CL B1", cat:"SEM", u:"bolsa", p:290, cv:"GIRASOL"},
-  {n:"ADV 5310 CL B2", cat:"SEM", u:"bolsa", p:250, cv:"GIRASOL"},
-  {n:"SYN 3970 CL", cat:"SEM", u:"bolsa", p:296, cv:"GIRASOL"},
-  // Semillas maíz
-  {n:"DK7210", cat:"SEM", u:"bolsa", p:160, cv:"MAIZ"},
-  {n:"DK7303", cat:"SEM", u:"bolsa", p:130, cv:"MAIZ"},
-  {n:"DK6962", cat:"SEM", u:"bolsa", p:195, cv:"MAIZ"},
-  {n:"KWS", cat:"SEM", u:"bolsa", p:140, cv:"MAIZ"},
-  {n:"Promedio maíz", cat:"SEM", u:"bolsa", p:161.67, cv:"MAIZ"},
-  // Semillas soja
-  {n:"DM46i20", cat:"SEM", u:"bolsa", p:40, cv:"SOJA"},
-  {n:"SJ PROPIA", cat:"SEM", u:"bolsa", p:40, cv:"SOJA"},
-  // Sin cultivo asignado en la planilla
-  {n:"Relincho", cat:"SEM", u:"bolsa", p:10, cv:""},
-  // Fertilizantes (USD por tonelada)
-  {n:"NITROCOMPLEX", cat:"FERT", u:"tn", p:990},
-  {n:"Nitrodoble", cat:"FERT", u:"tn", p:562},
-  {n:"Urea", cat:"FERT", u:"tn", p:572},
-  {n:"UREA-S NUTRIEN", cat:"FERT", u:"tn", p:585},
-  {n:"MAP LARTY", cat:"FERT", u:"tn", p:950},
-  {n:"MAP AZUFRADO NUTRIEN", cat:"FERT", u:"tn", p:937},
-  {n:"DAP-S NUTRIEN", cat:"FERT", u:"tn", p:919},
-  {n:"SJ NUTRIEN", cat:"FERT", u:"tn", p:716},
-];
 
 const PRODUCTORES_BASE = ["ENRIQUE","ANDRES","ENRIQUE - ANDRES","MARIANO","MARIANO - ANDRES","MARIANO - MATIAS - ANDRES","HAYDEE","HAYDEE - MARIANO","MATIAS","LORENZO","FAROUX MARIA GRACIELA","MATEAN SAS","SUC"];
 
@@ -1710,7 +1678,7 @@ function BuscadorProducto({valor, lista, color, negrita, onElegir, onNuevo}){
 // En la clave, "+" = y, "|" = o. Ej: "flurocloridona + metolacloro | paraquat + sulfentrazone"
 // ============================================================
 const PROTOCOLO_BASE = {
-  version: 1,
+  version: 2,
   campania: "26-27",
   criterios: [
     "Suelo limpio: si hay malezas nacidas, el residual va con quemante (glifosato/ControlMax + 2,4-D, o paraquat 2 L).",
@@ -1739,14 +1707,14 @@ const PROTOCOLO_BASE = {
       {id:"soja2-1", nombre:"A la siembra", desde:"10/12", hasta:"20/12", clave:"sulfentrazone + metolacloro | heat + metolacloro",
         mezcla:"Glifosato 1,7 + 2,4-D 0,3 L + Sulfentrazone 0,3 L + S-metolacloro 0,8 L. Alternativa: Heat 35 g + S-metolacloro 0,9 L.", hastaSiembra:true},
     ]},
-    {id:"maiz1", nombre:"Maíz temprano", aplicaA:"MAIZ", pasos:[
+    {id:"maiz1", nombre:"Maíz temprano", aplicaA:"MAIZ T", pasos:[
       {id:"maiz1-1", nombre:"Barbecho con atrazina", desde:"10/06", hasta:"25/09", clave:"atrazina",
         mezcla:"Junio: Glifosato 1,5 + 2,4-D 1,0 L + Dicamba 0,2 L + Atrazina 1 kg. Si no entró en junio, en septiembre: ControlMax 1,5–2 + 2,4-D 0,8–1,2 L + Dicamba 0,1–0,13 L + Atrazina 1 kg."},
       {id:"maiz1-2", nombre:"Preemergencia", desde:"01/10", hasta:"15/10", clave:"metolacloro + sulfentrazone | terbutilazina",
         mezcla:"ControlMax 1,2 + S-metolacloro 0,8 L + Sulfentrazone 0,3 L (+ carfentrazone 75 cc en cabeceras). Variante: Terbutilazina 1 L.",
         nota:"A la siembra (1–15 oct).", hastaSiembra:true},
     ]},
-    {id:"maiz2", nombre:"Maíz tardío", aplicaA:"MAIZ 2, MAIZ T, *-MAIZ", pasos:[
+    {id:"maiz2", nombre:"Maíz tardío", aplicaA:"MAIZ, MAIZ 2, *-MAIZ", pasos:[
       {id:"maiz2-1", nombre:"Barbecho", desde:"15/09", hasta:"20/10", clave:"atrazina",
         mezcla:"Glifosato 1,5–2 + 2,4-D 0,5–1 L + Dicamba 0,2 L + Atrazina 1 kg"},
       {id:"maiz2-2", nombre:"Barbecho intermedio", desde:"10/11", hasta:"25/11", clave:"atrazina | sulfentrazone",
@@ -1795,21 +1763,59 @@ const SINONIMOS_ACTIVO = {
   "flumetsulam": ["flumetsulam", "flumetsulan"],
   "laudis": ["laudis", "tembotrione"],
   "carfentrazone": ["carfentrazone", "shark"],
+  "acetoclor": ["acetoclor", "harness"],
+  "imazetapir": ["imazetapir", "pivot"],
+  "picloram": ["picloram", "tordon"],
 };
+// Activos que dejan residual en el suelo: son los que se listan en la ficha de cada lote.
+// Se suman los activos clave del protocolo, menos los que son sólo de contacto o post.
+const RESIDUALES = ["atrazina","terbutilazina","diflufenican","sulfentrazone","flurocloridona","metolacloro",
+  "acetoclor","flumioxazin","clorimuron","metsulfuron","imazetapir","flumetsulam","picloram","adengo","fierce","texaro"];
+const NO_RESIDUALES = ["paraquat","heat","carfentrazone","laudis","brucia","glifosato"];
+const nombreActivo = t => t === "metolacloro" || t === "s-metolacloro" ? "S-metolacloro" : t.charAt(0).toUpperCase() + t.slice(1);
+// Labores que no son pulverización (no cuentan como "última aplicación")
+const NO_ES_PULVERIZACION = /^(SIEMBRA|VOLEADA|INCORPORADA|PARATIL|RASTRA|ROLOS|SG\b|MZ PP|SJ PP|GR PP|SJ 2DA|MZ FERT|GR FERT|SJ FERT|FINA FERT)/i;
 
+// Si la labor no viene anotada, una pasada que sólo lleva semilla o fertilizante no es pulverización
+const CAT_NO_PULVERIZACION = ["SEM","FERT","SGR"];
+const esPulverizacion = a => !NO_ES_PULVERIZACION.test(a.labor||"") &&
+  !((a.productos||[]).length && a.productos.every(n => {
+    const cat = PRODUCTOS_BASE.find(p => normBusca(p.n) === normBusca(n));
+    return cat && CAT_NO_PULVERIZACION.includes(cat.cat);
+  }));
 const DIA_MS = 86400000;
+// Tope de atrazina por lote en la campaña (protocolo: si el lote puede ir a soja la siguiente)
+const TOPE_ATRAZINA_KG = 2;
 
 // "flurocloridona + metolacloro | paraquat + sulfentrazone" → [["flurocloridona","metolacloro"],["paraquat","sulfentrazone"]]
 const parseClave = clave => String(clave||"").split(/\||\bo\b/i)
   .map(alt => alt.split("+").map(t => normBusca(t).trim()).filter(Boolean))
   .filter(alt => alt.length);
 
-const productosTienen = (productos, termino) => {
+const productoEs = (nombre, termino) => {
   const variantes = SINONIMOS_ACTIVO[termino] || [termino.replace(/^s-/, "")];
-  return productos.some(p => { const n = normBusca(p); return variantes.some(v => n.includes(v)); });
+  const n = normBusca(nombre);
+  return variantes.some(v => n.includes(v));
 };
-const cumpleClave = (productos, alternativas) =>
-  alternativas.length > 0 && alternativas.some(alt => alt.every(t => productosTienen(productos, t)));
+// Qué activos (de una lista) lleva una aplicación
+const activosDe = (apl, terminos) => terminos.filter(t => (apl.productos||[]).some(p => productoEs(p, t)));
+
+// Unidad de la dosis: la del catálogo si el producto está; si no, se deduce del nombre (o va sin unidad)
+const unidadProducto = n => {
+  const k = normBusca(n);
+  const cat = PRODUCTOS_BASE.find(p => normBusca(p.n) === k);
+  if(cat && cat.u) return cat.u;
+  if(/\b(kg|kgs|grs?|granulad[oa]|solid[oa]|wg|wdg)\b/i.test(n)) return "kg";
+  if(/\b(lt|lts|litros?)\b/i.test(n)) return "L";
+  return "";
+};
+// Los residuales sólidos van en kg aunque el catálogo diga otra cosa
+const UNIDAD_ACTIVO = {atrazina:"kg", clorimuron:"kg", metsulfuron:"kg", texaro:"kg"};
+const fmtDosis = (d, n, activo) => {
+  if(d == null) return "";
+  const u = UNIDAD_ACTIVO[activo] || unidadProducto(n);
+  return `${Number(d).toLocaleString("es-AR",{maximumFractionDigits:3})}${u ? " " + u : ""}`;
+};
 
 // "26-27" + "10/06" → 10 jun 2026; enero y febrero caen en el segundo año
 const fechaDelPaso = (ddmm, campania) => {
@@ -1839,68 +1845,112 @@ const loteDeAplicacion = (ref, loteId) => refApuntaALote(ref, loteId) ? "entero"
 const ddmm = d => d ? `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}` : "—";
 
 // Cruza el protocolo con las labores de la planilla, lote por lote.
-// Estado de cada paso: hecho | ventana | atrasado (cerró y no abrió el siguiente) |
-// salteado (cerró sin hacerse pero ya se pasó al siguiente) | proximo
+// Un paso está hecho cuando, entre las aplicaciones del lote cerca de su ventana, ya están todos
+// los activos de alguna de sus alternativas (pueden venir en pasadas distintas).
+// Estado de cada paso: hecho | parcial (menos del 80% de las ha) | ventana | atrasado (cerró hace
+// 30 días o menos y no abrió el siguiente) | siembra (se hace a la siembra) | salteado | proximo
 function evaluarProtocolo(protocolo, campos, cultivoDe, aplicaciones, hoy){
   const resultado = [];
   const porCampo = {};
   aplicaciones.forEach(a => { (porCampo[a.campo] = porCampo[a.campo] || []).push(a); });
+  const iniCampania = fechaDelPaso("01/03", protocolo.campania);
+  const terminosProtocolo = (protocolo.cultivos||[]).flatMap(c => (c.pasos||[]).flatMap(p => parseClave(p.clave).flat()));
+  const residuales = [...new Set([...RESIDUALES, ...terminosProtocolo])].filter(t => !NO_RESIDUALES.includes(t));
+
   campos.forEach(campo => campo.lotes.forEach(lote => {
     const cv = cultivoDe(campo.id, lote.id);
     const protos = (protocolo.cultivos||[]).filter(p => cultivoCoincide(p.aplicaA, cv));
     if(!protos.length) return;
+    const haLote = Number(lote.ha) || 0;
     const apls = (porCampo[campo.id] || []).map(a => ({a, m: loteDeAplicacion(a.lote, lote.id)}))
-      .filter(x => x.m).map(x => x.m === "parte" ? {...x.a, parte:true} : x.a);
-    protos.forEach(prot => {
-      const pasos = (prot.pasos||[]).map(p => ({...p, alts: parseClave(p.clave),
-        ini: fechaDelPaso(p.desde, protocolo.campania), fin: fechaDelPaso(p.hasta, protocolo.campania)}))
-        .filter(p => p.ini && p.fin).sort((a,b) => a.ini - b.ini);
-      // Cada aplicación cuenta para el paso cuya ventana le queda más cerca (entre los que cumple)
+      .filter(x => x.m).map(x => x.m === "parte" ? {...x.a, parte:true} : x.a)
+      .filter(a => { const f = fechaLocal(a.fecha); return f && (!iniCampania || f >= iniCampania); })
+      .sort((x, y) => fechaLocal(y.fecha) - fechaLocal(x.fecha));
+
+    const porDia = {};
+    apls.forEach(a => (a.items || []).forEach(it => {
+      if(it.d != null && productoEs(it.n, "atrazina")) porDia[a.fecha] = Math.max(porDia[a.fecha] || 0, it.d);
+    }));
+    const atrazinaKg = Object.values(porDia).reduce((s, d) => s + d, 0);
+    const topeAtrazina = atrazinaKg >= TOPE_ATRAZINA_KG;
+
+    const evals = protos.map(prot => {
+      const pasos = (prot.pasos||[]).map(p => {
+        const alts = parseClave(p.clave);
+        return {...p, alts, terminos:[...new Set(alts.flat())],
+          ini: fechaDelPaso(p.desde, protocolo.campania), fin: fechaDelPaso(p.hasta, protocolo.campania)};
+      }).filter(p => p.ini && p.fin).sort((a,b) => a.ini - b.ini);
+      // Cada aplicación cuenta para el paso cuya ventana le queda más cerca (entre los que lleva algún activo)
       const asignadas = pasos.map(() => []);
       apls.forEach(a => {
         const f = fechaLocal(a.fecha);
-        if(!f) return;
         let mejor = Infinity, idxs = [];
         pasos.forEach((p, i) => {
           if(f < p.ini - 30*DIA_MS || f > p.fin.getTime() + 60*DIA_MS) return;
-          if(!cumpleClave(a.productos||[], p.alts)) return;
+          if(!activosDe(a, p.terminos).length) return;
           const dist = f < p.ini ? p.ini - f : f > p.fin ? f - p.fin : 0;
           if(dist < mejor){ mejor = dist; idxs = [i]; } else if(dist === mejor) idxs.push(i);
         });
         idxs.forEach(i => asignadas[i].push(a));
       });
-      const haLote = Number(lote.ha) || 0;
       const estados = pasos.map((p, i) => {
-        if(asignadas[i].length){
-          // Si lo aplicado cubre menos del 80% del lote (ej. 3 ha de 91), queda "hecho en parte"
-          const haHecha = asignadas[i].reduce((s, a) => s + (Number(a.ha) || haLote), 0);
+        const hechos = new Set(asignadas[i].flatMap(a => activosDe(a, p.terminos)));
+        // Lo que falta: si ya se empezó alguna alternativa, la que tiene menos pendiente; si no, la principal.
+        // Con el tope de atrazina alcanzado se descartan las alternativas que llevan atrazina (si hay otra).
+        const faltaDe = alt => alt.filter(t => !hechos.has(t));
+        let candidatas = p.alts;
+        const sinAtrazina = candidatas.filter(alt => !alt.includes("atrazina"));
+        const porTope = topeAtrazina && sinAtrazina.length > 0 && sinAtrazina.length < candidatas.length;
+        if(porTope) candidatas = sinAtrazina;
+        const conAvance = candidatas.filter(alt => alt.some(t => hechos.has(t)));
+        const elegida = (conAvance.length ? conAvance : candidatas.slice(0, 1))
+          .reduce((m, alt) => faltaDe(alt).length < faltaDe(m).length ? alt : m, (conAvance[0] || candidatas[0] || []));
+        const completa = p.alts.find(alt => alt.length && !faltaDe(alt).length);
+        const faltan = completa ? [] : faltaDe(elegida);
+        const base = {paso:p, apls:asignadas[i], faltan, porTope};
+        if(completa){
+          const alt = completa;
+          const haHecha = Math.min(...alt.map(t => asignadas[i].filter(a => activosDe(a, [t]).length)
+            .reduce((s, a) => s + (Number(a.ha) || haLote), 0)));
           const parcial = haLote > 0 && haHecha < 0.8 * haLote;
           const vigente = hoy <= p.fin.getTime() + 30*DIA_MS || p.hastaSiembra;
-          return {paso:p, estado: parcial && vigente ? "parcial" : "hecho", apls:asignadas[i], haHecha};
+          return {...base, estado: parcial && vigente ? "parcial" : "hecho", haHecha, alt};
         }
-        if(hoy < p.ini) return {paso:p, estado:"proximo", dias:Math.ceil((p.ini - hoy)/DIA_MS)};
-        if(hoy <= p.fin) return {paso:p, estado:"ventana", dias:Math.ceil((p.fin - hoy)/DIA_MS)};
+        if(hoy < p.ini) return {...base, estado:"proximo", dias:Math.ceil((p.ini - hoy)/DIA_MS)};
+        if(hoy <= p.fin) return {...base, estado:"ventana", dias:Math.ceil((p.fin - hoy)/DIA_MS)};
         const dias = Math.floor((hoy - p.fin)/DIA_MS);
         const yaSiguio = pasos.slice(i+1).some((q, j) => hoy >= q.ini || asignadas[i+1+j].length);
-        if(yaSiguio) return {paso:p, estado:"salteado", dias};
-        if(p.hastaSiembra) return {paso:p, estado: dias <= 120 ? "siembra" : "salteado", dias};
-        return {paso:p, estado: dias <= 30 ? "atrasado" : "salteado", dias};
+        if(yaSiguio) return {...base, estado:"salteado", dias};
+        if(p.hastaSiembra) return {...base, estado: dias <= 120 ? "siembra" : "salteado", dias};
+        return {...base, estado: dias <= 30 ? "atrasado" : "salteado", dias};
       });
-      resultado.push({campo, lote, cv, prot, estados});
+      return {prot, estados};
     });
+
+    // Residuales que ya recibió el lote en la campaña, con dosis y fecha (de la más vieja a la última)
+    const aplicados = [];
+    [...apls].reverse().forEach(a => (a.items || (a.productos||[]).map(n => ({n, d:null}))).forEach(it => {
+      const act = residuales.find(t => productoEs(it.n, t));
+      if(act) aplicados.push({activo:act, n:it.n, d:it.d, fecha:a.fecha, parte:a.parte, ref:a.lote, ha:a.ha});
+    }));
+    const ultima = apls.find(esPulverizacion) || null;
+    const ultimaResiduales = ultima ? (ultima.items || (ultima.productos||[]).map(n => ({n, d:null})))
+      .map(it => ({...it, activo: residuales.find(t => productoEs(it.n, t))})).filter(it => it.activo) : [];
+    resultado.push({campo, lote, cv, evals, aplicados, ultima, ultimaResiduales, atrazinaKg, topeAtrazina});
   }));
   return resultado;
 }
 
 const ESTADO_PASO = {
-  hecho:    {txt:"Hecho",     color:"#2E7D32", fondo:"#E8F5E9", icono:"✓"},
-  ventana:  {txt:"En ventana", color:"#8A6200", fondo:"#FFF6DD", icono:"●"},
-  siembra:  {txt:"Antes de sembrar", color:"#A0522D", fondo:"#FCEBDD", icono:"◆"},
-  parcial:  {txt:"Hecho en parte", color:"#6D5BA8", fondo:"#EFEAF8", icono:"◐"},
   atrasado: {txt:"Atrasado",  color:"#C0392B", fondo:"#FBE3E0", icono:"!"},
-  salteado: {txt:"No se hizo", color:"#8C8572", fondo:"#F1EEE6", icono:"–"},
+  ventana:  {txt:"En ventana", color:"#8A6200", fondo:"#FFF6DD", icono:"●"},
+  parcial:  {txt:"Hecho en parte", color:"#6D5BA8", fondo:"#EFEAF8", icono:"◐"},
+  siembra:  {txt:"Antes de sembrar", color:"#A0522D", fondo:"#FCEBDD", icono:"◆"},
   proximo:  {txt:"Próximo",   color:"#5B6B7A", fondo:"#EEF2F6", icono:"○"},
+  salteado: {txt:"No se hizo", color:"#8C8572", fondo:"#F1EEE6", icono:"–"},
+  hecho:    {txt:"Hecho",     color:"#2E7D32", fondo:"#E8F5E9", icono:"✓"},
 };
+const ORDEN_ESTADO = ["atrasado","ventana","parcial","siembra","proximo","salteado","hecho"];
 
 const cajaV = {background:CREMA,border:`1.5px solid ${TINTA}`,borderRadius:12,padding:"14px 16px"};
 const chipV = a => ({padding:"5px 11px",fontSize:12,fontWeight:700,cursor:"pointer",borderRadius:20,
@@ -1909,39 +1959,34 @@ const selectV = {padding:"8px 11px",fontSize:13.5,fontWeight:600,border:`1.5px s
 const nombreCampo = id => (CAMPOS.find(c => c.id === id) || {}).nombre || id;
 
 // ============================================================
-// LABORES PENDIENTES — lo que falta según el protocolo
+// LABORES PENDIENTES — ficha por lote: qué residual tiene y cuál le falta
 // ============================================================
-function VistaPendientes({protocolo, cultivoDe, aplicaciones, fechaDatos, onEditar}){
+function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDatos, onEditar}){
   const [campoF, setCampoF] = useState("TODOS");
   const [protF, setProtF] = useState("TODOS");
-  const [verLotes, setVerLotes] = useState(false);
+  const [estadoF, setEstadoF] = useState("TODOS");
   const hoy = useMemo(() => { const d = new Date(); d.setHours(0,0,0,0); return d; }, []);
   const evaluacion = useMemo(() => evaluarProtocolo(protocolo, CAMPOS, cultivoDe, aplicaciones, hoy),
     [protocolo, aplicaciones, cultivoDe, hoy]);
-  const filtrada = evaluacion.filter(e => (campoF === "TODOS" || e.campo.id === campoF) && (protF === "TODOS" || e.prot.id === protF));
 
-  // Tarjetas: lotes agrupados por paso y estado. De cada lote sólo cuenta el paso que toca ahora.
-  const grupos = {};
-  filtrada.forEach(e => {
-    const actuales = e.estados.filter(s => ["ventana","atrasado","siembra","parcial"].includes(s.estado));
-    const prox = e.estados.find(s => s.estado === "proximo" && s.dias <= 30);
-    const lista = actuales.length ? actuales : (prox && !e.estados.some(s => s.estado === "ventana") ? [prox] : []);
-    lista.forEach(s => {
-      const k = `${s.estado}|${e.prot.id}|${s.paso.id}`;
-      if(!grupos[k]) grupos[k] = {estado:s.estado, prot:e.prot, paso:s.paso, dias:s.dias, lotes:[]};
-      const falto = e.estados.filter(x => x.estado === "salteado" && x.paso.ini < s.paso.ini).map(x => x.paso.nombre);
-      const extra = s.estado === "parcial" ? `hecho en ${fmt(s.haHecha)} de ${fmt(Number(e.lote.ha)||0)} ha` : "";
-      grupos[k].lotes.push({campo:e.campo, lote:e.lote, cv:e.cv, falto, extra});
-    });
+  // Estado del lote = lo más urgente que tiene abierto
+  const fichas = evaluacion.map(e => {
+    const abiertos = e.evals.flatMap(ev => ev.estados).filter(s => ["atrasado","ventana","parcial","siembra"].includes(s.estado) || (s.estado === "proximo" && s.dias <= 30));
+    const estado = abiertos.length ? ORDEN_ESTADO.find(est => abiertos.some(s => s.estado === est)) : "aldia";
+    return {...e, estado};
   });
-  const orden = {atrasado:0, ventana:1, parcial:2, siembra:3, proximo:4};
-  const tarjetas = Object.values(grupos).sort((a,b) => orden[a.estado]-orden[b.estado] || a.paso.fin - b.paso.fin);
-  const resumen = ["atrasado","ventana","siembra","proximo"].map(est => {
-    const ts = tarjetas.filter(t => t.estado === est);
-    return {est, n: ts.reduce((s,t)=>s+t.lotes.length,0), ha: ts.reduce((s,t)=>s+t.lotes.reduce((x,l)=>x+(Number(l.lote.ha)||0),0),0)};
-  });
-  const alDia = filtrada.filter(e => !e.estados.some(s => ["ventana","atrasado","siembra","parcial"].includes(s.estado))).length;
+  const filtradas = fichas.filter(f => (campoF === "TODOS" || f.campo.id === campoF)
+    && (protF === "TODOS" || f.evals.some(ev => ev.prot.id === protF))
+    && (estadoF === "TODOS" || f.estado === estadoF))
+    .sort((a, b) => (ORDEN_ESTADO.indexOf(a.estado)+1 || 99) - (ORDEN_ESTADO.indexOf(b.estado)+1 || 99)
+      || a.campo.nombre.localeCompare(b.campo.nombre) || String(a.lote.id).localeCompare(String(b.lote.id), "es", {numeric:true}));
+  const base = fichas.filter(f => (campoF === "TODOS" || f.campo.id === campoF) && (protF === "TODOS" || f.evals.some(ev => ev.prot.id === protF)));
+  const tiles = [...["atrasado","ventana","parcial","siembra","proximo"].map(est => ({est, ...ESTADO_PASO[est], txt: est === "proximo" ? "Abre en 30 días" : ESTADO_PASO[est].txt})),
+    {est:"aldia", txt:"Sin nada pendiente", color:TINTA, fondo:CREMA}]
+    .map(t => ({...t, lotes: base.filter(f => f.estado === t.est)}))
+    .filter(t => t.lotes.length || t.est === "aldia");
   const camposCon = [...new Set(evaluacion.map(e => e.campo.id))];
+  const fFecha = s => { const d = fechaLocal(s); return d ? ddmm(d) : s; };
 
   return (
     <div style={{display:"flex",flexDirection:"column",gap:14}}>
@@ -1952,92 +1997,116 @@ function VistaPendientes({protocolo, cultivoDe, aplicaciones, fechaDatos, onEdit
         </select>
         <select value={protF} onChange={e=>setProtF(e.target.value)} style={selectV}>
           <option value="TODOS">Todos los cultivos</option>
-          {(protocolo.cultivos||[]).filter(p => evaluacion.some(e => e.prot.id === p.id)).map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+          {(protocolo.cultivos||[]).filter(p => evaluacion.some(e => e.evals.some(ev => ev.prot.id === p.id))).map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
         </select>
         <div style={{fontSize:12,opacity:0.65,flex:"1 1 260px"}}>
-          Protocolo cruzado con las labores de la planilla{fechaDatos ? ` (datos al ${fechaDatos})` : ""}. Hoy: {ddmm(hoy)}.{" "}
+          Labores de la planilla{fechaDatos ? ` al ${fechaDatos}` : ""} cruzadas con el protocolo. Hoy: {ddmm(hoy)}.
+          {!conDosis && " Las dosis aparecen cuando el pipeline publique el registro de labores."}{" "}
           <button onClick={onEditar} style={{border:"none",background:"none",padding:0,color:"#1E5FA8",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:12}}>Editar protocolo</button>
         </div>
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:10}}>
-        {resumen.map(r => { const st = ESTADO_PASO[r.est]; return (
-          <div key={r.est} style={{...cajaV,textAlign:"center",borderColor:st.color,background:st.fondo}}>
-            <div style={{fontSize:22,fontWeight:700,color:st.color}}>{r.n} <span style={{fontSize:13}}>lotes</span></div>
-            <div style={{fontSize:11.5,opacity:0.75,marginTop:2}}>{r.est==="proximo"?"Abren en 30 días":st.txt} · {fmt(r.ha)} ha</div>
-          </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:10}}>
+        {tiles.map(t => { const activo = estadoF === t.est; return (
+          <button key={t.est} onClick={()=>setEstadoF(activo ? "TODOS" : t.est)}
+            style={{...cajaV,textAlign:"center",borderColor:t.color,background:t.fondo,cursor:"pointer",fontFamily:"inherit",color:TINTA,
+              boxShadow:activo?`inset 0 0 0 2px ${t.color}`:"none",padding:"10px 8px"}}>
+            <div style={{fontSize:21,fontWeight:700,color:t.color}}>{t.lotes.length} <span style={{fontSize:12.5}}>lotes</span></div>
+            <div style={{fontSize:11.5,opacity:0.8,marginTop:2}}>{t.txt} · {fmt(t.lotes.reduce((s,f)=>s+(Number(f.lote.ha)||0),0))} ha</div>
+          </button>
         );})}
-        <div style={{...cajaV,textAlign:"center"}}>
-          <div style={{fontSize:22,fontWeight:700}}>{alDia} <span style={{fontSize:13}}>lotes</span></div>
-          <div style={{fontSize:11.5,opacity:0.75,marginTop:2}}>Sin nada pendiente hoy</div>
-        </div>
       </div>
+      {estadoF !== "TODOS" && <div style={{fontSize:12,opacity:0.7}}>Mostrando sólo "{(ESTADO_PASO[estadoF]||{txt:"Sin nada pendiente"}).txt}". <button onClick={()=>setEstadoF("TODOS")} style={{border:"none",background:"none",padding:0,color:"#1E5FA8",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:12}}>Ver todos</button></div>}
 
-      {!tarjetas.length && <div style={{...cajaV,textAlign:"center",opacity:0.7}}>No hay labores pendientes con estos filtros.</div>}
-      {tarjetas.map(t => {
-        const st = ESTADO_PASO[t.estado];
-        const ha = t.lotes.reduce((s,l)=>s+(Number(l.lote.ha)||0),0);
-        const cuando = t.estado==="atrasado" ? `venció el ${t.paso.hasta} (hace ${t.dias} días)`
-          : t.estado==="siembra" ? `ventana ${t.paso.desde}–${t.paso.hasta} · se hace a la siembra`
-          : t.estado==="parcial" ? `ventana ${t.paso.desde}–${t.paso.hasta} · falta completar el lote`
-          : t.estado==="ventana" ? `hasta el ${t.paso.hasta} · quedan ${t.dias} días`
-          : `abre el ${t.paso.desde} (en ${t.dias} días)`;
+      {!filtradas.length && <div style={{...cajaV,textAlign:"center",opacity:0.7}}>No hay lotes con estos filtros.</div>}
+      {filtradas.map(f => {
+        const st = ESTADO_PASO[f.estado] || {txt:"Al día", color:"#2E7D32", fondo:"#E8F5E9"};
+        // Residuales agrupados por activo, con total si se repitió
+        // (las partes del lote aplicadas el mismo día son una sola pasada: no se suman)
+        const porActivo = [];
+        f.aplicados.forEach(r => {
+          let g = porActivo.find(x => x.activo === r.activo);
+          if(!g){ g = {activo:r.activo, items:[]}; porActivo.push(g); }
+          const mismoDia = g.items.find(x => x.fecha === r.fecha);
+          if(mismoDia){ if(r.d != null && (mismoDia.d == null || r.d > mismoDia.d)) mismoDia.d = r.d; mismoDia.parte = mismoDia.parte && r.parte; mismoDia.ref += ` + ${r.ref}`; }
+          else g.items.push({...r});
+        });
+        const faltas = f.evals.flatMap(ev => ev.estados.filter(s => s.estado !== "hecho").map(s => ({...s, prot:ev.prot})))
+          .sort((a, b) => ORDEN_ESTADO.indexOf(a.estado) - ORDEN_ESTADO.indexOf(b.estado) || a.paso.ini - b.paso.ini);
         return (
-          <div key={`${t.estado}${t.prot.id}${t.paso.id}`} style={{...cajaV,borderLeft:`6px solid ${st.color}`}}>
-            <div style={{display:"flex",justifyContent:"space-between",gap:10,flexWrap:"wrap",alignItems:"baseline"}}>
-              <div>
-                <span style={{fontSize:10.5,fontWeight:700,color:st.color,background:st.fondo,borderRadius:5,padding:"2px 7px",marginRight:8,textTransform:"uppercase"}}>{st.txt}</span>
-                <span style={{fontSize:15,fontWeight:700}}>{t.prot.nombre} · {t.paso.nombre}</span>
-              </div>
-              <div style={{fontSize:12.5,fontWeight:600,color:st.color}}>{cuando}</div>
-            </div>
-            <div style={{fontSize:12.5,marginTop:6}}><b>Mezcla:</b> {t.paso.mezcla}</div>
-            {t.paso.nota && <div style={{fontSize:12,marginTop:3,opacity:0.75}}>{t.paso.nota}</div>}
-            <div style={{fontSize:11.5,fontWeight:700,marginTop:10,opacity:0.7}}>{t.lotes.length} lotes · {fmt(ha)} ha</div>
-            <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:6}}>
-              {t.lotes.map(l => (
-                <span key={`${l.campo.id}|${l.lote.id}`} title={l.cv} style={{fontSize:12,border:"1px solid #C8C2B0",borderRadius:7,padding:"3px 8px",background:"#fff"}}>
-                  <b>{l.campo.nombre}</b> {l.lote.label||l.lote.id} <span style={{opacity:0.6}}>{fmt(Number(l.lote.ha)||0)} ha</span>
-                  {l.extra && <span style={{color:"#6D5BA8",fontSize:11}}> · {l.extra}</span>}
-                  {l.falto.length>0 && <span style={{color:"#C0392B",fontSize:11}}> · faltó {l.falto.join(", ").toLowerCase()}</span>}
+          <div key={`${f.campo.id}|${f.lote.id}`} style={{...cajaV,borderLeft:`6px solid ${st.color}`,padding:"12px 14px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+              <div style={{display:"flex",alignItems:"center",gap:7,flexWrap:"wrap"}}>
+                <span style={{fontSize:15.5,fontWeight:700}}>{f.campo.nombre} · Lote {f.lote.label||f.lote.id}</span>
+                <span style={{fontSize:12,opacity:0.7}}>{fmt(Number(f.lote.ha)||0)} ha</span>
+                <span style={{fontSize:11.5,display:"inline-flex",alignItems:"center",gap:4,border:"1px solid #C8C2B0",borderRadius:6,padding:"1px 7px",background:"#fff"}}>
+                  <span style={{width:8,height:8,borderRadius:2,background:colorCv(f.cv)}}/>{f.cv}
                 </span>
-              ))}
+                <span style={{fontSize:11.5,opacity:0.6}}>{f.evals.map(ev => ev.prot.nombre).join(" + ")}</span>
+              </div>
+              <span style={{fontSize:10.5,fontWeight:700,color:st.color,background:st.fondo,border:`1px solid ${st.color}55`,borderRadius:5,padding:"2px 8px",textTransform:"uppercase"}}>{f.estado==="aldia"?"Al día":st.txt}</span>
+            </div>
+
+            <div style={{fontSize:12.5,marginTop:8}}>
+              <b>Última aplicación:</b>{" "}
+              {f.ultima ? <>
+                {fFecha(f.ultima.fecha)}{f.ultima.parte ? ` (${f.ultima.lote})` : ""} ·{" "}
+                {f.ultimaResiduales.length
+                  ? <span style={{color:"#2E7D32",fontWeight:600}}>con residual: {f.ultimaResiduales.map(it => `${it.n}${it.d!=null ? " " + fmtDosis(it.d, it.n, it.activo) : ""}`).join(", ")}</span>
+                  : <span style={{color:"#8A6200",fontWeight:600}}>sin residual</span>}
+                <span style={{opacity:0.6}}> — {(f.ultima.productos||[]).join(", ")}</span>
+              </> : <span style={{opacity:0.6}}>sin pulverizaciones en la campaña</span>}
+            </div>
+
+            <div style={{fontSize:12.5,marginTop:6}}>
+              <b>Residuales aplicados:</b>{" "}
+              {!porActivo.length && <span style={{opacity:0.6}}>ninguno todavía</span>}
+              <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:porActivo.length?4:0}}>
+                {porActivo.map(g => {
+                  const total = g.items.length > 1 && g.items.every(r => r.d != null) ? g.items.reduce((s, r) => s + r.d, 0) : null;
+                  return (
+                    <span key={g.activo} style={{fontSize:12,border:"1px solid #A5D6A7",background:"#F1F8F1",borderRadius:7,padding:"3px 8px"}}>
+                      <b>{nombreActivo(g.activo)}</b>{" "}
+                      {g.items.map((r, i) => <span key={i} title={`${r.n}${r.parte ? ` — ${r.ref}` : ""}`}>{i>0?" + ":""}{r.d!=null ? fmtDosis(r.d, r.n, g.activo) + " " : ""}<span style={{opacity:0.7}}>{fFecha(r.fecha)}{r.parte?"*":""}</span></span>)}
+                      {total != null && <b> = {fmtDosis(total, g.items[0].n, g.activo)}</b>}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div style={{fontSize:12.5,marginTop:8}}>
+              <b>Falta:</b>{" "}
+              {!faltas.length && <span style={{color:"#2E7D32",fontWeight:600}}>nada, el protocolo está completo ✓</span>}
+              <div style={{display:"flex",flexDirection:"column",gap:4,marginTop:faltas.length?4:0}}>
+                {faltas.map(s => {
+                  const e = ESTADO_PASO[s.estado];
+                  const que = s.faltan.length ? s.faltan.map(nombreActivo).join(" + ")
+                    : s.alt ? s.alt.map(nombreActivo).join(" + ") : s.paso.nombre;
+                  const cuando = s.estado==="atrasado" ? `venció el ${s.paso.hasta} (hace ${s.dias} días)`
+                    : s.estado==="ventana" ? `hasta el ${s.paso.hasta} · quedan ${s.dias} días`
+                    : s.estado==="siembra" ? "a la siembra"
+                    : s.estado==="parcial" ? `hecho en ${fmt(s.haHecha)} de ${fmt(Number(f.lote.ha)||0)} ha, falta completar`
+                    : s.estado==="proximo" ? `desde el ${s.paso.desde} (en ${s.dias} días)`
+                    : `no se hizo (ventana ${s.paso.desde}–${s.paso.hasta})`;
+                  const accionable = ["atrasado","ventana","siembra","parcial"].includes(s.estado);
+                  return (
+                    <div key={`${s.prot.id}${s.paso.id}`} style={{display:"flex",gap:7,alignItems:"baseline",flexWrap:"wrap",opacity:s.estado==="salteado"?0.7:1}}>
+                      <span style={{fontSize:10.5,fontWeight:700,color:e.color,background:e.fondo,borderRadius:5,padding:"1px 6px",minWidth:16,textAlign:"center"}}>{e.icono}</span>
+                      <span style={{fontWeight:700,color:e.color}}>{que}</span>
+                      <span style={{opacity:0.75}}>{cuando}</span>
+                      <span style={{fontSize:11.5,opacity:0.55}}>· {f.evals.length > 1 ? `${s.prot.nombre}, ` : ""}{s.paso.nombre.toLowerCase()}</span>
+                      {s.porTope && <span style={{fontSize:11.5,color:"#C0392B",fontWeight:600}}>· sin más atrazina: ya lleva {fmtDosis(f.atrazinaKg, "", "atrazina")} (tope {TOPE_ATRAZINA_KG} kg)</span>}
+                      {accionable && s.paso.mezcla && <div style={{width:"100%",fontSize:11.5,opacity:0.7,paddingLeft:24}}>Mezcla: {s.paso.mezcla}</div>}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         );
       })}
-
-      <div style={cajaV}>
-        <button onClick={()=>setVerLotes(v=>!v)} style={{...chipV(verLotes)}}>{verLotes?"Ocultar":"Ver"} estado por lote ({filtrada.length})</button>
-        {verLotes && (
-          <div style={{overflowX:"auto",marginTop:10}}>
-            <table style={{width:"100%",borderCollapse:"collapse",fontSize:12,minWidth:640}}>
-              <thead><tr style={{background:"#E5E0D0"}}>
-                {["Campo","Lote","Ha","Cultivo 26-27","Protocolo","Pasos"].map(h => <th key={h} style={{textAlign:"left",padding:"7px 9px",fontSize:10.5,textTransform:"uppercase",opacity:0.7}}>{h}</th>)}
-              </tr></thead>
-              <tbody>{filtrada.map(e => (
-                <tr key={`${e.campo.id}|${e.lote.id}|${e.prot.id}`} style={{borderTop:"1px solid #E5E0D0"}}>
-                  <td style={{padding:"6px 9px",fontWeight:600,whiteSpace:"nowrap"}}>{e.campo.nombre}</td>
-                  <td style={{padding:"6px 9px"}}>{e.lote.label||e.lote.id}</td>
-                  <td style={{padding:"6px 9px"}}>{fmt(Number(e.lote.ha)||0)}</td>
-                  <td style={{padding:"6px 9px",whiteSpace:"nowrap"}}><span style={{display:"inline-block",width:8,height:8,borderRadius:2,background:colorCv(e.cv),marginRight:4}}/>{e.cv}</td>
-                  <td style={{padding:"6px 9px",whiteSpace:"nowrap"}}>{e.prot.nombre}</td>
-                  <td style={{padding:"6px 9px"}}>
-                    <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
-                      {e.estados.map(s => { const st = ESTADO_PASO[s.estado]; return (
-                        <span key={s.paso.id} title={s.apls ? s.apls.map(a=>`${fechaCorta(a.fecha)}: ${a.productos.join(", ")}`).join("\n") : st.txt}
-                          style={{fontSize:11,color:st.color,background:st.fondo,border:`1px solid ${st.color}33`,borderRadius:5,padding:"1px 6px",whiteSpace:"nowrap"}}>
-                          {st.icono} {s.paso.nombre}{s.apls ? ` ${fechaCorta(s.apls[0].fecha)}${s.apls.every(a=>a.parte) ? ` (${s.apls.map(a=>a.lote).join(" + ")})` : ""}` : ""}
-                        </span>
-                      );})}
-                    </div>
-                  </td>
-                </tr>
-              ))}</tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      {filtradas.some(f => f.aplicados.some(r => r.parte)) && <div style={{fontSize:11.5,opacity:0.6}}>* aplicado en una parte del lote (ej. "sin cabecera"); el detalle está al pasar el mouse.</div>}
     </div>
   );
 }
@@ -2145,6 +2214,134 @@ function VistaRealizadas({aplicaciones, fertilizaciones}){
 }
 
 // ============================================================
+// DOCUMENTOS COMPARTIDOS — protocolo y precios, guardados en la planilla
+// (api/compartido.js) con copia local por si no hay señal
+// ============================================================
+function useDocCompartido(doc, base, valido, autor){
+  const KEY = `smix_${doc}_v1`;
+  const [datos, setDatos] = useState(() => {
+    try { const d = JSON.parse(window.localStorage.getItem(KEY)); if(valido(d)) return d; } catch {}
+    return base;
+  });
+  const [sync, setSync] = useState({estado:"cargando"});
+  useEffect(() => {
+    fetch(`/api/compartido?doc=${doc}`).then(r => r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status)))
+      .then(d => {
+        // La planilla manda: si nadie guardó todavía, vale el original
+        const remoto = valido(d.datos) ? d.datos : base;
+        setDatos(remoto);
+        try { if(valido(d.datos)) window.localStorage.setItem(KEY, JSON.stringify(d.datos)); else window.localStorage.removeItem(KEY); } catch {}
+        setSync({estado:"ok", actualizado:d.actualizado, autor:d.autor});
+      })
+      .catch(e => setSync({estado:"error", txt:e.message}));
+  }, []);
+  const guardar = async (nuevo) => {
+    setDatos(nuevo);
+    try { window.localStorage.setItem(KEY, JSON.stringify(nuevo)); } catch {}
+    setSync({estado:"guardando"});
+    try {
+      const r = await fetch(`/api/compartido?doc=${doc}`, {method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({datos:nuevo, autor})});
+      const d = await r.json();
+      if(!r.ok) throw new Error(d.error || "error");
+      setSync({estado:"ok", actualizado:d.actualizado, autor});
+    } catch(e) {
+      setSync({estado:"error", txt:e.message});
+    }
+  };
+  return [datos, guardar, sync];
+}
+const textoSync = (sync, sinCambios) => sync.estado === "guardando" ? "Guardando…" : sync.estado === "cargando" ? "Cargando la versión compartida…"
+  : sync.estado === "error" ? `No se pudo sincronizar${sync.txt ? `: ${sync.txt}` : ""}. Queda guardado en este equipo.`
+  : sync.actualizado ? `Guardado para todos el ${new Date(sync.actualizado).toLocaleString("es-AR",{dateStyle:"short",timeStyle:"short"})}${sync.autor ? ` por ${sync.autor}` : ""}` : sinCambios;
+
+// ============================================================
+// PRECIOS — editar el precio de semillas, fertilizantes y agroquímicos
+// Es el precio que toma "Nueva labor" al elegir el producto (y el que se escribe en la planilla).
+// ============================================================
+const PRECIOS_BASE = {version:1, precios:{}};
+const CATEGORIAS_PRECIO = [["SEM","Semillas"],["FERT","Fertilizantes"],["SGR","Curasemillas"],["HER","Herbicidas"],
+  ["INS","Insecticidas"],["FUN","Fungicidas"],["COAD","Coadyuvantes"]];
+
+function VistaPrecios({productos, precios, sync, onGuardar}){
+  const original = useMemo(() => Object.fromEntries(productos.map(p => [p.n, p.p || 0])), [productos]);
+  const aTexto = obj => Object.fromEntries(Object.entries(obj||{}).map(([n, v]) => [n, String(v).replace(".", ",")]));
+  const [editados, setEditados] = useState(() => aTexto(precios.precios));
+  useEffect(() => { setEditados(aTexto(precios.precios)); }, [precios]);
+  const [cat, setCat] = useState("SEM");
+  const [busca, setBusca] = useState("");
+
+  const num = t => { const x = parseFloat(String(t).replace(/\./g, "").replace(",", ".")); return isNaN(x) ? null : x; };
+  // Lo que se guarda: sólo los precios que difieren del original
+  const final = {};
+  Object.entries(editados).forEach(([n, t]) => { const v = num(t); if(v != null && v !== original[n]) final[n] = v; });
+  const cambiado = JSON.stringify(final) !== JSON.stringify(precios.precios || {});
+  const invalidos = Object.entries(editados).filter(([, t]) => String(t).trim() !== "" && num(t) == null).map(([n]) => n);
+
+  const palabras = normBusca(busca).split(/\s+/).filter(Boolean);
+  const lista = productos.filter(p => p.cat !== "LABOR" && (cat === "TODAS" || p.cat === cat || (cat === "EDITADOS" && precios.precios?.[p.n] != null))
+    && (!palabras.length || palabras.every(w => normBusca(p.n).includes(w))));
+  const btn = (fondo, color) => ({padding:"7px 13px",fontSize:12.5,fontWeight:700,borderRadius:8,border:`1.5px solid ${TINTA}`,background:fondo,color,cursor:"pointer",fontFamily:"inherit"});
+  const nEditados = Object.keys(precios.precios || {}).length;
+
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:12}}>
+      <div style={{...cajaV,display:"flex",gap:10,flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:5}}>
+        <div>
+          <div style={{fontSize:15,fontWeight:700}}>Precios de productos (USD)</div>
+          <div style={{fontSize:11.5,opacity:0.7,marginTop:2,color:sync.estado==="error"?"#C0392B":TINTA}}>
+            {textoSync(sync, "Precios originales del catálogo (sin cambios guardados)")}{nEditados ? ` · ${nEditados} precio(s) editado(s)` : ""}
+          </div>
+        </div>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          <button disabled={!cambiado} onClick={()=>setEditados(aTexto(precios.precios))} style={{...btn("transparent",TINTA),opacity:cambiado?1:0.4}}>Descartar cambios</button>
+          <button disabled={!cambiado || invalidos.length>0} onClick={()=>onGuardar({...precios, version:1, precios:final})}
+            style={{...btn(cambiado&&!invalidos.length?"#2E7D32":"#B5AF9D","#fff"),border:"none"}}>💾 Guardar precios</button>
+        </div>
+        {invalidos.length>0 && <div style={{width:"100%",fontSize:12,color:"#C0392B"}}>Revisá el número en: {invalidos.join(", ")}</div>}
+      </div>
+      <div style={{fontSize:12,opacity:0.7}}>
+        Es el precio que toma <b>Nueva labor</b> al elegir el producto y el que se escribe en la planilla al guardar la labor.
+        Las labores ya guardadas no cambian. El precio de las labores (pulverización, siembra…) no se edita acá.
+      </div>
+      <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+        {[...CATEGORIAS_PRECIO, ["TODAS","Todas"], ["EDITADOS",`Editados (${nEditados})`]].map(([k, l]) =>
+          <button key={k} onClick={()=>setCat(k)} style={chipV(cat===k)}>{l}</button>)}
+        <input value={busca} onChange={e=>setBusca(e.target.value)} placeholder="Buscar producto"
+          style={{...selectV,fontWeight:400,flex:"1 1 180px",minWidth:0,padding:"6px 10px",fontSize:13}}/>
+      </div>
+      <div style={{...cajaV,padding:0,overflow:"hidden"}}>
+        <div style={{display:"grid",gridTemplateColumns:"minmax(0,1fr) 96px 30px",gap:8,padding:"8px 12px",background:"#E5E0D0",
+          fontSize:10.5,fontWeight:700,textTransform:"uppercase",opacity:0.75}}>
+          <div>Producto</div><div style={{textAlign:"right"}}>Precio USD</div><div/>
+        </div>
+        {!lista.length && <div style={{padding:12,fontSize:12.5,opacity:0.6}}>No hay productos con estos filtros.</div>}
+        {lista.map(p => {
+          const t = editados[p.n];
+          const valor = t !== undefined ? t : String(original[p.n] ?? "").replace(".", ",");
+          const v = num(valor);
+          const distinto = v != null && v !== original[p.n];
+          return (
+            <div key={p.n} style={{display:"grid",gridTemplateColumns:"minmax(0,1fr) 96px 30px",gap:8,padding:"6px 12px",alignItems:"center",
+              borderTop:"1px solid #E5E0D0",background:distinto?"#FFF8E6":"transparent",fontSize:12.5}}>
+              <div style={{minWidth:0,overflowWrap:"anywhere"}} title={p.n}>
+                {p.n}{p.prov==="PROPIO" && <span style={{fontSize:10.5,color:"#1E5FA8",marginLeft:5}}>mío</span>}
+                <div style={{fontSize:11,opacity:0.6}}>por {p.u || "unidad"} · original {original[p.n] ? fmtCant(original[p.n]) : "sin precio"}</div>
+              </div>
+              <input inputMode="decimal" value={valor} onChange={e=>setEditados(x=>({...x,[p.n]:e.target.value}))}
+                style={{width:"100%",boxSizing:"border-box",padding:"5px 7px",fontSize:12.5,textAlign:"right",borderRadius:6,fontFamily:"inherit",
+                  border:`1px solid ${v==null && String(valor).trim()!=="" ? "#C0392B" : distinto ? "#C9A227" : "#C8C2B0"}`,background:"#FFFDF7",color:TINTA,fontWeight:distinto?700:400}}/>
+              <button title="Volver al precio original" disabled={!distinto} onClick={()=>setEditados(x=>{ const n={...x}; delete n[p.n]; return n; })}
+                style={{border:"none",background:"none",cursor:distinto?"pointer":"default",opacity:distinto?0.8:0.2,fontSize:14,padding:0,color:TINTA}}>↺</button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
 // EDITOR DEL PROTOCOLO — se guarda compartido en la planilla
 // ============================================================
 function VistaProtocoloEditor({protocolo, sync, onGuardar}){
@@ -2162,9 +2359,7 @@ function VistaProtocoloEditor({protocolo, sync, onGuardar}){
   const etiqueta = t => <div style={{fontSize:10.5,fontWeight:700,textTransform:"uppercase",opacity:0.6,marginBottom:3}}>{t}</div>;
   const btn = (fondo, color) => ({padding:"7px 13px",fontSize:12.5,fontWeight:700,borderRadius:8,border:`1.5px solid ${TINTA}`,background:fondo,color,cursor:"pointer",fontFamily:"inherit"});
 
-  const estadoSync = sync.estado === "guardando" ? "Guardando…" : sync.estado === "cargando" ? "Cargando el protocolo compartido…"
-    : sync.estado === "error" ? `No se pudo sincronizar${sync.txt ? `: ${sync.txt}` : ""}. Queda guardado en este equipo.`
-    : sync.actualizado ? `Guardado para todos el ${new Date(sync.actualizado).toLocaleString("es-AR",{dateStyle:"short",timeStyle:"short"})}${sync.autor ? ` por ${sync.autor}` : ""}` : "Protocolo original (sin cambios guardados)";
+  const estadoSync = textoSync(sync, "Protocolo original (sin cambios guardados)");
 
   return (
     <div style={{display:"flex",flexDirection:"column",gap:14}}>
@@ -2293,7 +2488,7 @@ export default function App(){
     datosRemotos.FERTILIZACIONES.map((f,i)=>({...f,id:i})).sort((a,b)=>fechaLocal(b.fecha)-fechaLocal(a.fecha))
     : FERTILIZACIONES_FALLBACK;
 
-  const [vista,setVista]=useState("mapas");        // mapas | galeria | realizadas | pendientes | herbicidas | fertilizaciones | ordenes | margenes | insumos | protocolo
+  const [vista,setVista]=useState("mapas");        // mapas | galeria | realizadas | pendientes | herbicidas | fertilizaciones | ordenes | margenes | protocolo | precios
   const [campoSel,setCampoSel]=useState("L3H");
   const [capaModo,setCapaModo]=useState("campaña"); // campaña|rindes|margenes|suelos
   const [cultivoFiltro,setCultivoFiltro]=useState(null); // null = sin filtro; "MAIZ", "SOJA", etc.
@@ -2398,38 +2593,15 @@ export default function App(){
   // Cargar al iniciar (y purgar los vencidos)
   useEffect(() => { bajarBorradores(); }, []);
 
-  // ── Protocolo de residuales: compartido en la planilla, con copia local por si no hay señal ──
-  const PROTO_KEY = "smix_protocolo_v1";
-  const [protocolo, setProtocolo] = useState(() => {
-    try { const p = JSON.parse(window.localStorage.getItem(PROTO_KEY)); if(p && Array.isArray(p.cultivos)) return p; } catch {}
-    return PROTOCOLO_BASE;
-  });
-  const [protoSync, setProtoSync] = useState({estado:"cargando"});
-  useEffect(() => {
-    fetch("/api/protocolo").then(r => r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status)))
-      .then(d => {
-        if(d.protocolo && Array.isArray(d.protocolo.cultivos)){
-          setProtocolo(d.protocolo);
-          try { window.localStorage.setItem(PROTO_KEY, JSON.stringify(d.protocolo)); } catch {}
-        }
-        setProtoSync({estado:"ok", actualizado:d.actualizado, autor:d.autor});
-      })
-      .catch(e => setProtoSync({estado:"error", txt:e.message}));
-  }, []);
-  const guardarProtocolo = async (p) => {
-    setProtocolo(p);
-    try { window.localStorage.setItem(PROTO_KEY, JSON.stringify(p)); } catch {}
-    setProtoSync({estado:"guardando"});
-    try {
-      const r = await fetch("/api/protocolo", {method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({protocolo:p, autor})});
-      const d = await r.json();
-      if(!r.ok) throw new Error(d.error || "error");
-      setProtoSync({estado:"ok", actualizado:d.actualizado, autor});
-    } catch(e) {
-      setProtoSync({estado:"error", txt:e.message});
-    }
-  };
+  // ── Protocolo y precios: compartidos en la planilla, con copia local por si no hay señal ──
+  const [protocolo, guardarProtocolo, protoSync] = useDocCompartido("protocolo", PROTOCOLO_BASE, d => !!d && Array.isArray(d.cultivos), autor);
+  const [precios, guardarPrecios, preciosSync] = useDocCompartido("precios", PRECIOS_BASE, d => !!d && !!d.precios && typeof d.precios === "object", autor);
+  // Registro de labores con la dosis de cada producto (lo publica el pipeline desde la hoja "registro")
+  const aplicacionesConDosis = useMemo(() => {
+    const reg = datosRemotos?.REGISTRO;
+    if(!Array.isArray(reg) || !reg.length) return null;
+    return reg.map((r, i) => ({...r, id:`r${i}`, productos:(r.productos||[]).map(p => p.n), items:r.productos||[]}));
+  }, [datosRemotos]);
   // Cultivo 26-27 de cada lote: el plan, y si no está, la rotación histórica
   const cultivoDe = useMemo(() => (campoId, loteId) =>
     buscarKey(PLAN_2627, campoId, loteId) || (buscarKey(HISTORICO_ROTACION, campoId, loteId) || {})["26-27"]?.cv || "",
@@ -2477,88 +2649,6 @@ export default function App(){
     }));
     return res.sort((a,b)=>b.ha-a.ha);
   },[cultivoFiltro,INV_26,PLAN_2627]);
-
-  // ── INSUMOS: carga por lote y resúmenes ──────────────────────
-  const INS_KEY = "smix_insumos_v2";
-  // ins[CAMPO|LOTE] = {cv, sem, dSem, f1, dF1, f2, dF2}   (dosis en kg/ha)
-  const [insumosLote, setInsumosLote] = useState({});
-  const [insCultivoFiltro, setInsCultivoFiltro] = useState("TODOS");
-  const [insCampoFiltro, setInsCampoFiltro] = useState("TODOS");
-  const [insSoloCargados, setInsSoloCargados] = useState(false);
-
-  useEffect(() => {
-    try { setInsumosLote(JSON.parse(window.localStorage.getItem(INS_KEY)) || {}); } catch {}
-  }, []);
-  useEffect(() => {
-    try { window.localStorage.setItem(INS_KEY, JSON.stringify(insumosLote)); } catch {}
-  }, [insumosLote]);
-
-  const INSUMOS = datosRemotos?.INSUMOS || INSUMOS_BASE;
-  const numIns = (v) => { const x = parseFloat(String(v).replace(",",".")); return isNaN(x) ? 0 : x; };
-  const setIns = (k, campoK, valor) => setInsumosLote(l => ({...l, [k]: {...(l[k]||{}), [campoK]: valor}}));
-  // Copia semilla, fertilizantes y dosis de un lote a todos los que tengan el mismo cultivo
-  const copiarInsumosACultivo = (fila, filas) => {
-    const src = insumosLote[fila.key] || {};
-    const campos = ["sem","dSem","f1","dF1","f2","dF2"];
-    setInsumosLote(l => {
-      const n = {...l};
-      filas.filter(f => f.cultivo === fila.cultivo).forEach(f => {
-        n[f.key] = {...(n[f.key]||{})};
-        campos.forEach(c => { n[f.key][c] = src[c]; });
-      });
-      return n;
-    });
-  };
-
-  // Una fila por lote y cultivo. Los lotes sin cultivo en la rotación también aparecen,
-  // con el cultivo a elegir a mano.
-  const filasInsumos = useMemo(() => {
-    const out = [];
-    CAMPOS.forEach(c => c.lotes.forEach(l => {
-      const cvs = cultivosDeLote(c.id, l.id);
-      const lista = cvs.length ? cvs : [""];
-      const ha = Number(l.ha) || 0;
-      lista.forEach(cvRot => {
-        const k = `${c.id}|${l.id}${cvRot ? "|"+cvRot : ""}`;
-        const g = insumosLote[k] || {};
-        const cv = g.cv || cvRot || "";
-        const dSem = numIns(g.dSem), dF1 = numIns(g.dF1), dF2 = numIns(g.dF2);
-        out.push({
-          campoId: c.id, campo: c.nombre, lote: l.label || l.id, key: k, loteKey: `${c.id}|${l.id}`, ha,
-          cultivo: cv, cvRot, dobleCultivo: cvs.length > 1 ? cvs.join(" / ") : null,
-          productor: PRODUCTOR[c.id] || "—",
-          sem: g.sem || "", f1: g.f1 || "", f2: g.f2 || "",
-          dSem, dF1, dF2,
-          totSem: dSem * ha, totF1: dF1 * ha, totF2: dF2 * ha,
-          cargado: !!((g.sem && dSem) || (g.f1 && dF1) || (g.f2 && dF2)),
-        });
-      });
-    }));
-    return out.sort((a,b) => a.campo.localeCompare(b.campo) || String(a.lote).localeCompare(String(b.lote), undefined, {numeric:true}));
-  }, [insumosLote, INV_26, PLAN_2627]);
-
-  // Suma kg por producto agrupando por campo, productor o cultivo
-  const agruparInsumos = (filas, clave) => {
-    const acc = {};
-    filas.forEach(f => {
-      const g = f[clave] || "—";
-      acc[g] = acc[g] || {ha:0, prod:{}, lotes:new Set()};
-      if(!acc[g].lotes.has(f.loteKey)){ acc[g].lotes.add(f.loteKey); acc[g].ha += f.ha; }
-      [[f.sem,f.totSem,"SEM"],[f.f1,f.totF1,"FERT"],[f.f2,f.totF2,"FERT"]].forEach(([n,kg,cat]) => {
-        if(!n || kg <= 0) return;
-        acc[g].prod[n] = acc[g].prod[n] || {kg:0, cat};
-        acc[g].prod[n].kg += kg;
-      });
-    });
-    return Object.entries(acc).filter(([,d]) => Object.keys(d.prod).length).sort((a,b) => b[1].ha - a[1].ha);
-  };
-  const precioIns = (n) => INSUMOS.find(i => i.n === n);
-  // Fertilizante: precio por tonelada. La semilla está por bolsa en la planilla, así que va sin USD.
-  const usdInsumo = (n, kg) => {
-    const i = precioIns(n);
-    if(!i || i.cat !== "FERT" || !i.p) return null;
-    return kg/1000 * i.p;
-  };
 
   const caja={background:CREMA,border:`1.5px solid ${TINTA}`,borderRadius:12,padding:"14px 16px"};
   const tab=(a)=>({padding:"8px 14px",fontSize:13,fontWeight:700,cursor:"pointer",borderRadius:8,
@@ -2868,7 +2958,7 @@ export default function App(){
     return [p.x, p.y];
   };
 
-  const updateFila = (tratIdx, filaIdx, campoK, valor) => {
+  const updateFila = (tratIdx, filaIdx, campoK, valor, producto) => {
     setTratamientos(ts => ts.map((t, ti) => {
       if(ti !== tratIdx) return t;
       return {
@@ -2876,7 +2966,7 @@ export default function App(){
         productos: t.productos.map((p, pi) => {
           if(pi !== filaIdx) return p;
           if(campoK === "n") {
-            const base = PRODUCTOS_BASE.find(pr => pr.n === valor);
+            const base = producto || TODOS_PRODUCTOS.find(pr => pr.n === valor);
             return {n: valor, d: p.d, u: base?.u||"L", p: base?.p||0};
           }
           if(campoK === "d") {
@@ -2895,7 +2985,7 @@ export default function App(){
     const filas = Array(10).fill(null).map(() => ({n:"", d:0}));
     receta.productos.forEach((rp, i) => {
       if(i >= 10) return;
-      const base = PRODUCTOS_BASE.find(p => p.n === rp.n);
+      const base = TODOS_PRODUCTOS.find(p => p.n === rp.n);
       filas[i] = {n: rp.n, d: rp.d, dTexto: String(rp.d), u: base?.u||"L", p: base?.p||0, prov: base?.prov||""};
     });
     setTratamientos(ts => ts.map((t,i) => i===tratIdx ? {...t, productos: filas} : t));
@@ -2932,7 +3022,9 @@ export default function App(){
     if(tipo === "VOLEADA" || tipo === "INCORPORADA") return ["FERT"];
     return ["HER","INS","FUN","COAD","FERT","SEM","SGR"];
   };
-  const TODOS_PRODUCTOS = [...PRODUCTOS_BASE, ...productosPropios];
+  // Catálogo con los precios editados en la pestaña Precios
+  const TODOS_PRODUCTOS = [...PRODUCTOS_BASE, ...productosPropios]
+    .map(p => precios.precios?.[p.n] != null ? {...p, p: precios.precios[p.n]} : p);
   const productosDisponibles = TODOS_PRODUCTOS.filter(p => categoriaDelTipo(ordTipo).includes(p.cat));
 
   // ── Productos propios ──
@@ -2947,7 +3039,7 @@ export default function App(){
     const lista = [...productosPropios, item];
     setProductosPropios(lista); guardarJSON(PROD_KEY, lista);
     // lo dejamos elegido en la fila donde se estaba agregando
-    if(formProd && formProd.fila != null) updateFila(brocha, formProd.fila, "n", n);
+    if(formProd && formProd.fila != null) updateFila(brocha, formProd.fila, "n", n, item);
     setFormProd(null);
     setNuevoProd({n:"", u:"L", p:"", cat:"HER"});
   };
@@ -3017,7 +3109,7 @@ export default function App(){
       }));
       return {
         cultivo: t.cultivo || "",
-        productos: t.filasActivas.map(p => ({n: p.n, d: p.d, p: p.p, u: p.u})),
+        productos: t.filasActivas.map(p => ({n: p.n, d: p.d, p: p.p || 0, u: p.u})),
         lotes,
       };
     }).filter(t => t.lotes.length > 0);
@@ -3218,8 +3310,8 @@ export default function App(){
           <button style={tab(vista==="fertilizaciones")} onClick={()=>setVista("fertilizaciones")}>🌱 Fertilizaciones</button>
           <button style={tab(vista==="margenes")} onClick={()=>setVista("margenes")}>💵 Márgenes</button>
           <button style={tab(vista==="ordenes")} onClick={()=>setVista("ordenes")}>🚜 Nueva labor</button>
-          <button style={tab(vista==="insumos")} onClick={()=>setVista("insumos")}>📦 Insumos</button>
           <button style={tab(vista==="protocolo")} onClick={()=>setVista("protocolo")}>📝 Protocolo</button>
+          <button style={tab(vista==="precios")} onClick={()=>setVista("precios")}>💲 Precios</button>
         </div>
 
         {/* ══ MAPA POR CAMPO ══ */}
@@ -3422,11 +3514,14 @@ export default function App(){
         {/* ══ HERBICIDAS ══ */}
         {vista==="realizadas"&&<VistaRealizadas aplicaciones={APLICACIONES} fertilizaciones={FERTILIZACIONES}/>}
 
-        {vista==="pendientes"&&<VistaPendientes protocolo={protocolo} cultivoDe={cultivoDe} aplicaciones={APLICACIONES}
+        {vista==="pendientes"&&<VistaPendientes protocolo={protocolo} cultivoDe={cultivoDe}
+          aplicaciones={aplicacionesConDosis || APLICACIONES} conDosis={!!aplicacionesConDosis}
           fechaDatos={fechaDatos ? new Date(fechaDatos).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}) : null}
           onEditar={()=>setVista("protocolo")}/>}
 
         {vista==="protocolo"&&<VistaProtocoloEditor protocolo={protocolo} sync={protoSync} onGuardar={guardarProtocolo}/>}
+
+        {vista==="precios"&&<VistaPrecios productos={[...PRODUCTOS_BASE, ...productosPropios]} precios={precios} sync={preciosSync} onGuardar={guardarPrecios}/>}
 
         {vista==="herbicidas"&&(
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
@@ -3560,7 +3655,7 @@ export default function App(){
 
           const tratActual = tratamientos[brocha];
           const haBrocha = haTratamiento(brocha);
-          const costoTratamiento = (t, ha) => t.filasActivas.reduce((s,p) => s + p.d*ha*p.p, 0);
+          const costoTratamiento = (t, ha) => t.filasActivas.reduce((s,p) => s + (p.d||0)*ha*(p.p||0), 0);
 
           // Totalizador general: suma de productos de TODOS los tratamientos
           const totalesGenerales = {};
@@ -3569,7 +3664,7 @@ export default function App(){
               if(!totalesGenerales[p.n]) totalesGenerales[p.n] = {n:p.n, u:p.u, p:p.p, total:0, costo:0};
               const cantP = p.d * t.ha;
               totalesGenerales[p.n].total += cantP;
-              totalesGenerales[p.n].costo += cantP * p.p;
+              totalesGenerales[p.n].costo += cantP * (p.p||0);
             });
           });
           const listaTotales = Object.values(totalesGenerales);
@@ -3872,8 +3967,8 @@ export default function App(){
                         <div style={{padding:"6px 8px",fontSize:10.5,fontWeight:700,textTransform:"uppercase",textAlign:"right"}}>USD</div>
                       </div>
                       {tratActual.productos.map((p, fi) => {
-                        const total = p.d * haBrocha;
-                        const costo = total * p.p;
+                        const total = (p.d||0) * haBrocha;
+                        const costo = total * (p.p||0);
                         const evF = p.n && p.d > 0 ? evaluarProducto(p.n, p.d, p.u, tratActual.cultivo, tratActual.etiqueta) : [];
                         const rojoF = evF.some(x=>x.nivel==="bloquea" || x.nivel==="alerta");
                         const bgF = rojoF ? "#FBE3E0" : evF.some(x=>x.nivel==="aviso") ? "#FFF8E6" : (fi%2===0?"#fff":"#FDFCF6");
@@ -3895,8 +3990,8 @@ export default function App(){
                     <div style={{marginTop:8,padding:"8px 10px",background:"#F8F5EC",borderRadius:6,display:"flex",justifyContent:"space-between",fontSize:12}}>
                       <span style={{fontWeight:600}}>Total tratamiento {brocha+1}:</span>
                       <span style={{fontWeight:700}}>
-                        USD {fmt(tratActual.productos.reduce((s,p) => s + p.d*haBrocha*p.p, 0))}
-                        {haBrocha > 0 && <span style={{opacity:0.6,marginLeft:8}}>({(tratActual.productos.reduce((s,p) => s + p.d*p.p, 0)).toFixed(2)}/ha)</span>}
+                        USD {fmt(tratActual.productos.reduce((s,p) => s + (p.d||0)*haBrocha*(p.p||0), 0))}
+                        {haBrocha > 0 && <span style={{opacity:0.6,marginLeft:8}}>({(tratActual.productos.reduce((s,p) => s + (p.d||0)*(p.p||0), 0)).toFixed(2)}/ha)</span>}
                       </span>
                     </div>
                   </div>
@@ -4166,7 +4261,7 @@ export default function App(){
                     return Object.values(camposDelTrat).map(({campo: c, lotes: lotesC}) => {
                       const haC = lotesC.reduce((s,x) => s+x.ha, 0);
                       const lotesLabel = lotesC.map(x => x.label).join(", ");
-                      const costoC = t.filasActivas.reduce((s,p) => s + p.d*haC*p.p, 0);
+                      const costoC = t.filasActivas.reduce((s,p) => s + (p.d||0)*haC*(p.p||0), 0);
                       return (
                         <div key={`${t.idx}-${c.id}`} style={{background:"#fff",border:`2px solid ${TINTA}`,borderRadius:10,overflow:"hidden",pageBreakInside:"avoid"}}>
                           <div style={{position:"relative",padding:"6px 12px",fontSize:11,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:"#fff",overflow:"hidden"}}>
@@ -4210,7 +4305,7 @@ export default function App(){
                             <tbody>
                               {t.filasActivas.map((p,i) => {
                                 const totalP = p.d * haC;
-                                const costoP = totalP * p.p;
+                                const costoP = totalP * (p.p||0);
                                 return (
                                   <tr key={i} style={{borderBottom:"1px solid #EEE9DC"}}>
                                     <td style={{padding:"5px 10px",fontWeight:600}}>{p.n}</td>
@@ -4280,136 +4375,6 @@ export default function App(){
         </div>
 
         {/* ══ PROTOCOLOS ══ */}
-        {vista==="insumos"&&(()=>{
-          const cultivosLista = [...new Set(filasInsumos.map(f=>f.cultivo).filter(Boolean))].sort();
-          const camposLista = [...new Set(filasInsumos.map(f=>f.campo))].sort();
-          let filas = filasInsumos;
-          if(insCampoFiltro!=="TODOS") filas = filas.filter(f=>f.campo===insCampoFiltro);
-          if(insCultivoFiltro!=="TODOS") filas = filas.filter(f=>f.cultivo===insCultivoFiltro);
-          if(insSoloCargados) filas = filas.filter(f=>f.cargado);
-          const semillas = INSUMOS.filter(i=>i.cat==="SEM");
-          const ferts = INSUMOS.filter(i=>i.cat==="FERT");
-          const th = {padding:"6px 6px",fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.04em",borderBottom:`1.5px solid ${TINTA}`,textAlign:"left",whiteSpace:"nowrap"};
-          const td = {padding:"3px 6px",fontSize:11.5,borderBottom:"1px solid #EEE9DC"};
-          const inp = {...inputB,fontSize:11.5,padding:"3px 5px",width:52,textAlign:"right"};
-          const selP = {...inputB,fontSize:11.5,padding:"3px 5px",minWidth:120};
-          const haFiltradas = [...new Map(filas.map(f=>[f.loteKey,f.ha]))].reduce((s,[,h])=>s+h,0);
-          const cargadas = filas.filter(f=>f.cargado).length;
-          const selSem = (f) => (
-            <select value={f.sem} onChange={e=>setIns(f.key,"sem",e.target.value)} style={selP}>
-              <option value="">—</option>
-              {semillas.filter(s=>!s.cv || s.cv===f.cultivo).map(s=><option key={s.n} value={s.n}>{s.n}</option>)}
-              {semillas.filter(s=>s.cv && s.cv!==f.cultivo).map(s=><option key={s.n} value={s.n}>{s.n} ({s.cv})</option>)}
-            </select>
-          );
-          const selFert = (f, campoK) => (
-            <select value={f[campoK]} onChange={e=>setIns(f.key,campoK,e.target.value)} style={selP}>
-              <option value="">—</option>
-              {ferts.map(x=><option key={x.n} value={x.n}>{x.n}</option>)}
-            </select>
-          );
-          const bloqueTotales = (titulo, clave) => {
-            const grupos = agruparInsumos(filas, clave);
-            return (
-              <div style={caja}>
-                <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55,marginBottom:8}}>{titulo}</div>
-                {!grupos.length && <div style={{fontSize:11.5,opacity:0.5}}>Todavía no cargaste insumos.</div>}
-                <div style={{display:"flex",flexDirection:"column",gap:10}}>
-                  {grupos.map(([g, dat]) => (
-                    <div key={g}>
-                      <div style={{fontSize:12.5,fontWeight:700,marginBottom:3}}>{g} <span style={{opacity:0.55,fontWeight:400}}>· {fmt(dat.ha)} ha</span></div>
-                      {Object.entries(dat.prod).sort((a,b)=>b[1].kg-a[1].kg).map(([n,x]) => {
-                        const usd = usdInsumo(n, x.kg);
-                        return (
-                          <div key={n} style={{display:"flex",justifyContent:"space-between",gap:8,fontSize:11.5,padding:"2px 0",borderBottom:"1px solid #F1EDE1"}}>
-                            <span>{x.cat==="SEM"?"🌾":"🧂"} {n}</span>
-                            <span style={{fontWeight:600,whiteSpace:"nowrap"}}>
-                              {fmt(Math.round(x.kg))} kg{x.kg>=1000 && <span style={{opacity:0.55,fontWeight:400}}> · {(x.kg/1000).toFixed(1)} tn</span>}
-                              {usd!==null && <span style={{opacity:0.6,fontWeight:400}}> · USD {fmt(Math.round(usd))}</span>}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          };
-          return (
-            <div style={{display:"flex",flexDirection:"column",gap:14}}>
-              <div style={caja}>
-                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8,flexWrap:"wrap"}}>
-                  <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55}}>Carga por lote · kg/ha</div>
-                  <select value={insCampoFiltro} onChange={e=>setInsCampoFiltro(e.target.value)} style={{...inputB,fontSize:12,padding:"4px 8px",width:"auto"}}>
-                    <option value="TODOS">Todos los campos</option>
-                    {camposLista.map(c=><option key={c} value={c}>{c}</option>)}
-                  </select>
-                  <select value={insCultivoFiltro} onChange={e=>setInsCultivoFiltro(e.target.value)} style={{...inputB,fontSize:12,padding:"4px 8px",width:"auto"}}>
-                    <option value="TODOS">Todos los cultivos</option>
-                    {cultivosLista.map(cv=><option key={cv} value={cv}>{cv}</option>)}
-                  </select>
-                  <label style={{fontSize:11.5,display:"flex",alignItems:"center",gap:4,cursor:"pointer"}}>
-                    <input type="checkbox" checked={insSoloCargados} onChange={e=>setInsSoloCargados(e.target.checked)}/> solo cargados
-                  </label>
-                  <div style={{fontSize:12,opacity:0.6,marginLeft:"auto"}}>{cargadas}/{filas.length} filas · {fmt(haFiltradas)} ha</div>
-                </div>
-                <div style={{overflowX:"auto"}}>
-                  <table style={{borderCollapse:"collapse",width:"100%",minWidth:900}}>
-                    <thead><tr>
-                      <th style={th}>Campo</th><th style={th}>Lote</th><th style={{...th,textAlign:"right"}}>ha</th><th style={th}>Cultivo</th>
-                      <th style={th}>Semilla</th><th style={{...th,textAlign:"right"}}>kg/ha</th><th style={{...th,textAlign:"right"}}>total</th>
-                      <th style={th}>Fertilizante 1</th><th style={{...th,textAlign:"right"}}>kg/ha</th><th style={{...th,textAlign:"right"}}>total</th>
-                      <th style={th}>Fertilizante 2</th><th style={{...th,textAlign:"right"}}>kg/ha</th><th style={{...th,textAlign:"right"}}>total</th>
-                      <th style={th}></th>
-                    </tr></thead>
-                    <tbody>
-                      {filas.map(f => (
-                        <tr key={f.key} style={{background:f.cargado?"#F6FAF6":"transparent"}}>
-                          <td style={td}>{f.campo}</td>
-                          <td style={td}>{f.lote}</td>
-                          <td style={{...td,textAlign:"right"}}>{fmt(f.ha)}</td>
-                          <td style={td}>
-                            {f.cvRot
-                              ? <span>{f.cultivo}{f.dobleCultivo && <span title={f.dobleCultivo} style={{opacity:0.5}}> ·2</span>}</span>
-                              : <select value={f.cultivo} onChange={e=>setIns(f.key,"cv",e.target.value)} style={{...inputB,fontSize:11.5,padding:"3px 5px",minWidth:90,color:f.cultivo?TINTA:"#9A937E"}}>
-                                  <option value="">— cultivo —</option>
-                                  {CULTIVOS_ORDEN.map(cv=><option key={cv} value={cv}>{cv}</option>)}
-                                </select>}
-                          </td>
-                          <td style={td}>{selSem(f)}</td>
-                          <td style={{...td,textAlign:"right"}}><input inputMode="decimal" value={insumosLote[f.key]?.dSem??""} onChange={e=>setIns(f.key,"dSem",e.target.value)} placeholder="0" style={inp}/></td>
-                          <td style={{...td,textAlign:"right",fontWeight:600}}>{f.totSem>0?fmt(Math.round(f.totSem)):"—"}</td>
-                          <td style={td}>{selFert(f,"f1")}</td>
-                          <td style={{...td,textAlign:"right"}}><input inputMode="decimal" value={insumosLote[f.key]?.dF1??""} onChange={e=>setIns(f.key,"dF1",e.target.value)} placeholder="0" style={inp}/></td>
-                          <td style={{...td,textAlign:"right",fontWeight:600}}>{f.totF1>0?fmt(Math.round(f.totF1)):"—"}</td>
-                          <td style={td}>{selFert(f,"f2")}</td>
-                          <td style={{...td,textAlign:"right"}}><input inputMode="decimal" value={insumosLote[f.key]?.dF2??""} onChange={e=>setIns(f.key,"dF2",e.target.value)} placeholder="0" style={inp}/></td>
-                          <td style={{...td,textAlign:"right",fontWeight:600}}>{f.totF2>0?fmt(Math.round(f.totF2)):"—"}</td>
-                          <td style={td}>
-                            {f.cargado && f.cultivo && (
-                              <button onClick={()=>copiarInsumosACultivo(f, filasInsumos)} title={`Copiar esta carga a todos los lotes de ${f.cultivo}`}
-                                style={{padding:"2px 7px",fontSize:10.5,fontWeight:600,cursor:"pointer",border:"1px solid #1E5FA8",borderRadius:12,background:"transparent",color:"#1E5FA8",fontFamily:"inherit",whiteSpace:"nowrap"}}>
-                                ⤵ {f.cultivo}
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                <div style={{fontSize:10.5,opacity:0.6,marginTop:6}}>Cargá un lote y con ⤵ copiás esa semilla, fertilizantes y dosis a todos los lotes del mismo cultivo. Los lotes sin cultivo en la rotación te dejan elegirlo a mano.</div>
-              </div>
-
-              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:14}}>
-                {bloqueTotales("Total por campo","campo")}
-                {bloqueTotales("Total por productor","productor")}
-                {bloqueTotales("Total por cultivo","cultivo")}
-              </div>
-            </div>
-          );
-        })()}
 
         <div style={{fontSize:11,opacity:0.45,marginTop:20,textAlign:"center"}}>
         </div>
