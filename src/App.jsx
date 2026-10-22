@@ -1432,6 +1432,13 @@ function getFill(campoId, loteId, modo, sueloVar, datos = {}) {
       : escalaColor(Math.abs(m.mbsa),0,600,"#FFCDD2","#B71C1C")||"#FFCDD2";
     return {fill,label:`${m.mbsa>=0?"+":""}${fmt(m.mbsa)} US$/ha`,dim:false};
   }
+  if(modo==="residuales"){
+    const r=(datos.RESIDUALES||{})[`${campoId}|${loteId}`];
+    if(!r) return {fill:"#F0EDE5",label:"",dim:true};
+    const est=PENDIENTE_RESIDUAL.includes(r.estado)?`Falta ${r.faltan.join(", ")||"residual"}`:r.estado==="sinprot"?"Sin protocolo":"Al día";
+    return {fill:colorResidualMapa(r.estado),label:r.corto,label2:r.fecha,dim:r.estado==="sinprot"&&r.corto==="sin residual",
+      tip:`${est} · último: ${r.detalle}`};
+  }
   if(modo==="suelos"){
     const s=buscarKey(SUELOS, campoId, loteId);
     if(!s) return {fill:"#F0EDE5",label:"sin análisis",dim:true};
@@ -1470,7 +1477,7 @@ function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick, datos, culti
       ))}
       {campo.lotes.map(l=>{
         const info=getFill(campo.id,l.id,modo,sueloVar,datos);
-        let {fill,fill2,label,dim,doble}=info;
+        let {fill,fill2,label,label2,dim,doble,tip}=info;
         // Filtro por cultivo: si está activo y este lote no lo tiene, atenuar
         let apagadoPorFiltro=false;
         if(cultivoFiltro&&cultivosDeLote){
@@ -1499,11 +1506,19 @@ function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick, datos, culti
                 fontWeight="700" textAnchor="middle"
                 fill={dim?"#B0A89A":TINTA} opacity={dim?0.55:1}>{l.label}</text>
               {l.ha&&<text x={cx} y={cy+(dim?9:label?4:9)*k} fontSize={(w<55*k?7.5:9)*k} textAnchor="middle" fill={dim?"#B0A89A":TINTA} opacity={dim?0.5:0.65}>{l.ha} ha</text>}
-              {!dim&&label&&<text x={cx} y={cy+15*k} fontSize={8.5*k} textAnchor="middle" fill={TINTA} opacity={0.85}>{label}</text>}
+              {!dim&&label&&(()=>{
+                // la letra se achica para que el texto no se salga del lote
+                const fs=Math.min(8.5*k,(w*0.9)/(Math.max(String(label).length,String(label2||"").length)*0.56));
+                if(fs<4.5*k) return null;
+                return <>
+                  <text x={cx} y={cy+15*k} fontSize={fs} textAnchor="middle" fill={TINTA} opacity={0.85}>{label}</text>
+                  {label2&&<text x={cx} y={cy+15*k+fs*1.15} fontSize={fs} textAnchor="middle" fill={TINTA} opacity={0.85}>{label2}</text>}
+                </>;
+              })()}
             </g>
           )}
           {isH&&!mini&&(()=>{
-            const txt=`${l.label}: ${label||"—"}`;
+            const txt=`${l.label}: ${tip||label||"—"}`;
             const tw=txt.length*6.2*k+12*k;
             return <g style={{pointerEvents:"none"}}>
               <rect x={cx-tw/2} y={cy-26*k} width={tw} height={19*k} rx={3.5*k} fill="rgba(46,42,34,0.88)"/>
@@ -1540,6 +1555,11 @@ function Leyenda({modo,sueloVar}){
       </div>
     </div>;
   }
+  if(modo==="residuales") return <div style={{display:"flex",flexWrap:"wrap",gap:"4px 14px",marginTop:6,alignItems:"center"}}>
+    {[["#9FD3A3","Al día"],["#E8857B","Le falta un residual"],["#F0EDE5","Sin protocolo"]].map(([c,t])=>
+      <div key={t} style={tag}><span style={{width:11,height:11,borderRadius:3,background:c,border:`1px solid ${TINTA}`,flexShrink:0}}/>{t}</div>)}
+    <span style={{fontSize:11.5,opacity:0.7}}>En cada lote: último residual y fecha. El detalle está en Labores pendientes.</span>
+  </div>;
   if(modo==="rindes") return <GradBar min="0 qq" max="90 qq" c1="#FFF5CC" c2="#BF4000" label="Rinde 25-26"/>;
   if(modo==="margenes") return <div style={{display:"flex",gap:14,flexWrap:"wrap",marginTop:6}}>
     <GradBar min="0" max="+US$1200" c1="#C8E6C9" c2="#1B5E20" label="MB s/alq positivo"/>
@@ -1849,7 +1869,7 @@ const ddmm = d => d ? `${String(d.getDate()).padStart(2,"0")}/${String(d.getMont
 // los activos de alguna de sus alternativas (pueden venir en pasadas distintas).
 // Estado de cada paso: hecho | parcial (menos del 80% de las ha) | ventana | atrasado (cerró hace
 // 30 días o menos y no abrió el siguiente) | siembra (se hace a la siembra) | salteado | proximo
-function evaluarProtocolo(protocolo, campos, cultivoDe, aplicaciones, hoy){
+function evaluarProtocolo(protocolo, campos, cultivoDe, aplicaciones, hoy, incluirSinProtocolo = false){
   const resultado = [];
   const porCampo = {};
   aplicaciones.forEach(a => { (porCampo[a.campo] = porCampo[a.campo] || []).push(a); });
@@ -1860,7 +1880,7 @@ function evaluarProtocolo(protocolo, campos, cultivoDe, aplicaciones, hoy){
   campos.forEach(campo => campo.lotes.forEach(lote => {
     const cv = cultivoDe(campo.id, lote.id);
     const protos = (protocolo.cultivos||[]).filter(p => cultivoCoincide(p.aplicaA, cv));
-    if(!protos.length) return;
+    if(!protos.length && !incluirSinProtocolo) return;
     const haLote = Number(lote.ha) || 0;
     const apls = (porCampo[campo.id] || []).map(a => ({a, m: loteDeAplicacion(a.lote, lote.id)}))
       .filter(x => x.m).map(x => x.m === "parte" ? {...x.a, parte:true} : x.a)
@@ -1952,6 +1972,43 @@ const ESTADO_PASO = {
 };
 const ORDEN_ESTADO = ["atrasado","ventana","parcial","siembra","proximo","salteado","hecho"];
 
+// Estado del lote = lo más urgente que tiene abierto ("aldia" si nada; "sinprot" si no tiene protocolo)
+const estadoDeLote = e => {
+  if(!e.evals.length) return "sinprot";
+  const abiertos = e.evals.flatMap(ev => ev.estados).filter(s => ["atrasado","ventana","parcial","siembra"].includes(s.estado) || (s.estado === "proximo" && s.dias <= 30));
+  return abiertos.length ? ORDEN_ESTADO.find(est => abiertos.some(s => s.estado === est)) : "aldia";
+};
+const ABREV_ACTIVO = {atrazina:"Atrazina", metolacloro:"S-meto", "s-metolacloro":"S-meto", flurocloridona:"Fluroc.", sulfentrazone:"Sulfen.",
+  diflufenican:"Diflu.", flumioxazin:"Flumiox.", clorimuron:"Clorim.", terbutilazina:"Terbu.", metsulfuron:"Metsulf.",
+  imazetapir:"Imazet.", flumetsulam:"Flumets.", acetoclor:"Acetoc."};
+// Capa del mapa: rojo = le falta algún residual ahora; verde = al día (puede tener un paso por abrir); gris = sin protocolo
+const PENDIENTE_RESIDUAL = ["atrasado","ventana","parcial","siembra"];
+const colorResidualMapa = est => PENDIENTE_RESIDUAL.includes(est) ? "#E8857B" : est === "sinprot" ? "#F0EDE5" : "#9FD3A3";
+
+// Para la capa "Residuales" del mapa: estado del protocolo y último residual de cada lote
+function residualesParaMapa(protocolo, campos, cultivoDe, aplicaciones, hoy){
+  const out = {};
+  evaluarProtocolo(protocolo, campos, cultivoDe, aplicaciones, hoy, true).forEach(e => {
+    const ult = e.aplicados.length ? e.aplicados[e.aplicados.length - 1].fecha : null;
+    const ultimos = ult ? e.aplicados.filter(r => r.fecha === ult) : [];
+    const activos = [...new Set(ultimos.map(r => r.activo))];
+    const fecha = ult ? ddmm(fechaLocal(ult)) : "";
+    const estado = estadoDeLote(e);
+    // qué falta ahora (para el detalle al pasar el mouse)
+    const faltan = e.evals.flatMap(ev => ev.estados).filter(st => PENDIENTE_RESIDUAL.includes(st.estado))
+      .map(st => (st.faltan.length ? st.faltan : st.alt || []).map(nombreActivo).join(" + ")).filter(Boolean);
+    out[`${e.campo.id}|${e.lote.id}`] = {
+      estado,
+      corto: activos.length ? activos.map(a => ABREV_ACTIVO[a] || nombreActivo(a)).join(" + ") : "sin residual",
+      fecha,
+      detalle: activos.length ? `${ultimos.map(r => `${nombreActivo(r.activo)}${r.d != null ? " " + fmtDosis(r.d, r.n, r.activo) : ""}`)
+        .filter((x, i, arr) => arr.indexOf(x) === i).join(" + ")} el ${fecha}` : "sin residual en la campaña",
+      faltan: [...new Set(faltan)],
+    };
+  });
+  return out;
+}
+
 const cajaV = {background:CREMA,border:`1.5px solid ${TINTA}`,borderRadius:12,padding:"14px 16px"};
 const chipV = a => ({padding:"5px 11px",fontSize:12,fontWeight:700,cursor:"pointer",borderRadius:20,
   border:`1.5px solid ${TINTA}`,background:a?TINTA:"transparent",color:a?CREMA:TINTA,fontFamily:"inherit"});
@@ -1970,11 +2027,7 @@ function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDat
     [protocolo, aplicaciones, cultivoDe, hoy]);
 
   // Estado del lote = lo más urgente que tiene abierto
-  const fichas = evaluacion.map(e => {
-    const abiertos = e.evals.flatMap(ev => ev.estados).filter(s => ["atrasado","ventana","parcial","siembra"].includes(s.estado) || (s.estado === "proximo" && s.dias <= 30));
-    const estado = abiertos.length ? ORDEN_ESTADO.find(est => abiertos.some(s => s.estado === est)) : "aldia";
-    return {...e, estado};
-  });
+  const fichas = evaluacion.map(e => ({...e, estado: estadoDeLote(e)}));
   const filtradas = fichas.filter(f => (campoF === "TODOS" || f.campo.id === campoF)
     && (protF === "TODOS" || f.evals.some(ev => ev.prot.id === protF))
     && (estadoF === "TODOS" || f.estado === estadoF))
@@ -2606,6 +2659,10 @@ export default function App(){
   const cultivoDe = useMemo(() => (campoId, loteId) =>
     buscarKey(PLAN_2627, campoId, loteId) || (buscarKey(HISTORICO_ROTACION, campoId, loteId) || {})["26-27"]?.cv || "",
     [PLAN_2627, HISTORICO_ROTACION]);
+  // Capa "Residuales" del mapa (se calcula sólo cuando está elegida)
+  const residualesMapa = useMemo(() => capaModo === "residuales"
+    ? residualesParaMapa(protocolo, CAMPOS, cultivoDe, aplicacionesConDosis || APLICACIONES, (() => { const d = new Date(); d.setHours(0,0,0,0); return d; })())
+    : null, [capaModo, protocolo, cultivoDe, aplicacionesConDosis, datosRemotos]);
   const [modoDividir, setModoDividir] = useState(false);
   const [loteDiv, setLoteDiv] = useState(null);       // {campoId, loteId} en edición
   const [puntosCorte, setPuntosCorte] = useState([]); // [[x,y],[x,y]]
@@ -3255,6 +3312,7 @@ export default function App(){
     {id:"rindes",lbl:"📈 Rindes 25-26"},
     {id:"margenes",lbl:"💵 Márgenes 25-26"},
     {id:"suelos",lbl:"🔬 Análisis de suelo"},
+    {id:"residuales",lbl:"🧪 Residuales"},
   ];
 
   const inputB={width:"100%",boxSizing:"border-box",padding:"6px 8px",fontSize:13,border:"1px solid #C8C2B0",borderRadius:6,background:"#FFFDF7",color:TINTA,fontFamily:"inherit"};
@@ -3350,7 +3408,7 @@ export default function App(){
                 <div style={{fontWeight:700,fontSize:15}}>{campo.nombre}</div>
                 <div style={{fontSize:12,opacity:0.6}}>{PRODUCTOR[campo.id]} · {fmt(haCampo(campo))} ha</div>
               </div>
-              <MapaCampo campo={campo} modo={capaModo} sueloVar={sueloVar} onLoteClick={abrirLote} datos={{INV_26,PLAN_2627,RINDE_2526,SUELOS}} cultivoFiltro={cultivoFiltro} cultivosDeLote={cultivosDeLote}/>
+              <MapaCampo campo={campo} modo={capaModo} sueloVar={sueloVar} onLoteClick={abrirLote} datos={{INV_26,PLAN_2627,RINDE_2526,SUELOS,RESIDUALES:residualesMapa}} cultivoFiltro={cultivoFiltro} cultivosDeLote={cultivosDeLote}/>
               <div style={{paddingInline:4}}><Leyenda modo={capaModo} sueloVar={sueloVar}/></div>
               {/* Resumen ha por cultivo — campaña 26-27 */}
               {capaModo==="campaña"&&(()=>{
@@ -3503,7 +3561,7 @@ export default function App(){
                     <div style={{fontWeight:700,fontSize:14}}>{c.nombre}</div>
                     <div style={{fontSize:12,opacity:0.55}}>{PRODUCTOR[c.id]} · {fmt(haCampo(c))} ha</div>
                   </div>
-                  <MapaCampo campo={c} modo={capaModo} sueloVar={sueloVar} mini={false} onLoteClick={abrirLote} datos={{INV_26,PLAN_2627,RINDE_2526,SUELOS}} cultivoFiltro={cultivoFiltro} cultivosDeLote={cultivosDeLote}/>
+                  <MapaCampo campo={c} modo={capaModo} sueloVar={sueloVar} mini={false} onLoteClick={abrirLote} datos={{INV_26,PLAN_2627,RINDE_2526,SUELOS,RESIDUALES:residualesMapa}} cultivoFiltro={cultivoFiltro} cultivosDeLote={cultivosDeLote}/>
                   <div style={{marginTop:4}}><Leyenda modo={capaModo} sueloVar={sueloVar}/></div>
                 </div>
               ))}
