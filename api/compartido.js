@@ -1,18 +1,23 @@
-// api/protocolo.js
-// Vercel Serverless Function — protocolo de residuales COMPARTIDO entre Santos y Andrés.
-// Se guarda en la hoja "protocolo" de la planilla LABORES S-MIX 26-27, en la fila 2:
-//   A actualizado (ISO) | B autor | C… el JSON del protocolo partido en trozos
+// api/compartido.js
+// Vercel Serverless Function — documentos de la app COMPARTIDOS entre Santos y Andrés:
+//   ?doc=protocolo  protocolo de residuales (pestaña Protocolo)
+//   ?doc=precios    precios editados de los productos (pestaña Precios)
+// Cada uno se guarda en su hoja de la planilla LABORES S-MIX 26-27, en la fila 2:
+//   A actualizado (ISO) | B autor | C… el JSON partido en trozos
 // (una celda admite hasta 50.000 caracteres).
 //
-// GET                    → { protocolo | null, actualizado, autor }
-// POST {protocolo, autor} → guarda y devuelve { ok, actualizado }
+// GET  ?doc=…               → { datos | null, actualizado, autor }
+// POST ?doc=… {datos, autor} → guarda y devuelve { ok, actualizado }
 //
 // Requiere la env GOOGLE_CREDENTIALS (la misma que usa guardar-labor.js).
 
 import { google } from "googleapis";
 
 const PLANILLA_LABORES = "1JpAA6bCl_uhizVO4jOVBEs34RRlNuAVHKr8kSFRm5ro";
-const HOJA = "protocolo";
+const DOCS = {
+  protocolo: d => d && Array.isArray(d.cultivos),
+  precios:   d => d && typeof d.precios === "object" && !Array.isArray(d.precios),
+};
 const TROZO = 40000;
 
 function getAuth() {
@@ -23,7 +28,7 @@ function getAuth() {
 }
 
 // Crea la hoja la primera vez, con su encabezado
-async function asegurarHoja(sheets) {
+async function asegurarHoja(sheets, HOJA) {
   const meta = await sheets.spreadsheets.get({ spreadsheetId: PLANILLA_LABORES });
   if (meta.data.sheets.some(s => s.properties.title === HOJA)) return;
   await sheets.spreadsheets.batchUpdate({
@@ -44,30 +49,32 @@ export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") return res.status(200).end();
 
+  const doc = String(req.query?.doc || "protocolo");
+  if (!DOCS[doc]) return res.status(400).json({ error: `Documento desconocido: ${doc}` });
+  const HOJA = doc;
+
   try {
     const auth = getAuth();
     await auth.authorize();
     const sheets = google.sheets({ version: "v4", auth });
-    await asegurarHoja(sheets);
+    await asegurarHoja(sheets, HOJA);
 
     if (req.method === "GET") {
       const r = await sheets.spreadsheets.values.get({ spreadsheetId: PLANILLA_LABORES, range: `${HOJA}!A2:Z2` });
       const fila = (r.data.values || [])[0] || [];
       const json = fila.slice(2).join("");
-      let protocolo = null;
-      if (json) { try { protocolo = JSON.parse(json); } catch { protocolo = null; } }
-      return res.status(200).json({ protocolo, actualizado: fila[0] || null, autor: fila[1] || "" });
+      let datos = null;
+      if (json) { try { datos = JSON.parse(json); } catch { datos = null; } }
+      return res.status(200).json({ datos, actualizado: fila[0] || null, autor: fila[1] || "" });
     }
 
     if (req.method === "POST") {
-      const { protocolo, autor } = req.body || {};
-      if (!protocolo || !Array.isArray(protocolo.cultivos)) {
-        return res.status(400).json({ error: "Protocolo inválido: falta la lista de cultivos." });
-      }
-      const json = JSON.stringify(protocolo);
+      const { datos, autor } = req.body || {};
+      if (!DOCS[doc](datos)) return res.status(400).json({ error: `Datos inválidos para ${doc}.` });
+      const json = JSON.stringify(datos);
       const trozos = [];
       for (let i = 0; i < json.length; i += TROZO) trozos.push(json.slice(i, i + TROZO));
-      if (trozos.length > 24) return res.status(413).json({ error: "El protocolo es demasiado grande para guardarlo." });
+      if (trozos.length > 24) return res.status(413).json({ error: "Es demasiado grande para guardarlo." });
       const actualizado = new Date().toISOString();
       await sheets.spreadsheets.values.clear({ spreadsheetId: PLANILLA_LABORES, range: `${HOJA}!A2:Z2` });
       await sheets.spreadsheets.values.update({
@@ -81,7 +88,7 @@ export default async function handler(req, res) {
 
     return res.status(405).json({ error: "Method not allowed" });
   } catch (err) {
-    console.error("Error en protocolo:", err);
+    console.error(`Error en ${doc}:`, err);
     return res.status(500).json({ error: err.message || "Error interno" });
   }
 }
