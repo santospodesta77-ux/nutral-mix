@@ -1698,7 +1698,7 @@ function BuscadorProducto({valor, lista, color, negrita, onElegir, onNuevo}){
 // En la clave, "+" = y, "|" = o. Ej: "flurocloridona + metolacloro | paraquat + sulfentrazone"
 // ============================================================
 const PROTOCOLO_BASE = {
-  version: 2,
+  version: 3,
   campania: "26-27",
   criterios: [
     "Suelo limpio: si hay malezas nacidas, el residual va con quemante (glifosato/ControlMax + 2,4-D, o paraquat 2 L).",
@@ -1707,7 +1707,7 @@ const PROTOCOLO_BASE = {
     "Dosis: en L o kg de formulado por ha (sulfentrazone 50%, flurocloridona 25%, atrazina 90%, diflufenican 50%, flumioxazin 48%).",
   ].join("\n"),
   cultivos: [
-    {id:"girasol", nombre:"Girasol", aplicaA:"GIRASOL, *-GIRASOL", pasos:[
+    {id:"girasol", nombre:"Girasol", aplicaA:"GIRASOL, *-GIRASOL", siembraDesde:"05/10", siembraHasta:"15/11", pasos:[
       {id:"girasol-1", nombre:"Barbecho largo", desde:"10/06", hasta:"15/07", clave:"diflufenican",
         mezcla:"Glifosato 1,5 kg + 2,4-D 1,0 L + Fluroxipir 0,3 L + Diflufenican 0,2 L"},
       {id:"girasol-2", nombre:"Barbecho intermedio", desde:"01/09", hasta:"25/09", clave:"sulfentrazone",
@@ -1716,25 +1716,25 @@ const PROTOCOLO_BASE = {
         mezcla:"Paraquat 2 L (o glifosato 1,5) + Flurocloridona 0,5 L + S-metolacloro 0,65–0,9 L (+ Ampligo 0,1 L si hay isoca). Variante sin flurocloridona: Paraquat 2 L + Sulfentrazone 0,25 L.",
         nota:"Hasta 72 h post siembra. Si el lote no recibió el paso 2, sumar sulfentrazone 0,2 L."},
     ]},
-    {id:"soja1", nombre:"Soja de primera", aplicaA:"SOJA", pasos:[
+    {id:"soja1", nombre:"Soja de primera", aplicaA:"SOJA", siembraDesde:"25/10", siembraHasta:"30/11", pasos:[
       {id:"soja1-1", nombre:"Barbecho intermedio", desde:"10/09", hasta:"10/10", clave:"clorimuron",
         mezcla:"ControlMax 2 + 2,4-D 1,5 L + Dicamba 0,1 L + Clorimuron 75% 10 g (o clorimuron 25% 40–50 g)"},
       {id:"soja1-2", nombre:"Preemergencia", desde:"25/10", hasta:"15/11", clave:"flumioxazin + metolacloro | fierce | texaro",
         mezcla:"Glifosato 1,5 + Flumioxazin 0,15 L + S-metolacloro 0,9 L + Sulfentrazone 0,35 L (+ 2,4-D 0,3 L si hay nacidas). Variantes: Fierce RM 0,4 L · Texaro 36 g + Sulfentrazone 0,2 L.",
         nota:"Sin atrazina en ningún paso."},
     ]},
-    {id:"soja2", nombre:"Soja de segunda", aplicaA:"*-SOJA, SOJA 2", pasos:[
+    {id:"soja2", nombre:"Soja de segunda", aplicaA:"*-SOJA, SOJA 2", siembraDesde:"01/12", siembraHasta:"10/01", pasos:[
       {id:"soja2-1", nombre:"A la siembra", desde:"10/12", hasta:"20/12", clave:"sulfentrazone + metolacloro | heat + metolacloro",
         mezcla:"Glifosato 1,7 + 2,4-D 0,3 L + Sulfentrazone 0,3 L + S-metolacloro 0,8 L. Alternativa: Heat 35 g + S-metolacloro 0,9 L.", hastaSiembra:true},
     ]},
-    {id:"maiz1", nombre:"Maíz temprano", aplicaA:"MAIZ T", pasos:[
+    {id:"maiz1", nombre:"Maíz temprano", aplicaA:"MAIZ T", siembraDesde:"01/10", siembraHasta:"15/10", pasos:[
       {id:"maiz1-1", nombre:"Barbecho con atrazina", desde:"10/06", hasta:"25/09", clave:"atrazina",
         mezcla:"Junio: Glifosato 1,5 + 2,4-D 1,0 L + Dicamba 0,2 L + Atrazina 1 kg. Si no entró en junio, en septiembre: ControlMax 1,5–2 + 2,4-D 0,8–1,2 L + Dicamba 0,1–0,13 L + Atrazina 1 kg."},
       {id:"maiz1-2", nombre:"Preemergencia", desde:"01/10", hasta:"15/10", clave:"metolacloro + sulfentrazone | terbutilazina",
         mezcla:"ControlMax 1,2 + S-metolacloro 0,8 L + Sulfentrazone 0,3 L (+ carfentrazone 75 cc en cabeceras). Variante: Terbutilazina 1 L.",
         nota:"A la siembra (1–15 oct).", hastaSiembra:true},
     ]},
-    {id:"maiz2", nombre:"Maíz tardío", aplicaA:"MAIZ, MAIZ 2, *-MAIZ", pasos:[
+    {id:"maiz2", nombre:"Maíz tardío", aplicaA:"MAIZ, MAIZ 2, *-MAIZ", siembraDesde:"01/12", siembraHasta:"20/12", pasos:[
       {id:"maiz2-1", nombre:"Barbecho", desde:"15/09", hasta:"20/10", clave:"atrazina",
         mezcla:"Glifosato 1,5–2 + 2,4-D 0,5–1 L + Dicamba 0,2 L + Atrazina 1 kg"},
       {id:"maiz2-2", nombre:"Barbecho intermedio", desde:"10/11", hasta:"25/11", clave:"atrazina | sulfentrazone",
@@ -1745,22 +1745,22 @@ const PROTOCOLO_BASE = {
         mezcla:"Glifosato 1,7–2 + 2,4-D 0,3–0,5 L + Atrazina 1–1,5 kg · variantes Laudis 0,3 L o Brucia 90 cc + Atrazina 1 kg",
         nota:"Tope: no más de 2 kg de atrazina por lote en la campaña si el lote puede ir a soja la siguiente."},
     ]},
-    {id:"sorgo", nombre:"Sorgo", aplicaA:"SORGO, *-SORGO", pasos:[
+    {id:"sorgo", nombre:"Sorgo", aplicaA:"SORGO, *-SORGO", siembraDesde:"15/11", siembraHasta:"15/12", pasos:[
       {id:"sorgo-1", nombre:"Barbecho", desde:"20/09", hasta:"20/10", clave:"atrazina",
         mezcla:"ControlMax 2 + 2,4-D 1,2–1,3 L + Dicamba 0,1–0,13 L + Atrazina 1 kg"},
       {id:"sorgo-2", nombre:"Preemergencia", desde:"15/11", hasta:"15/12", clave:"metolacloro",
         mezcla:"S-metolacloro 0,8 L + Atrazina 0,5 kg",
         nota:"A la siembra, sólo con semilla curada con protector (Concep).", hastaSiembra:true},
     ]},
-    {id:"fina", nombre:"Fina (cebada / trigo)", aplicaA:"CEBADA, TRIGO, CEBADA-*, TRIGO-*", pasos:[
+    {id:"fina", nombre:"Fina (cebada / trigo)", aplicaA:"CEBADA, TRIGO, CEBADA-*, TRIGO-*", siembraDesde:"01/05", siembraHasta:"15/07", pasos:[
       {id:"fina-1", nombre:"Presiembra de otoño", desde:"15/05", hasta:"31/05", clave:"flurocloridona",
         mezcla:"Glifosato 1–2 + 2,4-D 0,5–0,8 L + Flurocloridona 1 L"},
     ]},
-    {id:"cobertura", nombre:"Coberturas (vicia + triticale)", aplicaA:"", pasos:[
+    {id:"cobertura", nombre:"Coberturas (vicia + triticale)", aplicaA:"", siembraDesde:"01/05", siembraHasta:"31/05", pasos:[
       {id:"cobertura-1", nombre:"Presiembra", desde:"20/04", hasta:"30/04", clave:"terbutilazina",
         mezcla:"Glifosato 1,5 + Terbutilazina 2 L"},
     ]},
-    {id:"pastura", nombre:"Pasturas / alfalfa (implantación)", aplicaA:"", pasos:[
+    {id:"pastura", nombre:"Pasturas / alfalfa (implantación)", aplicaA:"", siembraDesde:"01/03", siembraHasta:"30/04", pasos:[
       {id:"pastura-1", nombre:"Presiembra", desde:"01/03", hasta:"30/04", clave:"flumetsulam",
         mezcla:"Glifosato 1,7–1,8 + 2,4-D 0,5 L + Flumetsulam 0,25–0,3 L"},
     ]},
@@ -1793,16 +1793,27 @@ const RESIDUALES = ["atrazina","terbutilazina","diflufenican","sulfentrazone","f
   "acetoclor","flumioxazin","clorimuron","metsulfuron","imazetapir","flumetsulam","picloram","adengo","fierce","texaro"];
 const NO_RESIDUALES = ["paraquat","heat","carfentrazone","laudis","brucia","glifosato"];
 const nombreActivo = t => t === "metolacloro" || t === "s-metolacloro" ? "S-metolacloro" : t.charAt(0).toUpperCase() + t.slice(1);
-// Labores que no son pulverización (no cuentan como "última aplicación")
-const NO_ES_PULVERIZACION = /^(SIEMBRA|VOLEADA|INCORPORADA|PARATIL|RASTRA|ROLOS|SG\b|MZ PP|SJ PP|GR PP|SJ 2DA|MZ FERT|GR FERT|SJ FERT|FINA FERT)/i;
-
-// Si la labor no viene anotada, una pasada que sólo lleva semilla o fertilizante no es pulverización
-const CAT_NO_PULVERIZACION = ["SEM","FERT","SGR"];
-const esPulverizacion = a => !NO_ES_PULVERIZACION.test(a.labor||"") &&
-  !((a.productos||[]).length && a.productos.every(n => {
-    const cat = PRODUCTOS_BASE.find(p => normBusca(p.n) === normBusca(n));
-    return cat && CAT_NO_PULVERIZACION.includes(cat.cat);
-  }));
+// Tipo de labor: siembra | fertilizacion | labranza | pulverizacion.
+// Sale de la labor anotada; si no viene, de los productos (semilla = siembra, sólo fertilizante = fertilización).
+const LABOR_SIEMBRA = /^(SIEMBRA|SG\b|MZ PP|SJ PP|GR PP|SJ 2DA|MZ FERT|GR FERT|SJ FERT|FINA FERT)/i;
+const LABOR_FERTILIZACION = /^(VOLEADA|INCORPORADA)/i;
+const LABOR_LABRANZA = /^(PARATIL|RASTRA|ROLOS)/i;
+const catProducto = n => (PRODUCTOS_BASE.find(p => normBusca(p.n) === normBusca(n)) || {}).cat || null;
+const clasificarLabor = (labor, productos = []) => {
+  const l = String(labor || "");
+  if(LABOR_SIEMBRA.test(l) || productos.some(n => catProducto(n) === "SEM")) return "siembra";
+  if(LABOR_FERTILIZACION.test(l)) return "fertilizacion";
+  if(LABOR_LABRANZA.test(l)) return "labranza";
+  if(!l && productos.length && productos.every(n => catProducto(n) === "FERT")) return "fertilizacion";
+  return "pulverizacion";
+};
+const esPulverizacion = a => clasificarLabor(a.labor, a.productos) === "pulverizacion";
+const TIPO_LABOR = {
+  siembra:       {txt:"Siembra",       color:"#7A4E12", fondo:"#F6EAD7"},
+  pulverizacion: {txt:"Pulverización", color:"#2E7D32", fondo:"#EEF5E6"},
+  fertilizacion: {txt:"Fertilización", color:"#0D47A1", fondo:"#E3F2FD"},
+  labranza:      {txt:"Labranza",      color:"#5D4037", fondo:"#EFEBE9"},
+};
 const DIA_MS = 86400000;
 // Tope de atrazina por lote en la campaña (protocolo: si el lote puede ir a soja la siguiente)
 const TOPE_ATRAZINA_KG = 2;
@@ -1833,7 +1844,9 @@ const unidadProducto = n => {
 const UNIDAD_ACTIVO = {atrazina:"kg", clorimuron:"kg", metsulfuron:"kg", texaro:"kg"};
 const fmtDosis = (d, n, activo) => {
   if(d == null) return "";
-  const u = UNIDAD_ACTIVO[activo] || unidadProducto(n);
+  let u = UNIDAD_ACTIVO[activo] || unidadProducto(n);
+  // Las semillas propias figuran en kg en el catálogo pero en la planilla se cargan en toneladas (0,09 = 90 kg/ha)
+  if(u === "kg" && d < 2 && catProducto(n) === "SEM") u = "tn";
   return `${Number(d).toLocaleString("es-AR",{maximumFractionDigits:3})}${u ? " " + u : ""}`;
 };
 
@@ -1900,6 +1913,22 @@ function evaluarProtocolo(protocolo, campos, cultivoDe, aplicaciones, hoy, inclu
         return {...p, alts, terminos:[...new Set(alts.flat())],
           ini: fechaDelPaso(p.desde, protocolo.campania), fin: fechaDelPaso(p.hasta, protocolo.campania)};
       }).filter(p => p.ini && p.fin).sort((a,b) => a.ini - b.ini);
+      // Siembra: la registrada cerca de la ventana de siembra del cultivo (protocolos guardados
+      // antes de que existiera la ventana usan la del protocolo original)
+      const orig = (PROTOCOLO_BASE.cultivos.find(c => c.id === prot.id) || {});
+      const sDesde = prot.siembraDesde ?? orig.siembraDesde, sHasta = prot.siembraHasta ?? orig.siembraHasta;
+      const sIni = fechaDelPaso(sDesde, protocolo.campania), sFin = fechaDelPaso(sHasta, protocolo.campania);
+      let siembra = null;
+      if(sIni && sFin){
+        const hecha = apls.find(a => { const f = fechaLocal(a.fecha);
+          return clasificarLabor(a.labor, a.productos) === "siembra" && f >= sIni - 45*DIA_MS && f <= sFin.getTime() + 60*DIA_MS; });
+        siembra = hecha ? {estado:"hecho", apl:hecha, fecha:fechaLocal(hecha.fecha)}
+          : hoy < sIni ? {estado:"proximo", dias:Math.ceil((sIni - hoy)/DIA_MS)}
+          : hoy <= sFin ? {estado:"ventana", dias:Math.ceil((sFin - hoy)/DIA_MS)}
+          : (hoy - sFin) <= 30*DIA_MS ? {estado:"atrasado", dias:Math.floor((hoy - sFin)/DIA_MS)}
+          : {estado:"sinregistro"};   // ventana vieja: seguramente se sembró y no quedó en la planilla
+        siembra.desde = sDesde; siembra.hasta = sHasta;
+      }
       // Cada aplicación cuenta para el paso cuya ventana le queda más cerca (entre los que lleva algún activo)
       const asignadas = pasos.map(() => []);
       apls.forEach(a => {
@@ -1936,6 +1965,9 @@ function evaluarProtocolo(protocolo, campos, cultivoDe, aplicaciones, hoy, inclu
           const vigente = hoy <= p.fin.getTime() + 30*DIA_MS || p.hastaSiembra;
           return {...base, estado: parcial && vigente ? "parcial" : "hecho", haHecha, alt};
         }
+        // Lo que va a la siembra y no se hizo: si ya se sembró (hace más de 3 días), quedó atrasado
+        if(p.hastaSiembra && siembra && siembra.estado === "hecho" && hoy - siembra.fecha > 3*DIA_MS)
+          return {...base, estado:"atrasado", dias:Math.floor((hoy - siembra.fecha)/DIA_MS), postSiembra:siembra.fecha};
         if(hoy < p.ini) return {...base, estado:"proximo", dias:Math.ceil((p.ini - hoy)/DIA_MS)};
         if(hoy <= p.fin) return {...base, estado:"ventana", dias:Math.ceil((p.fin - hoy)/DIA_MS)};
         const dias = Math.floor((hoy - p.fin)/DIA_MS);
@@ -1944,7 +1976,7 @@ function evaluarProtocolo(protocolo, campos, cultivoDe, aplicaciones, hoy, inclu
         if(p.hastaSiembra) return {...base, estado: dias <= 120 ? "siembra" : "salteado", dias};
         return {...base, estado: dias <= 30 ? "atrasado" : "salteado", dias};
       });
-      return {prot, estados};
+      return {prot, estados, siembra};
     });
 
     // Residuales que ya recibió el lote en la campaña, con dosis y fecha (de la más vieja a la última)
@@ -2028,16 +2060,18 @@ function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDat
 
   // Estado del lote = lo más urgente que tiene abierto
   const fichas = evaluacion.map(e => ({...e, estado: estadoDeLote(e)}));
+  const paraSembrar = f => f.evals.some(ev => ev.siembra && ["ventana","atrasado"].includes(ev.siembra.estado));
   const filtradas = fichas.filter(f => (campoF === "TODOS" || f.campo.id === campoF)
     && (protF === "TODOS" || f.evals.some(ev => ev.prot.id === protF))
-    && (estadoF === "TODOS" || f.estado === estadoF))
+    && (estadoF === "TODOS" || (estadoF === "sembrar" ? paraSembrar(f) : f.estado === estadoF)))
     .sort((a, b) => (ORDEN_ESTADO.indexOf(a.estado)+1 || 99) - (ORDEN_ESTADO.indexOf(b.estado)+1 || 99)
       || a.campo.nombre.localeCompare(b.campo.nombre) || String(a.lote.id).localeCompare(String(b.lote.id), "es", {numeric:true}));
   const base = fichas.filter(f => (campoF === "TODOS" || f.campo.id === campoF) && (protF === "TODOS" || f.evals.some(ev => ev.prot.id === protF)));
   const tiles = [...["atrasado","ventana","parcial","siembra","proximo"].map(est => ({est, ...ESTADO_PASO[est], txt: est === "proximo" ? "Abre en 30 días" : ESTADO_PASO[est].txt})),
     {est:"aldia", txt:"Sin nada pendiente", color:TINTA, fondo:CREMA}]
     .map(t => ({...t, lotes: base.filter(f => f.estado === t.est)}))
-    .filter(t => t.lotes.length || t.est === "aldia");
+    .filter(t => t.lotes.length || t.est === "aldia")
+    .concat([{est:"sembrar", txt:"🌱 Falta sembrar", color:"#7A4E12", fondo:"#F6EAD7", lotes: base.filter(paraSembrar)}]);
   const camposCon = [...new Set(evaluacion.map(e => e.campo.id))];
   const fFecha = s => { const d = fechaLocal(s); return d ? ddmm(d) : s; };
 
@@ -2069,7 +2103,7 @@ function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDat
           </button>
         );})}
       </div>
-      {estadoF !== "TODOS" && <div style={{fontSize:12,opacity:0.7}}>Mostrando sólo "{(ESTADO_PASO[estadoF]||{txt:"Sin nada pendiente"}).txt}". <button onClick={()=>setEstadoF("TODOS")} style={{border:"none",background:"none",padding:0,color:"#1E5FA8",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:12}}>Ver todos</button></div>}
+      {estadoF !== "TODOS" && <div style={{fontSize:12,opacity:0.7}}>Mostrando sólo "{estadoF==="sembrar" ? "Falta sembrar" : (ESTADO_PASO[estadoF]||{txt:"Sin nada pendiente"}).txt}". <button onClick={()=>setEstadoF("TODOS")} style={{border:"none",background:"none",padding:0,color:"#1E5FA8",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:12}}>Ver todos</button></div>}
 
       {!filtradas.length && <div style={{...cajaV,textAlign:"center",opacity:0.7}}>No hay lotes con estos filtros.</div>}
       {filtradas.map(f => {
@@ -2111,6 +2145,25 @@ function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDat
               </> : <span style={{opacity:0.6}}>sin pulverizaciones en la campaña</span>}
             </div>
 
+            {f.evals.filter(ev => ev.siembra).map(ev => {
+              const sb = ev.siembra;
+              const items = sb.apl ? (sb.apl.items || (sb.apl.productos||[]).map(n => ({n, d:null}))) : [];
+              const color = sb.estado==="hecho" ? "#2E7D32" : sb.estado==="ventana" ? "#8A6200" : sb.estado==="atrasado" ? "#C0392B" : sb.estado==="sinregistro" ? "#8C8572" : "#5B6B7A";
+              return (
+                <div key={ev.prot.id} style={{fontSize:12.5,marginTop:6}}>
+                  <b>🌱 Siembra{f.evals.length > 1 ? ` (${ev.prot.nombre.toLowerCase()})` : ""}:</b>{" "}
+                  <span style={{color,fontWeight:600}}>
+                    {sb.estado==="hecho" ? `sembrado el ${fFecha(sb.apl.fecha)}${sb.apl.parte ? ` (${sb.apl.lote})` : ""}`
+                      : sb.estado==="ventana" ? `falta sembrar · ventana hasta el ${sb.hasta} (quedan ${sb.dias} días)`
+                      : sb.estado==="atrasado" ? `sin siembra registrada · la ventana cerró el ${sb.hasta}`
+                      : sb.estado==="sinregistro" ? "sin siembra registrada en la planilla"
+                      : `desde el ${sb.desde} (en ${sb.dias} días)`}
+                  </span>
+                  {items.length > 0 && <span style={{opacity:0.75}}> — {items.map(it => `${it.n}${it.d!=null ? " " + fmtDosis(it.d, it.n) : ""}`).join(" · ")}</span>}
+                </div>
+              );
+            })}
+
             <div style={{fontSize:12.5,marginTop:6}}>
               <b>Residuales aplicados:</b>{" "}
               {!porActivo.length && <span style={{opacity:0.6}}>ninguno todavía</span>}
@@ -2136,7 +2189,8 @@ function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDat
                   const e = ESTADO_PASO[s.estado];
                   const que = s.faltan.length ? s.faltan.map(nombreActivo).join(" + ")
                     : s.alt ? s.alt.map(nombreActivo).join(" + ") : s.paso.nombre;
-                  const cuando = s.estado==="atrasado" ? `venció el ${s.paso.hasta} (hace ${s.dias} días)`
+                  const cuando = s.postSiembra ? `se sembró el ${ddmm(s.postSiembra)} sin este residual`
+                    : s.estado==="atrasado" ? `venció el ${s.paso.hasta} (hace ${s.dias} días)`
                     : s.estado==="ventana" ? `hasta el ${s.paso.hasta} · quedan ${s.dias} días`
                     : s.estado==="siembra" ? "a la siembra"
                     : s.estado==="parcial" ? `hecho en ${fmt(s.haHecha)} de ${fmt(Number(f.lote.ha)||0)} ha, falta completar`
@@ -2167,7 +2221,7 @@ function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDat
 // ============================================================
 // LABORES REALIZADAS — por lote, campo o cultivo
 // ============================================================
-function VistaRealizadas({aplicaciones, fertilizaciones}){
+function VistaRealizadas({aplicaciones, fertilizaciones, registro}){
   const [campoF, setCampoF] = useState("TODOS");
   const [loteF, setLoteF] = useState("TODOS");
   const [cultivoF, setCultivoF] = useState("TODOS");
@@ -2175,12 +2229,19 @@ function VistaRealizadas({aplicaciones, fertilizaciones}){
   const [busca, setBusca] = useState("");
   const [agrupar, setAgrupar] = useState("lote");
 
-  const registros = useMemo(() => [
-    ...aplicaciones.map(a => ({key:`a${a.id}`, fecha:a.fecha, campo:a.campo, lote:String(a.lote), cultivo:a.cultivo||"", ha:Number(a.ha)||0,
-      tipo:"pulverizacion", labor:a.labor ? a.labor.charAt(0) + a.labor.slice(1).toLowerCase() : "Labor", detalle:(a.productos||[]).join(" · "), costo:Number(a.costo)||0})),
+  const capital = t => t ? t.charAt(0) + t.slice(1).toLowerCase() : "";
+  // Con el registro del pipeline se ven todas las labores (siembra incluida) con dosis y costo
+  const registros = useMemo(() => registro ? registro.map(r => {
+    const tipo = clasificarLabor(r.labor, r.productos);
+    return {key:r.id, fecha:r.fecha, campo:r.campo, lote:String(r.lote), cultivo:r.cultivo||"", ha:Number(r.ha)||0, tipo,
+      labor: capital(r.labor) || TIPO_LABOR[tipo].txt,
+      detalle:(r.items||[]).map(it => `${it.n}${it.d!=null ? " " + fmtDosis(it.d, it.n) : ""}`).join(" · "), costo:Number(r.costo)||0};
+  }).sort((a,b) => fechaLocal(b.fecha) - fechaLocal(a.fecha)) : [
+    ...aplicaciones.map(a => { const tipo = clasificarLabor(a.labor, a.productos); return {key:`a${a.id}`, fecha:a.fecha, campo:a.campo, lote:String(a.lote), cultivo:a.cultivo||"", ha:Number(a.ha)||0,
+      tipo, labor: capital(a.labor) || TIPO_LABOR[tipo].txt, detalle:(a.productos||[]).join(" · "), costo:Number(a.costo)||0}; }),
     ...fertilizaciones.map(f => ({key:`f${f.id}`, fecha:f.fecha, campo:f.campo, lote:String(f.lote), cultivo:f.cultivo||"", ha:Number(f.ha)||0,
       tipo:"fertilizacion", labor:f.tipo||"Fertilización", detalle:[f.producto, f.dosis].filter(Boolean).join(" · "), costo:(Number(f.ha)||0)*(Number(f.costoHa)||0)})),
-  ].sort((a,b) => fechaLocal(b.fecha) - fechaLocal(a.fecha)), [aplicaciones, fertilizaciones]);
+  ].sort((a,b) => fechaLocal(b.fecha) - fechaLocal(a.fecha)), [aplicaciones, fertilizaciones, registro]);
 
   const campos = [...new Set(registros.map(r => r.campo))].sort((a,b)=>nombreCampo(a).localeCompare(nombreCampo(b)));
   const lotes = campoF === "TODOS" ? [] : [...new Set(registros.filter(r => r.campo === campoF).map(r => r.lote))].sort((a,b)=>a.localeCompare(b,"es",{numeric:true}));
@@ -2218,9 +2279,11 @@ function VistaRealizadas({aplicaciones, fertilizaciones}){
           {cultivos.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
         <select value={tipoF} onChange={e=>setTipoF(e.target.value)} style={selectV}>
-          <option value="todas">Pulverizaciones y fertilizaciones</option>
+          <option value="todas">Todas las labores</option>
+          <option value="siembra">Sólo siembras</option>
           <option value="pulverizacion">Sólo pulverizaciones</option>
           <option value="fertilizacion">Sólo fertilizaciones</option>
+          {registros.some(r => r.tipo === "labranza") && <option value="labranza">Sólo labranzas</option>}
         </select>
         <input value={busca} onChange={e=>setBusca(e.target.value)} placeholder="Buscar producto (ej: atrazina)"
           style={{...selectV,fontWeight:400,flex:"1 1 180px",minWidth:0}}/>
@@ -2251,7 +2314,7 @@ function VistaRealizadas({aplicaciones, fertilizaciones}){
                 <div style={{fontWeight:700,whiteSpace:"nowrap"}}>{fechaCorta(r.fecha)}</div>
                 <div style={{minWidth:0}}>
                   <span style={{fontSize:10.5,fontWeight:700,borderRadius:5,padding:"1px 6px",marginRight:6,
-                    background:r.tipo==="fertilizacion"?"#E3F2FD":"#EEF5E6",color:r.tipo==="fertilizacion"?"#0D47A1":"#2E7D32"}}>{r.labor}</span>
+                    background:(TIPO_LABOR[r.tipo]||TIPO_LABOR.pulverizacion).fondo,color:(TIPO_LABOR[r.tipo]||TIPO_LABOR.pulverizacion).color}}>{r.labor}</span>
                   {agrupar!=="lote" && <b>{nombreCampo(r.campo)} {r.lote} · </b>}
                   {agrupar!=="cultivo" && agrupar!=="lote" && r.cultivo && <span style={{opacity:0.7}}>{r.cultivo} · </span>}
                   <span style={{opacity:0.85}}>{r.detalle || "—"}</span>
@@ -2403,7 +2466,9 @@ function VistaProtocoloEditor({protocolo, sync, onGuardar}){
   useEffect(() => { setBorrador(protocolo); }, [protocolo]);
   const cambiado = JSON.stringify(borrador) !== JSON.stringify(protocolo);
   const fechaOK = s => /^\d{1,2}\/\d{1,2}$/.test(String(s||"").trim());
-  const errores = (borrador.cultivos||[]).flatMap(c => (c.pasos||[]).filter(p => !fechaOK(p.desde) || !fechaOK(p.hasta)).map(p => `${c.nombre} · ${p.nombre||"paso sin nombre"}`));
+  const errores = (borrador.cultivos||[]).flatMap(c => [
+    ...((c.siembraDesde && !fechaOK(c.siembraDesde)) || (c.siembraHasta && !fechaOK(c.siembraHasta)) ? [`${c.nombre} · siembra`] : []),
+    ...(c.pasos||[]).filter(p => !fechaOK(p.desde) || !fechaOK(p.hasta)).map(p => `${c.nombre} · ${p.nombre||"paso sin nombre"}`)]);
 
   const setCultivo = (ci, cambios) => setBorrador(b => ({...b, cultivos: b.cultivos.map((c,i) => i===ci ? {...c, ...cambios} : c)}));
   const setPaso = (ci, pi, cambios) => setCultivo(ci, {pasos: borrador.cultivos[ci].pasos.map((p,i) => i===pi ? {...p, ...cambios} : p)});
@@ -2447,7 +2512,7 @@ function VistaProtocoloEditor({protocolo, sync, onGuardar}){
           <div style={{display:"flex",gap:10,alignItems:"center",justifyContent:"space-between",flexWrap:"wrap"}}>
             <button onClick={()=>setAbierto(abierto===c.id?null:c.id)} style={{border:"none",background:"none",padding:0,cursor:"pointer",fontFamily:"inherit",color:TINTA,textAlign:"left"}}>
               <span style={{fontSize:16,fontWeight:700}}>{abierto===c.id?"▾":"▸"} {c.nombre}</span>
-              <span style={{fontSize:12,opacity:0.65,marginLeft:8}}>{c.pasos.length} pasos · {c.aplicaA || "sin cultivos asignados"}</span>
+              <span style={{fontSize:12,opacity:0.65,marginLeft:8}}>{c.pasos.length} pasos · {c.aplicaA || "sin cultivos asignados"}{c.siembraDesde ? ` · siembra ${c.siembraDesde}–${c.siembraHasta||"?"}` : ""}</span>
             </button>
             {abierto===c.id && <button onClick={()=>{ if(window.confirm(`¿Borrar ${c.nombre} del protocolo?`)) setBorrador(b=>({...b,cultivos:b.cultivos.filter((_,i)=>i!==ci)})); }}
               style={{...btn("transparent","#C0392B"),borderColor:"#C0392B",padding:"4px 10px",fontSize:11.5}}>Borrar cultivo</button>}
@@ -2462,6 +2527,10 @@ function VistaProtocoloEditor({protocolo, sync, onGuardar}){
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:10}}>
                 <div>{etiqueta("Nombre")}<input value={c.nombre} onChange={e=>setCultivo(ci,{nombre:e.target.value})} style={campoTxt}/></div>
                 <div>{etiqueta("Se aplica a (cultivos de la planilla)")}<input value={c.aplicaA} onChange={e=>setCultivo(ci,{aplicaA:e.target.value})} placeholder="ej: SOJA, *-SOJA" style={campoTxt}/></div>
+                <div style={{display:"flex",gap:8}}>
+                  <div style={{flex:1}}>{etiqueta("Siembra desde")}<input value={c.siembraDesde||""} placeholder="dd/mm" onChange={e=>setCultivo(ci,{siembraDesde:e.target.value})} style={{...campoTxt,borderColor:!c.siembraDesde||fechaOK(c.siembraDesde)?"#C8C2B0":"#C0392B"}}/></div>
+                  <div style={{flex:1}}>{etiqueta("Siembra hasta")}<input value={c.siembraHasta||""} placeholder="dd/mm" onChange={e=>setCultivo(ci,{siembraHasta:e.target.value})} style={{...campoTxt,borderColor:!c.siembraHasta||fechaOK(c.siembraHasta)?"#C8C2B0":"#C0392B"}}/></div>
+                </div>
               </div>
               {c.pasos.map((p, pi) => (
                 <div key={p.id} style={{border:"1px solid #C8C2B0",borderRadius:9,padding:10,background:"#FFFDF7"}}>
@@ -3570,7 +3639,7 @@ export default function App(){
         )}
 
         {/* ══ HERBICIDAS ══ */}
-        {vista==="realizadas"&&<VistaRealizadas aplicaciones={APLICACIONES} fertilizaciones={FERTILIZACIONES}/>}
+        {vista==="realizadas"&&<VistaRealizadas aplicaciones={APLICACIONES} fertilizaciones={FERTILIZACIONES} registro={aplicacionesConDosis}/>}
 
         {vista==="pendientes"&&<VistaPendientes protocolo={protocolo} cultivoDe={cultivoDe}
           aplicaciones={aplicacionesConDosis || APLICACIONES} conDosis={!!aplicacionesConDosis}
