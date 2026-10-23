@@ -11,6 +11,7 @@
 // Requiere la env GOOGLE_CREDENTIALS (la misma que usa guardar-labor.js).
 
 import { google } from "googleapis";
+import { claveOk } from "./_clave.js";
 
 const PLANILLA_LABORES = "1JpAA6bCl_uhizVO4jOVBEs34RRlNuAVHKr8kSFRm5ro";
 const HOJA = "borradores";
@@ -52,8 +53,9 @@ async function leerFilas(sheets) {
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-clave");
   if (req.method === "OPTIONS") return res.status(200).end();
+  if (!claveOk(req, res)) return;
 
   try {
     const auth = getAuth();
