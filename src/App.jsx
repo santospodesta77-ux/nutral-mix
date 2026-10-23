@@ -3871,7 +3871,11 @@ export default function App(){
       setPdfMsg({ok:true, texto:"Armando el PDF…"});
       await cargarScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
       await cargarScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
-      const canvas = await window.html2canvas(nodo, {scale:2, backgroundColor:"#FFFFFF", useCORS:true});
+      // El PDF va al aplicador: sin precios ni dólares (lo mismo que se oculta al imprimir)
+      nodo.classList.add("pdf-sin-precios");
+      let canvas;
+      try { canvas = await window.html2canvas(nodo, {scale:2, backgroundColor:"#FFFFFF", useCORS:true}); }
+      finally { nodo.classList.remove("pdf-sin-precios"); }
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({unit:"mm", format:"a4", orientation:"portrait"});
       const anchoP = 210, altoP = 297;
@@ -3954,6 +3958,7 @@ export default function App(){
           @page { margin: 1cm; }
         }
         .print-only { display: none; }
+        .pdf-sin-precios .no-print, .pdf-sin-precios .no-print * { display: none !important; }
       `}</style>
       <div style={{maxWidth:1200,margin:"0 auto"}}>
 
