@@ -7,7 +7,13 @@
 // POST {monitoreo}          → guarda o pisa (por id) y devuelve { ok, fila }
 // POST {id, borrar:true}    → lo borra
 //
+// Además, cada monitoreo se escribe en un Google Doc editable por campo ("Monitoreos – <campo>", siempre
+// el mismo), en su propia carpeta "Monitoreos S-MIX" del Drive, usando el Apps Script de los PDF.
+// Si el Doc falla, el monitoreo igual queda guardado en la planilla (la respuesta trae docError).
+//
 // Requiere la env GOOGLE_CREDENTIALS (la misma que usa guardar-labor.js).
+// Para los Docs: APPS_SCRIPT_PDF_URL, APPS_SCRIPT_PDF_TOKEN y (opcional) DRIVE_MONITOREOS_FOLDER, id de la
+// carpeta donde van los Docs (si no está, el script usa/crea "Monitoreos S-MIX" en Mi unidad).
 
 import { google } from "googleapis";
 import { claveOk } from "./_clave.js";
@@ -62,6 +68,23 @@ async function leerFilas(sheets) {
   return r.data.values || [];
 }
 
+// Le pasa el monitoreo (o el borrado) al Apps Script que arma los Docs por campo
+async function alDoc(cuerpo) {
+  const url = process.env.APPS_SCRIPT_PDF_URL, token = process.env.APPS_SCRIPT_PDF_TOKEN;
+  if (!url || !token) return { docError: "Falta configurar el Apps Script (APPS_SCRIPT_PDF_URL y APPS_SCRIPT_PDF_TOKEN)." };
+  try {
+    const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, carpetaMonitoreos: process.env.DRIVE_MONITOREOS_FOLDER || "", ...cuerpo }), signal: AbortSignal.timeout(40000) });
+    const d = JSON.parse(await r.text());
+    if (!d.ok) return { docError: d.error || "El Apps Script no pudo escribir el Doc." };
+    // El script viejo no conoce "accion" y contesta como si fuera un PDF
+    if (cuerpo.accion === "monitoreo" && !d.doc) return { docError: "Hay que actualizar el Apps Script (apps-script/guardar-pdf.gs) para los Docs de monitoreo." };
+    return { docLink: d.link || "" };
+  } catch (e) {
+    return { docError: `El Apps Script no respondió bien: ${e.message}` };
+  }
+}
+
 const aObjeto = f => Object.fromEntries(CAMPOS_FILA.map((k, i) => [k, f[i] || ""]));
 
 export default async function handler(req, res) {
@@ -92,7 +115,7 @@ export default async function handler(req, res) {
       const idx = filas.findIndex(f => f[0] === idBorrar);
       if (idx < 0) return res.status(200).json({ ok: true, borrado: false });
       await sheets.spreadsheets.values.clear({ spreadsheetId: PLANILLA_LABORES, range: `${HOJA}!A${idx + 2}:${ULTIMA_COL}${idx + 2}` });
-      return res.status(200).json({ ok: true, borrado: true });
+      return res.status(200).json({ ok: true, borrado: true, ...(await alDoc({ accion: "monitoreo_borrar", id: idBorrar })) });
     }
 
     const m = monitoreo || {};
@@ -108,7 +131,7 @@ export default async function handler(req, res) {
       valueInputOption: "RAW",
       requestBody: { values: [valores] },
     });
-    return res.status(200).json({ ok: true, fila });
+    return res.status(200).json({ ok: true, fila, ...(await alDoc({ accion: "monitoreo", monitoreo: m })) });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: e.message || "Error guardando el monitoreo." });

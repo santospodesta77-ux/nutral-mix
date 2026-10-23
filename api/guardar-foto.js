@@ -26,6 +26,14 @@ export default async function handler(req, res) {
     const limpio = String(base64).replace(/^data:image\/\w+;base64,/, "");
     if (limpio.length * 0.75 > 4 * 1024 * 1024) return res.status(413).json({ error: "La foto pesa más de 4 MB." });
 
+    // Primero se pregunta la versión: el script viejo (sólo PDF) guardaba la foto como un PDF roto
+    // en la carpeta de las órdenes. A ese no se le manda nada.
+    const v = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, accion: "version" }) })
+      .then(x => x.json()).catch(() => ({}));
+    if (!(Number(v.version) >= 3)) {
+      return res.status(500).json({ error: "Hay que actualizar el Apps Script (apps-script/guardar-pdf.gs, Nueva versión) para guardar fotos. El monitoreo se guarda igual, sin la foto." });
+    }
+
     const r = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

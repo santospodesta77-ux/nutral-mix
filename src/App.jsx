@@ -2983,11 +2983,11 @@ function FormMonitoreo({monit, campoId, loteId, cultivoDe, siembraDe, autor, cam
 
   const guardar = async () => {
     setGuardando(true);
-    let links = form.fotos ? String(form.fotos).split(" ").filter(Boolean) : [], fallaron = 0;
+    let links = form.fotos ? String(form.fotos).split(" ").filter(Boolean) : [], fallaron = 0, motivo = "";
     for(const [k, ft] of fotos.entries()){
       setMsg({ok:true, txt:`Subiendo foto ${k+1} de ${fotos.length}…`});
       try { links.push(await subirFoto(await achicarFoto(ft.file), `monitoreo ${form.fecha} ${campo.nombre} ${lote.label||lote.id} ${links.length+1}.jpg`)); }
-      catch { fallaron++; }
+      catch(e) { fallaron++; motivo = motivo || e.message; }
     }
     // Nacimientos: si se contó algo, se arma el detalle; si no, queda lo que ya tenía
     let nacimiento = form.nacimiento, plantasHa = form.plantasHa, sembradas = form.sembradasHa, logroTxt = form.logro;
@@ -3003,7 +3003,9 @@ function FormMonitoreo({monit, campoId, loteId, cultivoDe, siembraDe, autor, cam
         nac.causas.length ? `fallas: ${nac.causas.join(", ")}` : "",
       ].filter(Boolean).join(" · ");
     }
-    const m = {id: form.id || `m${Date.now().toString(36)}`, fecha:form.fecha, campo:campoId, lote:String(loteId), cultivo:form.cultivo || cvPlan,
+    // campoNombre y loteNombre no van a la planilla: son para el título del Google Doc del campo
+    const m = {id: form.id || `m${Date.now().toString(36)}`, fecha:form.fecha, campo:campoId, campoNombre:campo.nombre, loteNombre:String(lote.label||lote.id),
+      lote:String(loteId), cultivo:form.cultivo || cvPlan,
       estado:String(form.estado).trim(), nivel:form.nivel, malezas:String(form.malezas).trim(), malezasDensidad:form.malezasDensidad, malezasTamano:form.malezasTamano,
       plagas:String(form.plagas).trim(), enfermedades:String(form.enfermedades).trim(), suelo:form.suelo, observaciones:String(form.observaciones).trim(),
       accion:String(form.accion).trim(), autor, fotos:links.join(" "), plantasHa, sembradasHa:sembradas, logro:logroTxt, nacimiento};
@@ -3011,7 +3013,7 @@ function FormMonitoreo({monit, campoId, loteId, cultivoDe, siembraDe, autor, cam
     const ok = await monit.guardar([m]);
     fotos.forEach(ft => URL.revokeObjectURL(ft.url)); setFotos([]);
     setGuardando(false);
-    const avisoFotos = fallaron ? ` ${fallaron} foto${fallaron>1?"s":""} no se pudo subir (sin señal o el Drive no respondió).` : "";
+    const avisoFotos = fallaron ? ` ${fallaron} foto${fallaron>1?"s":""} no se pudo subir: ${/Failed to fetch|NetworkError|Load failed/i.test(motivo) ? "sin señal" : motivo}` : "";
     onListo(ok ? {ok:!fallaron, txt:`✓ Monitoreo de ${campo.nombre} ${lote.label||lote.id} guardado en la planilla${links.length ? ` con ${links.length} foto${links.length>1?"s":""}` : ""}.${avisoFotos}`}
       : {ok:false, txt:`Sin conexión con la planilla: el monitoreo quedó guardado en este equipo y se sube cuando vuelva la señal.${avisoFotos}`});
   };
@@ -3192,7 +3194,8 @@ function VistaMonitoreo({monit, lluv, cultivoDe, siembraDe, autor, cambiarAutor}
     <div style={{display:"flex",flexDirection:"column",gap:14}}>
       <div style={{fontSize:12.5,opacity:0.75}}>
         Para cargar un monitoreo: <b>🗺️ Mapa por campo</b> → elegí el campo → tocá el lote → <b>🔍 Monitorear este lote</b>.
-        Se guardan en la hoja <b>monitoreo</b> de la planilla LABORES S-MIX 26-27 (Drive).
+        Se guardan en la hoja <b>monitoreo</b> de la planilla LABORES S-MIX 26-27 y, además, en un <b>Google Doc por campo</b>
+        editable ("Monitoreos – <i>campo</i>", siempre el mismo, en la carpeta <b>Monitoreos S-MIX</b> del Drive, con las fotos).
         {monit.sync.estado==="error" && <span style={{color:"#C0392B"}}> No se pudo leer la planilla{monit.sync.txt ? ` (${monit.sync.txt})` : ""}.</span>}
       </div>
       {monit.sinSubir > 0 && (

@@ -17,16 +17,28 @@
 //
 // POST { token, nombre, base64, carpeta?, mime?, subcarpeta? } → { ok:true, link, fileId, mime }  |  { ok:false, error }
 // mime: "application/pdf" (órdenes, por defecto) o "image/jpeg" (fotos de monitoreo, van a la subcarpeta).
+//
+// Monitoreos en Google Docs editables: UN documento por campo ("Monitoreos – El Descanso"), siempre el mismo,
+// al que se le van agregando los monitoreos. Van en su propia carpeta "Monitoreos S-MIX" (Mi unidad),
+// separada de las órdenes; o en la carpeta cuyo id llegue en carpetaMonitoreos.
+// POST { token, accion:"monitoreo", monitoreo, carpetaMonitoreos? }  → escribe o reescribe (por id) la entrada → { ok, link, doc:true }
+// POST { token, accion:"monitoreo_borrar", id, carpetaMonitoreos? }  → la saca del Doc donde esté
+// La primera vez que se usa esta versión, Google pide autorizar el permiso de Documentos.
 // Al actualizar este script: pegar el código nuevo, dejar la CLAVE que ya tenías, y en
 // Implementar → Gestionar implementaciones → lápiz → Versión: "Nueva versión" → Implementar.
 
 const CLAVE = "CAMBIAR_POR_LA_CLAVE";
+const VERSION = 3; // 1: sólo PDF · 2: fotos · 3: Docs de monitoreo por campo
 const CARPETA_POR_DEFECTO = "Ordenes S-MIX"; // se usa si no llega el id de carpeta
+const CARPETA_MONITOREOS = "Monitoreos S-MIX"; // carpeta propia de los Docs de monitoreo
 
 function doPost(e) {
   try {
     const datos = JSON.parse(e.postData.contents);
     if (datos.token !== CLAVE) return responder({ ok: false, error: "Clave incorrecta." });
+    // La app pregunta la versión antes de mandar fotos: el script viejo las guardaba como PDF
+    if (datos.accion === "version") return responder({ ok: true, version: VERSION });
+    if (datos.accion === "monitoreo" || datos.accion === "monitoreo_borrar") return responder(monitoreoEnDoc(datos));
     if (!datos.base64) return responder({ ok: false, error: "Falta el archivo." });
 
     const mime = datos.mime === "image/jpeg" ? "image/jpeg" : "application/pdf";
@@ -55,6 +67,127 @@ function buscarCarpeta(id) {
 function subCarpeta(padre, nombre) {
   const existentes = padre.getFoldersByName(nombre);
   return existentes.hasNext() ? existentes.next() : padre.createFolder(nombre);
+}
+
+// ─────────────────────────────────────────────────────────────
+// MONITOREOS EN GOOGLE DOCS
+// ─────────────────────────────────────────────────────────────
+const NIVELES = { ok: "🟢 Sin problemas", atencion: "🟡 Atención", urgente: "🔴 Urgente" };
+
+function monitoreoEnDoc(datos) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(25000); // que dos guardados juntos no creen dos Docs del mismo campo
+  try {
+    const carpeta = carpetaMonitoreos(datos.carpetaMonitoreos);
+    if (datos.accion === "monitoreo_borrar") {
+      const docs = carpeta.getFilesByType(MimeType.GOOGLE_DOCS);
+      while (docs.hasNext()) {
+        const doc = DocumentApp.openById(docs.next().getId());
+        if (quitarEntrada(doc.getBody(), String(datos.id)) >= 0) { doc.saveAndClose(); return { ok: true, borrado: true }; }
+      }
+      return { ok: true, borrado: false };
+    }
+    const m = datos.monitoreo || {};
+    if (!m.id || !m.campo) return { ok: false, error: "Falta el monitoreo." };
+    const nombreCampo = String(m.campoNombre || m.campo);
+    const doc = docDelCampo(carpeta, nombreCampo);
+    const body = doc.getBody();
+    let pos = quitarEntrada(body, String(m.id));   // si se editó, va en el mismo lugar
+    if (pos < 0) pos = 2;                           // si es nuevo, arriba de todo (debajo del título)
+    escribirEntrada(body, pos, m);
+    doc.saveAndClose();
+    return { ok: true, doc: true, link: doc.getUrl() };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// Carpeta de los Docs de monitoreo: la pedida, o "Monitoreos S-MIX" en Mi unidad (se crea la primera vez)
+function carpetaMonitoreos(id) {
+  if (id) return DriveApp.getFolderById(id);
+  const existentes = DriveApp.getFoldersByName(CARPETA_MONITOREOS);
+  return existentes.hasNext() ? existentes.next() : DriveApp.createFolder(CARPETA_MONITOREOS);
+}
+
+// Busca (o crea) el Doc "Monitoreos – <campo>" dentro de la carpeta
+function docDelCampo(carpeta, nombreCampo) {
+  const nombre = "Monitoreos – " + nombreCampo;
+  const existentes = carpeta.getFilesByName(nombre);
+  if (existentes.hasNext()) return DocumentApp.openById(existentes.next().getId());
+  const doc = DocumentApp.create(nombre);
+  DriveApp.getFileById(doc.getId()).moveTo(carpeta);
+  const body = doc.getBody();
+  body.getChild(0).asParagraph().setText(nombre).setHeading(DocumentApp.ParagraphHeading.TITLE);
+  body.appendParagraph("Se completa solo desde la app Nutral Mix cada vez que se guarda un monitoreo. Los más nuevos van arriba.")
+    .setHeading(DocumentApp.ParagraphHeading.NORMAL).editAsText().setItalic(true).setForegroundColor("#777777");
+  return doc;
+}
+
+// Cada entrada empieza con un título (Encabezado 2) y termina con un renglón "ref <id>".
+// Devuelve dónde estaba (índice) o -1 si no estaba.
+function quitarEntrada(body, id) {
+  const marca = "ref " + id;
+  for (let i = body.getNumChildren() - 1; i >= 0; i--) {
+    const el = body.getChild(i);
+    if (el.getType() !== DocumentApp.ElementType.PARAGRAPH || el.asParagraph().getText().trim() !== marca) continue;
+    let ini = i;
+    while (ini > 0) {
+      const ant = body.getChild(ini);
+      if (ant.getType() === DocumentApp.ElementType.PARAGRAPH && ant.asParagraph().getHeading() === DocumentApp.ParagraphHeading.HEADING2) break;
+      ini--;
+    }
+    if (ini === 0) ini = i; // sin título encontrado: sólo se saca la marca, nunca el encabezado del Doc
+    // Docs no deja borrar el último párrafo del documento: se deja uno vacío
+    if (i === body.getNumChildren() - 1) body.appendParagraph("");
+    for (let k = i; k >= ini; k--) body.removeChild(body.getChild(k));
+    return ini;
+  }
+  return -1;
+}
+
+function escribirEntrada(body, pos, m) {
+  let i = Math.min(pos, body.getNumChildren());
+  const ins = texto => i < body.getNumChildren() ? body.insertParagraph(i++, texto) : (i++, body.appendParagraph(texto));
+  const f = String(m.fecha || "").split("-");
+  const fecha = f.length === 3 ? f[2] + "/" + f[1] + "/" + f[0] : String(m.fecha || "");
+  const titulo = [fecha, "Lote " + (m.loteNombre || m.lote), m.cultivo, NIVELES[m.nivel] || ""].filter(Boolean).join(" · ");
+  ins(titulo).setHeading(DocumentApp.ParagraphHeading.HEADING2);
+
+  const linea = (etiqueta, valor) => {
+    if (!valor) return;
+    const p = ins(etiqueta + ": " + valor).setHeading(DocumentApp.ParagraphHeading.NORMAL);
+    p.editAsText().setBold(false).setBold(0, etiqueta.length, true);
+  };
+  const malezas = m.malezas ? m.malezas + ([m.malezasDensidad, m.malezasTamano].filter(Boolean).length
+    ? " (" + [m.malezasDensidad, m.malezasTamano].filter(Boolean).join(", ").toLowerCase() + ")" : "") : "";
+  linea("Estadio", m.estado);
+  linea("Suelo / humedad", m.suelo);
+  linea("Nacimientos", m.nacimiento);
+  linea("Malezas", malezas);
+  linea("Plagas", m.plagas);
+  linea("Enfermedades", m.enfermedades);
+  linea("Observaciones", m.observaciones);
+  linea("Acción sugerida", m.accion);
+  linea("Recorrió", m.autor);
+
+  // Fotos: se meten en el Doc (achicadas) con el link al original
+  const links = String(m.fotos || "").split(" ").filter(Boolean);
+  if (links.length) {
+    const p = ins("").setHeading(DocumentApp.ParagraphHeading.NORMAL);
+    links.forEach(link => {
+      const id = (link.match(/\/d\/([\w-]+)/) || link.match(/[?&]id=([\w-]+)/) || [])[1];
+      try {
+        const img = p.appendInlineImage(DriveApp.getFileById(id).getBlob());
+        const ancho = 220, k = ancho / img.getWidth();
+        img.setWidth(ancho).setHeight(Math.round(img.getHeight() * k)).setLinkUrl(link);
+        p.appendText("  ");
+      } catch (err) {
+        p.appendText("📷 " + link + "  ");
+      }
+    });
+  }
+  const ref = ins("ref " + m.id).setHeading(DocumentApp.ParagraphHeading.NORMAL);
+  ref.editAsText().setBold(false).setFontSize(7).setForegroundColor("#BBBBBB");
 }
 
 function responder(obj) {
