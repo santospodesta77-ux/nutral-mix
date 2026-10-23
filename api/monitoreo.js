@@ -14,12 +14,14 @@ import { claveOk } from "./_clave.js";
 
 const PLANILLA_LABORES = "1JpAA6bCl_uhizVO4jOVBEs34RRlNuAVHKr8kSFRm5ro";
 const HOJA = "monitoreo";
-// Orden de las columnas en la hoja (A…P). Las columnas nuevas van siempre al final.
+// Orden de las columnas en la hoja (A…V). Las columnas nuevas van siempre al final.
 const CAMPOS_FILA = ["id", "fecha", "campo", "lote", "cultivo", "estado", "nivel", "malezas", "plagas",
-  "enfermedades", "suelo", "observaciones", "accion", "autor", "registrado", "fotos"];
+  "enfermedades", "suelo", "observaciones", "accion", "autor", "registrado", "fotos",
+  "malezasDensidad", "malezasTamano", "plantasHa", "sembradasHa", "logro", "nacimiento"];
 const ENCABEZADO = ["id", "fecha", "campo", "lote", "cultivo", "estado del cultivo", "nivel", "malezas", "plagas",
-  "enfermedades", "suelo / humedad", "observaciones", "acción sugerida", "recorrió", "registrado (app)", "fotos (links del Drive)"];
-const ULTIMA_COL = "P";
+  "enfermedades", "suelo / humedad", "observaciones", "acción sugerida", "recorrió", "registrado (app)", "fotos (links del Drive)",
+  "malezas: densidad", "malezas: tamaño", "plantas logradas / ha", "semillas sembradas / ha", "logro %", "nacimientos (detalle)"];
+const ULTIMA_COL = "V";
 
 function getAuth() {
   const creds = JSON.parse(process.env.GOOGLE_CREDENTIALS);
