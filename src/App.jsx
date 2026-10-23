@@ -2983,11 +2983,11 @@ function FormMonitoreo({monit, campoId, loteId, cultivoDe, siembraDe, autor, cam
 
   const guardar = async () => {
     setGuardando(true);
-    let links = form.fotos ? String(form.fotos).split(" ").filter(Boolean) : [], fallaron = 0;
+    let links = form.fotos ? String(form.fotos).split(" ").filter(Boolean) : [], fallaron = 0, motivo = "";
     for(const [k, ft] of fotos.entries()){
       setMsg({ok:true, txt:`Subiendo foto ${k+1} de ${fotos.length}…`});
       try { links.push(await subirFoto(await achicarFoto(ft.file), `monitoreo ${form.fecha} ${campo.nombre} ${lote.label||lote.id} ${links.length+1}.jpg`)); }
-      catch { fallaron++; }
+      catch(e) { fallaron++; motivo = motivo || e.message; }
     }
     // Nacimientos: si se contó algo, se arma el detalle; si no, queda lo que ya tenía
     let nacimiento = form.nacimiento, plantasHa = form.plantasHa, sembradas = form.sembradasHa, logroTxt = form.logro;
@@ -3013,7 +3013,7 @@ function FormMonitoreo({monit, campoId, loteId, cultivoDe, siembraDe, autor, cam
     const ok = await monit.guardar([m]);
     fotos.forEach(ft => URL.revokeObjectURL(ft.url)); setFotos([]);
     setGuardando(false);
-    const avisoFotos = fallaron ? ` ${fallaron} foto${fallaron>1?"s":""} no se pudo subir (sin señal o el Drive no respondió).` : "";
+    const avisoFotos = fallaron ? ` ${fallaron} foto${fallaron>1?"s":""} no se pudo subir: ${/Failed to fetch|NetworkError|Load failed/i.test(motivo) ? "sin señal" : motivo}` : "";
     onListo(ok ? {ok:!fallaron, txt:`✓ Monitoreo de ${campo.nombre} ${lote.label||lote.id} guardado en la planilla${links.length ? ` con ${links.length} foto${links.length>1?"s":""}` : ""}.${avisoFotos}`}
       : {ok:false, txt:`Sin conexión con la planilla: el monitoreo quedó guardado en este equipo y se sube cuando vuelva la señal.${avisoFotos}`});
   };

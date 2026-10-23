@@ -28,6 +28,7 @@
 // Implementar → Gestionar implementaciones → lápiz → Versión: "Nueva versión" → Implementar.
 
 const CLAVE = "CAMBIAR_POR_LA_CLAVE";
+const VERSION = 3; // 1: sólo PDF · 2: fotos · 3: Docs de monitoreo por campo
 const CARPETA_POR_DEFECTO = "Ordenes S-MIX"; // se usa si no llega el id de carpeta
 const CARPETA_MONITOREOS = "Monitoreos S-MIX"; // carpeta propia de los Docs de monitoreo
 
@@ -35,6 +36,8 @@ function doPost(e) {
   try {
     const datos = JSON.parse(e.postData.contents);
     if (datos.token !== CLAVE) return responder({ ok: false, error: "Clave incorrecta." });
+    // La app pregunta la versión antes de mandar fotos: el script viejo las guardaba como PDF
+    if (datos.accion === "version") return responder({ ok: true, version: VERSION });
     if (datos.accion === "monitoreo" || datos.accion === "monitoreo_borrar") return responder(monitoreoEnDoc(datos));
     if (!datos.base64) return responder({ ok: false, error: "Falta el archivo." });
 
