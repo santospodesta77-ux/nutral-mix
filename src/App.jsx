@@ -2696,12 +2696,72 @@ const NIVEL_MONITOREO = {
   urgente: {txt:"Urgente",       icono:"🔴", color:"#C0392B", fondo:"#FBE3E0"},
 };
 const SUGERENCIAS_MONITOREO = {
-  malezas: ["Rama negra","Yuyo colorado","Sorgo de Alepo","Gramíneas anuales","Chloris","Eleusine","Cardo ruso","Quínoa","Cebadilla","Peludilla","Viola"],
-  plagas: ["Isoca","Chinche","Trips","Arañuela","Pulgón","Tucura","Cogollero","Bolillera","Babosa","Gusano blanco"],
-  enfermedades: ["Mancha amarilla","Roya","Tizón","Esclerotinia","Mildiu","Carbón"],
+  malezas: ["Rama negra","Yuyo colorado","Gramón","Sorgo de Alepo","Capín","Pata de ganso","Chloris","Gramíneas anuales","Cardo ruso","Quínoa",
+    "Bowlesia","Ortiga mansa","Nabo / mostacilla","Raigrás","Avena guacha","Cebadilla","Verdolaga","Chamico","Malva","Peludilla","Viola"],
+  plagas: ["Isoca","Chinche","Trips","Arañuela","Pulgón","Tucura","Cogollero","Bolillera","Babosa","Gusano blanco","Gusano cortador","Oruga militar"],
+  enfermedades: ["Mancha amarilla","Roya","Tizón","Esclerotinia","Mildiu","Carbón","Mancha en red","Ramularia","Cercospora","Phoma"],
 };
-const ESTADOS_CULTIVO = ["Barbecho","Emergencia","V2","V4","V6","V8","V10","VT","R1","R2","R3","R5","R6","Macollaje","Encañazón","Espigazón","Llenado de grano","Madurez"];
+const DENSIDAD_MALEZAS = ["","Aisladas","Baja","Media","Alta","En manchones"];
+const TAMANO_MALEZAS = ["","Plántula / roseta","Menos de 5 cm","5 a 15 cm","Más de 15 cm","Rebrote / tolerante"];
+const ACCIONES_MONITOREO = ["Aplicar residual","Aplicar quemante / barbecho","Control de malezas en cultivo","Control de plagas","Fungicida",
+  "Resembrar","Fertilizar","Volver a monitorear en 7 días","Sin acción por ahora"];
 const HUMEDAD_SUELO = ["","Seco","Humedad justa","Buena humedad","Encharcado"];
+// Antes del cultivo (sirven para cualquier lote)
+const ESTADOS_SIN_CULTIVO = [["Pre-siembra","Pre-siembra (barbecho)"],["Sembrado sin emerger","Sembrado, sin emerger"],["Rastrojo","Rastrojo / poscosecha"]];
+// Escalas fenológicas por cultivo: [código, descripción]
+const ZADOKS = {nombre:"Zadoks", estadios:[["Z10","Emergencia (1ª hoja)"],["Z12","2 hojas"],["Z13","3 hojas"],["Z21","Inicio de macollaje"],
+  ["Z23","3 macollos"],["Z25","5 macollos"],["Z30","Inicio de encañazón (espiga a 1 cm)"],["Z31","1er nudo"],["Z32","2º nudo"],["Z37","Hoja bandera visible"],
+  ["Z39","Lígula de la hoja bandera"],["Z45","Bota (vaina engrosada)"],["Z49","Aristas visibles"],["Z55","Espigazón (media espiga)"],["Z65","Antesis / floración"],
+  ["Z71","Grano acuoso"],["Z75","Grano lechoso"],["Z85","Grano pastoso"],["Z92","Madurez de cosecha"]]};
+const ESCALAS_FENOLOGICAS = {
+  SOJA: {nombre:"Fehr y Caviness", estadios:[["VE","Emergencia"],["VC","Cotiledones, hojas unifoliadas abiertas"],["V1","1ª hoja trifoliada"],["V2","2ª trifoliada"],
+    ["V3","3ª trifoliada"],["V4","4ª trifoliada"],["V5","5ª trifoliada"],["V6","6ª trifoliada"],["V7+","7 o más trifoliadas"],["R1","Inicio de floración"],
+    ["R2","Floración plena"],["R3","Inicio de formación de vainas"],["R4","Vainas desarrolladas"],["R5","Inicio de llenado de granos"],
+    ["R6","Granos desarrollados"],["R7","Madurez fisiológica"],["R8","Madurez de cosecha"]]},
+  MAIZ: {nombre:"Ritchie y Hanway", estadios:[["VE","Emergencia"],["V1","1 hoja con lígula"],["V2","2 hojas"],["V3","3 hojas"],["V4","4 hojas"],["V5","5 hojas"],
+    ["V6","6 hojas"],["V8","8 hojas"],["V10","10 hojas"],["V12","12 hojas"],["V14","14 hojas"],["V16+","16 o más hojas"],["VT","Panojamiento"],
+    ["R1","Emergencia de estigmas (sedas)"],["R2","Ampolla"],["R3","Grano lechoso"],["R4","Grano pastoso"],["R5","Grano dentado"],["R6","Madurez fisiológica"]]},
+  GIRASOL: {nombre:"Schneiter y Miller", estadios:[["VE","Emergencia"],["V2","2 hojas verdaderas"],["V4","4 hojas"],["V6","6 hojas"],["V8","8 hojas"],
+    ["V10","10 hojas"],["V12","12 hojas"],["V14+","14 o más hojas"],["R1","Botón floral visible (estrella)"],["R2","Botón a menos de 2 cm de la última hoja"],
+    ["R3","Botón a más de 2 cm"],["R4","Inflorescencia empieza a abrir"],["R5","Floración (R5.1 a R5.9)"],["R6","Fin de floración"],
+    ["R7","Dorso del capítulo amarillo pálido"],["R8","Dorso amarillo, brácteas verdes"],["R9","Madurez fisiológica"]]},
+  SORGO: {nombre:"Vanderlip y Reeves", estadios:[["E0","Emergencia"],["E1","3 hojas"],["E2","5 hojas"],["E3","Diferenciación del punto de crecimiento"],
+    ["E4","Hoja bandera visible"],["E5","Bota"],["E6","Floración (50%)"],["E7","Grano pastoso blando"],["E8","Grano pastoso duro"],["E9","Madurez fisiológica"]]},
+  MANI: {nombre:"Boote", estadios:[["VE","Emergencia"],["V2","2 nudos"],["V4","4 nudos"],["V6+","6 o más nudos"],["R1","Inicio de floración"],["R2","Clavo"],
+    ["R3","Inicio de formación de vainas"],["R4","Vaina completa"],["R5","Inicio de semilla"],["R6","Semilla completa"],["R7","Inicio de madurez"],["R8","Madurez de cosecha"]]},
+  TRIGO: ZADOKS, CEBADA: ZADOKS, AVENA: ZADOKS, CENTENO: ZADOKS, VERDEO: ZADOKS, FINA: ZADOKS,
+};
+const ESCALA_PASTURA = {nombre:"Pastura", estadios:[["Implantación","Implantación"],["Vegetativo","Vegetativo"],["Listo para pastoreo","Listo para pastoreo"],
+  ["Pastoreado","Recién pastoreado"],["Floración","Floración"],["Semillazón","Semillazón"]]};
+const escalaDe = cv => ESCALAS_FENOLOGICAS[baseCv(cv)] || ESCALA_PASTURA;
+const CULTIVOS_FINOS = ["TRIGO","CEBADA","AVENA","CENTENO","VERDEO","FINA"];
+const CULTIVOS_MONITOREO = ["SOJA","MAIZ","GIRASOL","SORGO","MANI","TRIGO","CEBADA","AVENA","CENTENO","VERDEO","PASTURA"];
+// Estadios en los que tiene sentido contar plantas nacidas
+const ESTADIOS_NACIMIENTO = ["Sembrado sin emerger","VE","VC","V1","V2","V3","V4","Z10","Z12","Z13","Z21","E0","E1","Implantación"];
+const SEMILLAS_POR_BOLSA = {MAIZ:80000, GIRASOL:150000, SORGO:200000};
+const SURCOS = [0.175,0.19,0.21,0.35,0.42,0.52,0.525,0.70];
+const SEMBRADAS_SUGERIDAS = {MAIZ:[60000,65000,70000,75000,80000], GIRASOL:[40000,45000,50000,55000,60000], SOJA:[250000,300000,350000,400000],
+  SORGO:[150000,200000,250000], MANI:[150000,180000,200000]};
+const CAUSAS_FALLA = ["Falta de humedad","Planchado / encostrado","Profundidad despareja","Babosa","Gusano blanco","Otras plagas de suelo",
+  "Exceso de agua","Mucho rastrojo","Calidad de semilla","Falla de sembradora"];
+// Cultivo que hay hoy en el lote: si hay siembra registrada reciente, ese; si es doble cultivo, la fina hasta noviembre
+const cultivoEnLote = (cv, siembra, fechaISO) => {
+  const partes = cvPartes(cv);
+  const f = fechaLocal(fechaISO) || new Date();
+  const fs = siembra && fechaLocal(siembra.fecha);
+  if(fs && (f - fs) / 86400000 < 200 && (f - fs) >= 0 && cvPartes(siembra.cultivo)[0]) return cvPartes(siembra.cultivo)[0];
+  if(partes.length > 1){ const mes = f.getMonth() + 1; return CULTIVOS_FINOS.includes(partes[0]) && mes >= 4 && mes <= 11 ? partes[0] : partes[partes.length-1]; }
+  return partes[0] || "";
+};
+// Semillas/ha según la siembra registrada (sólo cuando la semilla va en bolsas de cantidad conocida)
+const sembradasSegunRegistro = (siembra, cultivo) => {
+  if(!siembra) return null;
+  const sem = (siembra.productos||[]).find(p => catProducto(p.n) === "SEM") || (siembra.productos||[]).find(p => Number(p.d) > 0 && Number(p.d) < 3 && catProducto(p.n) !== "FERT");
+  const porBolsa = SEMILLAS_POR_BOLSA[baseCv(cultivo)];
+  if(!sem || !porBolsa || !(Number(sem.d) > 0) || Number(sem.d) > 5) return sem ? {sem, valor:null} : null;
+  return {sem, valor: Math.round(Number(sem.d) * porBolsa / 100) * 100};
+};
+const fmtMiles = n => n == null || isNaN(n) ? "—" : Math.round(n).toLocaleString("es-AR");
 // Lista compartida en una hoja de la planilla (monitoreos, lluvias), con cola local de lo que
 // no se pudo subir por falta de señal: se ve igual (marcado) y se sube solo cuando vuelve.
 function useListaCompartida({url, cuerpo, colaKey, campo}){
@@ -2864,56 +2924,260 @@ const subirFoto = async (base64, nombre) => {
   return d.link;
 };
 
-function VistaMonitoreo({monit, lluv, cultivoDe, autor, cambiarAutor}){
+// Formulario de monitoreo de UN lote. Se abre desde el lote (Mapa por campo → tocar el lote →
+// "Monitorear este lote") y también para editar uno ya cargado desde la pestaña Monitoreo.
+// Casi todo es para elegir (desplegables y botones) así se escribe lo menos posible en el celular.
+function FormMonitoreo({monit, campoId, loteId, cultivoDe, siembraDe, autor, cambiarAutor, inicial, onListo, onCancelar}){
   const hoyISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
-  const vacio = () => ({id:null, fecha:hoyISO(), campo:CAMPOS[0].id, lotes:[], estado:"", nivel:"ok", malezas:"", plagas:"", enfermedades:"", suelo:"", observaciones:"", accion:""});
-  const [form, setForm] = useState(vacio);
+  const campo = CAMPOS.find(c => c.id === campoId) || {nombre:campoId, lotes:[]};
+  const lote = campo.lotes.find(l => String(l.id) === String(loteId)) || {id:loteId};
+  const cvPlan = cultivoDe(campoId, loteId);
+  const siembra = siembraDe ? siembraDe(campoId, loteId) : null;
+  const opcionesCultivo = [...new Set([...cvPartes(cvPlan), ...CULTIVOS_MONITOREO])];
+  const [form, setForm] = useState(() => {
+    const base = {id:null, fecha:hoyISO(), estado:"", nivel:"ok", malezas:"", malezasDensidad:"", malezasTamano:"", plagas:"", enfermedades:"", suelo:"",
+      observaciones:"", accion:"", fotos:"", plantasHa:"", sembradasHa:"", logro:"", nacimiento:""};
+    const f = inicial ? {...base, ...inicial} : base;
+    const cv = inicial && opcionesCultivo.includes(baseCv(inicial.cultivo)) ? baseCv(inicial.cultivo) : cultivoEnLote(cvPlan, siembra, f.fecha);
+    return {...f, cultivo: cv || ""};
+  });
   const [fotos, setFotos] = useState([]);   // {file, url} elegidas para este monitoreo
-  const [abierto, setAbierto] = useState(false);
+  const [msg, setMsg] = useState(null);
+  const [guardando, setGuardando] = useState(false);
+  const set = cambios => setForm(f => ({...f, ...cambios}));
+
+  const escala = escalaDe(form.cultivo);
+  const estadosConocidos = [...ESTADOS_SIN_CULTIVO, ...escala.estadios].map(e => e[0]);
+  const [estadoOtro, setEstadoOtro] = useState(() => !!form.estado && !estadosConocidos.includes(form.estado));
+  const fino = CULTIVOS_FINOS.includes(baseCv(form.cultivo));
+  const conCultivo = form.estado && !["Pre-siembra","Rastrojo"].includes(form.estado);
+
+  // ── Control de nacimientos ──
+  const sembReg = sembradasSegunRegistro(siembra, form.cultivo);
+  const [verNac, setVerNac] = useState(() => !!(inicial && (inicial.plantasHa || inicial.nacimiento)));
+  const [nac, setNac] = useState(() => ({surco: fino ? 0.175 : 0.52, metros: fino ? 1 : 10, conteos:["","",""],
+    sembradas: inicial?.sembradasHa ? String(fino ? Number(inicial.sembradasHa)/10000 : inicial.sembradasHa) : (sembReg?.valor ? String(sembReg.valor) : ""),
+    uniformidad:"", causas:[]}));
+  const setN = c => setNac(n => ({...n, ...c}));
+  const nums = nac.conteos.map(Number).filter(x => x > 0);
+  const promedio = nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
+  const plHaContado = promedio != null ? promedio / (nac.metros * nac.surco) * 10000 : null;
+  const plHa = plHaContado ?? (inicial?.plantasHa ? Number(inicial.plantasHa) : null);
+  const sembradasHa = Number(nac.sembradas) > 0 ? (fino ? Number(nac.sembradas) * 10000 : Number(nac.sembradas)) : null;
+  const logro = plHa && sembradasHa ? plHa / sembradasHa * 100 : null;
+  const unidad = fino ? "pl/m²" : "pl/ha";
+  const enUnidad = v => v == null ? "—" : fino ? fmtMiles(v / 10000) : fmtMiles(v);
+  const cambiarEstado = v => {
+    if(v === "__otro"){ setEstadoOtro(true); set({estado:""}); return; }
+    setEstadoOtro(false); set({estado:v});
+    if(ESTADIOS_NACIMIENTO.includes(v) && !["Pre-siembra","Rastrojo"].includes(v)) setVerNac(true);
+  };
+
+  // Botón rápido: agrega o saca el nombre de la lista del campo de texto
+  const toggleSugerencia = (k, nombre) => {
+    const partes = String(form[k]||"").split(",").map(x => x.trim()).filter(Boolean);
+    const esta = partes.some(x => normBusca(x) === normBusca(nombre));
+    set({[k]: (esta ? partes.filter(x => normBusca(x) !== normBusca(nombre)) : [...partes, nombre]).join(", ")});
+  };
+  const marcada = (k, n) => String(form[k]||"").split(",").some(x => normBusca(x.trim()) === normBusca(n));
+
+  const guardar = async () => {
+    setGuardando(true);
+    let links = form.fotos ? String(form.fotos).split(" ").filter(Boolean) : [], fallaron = 0;
+    for(const [k, ft] of fotos.entries()){
+      setMsg({ok:true, txt:`Subiendo foto ${k+1} de ${fotos.length}…`});
+      try { links.push(await subirFoto(await achicarFoto(ft.file), `monitoreo ${form.fecha} ${campo.nombre} ${lote.label||lote.id} ${links.length+1}.jpg`)); }
+      catch { fallaron++; }
+    }
+    // Nacimientos: si se contó algo, se arma el detalle; si no, queda lo que ya tenía
+    let nacimiento = form.nacimiento, plantasHa = form.plantasHa, sembradas = form.sembradasHa, logroTxt = form.logro;
+    if(verNac && conCultivo && (plHaContado != null || sembradasHa || nac.uniformidad || nac.causas.length)){
+      plantasHa = plHa != null ? String(Math.round(plHa)) : "";
+      sembradas = sembradasHa ? String(Math.round(sembradasHa)) : "";
+      logroTxt = logro != null ? String(Math.round(logro)) : "";
+      nacimiento = [
+        plHaContado != null ? `${enUnidad(plHaContado)} ${unidad} (${nums.join(", ")} pl en ${String(nac.metros).replace(".",",")} m, surco ${String(nac.surco).replace(".",",")} m)` : "",
+        sembradasHa ? `sembradas ${enUnidad(sembradasHa)} ${unidad}` : "",
+        logro != null ? `logro ${Math.round(logro)}%` : "",
+        nac.uniformidad ? `uniformidad ${nac.uniformidad.toLowerCase()}` : "",
+        nac.causas.length ? `fallas: ${nac.causas.join(", ")}` : "",
+      ].filter(Boolean).join(" · ");
+    }
+    const m = {id: form.id || `m${Date.now().toString(36)}`, fecha:form.fecha, campo:campoId, lote:String(loteId), cultivo:form.cultivo || cvPlan,
+      estado:String(form.estado).trim(), nivel:form.nivel, malezas:String(form.malezas).trim(), malezasDensidad:form.malezasDensidad, malezasTamano:form.malezasTamano,
+      plagas:String(form.plagas).trim(), enfermedades:String(form.enfermedades).trim(), suelo:form.suelo, observaciones:String(form.observaciones).trim(),
+      accion:String(form.accion).trim(), autor, fotos:links.join(" "), plantasHa, sembradasHa:sembradas, logro:logroTxt, nacimiento};
+    setMsg({ok:true, txt:"Guardando…"});
+    const ok = await monit.guardar([m]);
+    fotos.forEach(ft => URL.revokeObjectURL(ft.url)); setFotos([]);
+    setGuardando(false);
+    const avisoFotos = fallaron ? ` ${fallaron} foto${fallaron>1?"s":""} no se pudo subir (sin señal o el Drive no respondió).` : "";
+    onListo(ok ? {ok:!fallaron, txt:`✓ Monitoreo de ${campo.nombre} ${lote.label||lote.id} guardado en la planilla${links.length ? ` con ${links.length} foto${links.length>1?"s":""}` : ""}.${avisoFotos}`}
+      : {ok:false, txt:`Sin conexión con la planilla: el monitoreo quedó guardado en este equipo y se sube cuando vuelva la señal.${avisoFotos}`});
+  };
+
+  const lbl = t => <div style={{fontSize:10.5,fontWeight:700,textTransform:"uppercase",opacity:0.6,marginBottom:3}}>{t}</div>;
+  // 16px en los campos: con menos, el iPhone hace zoom al tocarlos
+  const txt = {width:"100%",boxSizing:"border-box",padding:"9px 10px",fontSize:16,border:"1px solid #C8C2B0",borderRadius:7,background:"#FFFDF7",color:TINTA,fontFamily:"inherit"};
+  const chipS = a => ({padding:"7px 11px",fontSize:13,borderRadius:16,cursor:"pointer",fontFamily:"inherit",
+    border:`1px solid ${a?TINTA:"#C8C2B0"}`,background:a?TINTA:"#fff",color:a?CREMA:TINTA,fontWeight:a?700:500});
+  const fila2 = {display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:10};
+
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:13}}>
+      <div>
+        <div style={{fontSize:16,fontWeight:700}}>{form.id ? "Editar monitoreo" : "🔍 Monitoreo"} · {campo.nombre} · Lote {lote.label||lote.id}</div>
+        <div style={{fontSize:12.5,opacity:0.7,marginTop:2}}>{lote.ha ? `${fmt(Number(lote.ha))} ha · ` : ""}{cvPlan || "sin cultivo asignado"}
+          {siembra && <> · sembrado {fechaCorta(siembra.fecha)}</>}</div>
+      </div>
+      <div style={fila2}>
+        <div>{lbl("Fecha")}<input type="date" value={form.fecha} onChange={e=>set({fecha:e.target.value})} style={txt}/></div>
+        <div>{lbl("Recorrió")}<input value={autor} onChange={e=>cambiarAutor(e.target.value)} placeholder="Tu nombre" style={txt}/></div>
+      </div>
+      <div>
+        {lbl("Nivel")}
+        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+          {Object.entries(NIVEL_MONITOREO).map(([k, n]) => (
+            <button key={k} onClick={()=>set({nivel:k})} style={{padding:"9px 13px",fontSize:14,fontWeight:700,borderRadius:9,cursor:"pointer",fontFamily:"inherit",
+              border:`2px solid ${form.nivel===k?n.color:"#C8C2B0"}`,background:form.nivel===k?n.fondo:"#fff",color:form.nivel===k?n.color:TINTA}}>{n.icono} {n.txt}</button>
+          ))}
+        </div>
+      </div>
+      <div style={fila2}>
+        <div>{lbl("Cultivo en el lote")}
+          <select value={form.cultivo} onChange={e=>{ const cv = e.target.value, fn = CULTIVOS_FINOS.includes(baseCv(cv));
+            set({cultivo:cv, estado:estadoOtro || ESTADOS_SIN_CULTIVO.some(x => x[0] === form.estado) ? form.estado : ""});
+            setN({surco: fn ? 0.175 : 0.52, metros: fn ? 1 : 10}); }} style={txt}>
+            {!form.cultivo && <option value="">—</option>}
+            {opcionesCultivo.map(c => <option key={c} value={c}>{c}</option>)}
+          </select></div>
+        <div>{lbl(`Estadio (escala ${escala.nombre})`)}
+          <select value={estadoOtro ? "__otro" : form.estado} onChange={e=>cambiarEstado(e.target.value)} style={txt}>
+            <option value="">— elegir —</option>
+            <optgroup label="Sin cultivo / sin emerger">{ESTADOS_SIN_CULTIVO.map(([c, d]) => <option key={c} value={c}>{d}</option>)}</optgroup>
+            <optgroup label={`${form.cultivo || "Cultivo"} · ${escala.nombre}`}>{escala.estadios.map(([c, d]) => <option key={c} value={c}>{c === d ? c : `${c} · ${d}`}</option>)}</optgroup>
+            <option value="__otro">Otro (escribir)…</option>
+          </select>
+          {estadoOtro && <input value={form.estado} onChange={e=>set({estado:e.target.value})} placeholder="Estadio" style={{...txt,marginTop:6}}/>}
+        </div>
+      </div>
+      <div>{lbl("Suelo / humedad")}<select value={form.suelo} onChange={e=>set({suelo:e.target.value})} style={txt}>
+        {HUMEDAD_SUELO.map(h => <option key={h} value={h}>{h || "—"}</option>)}</select></div>
+
+      {conCultivo && (
+        <div style={{border:"1.5px solid #9CC29A",borderRadius:10,background:"#F7FBF5"}}>
+          <button onClick={()=>setVerNac(v => !v)} style={{width:"100%",textAlign:"left",padding:"11px 12px",fontSize:14.5,fontWeight:700,border:"none",background:"none",color:TINTA,cursor:"pointer",fontFamily:"inherit",display:"flex",justifyContent:"space-between"}}>
+            <span>🌱 Control de nacimientos{plHa != null ? ` · ${enUnidad(plHa)} ${unidad}${logro != null ? ` · logro ${Math.round(logro)}%` : ""}` : ""}</span><span>{verNac ? "▴" : "▾"}</span>
+          </button>
+          {verNac && (
+            <div style={{padding:"0 12px 12px",display:"flex",flexDirection:"column",gap:10}}>
+              <div style={fila2}>
+                <div>{lbl("Distancia entre surcos")}<select value={nac.surco} onChange={e=>setN({surco:Number(e.target.value)})} style={txt}>
+                  {SURCOS.map(s => <option key={s} value={s}>{Math.round(s*1000)/10} cm</option>)}</select></div>
+                <div>{lbl("Metros de surco contados")}<select value={nac.metros} onChange={e=>setN({metros:Number(e.target.value)})} style={txt}>
+                  {[0.5,1,2,3,5,10].map(m => <option key={m} value={m}>{String(m).replace(".",",")} m</option>)}</select></div>
+              </div>
+              <div>
+                {lbl("Plantas contadas en cada estación")}
+                <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+                  {nac.conteos.map((c, k) => (
+                    <input key={k} value={c} inputMode="numeric" pattern="[0-9]*" placeholder={`#${k+1}`}
+                      onChange={e=>setN({conteos:nac.conteos.map((x, i) => i === k ? e.target.value.replace(/\D/g,"") : x)})}
+                      style={{...txt,width:64,textAlign:"center",padding:"9px 4px"}}/>
+                  ))}
+                  <button onClick={()=>setN({conteos:[...nac.conteos, ""]})} style={chipS(false)}>+ estación</button>
+                </div>
+              </div>
+              <div>{lbl(`Semillas sembradas (por ${fino ? "m²" : "ha"})`)}
+                <input value={nac.sembradas} inputMode="numeric" list={`sembradas-${form.cultivo}`} onChange={e=>setN({sembradas:e.target.value.replace(/[^\d]/g,"")})}
+                  placeholder={fino ? "ej: 300" : "ej: 70000"} style={txt}/>
+                <datalist id={`sembradas-${form.cultivo}`}>{(fino ? [200,250,300,350] : SEMBRADAS_SUGERIDAS[baseCv(form.cultivo)] || []).map(v => <option key={v} value={v}/>)}</datalist>
+                {sembReg?.valor && <div style={{fontSize:11.5,opacity:0.7,marginTop:3}}>Según la siembra del {fechaCorta(siembra.fecha)}: {sembReg.sem.n} {String(sembReg.sem.d).replace(".",",")} bolsas/ha ≈ {fmtMiles(sembReg.valor)} semillas/ha</div>}
+                {sembReg && !sembReg.valor && <div style={{fontSize:11.5,opacity:0.7,marginTop:3}}>En la siembra del {fechaCorta(siembra.fecha)} se cargó {sembReg.sem.n} a {fmtCant(sembReg.sem.d)}/ha: completá las semillas por {fino ? "m²" : "ha"}.</div>}
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,textAlign:"center"}}>
+                {[["Logradas", plHa != null ? `${enUnidad(plHa)}` : "—", unidad],["Sembradas", sembradasHa ? enUnidad(sembradasHa) : "—", unidad],
+                  ["Logro", logro != null ? `${Math.round(logro)}%` : "—", "nacidas / sembradas"]].map(([t, v, u]) => (
+                  <div key={t} style={{background:"#fff",border:"1px solid #D5E6D3",borderRadius:8,padding:"7px 4px"}}>
+                    <div style={{fontSize:10,textTransform:"uppercase",opacity:0.6,fontWeight:700}}>{t}</div>
+                    <div style={{fontSize:17,fontWeight:700,color:t==="Logro"&&logro!=null?(logro>=90?"#2E7D32":logro>=75?"#8A6200":"#C0392B"):TINTA}}>{v}</div>
+                    <div style={{fontSize:10,opacity:0.55}}>{u}</div>
+                  </div>
+                ))}
+              </div>
+              <div>{lbl("Uniformidad")}
+                <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+                  {["Buena","Regular","Mala"].map(u => <button key={u} onClick={()=>setN({uniformidad:nac.uniformidad===u?"":u})} style={chipS(nac.uniformidad===u)}>{u}</button>)}
+                </div></div>
+              <div>{lbl("Causas de fallas")}
+                <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+                  {CAUSAS_FALLA.map(c => { const a = nac.causas.includes(c); return <button key={c} onClick={()=>setN({causas:a ? nac.causas.filter(x => x !== c) : [...nac.causas, c]})} style={chipS(a)}>{c}</button>; })}
+                </div></div>
+              {inicial?.nacimiento && <div style={{fontSize:11.5,opacity:0.7}}>Cargado antes: {inicial.nacimiento}</div>}
+            </div>
+          )}
+        </div>
+      )}
+
+      {[["malezas","Malezas"],["plagas","Plagas"],["enfermedades","Enfermedades"]].map(([k, t]) => (
+        <div key={k}>
+          {lbl(t)}
+          <div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:6}}>
+            {SUGERENCIAS_MONITOREO[k].map(n => <button key={n} onClick={()=>toggleSugerencia(k, n)} style={chipS(marcada(k, n))}>{n}</button>)}
+          </div>
+          {k === "malezas" && form.malezas && (
+            <div style={{...fila2,marginBottom:6}}>
+              <div>{lbl("Densidad")}<select value={form.malezasDensidad} onChange={e=>set({malezasDensidad:e.target.value})} style={txt}>
+                {DENSIDAD_MALEZAS.map(d => <option key={d} value={d}>{d || "—"}</option>)}</select></div>
+              <div>{lbl("Tamaño")}<select value={form.malezasTamano} onChange={e=>set({malezasTamano:e.target.value})} style={txt}>
+                {TAMANO_MALEZAS.map(d => <option key={d} value={d}>{d || "—"}</option>)}</select></div>
+            </div>
+          )}
+          <input value={form[k]} onChange={e=>set({[k]:e.target.value})} placeholder={`Otra / detalle (opcional)`} style={txt}/>
+        </div>
+      ))}
+      <div>
+        {lbl("Acción sugerida")}
+        <div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:6}}>
+          {ACCIONES_MONITOREO.map(n => <button key={n} onClick={()=>toggleSugerencia("accion", n)} style={chipS(marcada("accion", n))}>{n}</button>)}
+        </div>
+        <input value={form.accion} onChange={e=>set({accion:e.target.value})} placeholder="Detalle (opcional), ej: antes del 30/10" style={txt}/>
+      </div>
+      <div>{lbl("Observaciones")}<textarea rows={2} value={form.observaciones} onChange={e=>set({observaciones:e.target.value})} style={{...txt,resize:"vertical"}}/></div>
+      <div>
+        {lbl("Fotos (se guardan en el Drive)")}
+        <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+          {fotos.map((ft, k) => (
+            <div key={ft.url} style={{position:"relative"}}>
+              <img src={ft.url} alt="" style={{width:72,height:72,objectFit:"cover",borderRadius:8,border:"1px solid #C8C2B0"}}/>
+              <button onClick={()=>{ URL.revokeObjectURL(ft.url); setFotos(fs => fs.filter((_, i) => i !== k)); }}
+                style={{position:"absolute",top:-6,right:-6,width:22,height:22,borderRadius:11,border:"none",background:TINTA,color:"#fff",fontSize:12,cursor:"pointer"}}>✕</button>
+            </div>
+          ))}
+          <label style={{padding:"10px 14px",fontSize:14,fontWeight:700,borderRadius:9,border:`1.5px dashed ${TINTA}`,cursor:"pointer"}}>
+            📷 Agregar fotos
+            <input type="file" accept="image/*" multiple style={{display:"none"}}
+              onChange={e=>{ const fs = [...e.target.files].map(file => ({file, url:URL.createObjectURL(file)})); setFotos(x => [...x, ...fs]); e.target.value=""; }}/>
+          </label>
+          {form.fotos && <span style={{fontSize:12,opacity:0.7}}>ya tiene {String(form.fotos).split(" ").filter(Boolean).length} foto(s) guardada(s)</span>}
+        </div>
+      </div>
+      {msg && <div style={{fontSize:13,fontWeight:600,color:msg.ok?"#2E7D32":"#8A6200"}}>{msg.txt}</div>}
+      <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+        <button onClick={guardar} disabled={guardando} style={{padding:"12px 20px",fontSize:15,fontWeight:700,borderRadius:9,border:"none",background:"#2E7D32",color:"#fff",cursor:"pointer",fontFamily:"inherit",opacity:guardando?0.7:1}}>{guardando ? "Guardando…" : "💾 Guardar monitoreo"}</button>
+        <button onClick={onCancelar} disabled={guardando} style={{padding:"12px 16px",fontSize:15,fontWeight:600,borderRadius:9,border:`1.5px solid ${TINTA}`,background:"transparent",color:TINTA,cursor:"pointer",fontFamily:"inherit"}}>Cancelar</button>
+      </div>
+    </div>
+  );
+}
+
+function VistaMonitoreo({monit, lluv, cultivoDe, siembraDe, autor, cambiarAutor}){
+  const [editando, setEditando] = useState(null);   // monitoreo que se está editando
   const [msg, setMsg] = useState(null);
   const [campoF, setCampoF] = useState("TODOS");
   const [nivelF, setNivelF] = useState("TODOS");
   const [busca, setBusca] = useState("");
-
-  const set = cambios => setForm(f => ({...f, ...cambios}));
-  const campoForm = CAMPOS.find(c => c.id === form.campo) || CAMPOS[0];
-  const toggleLote = id => set({lotes: form.lotes.includes(id) ? form.lotes.filter(x => x !== id) : [...form.lotes, id]});
-  // Botón rápido: agrega o saca el nombre de la lista del campo de texto
-  const toggleSugerencia = (k, nombre) => {
-    const partes = form[k].split(",").map(x => x.trim()).filter(Boolean);
-    const esta = partes.some(x => normBusca(x) === normBusca(nombre));
-    set({[k]: (esta ? partes.filter(x => normBusca(x) !== normBusca(nombre)) : [...partes, nombre]).join(", ")});
-  };
-
-  const guardar = async () => {
-    if(!form.lotes.length){ setMsg({ok:false, txt:"Elegí al menos un lote."}); return; }
-    const base = {fecha:form.fecha, campo:form.campo, estado:form.estado.trim(), nivel:form.nivel, malezas:form.malezas.trim(), plagas:form.plagas.trim(),
-      enfermedades:form.enfermedades.trim(), suelo:form.suelo, observaciones:form.observaciones.trim(), accion:form.accion.trim(), autor};
-    const lista = form.lotes.map((l, i) => ({...base, lote:l, cultivo:cultivoDe(form.campo, l),
-      id: form.id && form.lotes.length === 1 ? form.id : `m${Date.now().toString(36)}${i}`}));
-    // Fotos: se suben una vez y el link va en todos los lotes de la recorrida
-    let links = form.fotos ? form.fotos.split(" ").filter(Boolean) : [], fallaron = 0;
-    for(const [k, ft] of fotos.entries()){
-      setMsg({ok:true, txt:`Subiendo foto ${k+1} de ${fotos.length}…`});
-      try { links.push(await subirFoto(await achicarFoto(ft.file), `monitoreo ${form.fecha} ${nombreCampo(form.campo)} ${form.lotes.join("-")} ${k+1}.jpg`)); }
-      catch { fallaron++; }
-    }
-    lista.forEach(m => { m.fotos = links.join(" "); });
-    setMsg({ok:true, txt:"Guardando…"});
-    const ok = await monit.guardar(lista);
-    const avisoFotos = fallaron ? ` ${fallaron} foto${fallaron>1?"s":""} no se pudo subir (sin señal o el Drive no respondió).` : "";
-    setMsg(ok ? {ok:!fallaron, txt:`✓ Guardado en la planilla (${lista.length} lote${lista.length>1?"s":""}${links.length ? `, ${links.length} foto${links.length>1?"s":""}` : ""}).${avisoFotos}`}
-      : {ok:false, txt:`Sin conexión con la planilla: quedó guardado en este equipo y se sube cuando vuelva la señal.${avisoFotos}`});
-    fotos.forEach(ft => URL.revokeObjectURL(ft.url)); setFotos([]);
-    setForm(f => ({...vacio(), campo:f.campo, fecha:f.fecha}));
-    setAbierto(false);
-  };
-  const editar = m => {
-    setForm({id:m.id, fecha:m.fecha, campo:m.campo, lotes:[String(m.lote)], estado:m.estado||"", nivel:m.nivel||"ok", malezas:m.malezas||"",
-      plagas:m.plagas||"", enfermedades:m.enfermedades||"", suelo:m.suelo||"", observaciones:m.observaciones||"", accion:m.accion||"", fotos:m.fotos||""});
-    setAbierto(true); setMsg(null);
-    window.scrollTo({top:0, behavior:"smooth"});
-  };
+  const editar = m => { setEditando(m); setMsg(null); window.scrollTo({top:0, behavior:"smooth"}); };
 
   const palabras = normBusca(busca).split(/\s+/).filter(Boolean);
   const filtrados = monit.lista.filter(m => (campoF === "TODOS" || m.campo === campoF) && (nivelF === "TODOS" || m.nivel === nivelF)
@@ -2922,21 +3186,14 @@ function VistaMonitoreo({monit, lluv, cultivoDe, autor, cambiarAutor}){
   const ultimos = [];
   monit.lista.filter(m => campoF === "TODOS" || m.campo === campoF).forEach(m => { if(!ultimos.some(u => u.campo === m.campo && u.lote === m.lote)) ultimos.push(m); });
   const conAlerta = ultimos.filter(m => m.nivel === "urgente" || m.nivel === "atencion");
-
-  const lbl = t => <div style={{fontSize:10.5,fontWeight:700,textTransform:"uppercase",opacity:0.6,marginBottom:3}}>{t}</div>;
-  const txt = {width:"100%",boxSizing:"border-box",padding:"8px 9px",fontSize:14,border:"1px solid #C8C2B0",borderRadius:7,background:"#FFFDF7",color:TINTA,fontFamily:"inherit"};
-  const chipS = a => ({padding:"5px 10px",fontSize:12.5,borderRadius:16,cursor:"pointer",fontFamily:"inherit",
-    border:`1px solid ${a?TINTA:"#C8C2B0"}`,background:a?TINTA:"#fff",color:a?CREMA:TINTA,fontWeight:a?700:500});
   const fFecha = s => { const d = fechaLocal(s); return d ? ddmm(d) : s; };
 
   return (
     <div style={{display:"flex",flexDirection:"column",gap:14}}>
-      <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center",justifyContent:"space-between"}}>
-        <div style={{fontSize:12,opacity:0.7,flex:"1 1 260px"}}>
-          Cada recorrida se guarda en la hoja <b>monitoreo</b> de la planilla LABORES S-MIX 26-27 (Drive).
-          {monit.sync.estado==="error" && <span style={{color:"#C0392B"}}> No se pudo leer la planilla{monit.sync.txt ? ` (${monit.sync.txt})` : ""}.</span>}
-        </div>
-        {!abierto && <button onClick={()=>{ setAbierto(true); setMsg(null); }} style={{padding:"10px 16px",fontSize:14,fontWeight:700,borderRadius:9,border:"none",background:"#2E7D32",color:"#fff",cursor:"pointer",fontFamily:"inherit"}}>➕ Nuevo monitoreo</button>}
+      <div style={{fontSize:12.5,opacity:0.75}}>
+        Para cargar un monitoreo: <b>🗺️ Mapa por campo</b> → elegí el campo → tocá el lote → <b>🔍 Monitorear este lote</b>.
+        Se guardan en la hoja <b>monitoreo</b> de la planilla LABORES S-MIX 26-27 (Drive).
+        {monit.sync.estado==="error" && <span style={{color:"#C0392B"}}> No se pudo leer la planilla{monit.sync.txt ? ` (${monit.sync.txt})` : ""}.</span>}
       </div>
       {monit.sinSubir > 0 && (
         <div style={{...cajaV,borderColor:"#C9A227",background:"#FFF8E6",display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",padding:"10px 14px"}}>
@@ -2946,74 +3203,10 @@ function VistaMonitoreo({monit, lluv, cultivoDe, autor, cambiarAutor}){
       )}
       {msg && <div style={{fontSize:13,fontWeight:600,padding:"9px 12px",borderRadius:8,background:msg.ok?"#E8F5E9":"#FFF6DD",color:msg.ok?"#2E7D32":"#8A6200"}}>{msg.txt}</div>}
 
-      {abierto && (
-        <div style={{...cajaV,display:"flex",flexDirection:"column",gap:12}}>
-          <div style={{fontSize:15,fontWeight:700}}>{form.id ? "Editar monitoreo" : "Nuevo monitoreo"}</div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:10}}>
-            <div>{lbl("Fecha")}<input type="date" value={form.fecha} onChange={e=>set({fecha:e.target.value})} style={txt}/></div>
-            <div>{lbl("Campo")}<select value={form.campo} disabled={!!form.id} onChange={e=>set({campo:e.target.value, lotes:[]})} style={txt}>
-              {CAMPOS.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}</select></div>
-            <div>{lbl("Recorrió")}<input value={autor} onChange={e=>cambiarAutor(e.target.value)} placeholder="Tu nombre" style={txt}/></div>
-          </div>
-          <div>
-            {lbl(form.id ? "Lote" : "Lotes recorridos (podés marcar varios)")}
-            <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-              {campoForm.lotes.map(l => { const a = form.lotes.includes(l.id); const cv = cultivoDe(campoForm.id, l.id); return (
-                <button key={l.id} disabled={!!form.id && !a} onClick={()=>toggleLote(l.id)} style={{...chipS(a),opacity:!!form.id && !a ? 0.35 : 1}}>
-                  {l.label||l.id}{cv ? <span style={{fontSize:10.5,opacity:0.75}}> · {cv}</span> : null}
-                </button>
-              );})}
-            </div>
-          </div>
-          <div>
-            {lbl("Nivel")}
-            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-              {Object.entries(NIVEL_MONITOREO).map(([k, n]) => (
-                <button key={k} onClick={()=>set({nivel:k})} style={{padding:"8px 13px",fontSize:13.5,fontWeight:700,borderRadius:9,cursor:"pointer",fontFamily:"inherit",
-                  border:`2px solid ${form.nivel===k?n.color:"#C8C2B0"}`,background:form.nivel===k?n.fondo:"#fff",color:form.nivel===k?n.color:TINTA}}>{n.icono} {n.txt}</button>
-              ))}
-            </div>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:10}}>
-            <div>{lbl("Estado del cultivo")}<input value={form.estado} list="estados-cultivo" onChange={e=>set({estado:e.target.value})} placeholder="ej: V4, barbecho, macollaje" style={txt}/>
-              <datalist id="estados-cultivo">{ESTADOS_CULTIVO.map(e => <option key={e} value={e}/>)}</datalist></div>
-            <div>{lbl("Suelo / humedad")}<select value={form.suelo} onChange={e=>set({suelo:e.target.value})} style={txt}>
-              {HUMEDAD_SUELO.map(h => <option key={h} value={h}>{h || "—"}</option>)}</select></div>
-          </div>
-          {[["malezas","Malezas"],["plagas","Plagas"],["enfermedades","Enfermedades"]].map(([k, t]) => (
-            <div key={k}>
-              {lbl(t)}
-              <div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:6}}>
-                {SUGERENCIAS_MONITOREO[k].map(n => <button key={n} onClick={()=>toggleSugerencia(k, n)}
-                  style={chipS(form[k].split(",").some(x => normBusca(x.trim()) === normBusca(n)))}>{n}</button>)}
-              </div>
-              <input value={form[k]} onChange={e=>set({[k]:e.target.value})} placeholder={`${t} (y densidad / umbral si querés)`} style={txt}/>
-            </div>
-          ))}
-          <div>{lbl("Observaciones")}<textarea rows={3} value={form.observaciones} onChange={e=>set({observaciones:e.target.value})} style={{...txt,resize:"vertical"}}/></div>
-          <div>{lbl("Acción sugerida")}<textarea rows={2} value={form.accion} onChange={e=>set({accion:e.target.value})} placeholder="ej: aplicar residual antes del 25/10" style={{...txt,resize:"vertical"}}/></div>
-          <div>
-            {lbl("Fotos (se guardan en el Drive)")}
-            <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
-              {fotos.map((ft, k) => (
-                <div key={ft.url} style={{position:"relative"}}>
-                  <img src={ft.url} alt="" style={{width:72,height:72,objectFit:"cover",borderRadius:8,border:"1px solid #C8C2B0"}}/>
-                  <button onClick={()=>{ URL.revokeObjectURL(ft.url); setFotos(fs => fs.filter((_, i) => i !== k)); }}
-                    style={{position:"absolute",top:-6,right:-6,width:22,height:22,borderRadius:11,border:"none",background:TINTA,color:"#fff",fontSize:12,cursor:"pointer"}}>✕</button>
-                </div>
-              ))}
-              <label style={{padding:"9px 13px",fontSize:13.5,fontWeight:700,borderRadius:9,border:`1.5px dashed ${TINTA}`,cursor:"pointer"}}>
-                📷 Agregar fotos
-                <input type="file" accept="image/*" multiple style={{display:"none"}}
-                  onChange={e=>{ const fs = [...e.target.files].map(file => ({file, url:URL.createObjectURL(file)})); setFotos(x => [...x, ...fs]); e.target.value=""; }}/>
-              </label>
-              {form.fotos && <span style={{fontSize:12,opacity:0.7}}>ya tiene {form.fotos.split(" ").filter(Boolean).length} foto(s) guardada(s)</span>}
-            </div>
-          </div>
-          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-            <button onClick={guardar} disabled={monit.sync.estado==="guardando"} style={{padding:"10px 18px",fontSize:14,fontWeight:700,borderRadius:9,border:"none",background:"#2E7D32",color:"#fff",cursor:"pointer",fontFamily:"inherit"}}>💾 Guardar</button>
-            <button onClick={()=>{ setForm(vacio()); setAbierto(false); }} style={{padding:"10px 16px",fontSize:14,fontWeight:600,borderRadius:9,border:`1.5px solid ${TINTA}`,background:"transparent",color:TINTA,cursor:"pointer",fontFamily:"inherit"}}>Cancelar</button>
-          </div>
+      {editando && (
+        <div style={cajaV}>
+          <FormMonitoreo key={editando.id} monit={monit} campoId={editando.campo} loteId={editando.lote} cultivoDe={cultivoDe} siembraDe={siembraDe} autor={autor} cambiarAutor={cambiarAutor}
+            inicial={editando} onListo={m => { setMsg(m); setEditando(null); }} onCancelar={() => setEditando(null)}/>
         </div>
       )}
 
@@ -3062,7 +3255,8 @@ function VistaMonitoreo({monit, lluv, cultivoDe, autor, cambiarAutor}){
             </div>
           </div>
           <div style={{fontSize:12.5,marginTop:6,display:"flex",flexDirection:"column",gap:2}}>
-            {m.malezas && <div><b>Malezas:</b> {m.malezas}</div>}
+            {m.malezas && <div><b>Malezas:</b> {m.malezas}{[m.malezasDensidad, m.malezasTamano].filter(Boolean).length ? ` (${[m.malezasDensidad, m.malezasTamano].filter(Boolean).join(", ").toLowerCase()})` : ""}</div>}
+            {m.nacimiento && <div><b>🌱 Nacimientos:</b> {m.nacimiento}</div>}
             {m.plagas && <div><b>Plagas:</b> {m.plagas}</div>}
             {m.enfermedades && <div><b>Enfermedades:</b> {m.enfermedades}</div>}
             {m.suelo && <div><b>Suelo:</b> {m.suelo}</div>}
@@ -3141,7 +3335,6 @@ export default function App(){
   const [etiquetas,setEtiquetas]=useState(["","","",""]);
   const [titulos,setTitulos]=useState({});
   const [loteAbierto,setLoteAbierto]=useState(null); // {campo, lote} para modal historial
-  const [campSel,setCampSel]=useState("26-27");
 
   // === Estado del generador de órdenes ===
   const [ordFecha, setOrdFecha] = useState(new Date().toISOString().split("T")[0]);
@@ -3249,6 +3442,10 @@ export default function App(){
     if(!Array.isArray(reg) || !reg.length) return null;
     return reg.map((r, i) => ({...r, id:`r${i}`, productos:(r.productos||[]).map(p => p.n), items:r.productos||[]}));
   }, [datosRemotos]);
+  // Última siembra registrada de cada lote (para el control de nacimientos del monitoreo)
+  const siembraDe = useMemo(() => (campoId, loteId) => (datosRemotos?.REGISTRO || [])
+    .filter(r => r.campo === campoId && refApuntaALote(r.lote, loteId) && clasificarLabor(r.labor, (r.productos||[]).map(p => p.n)) === "siembra")
+    .sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)))[0] || null, [datosRemotos]);
   // Cultivo 26-27 de cada lote: el plan, y si no está, la rotación histórica
   const cultivoDe = useMemo(() => (campoId, loteId) =>
     buscarKey(PLAN_2627, campoId, loteId) || (buscarKey(HISTORICO_ROTACION, campoId, loteId) || {})["26-27"]?.cv || "",
@@ -4211,7 +4408,7 @@ export default function App(){
           fechaDatos={fechaDatos ? new Date(fechaDatos).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}) : null}
           onEditar={()=>setVista("protocolo")}/>}
 
-        {vista==="monitoreo"&&<VistaMonitoreo monit={monit} lluv={lluv} cultivoDe={cultivoDe} autor={autor} cambiarAutor={cambiarAutor}/>}
+        {vista==="monitoreo"&&<VistaMonitoreo monit={monit} lluv={lluv} cultivoDe={cultivoDe} siembraDe={siembraDe} autor={autor} cambiarAutor={cambiarAutor}/>}
 
         {vista==="protocolo"&&<VistaProtocoloEditor protocolo={protocolo} sync={protoSync} onGuardar={guardarProtocolo}/>}
 
@@ -4985,7 +5182,7 @@ export default function App(){
       </div>
 
       {/* MODAL HISTORIAL LOTE */}
-      {loteAbierto&&<ModalHistorial loteInfo={loteAbierto} onClose={cerrarLote} campSel={campSel} setCampSel={setCampSel} historico={HISTORICO_ROTACION} aplicaciones={APLICACIONES} fertilizaciones={FERTILIZACIONES} inv26={INV_26} plan2627={PLAN_2627} suelos={SUELOS}/>}
+      {loteAbierto&&<ModalHistorial loteInfo={loteAbierto} onClose={cerrarLote} monit={monit} cultivoDe={cultivoDe} siembraDe={siembraDe} autor={autor} cambiarAutor={cambiarAutor} aplicaciones={APLICACIONES} fertilizaciones={FERTILIZACIONES} inv26={INV_26} plan2627={PLAN_2627} suelos={SUELOS}/>}
     </div>
   );
 }
@@ -4993,21 +5190,14 @@ export default function App(){
 // ============================================================
 // MODAL HISTORIAL — muestra 8 campañas de un lote
 // ============================================================
-function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, aplicaciones=[], fertilizaciones=[], inv26={}, plan2627={}, suelos={}}){
-  const HISTORICO_ROTACION = historico || HISTORICO_ROTACION_FALLBACK;
+function ModalHistorial({loteInfo, onClose, aplicaciones=[], fertilizaciones=[], inv26={}, plan2627={}, suelos={}, monit, cultivoDe, siembraDe, autor, cambiarAutor}){
   const {campo,lote}=loteInfo;
-  const key=`${campo.id}|${lote.id}`;
-  const hist=buscarKey(HISTORICO_ROTACION, campo.id, lote.id);
-  const camps=["19-20","20-21","21-22","22-23","23-24","24-25","25-26","26-27"];
-  const camp=hist&&hist[campSel]?campSel:(hist?camps.filter(c=>hist[c]).slice(-1)[0]:"26-27");
-  const dato=hist?hist[camp]:null;
-  const cv=dato?.cv||"Sin datos";
-  const rF=dato?.rF;
-  const rG=dato?.rG;
-
-  // Estadísticas del lote
-  const rindesFina=hist?Object.entries(hist).filter(([_,d])=>d.rF).map(([c,d])=>({c,r:d.rF})):[];
-  const rindesGruesa=hist?Object.entries(hist).filter(([_,d])=>d.rG).map(([c,d])=>({c,r:d.rG})):[];
+  const [monitoreando,setMonitoreando]=useState(false);
+  const [aviso,setAviso]=useState(null);
+  const cajaRef=useRef(null);
+  const fFecha=s=>{ const d=fechaLocal(s); return d?ddmm(d):s; };
+  // Últimos monitoreos de este lote (la lista viene ordenada de más nuevo a más viejo)
+  const monLote=(monit?.lista||[]).filter(m=>m.campo===campo.id&&String(m.lote)===String(lote.id)).slice(0,3);
 
   // Filtrar aplicaciones y fert de este lote (matching flexible)
   const matchLote=(x)=> x.campo===campo.id && refApuntaALote(x.lote, lote.id);
@@ -5043,8 +5233,8 @@ function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, apli
   const modal={background:CREMA,borderRadius:14,maxWidth:640,width:"100%",maxHeight:"90vh",overflow:"auto",boxShadow:"0 20px 60px rgba(0,0,0,0.3)",border:`2px solid ${TINTA}`};
 
   return (
-    <div style={overlay} onClick={onClose}>
-      <div style={modal} onClick={e=>e.stopPropagation()}>
+    <div style={overlay} onClick={()=>{ if(!monitoreando) onClose(); }}>
+      <div ref={cajaRef} style={modal} onClick={e=>e.stopPropagation()}>
         {/* Header */}
         <div style={{padding:"16px 20px",borderBottom:`1.5px solid ${TINTA}`,display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10}}>
           <div>
@@ -5055,6 +5245,35 @@ function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, apli
           <button onClick={onClose} style={{background:"none",border:"none",fontSize:26,cursor:"pointer",lineHeight:1,color:TINTA,padding:4}}>×</button>
         </div>
 
+        {/* ── MONITOREO DEL LOTE ── */}
+        <div style={{padding:"14px 20px",borderBottom:"1px solid #D8D2C0",background:"#F4F8F1"}}>
+          {monitoreando?(
+            <FormMonitoreo monit={monit} campoId={campo.id} loteId={lote.id} cultivoDe={cultivoDe} siembraDe={siembraDe} autor={autor} cambiarAutor={cambiarAutor}
+              onListo={m=>{ setAviso(m); setMonitoreando(false); cajaRef.current?.scrollTo({top:0}); }} onCancelar={()=>setMonitoreando(false)}/>
+          ):(
+            <div style={{display:"flex",flexDirection:"column",gap:9}}>
+              <button onClick={()=>{ setAviso(null); setMonitoreando(true); }}
+                style={{padding:"13px 16px",fontSize:16,fontWeight:700,borderRadius:10,border:"none",background:"#2E7D32",color:"#fff",cursor:"pointer",fontFamily:"inherit"}}>🔍 Monitorear este lote</button>
+              {aviso&&<div style={{fontSize:13,fontWeight:600,color:aviso.ok?"#2E7D32":"#8A6200"}}>{aviso.txt}</div>}
+              {monLote.length>0?(
+                <div style={{display:"flex",flexDirection:"column",gap:5}}>
+                  <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55}}>Últimos monitoreos</div>
+                  {monLote.map(m=>{ const n=NIVEL_MONITOREO[m.nivel]||NIVEL_MONITOREO.ok; return (
+                    <div key={m.id} style={{fontSize:12.5,background:"#fff",borderLeft:`4px solid ${n.color}`,borderRadius:6,padding:"6px 9px"}}>
+                      <b>{fFecha(m.fecha)}</b> · <span style={{color:n.color,fontWeight:700}}>{n.icono} {n.txt}</span>
+                      {m.estado&&<span style={{opacity:0.75}}> · {m.estado}</span>}
+                      {[m.malezas,m.plagas,m.enfermedades].filter(Boolean).length>0&&<div style={{marginTop:2}}>{[m.malezas,m.plagas,m.enfermedades].filter(Boolean).join(" · ")}</div>}
+                      {m.nacimiento&&<div style={{marginTop:2}}>🌱 {m.nacimiento}</div>}
+                      {m.accion&&<div style={{marginTop:2,color:"#1E5FA8"}}>→ {m.accion}</div>}
+                    </div>
+                  );})}
+                </div>
+              ):<div style={{fontSize:12,opacity:0.6,fontStyle:"italic"}}>Todavía no se monitoreó este lote.</div>}
+            </div>
+          )}
+        </div>
+
+        {!monitoreando&&<>
         {/* ── 1. CAMPAÑA ACTUAL 26-27 ── */}
         {(()=>{
           const k=`${campo.id}|${lote.id}`;
@@ -5184,94 +5403,7 @@ function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, apli
           )}
         </div>
 
-        {/* ── 4. HISTÓRICO DE ROTACIÓN (plegable) ── */}
-        <details style={{padding:"0",borderTop:"1px solid #D8D2C0"}}>
-          <summary style={{padding:"14px 20px",cursor:"pointer",listStyle:"none",display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.65,fontWeight:700,userSelect:"none"}}>
-            <span>📜 Rotación histórica</span>
-            <span style={{fontSize:14,opacity:0.5}}>▾</span>
-          </summary>
-
-          {/* Selector de campaña */}
-          <div style={{padding:"0 20px 12px"}}>
-            <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-              {camps.map(c=>{
-                const tieneDato=hist&&hist[c];
-                const activa=c===camp;
-                return <button key={c} onClick={()=>tieneDato&&setCampSel(c)}
-                  disabled={!tieneDato}
-                  style={{padding:"5px 10px",fontSize:12,fontWeight:700,cursor:tieneDato?"pointer":"not-allowed",borderRadius:16,border:`1.5px solid ${activa?TINTA:"#C8C2B0"}`,background:activa?TINTA:tieneDato?"transparent":"#F0EDE3",color:activa?"#fff":tieneDato?TINTA:"#B5AF9D",fontFamily:"inherit",opacity:tieneDato?1:0.5}}>
-                  {c}
-                </button>;
-              })}
-            </div>
-          </div>
-
-          {/* Detalle de campaña seleccionada */}
-          <div style={{padding:"0 20px 14px"}}>
-            {dato?(
-              <div>
-                <div style={{fontSize:10.5,letterSpacing:"0.1em",textTransform:"uppercase",opacity:0.55}}>Campaña {camp}</div>
-                <div style={{display:"flex",alignItems:"center",gap:10,marginTop:6}}>
-                  <span style={{width:18,height:18,borderRadius:4,background:colorCv(cv),border:`1.5px solid ${TINTA}`,flexShrink:0}}/>
-                  <span style={{fontSize:17,fontWeight:700}}>{cv}</span>
-                </div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:10}}>
-                  <div style={{background:"#fff",border:"1px solid #E5E0D0",borderRadius:7,padding:"8px 10px"}}>
-                    <div style={{fontSize:10,letterSpacing:"0.1em",textTransform:"uppercase",opacity:0.55}}>Rinde fina</div>
-                    <div style={{fontSize:19,fontWeight:700,marginTop:2}}>{rF!=null?`${rF} qq/ha`:"—"}</div>
-                  </div>
-                  <div style={{background:"#fff",border:"1px solid #E5E0D0",borderRadius:7,padding:"8px 10px"}}>
-                    <div style={{fontSize:10,letterSpacing:"0.1em",textTransform:"uppercase",opacity:0.55}}>Rinde gruesa</div>
-                    <div style={{fontSize:19,fontWeight:700,marginTop:2}}>{rG!=null?`${rG} qq/ha`:"—"}</div>
-                  </div>
-                </div>
-              </div>
-            ):(
-              <div style={{opacity:0.55,fontStyle:"italic",fontSize:13}}>Sin datos históricos.</div>
-            )}
-          </div>
-
-          {/* Tabla completa */}
-          {hist&&(
-            <div style={{padding:"0 20px 18px"}}>
-              <div style={{background:"#fff",border:"1px solid #E5E0D0",borderRadius:8,overflow:"hidden"}}>
-                <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
-                  <thead><tr style={{background:"#E5E0D0"}}>
-                    {["Camp.","Cultivo","R. fina","R. gruesa"].map(h=>(
-                      <th key={h} style={{textAlign:"left",padding:"6px 9px",fontSize:10,textTransform:"uppercase",letterSpacing:"0.05em",opacity:0.7,whiteSpace:"nowrap"}}>{h}</th>
-                    ))}
-                  </tr></thead>
-                  <tbody>
-                    {camps.map(c=>{
-                      const d=hist[c];
-                      if(!d) return null;
-                      return <tr key={c} style={{borderTop:"1px solid #EEE9DC",background:c===camp?"#F8F5EC":"transparent"}}>
-                        <td style={{padding:"6px 9px",fontWeight:c===camp?700:500,whiteSpace:"nowrap"}}>{c}</td>
-                        <td style={{padding:"6px 9px"}}>
-                          {d.cv?<span style={{display:"inline-flex",alignItems:"center",gap:5}}>
-                            <span style={{width:8,height:8,borderRadius:2,background:colorCv(d.cv),flexShrink:0}}/>{d.cv}
-                          </span>:<span style={{opacity:0.4}}>—</span>}
-                        </td>
-                        <td style={{padding:"6px 9px",fontWeight:600}}>{d.rF!=null?`${d.rF} qq`:<span style={{opacity:0.4}}>—</span>}</td>
-                        <td style={{padding:"6px 9px",fontWeight:600}}>{d.rG!=null?`${d.rG} qq`:<span style={{opacity:0.4}}>—</span>}</td>
-                      </tr>;
-                    })}
-                  </tbody>
-                </table>
-              </div>
-              {(rindesFina.length>0||rindesGruesa.length>0)&&(
-                <div style={{display:"flex",gap:12,marginTop:10,flexWrap:"wrap",fontSize:11.5}}>
-                  {rindesFina.length>0&&<div style={{opacity:0.75}}>
-                    <b>Prom. fina:</b> {(rindesFina.reduce((s,x)=>s+x.r,0)/rindesFina.length).toFixed(1)} qq ({rindesFina.length}c)
-                  </div>}
-                  {rindesGruesa.length>0&&<div style={{opacity:0.75}}>
-                    <b>Prom. gruesa:</b> {(rindesGruesa.reduce((s,x)=>s+x.r,0)/rindesGruesa.length).toFixed(1)} qq ({rindesGruesa.length}c)
-                  </div>}
-                </div>
-              )}
-            </div>
-          )}
-        </details>
+        </>}
       </div>
     </div>
   );
