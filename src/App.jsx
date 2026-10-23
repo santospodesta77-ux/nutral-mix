@@ -2864,56 +2864,124 @@ const subirFoto = async (base64, nombre) => {
   return d.link;
 };
 
-function VistaMonitoreo({monit, lluv, cultivoDe, autor, cambiarAutor}){
+// Formulario de monitoreo de UN lote. Se abre desde el lote (Mapa por campo → tocar el lote →
+// "Monitorear este lote") y también para editar uno ya cargado desde la pestaña Monitoreo.
+function FormMonitoreo({monit, campoId, loteId, cultivoDe, autor, cambiarAutor, inicial, onListo, onCancelar}){
   const hoyISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
-  const vacio = () => ({id:null, fecha:hoyISO(), campo:CAMPOS[0].id, lotes:[], estado:"", nivel:"ok", malezas:"", plagas:"", enfermedades:"", suelo:"", observaciones:"", accion:""});
-  const [form, setForm] = useState(vacio);
+  const [form, setForm] = useState(() => inicial ? {estado:"", nivel:"ok", malezas:"", plagas:"", enfermedades:"", suelo:"", observaciones:"", accion:"", fotos:"", ...inicial}
+    : {id:null, fecha:hoyISO(), estado:"", nivel:"ok", malezas:"", plagas:"", enfermedades:"", suelo:"", observaciones:"", accion:"", fotos:""});
   const [fotos, setFotos] = useState([]);   // {file, url} elegidas para este monitoreo
-  const [abierto, setAbierto] = useState(false);
   const [msg, setMsg] = useState(null);
-  const [campoF, setCampoF] = useState("TODOS");
-  const [nivelF, setNivelF] = useState("TODOS");
-  const [busca, setBusca] = useState("");
+  const [guardando, setGuardando] = useState(false);
+  const campo = CAMPOS.find(c => c.id === campoId) || {nombre:campoId, lotes:[]};
+  const lote = campo.lotes.find(l => String(l.id) === String(loteId)) || {id:loteId};
+  const cv = cultivoDe(campoId, loteId);
 
   const set = cambios => setForm(f => ({...f, ...cambios}));
-  const campoForm = CAMPOS.find(c => c.id === form.campo) || CAMPOS[0];
-  const toggleLote = id => set({lotes: form.lotes.includes(id) ? form.lotes.filter(x => x !== id) : [...form.lotes, id]});
   // Botón rápido: agrega o saca el nombre de la lista del campo de texto
   const toggleSugerencia = (k, nombre) => {
-    const partes = form[k].split(",").map(x => x.trim()).filter(Boolean);
+    const partes = String(form[k]||"").split(",").map(x => x.trim()).filter(Boolean);
     const esta = partes.some(x => normBusca(x) === normBusca(nombre));
     set({[k]: (esta ? partes.filter(x => normBusca(x) !== normBusca(nombre)) : [...partes, nombre]).join(", ")});
   };
 
   const guardar = async () => {
-    if(!form.lotes.length){ setMsg({ok:false, txt:"Elegí al menos un lote."}); return; }
-    const base = {fecha:form.fecha, campo:form.campo, estado:form.estado.trim(), nivel:form.nivel, malezas:form.malezas.trim(), plagas:form.plagas.trim(),
-      enfermedades:form.enfermedades.trim(), suelo:form.suelo, observaciones:form.observaciones.trim(), accion:form.accion.trim(), autor};
-    const lista = form.lotes.map((l, i) => ({...base, lote:l, cultivo:cultivoDe(form.campo, l),
-      id: form.id && form.lotes.length === 1 ? form.id : `m${Date.now().toString(36)}${i}`}));
-    // Fotos: se suben una vez y el link va en todos los lotes de la recorrida
-    let links = form.fotos ? form.fotos.split(" ").filter(Boolean) : [], fallaron = 0;
+    setGuardando(true);
+    let links = form.fotos ? String(form.fotos).split(" ").filter(Boolean) : [], fallaron = 0;
     for(const [k, ft] of fotos.entries()){
       setMsg({ok:true, txt:`Subiendo foto ${k+1} de ${fotos.length}…`});
-      try { links.push(await subirFoto(await achicarFoto(ft.file), `monitoreo ${form.fecha} ${nombreCampo(form.campo)} ${form.lotes.join("-")} ${k+1}.jpg`)); }
+      try { links.push(await subirFoto(await achicarFoto(ft.file), `monitoreo ${form.fecha} ${campo.nombre} ${lote.label||lote.id} ${links.length+1}.jpg`)); }
       catch { fallaron++; }
     }
-    lista.forEach(m => { m.fotos = links.join(" "); });
+    const m = {id: form.id || `m${Date.now().toString(36)}`, fecha:form.fecha, campo:campoId, lote:String(loteId), cultivo:cv,
+      estado:String(form.estado).trim(), nivel:form.nivel, malezas:String(form.malezas).trim(), plagas:String(form.plagas).trim(),
+      enfermedades:String(form.enfermedades).trim(), suelo:form.suelo, observaciones:String(form.observaciones).trim(),
+      accion:String(form.accion).trim(), autor, fotos:links.join(" ")};
     setMsg({ok:true, txt:"Guardando…"});
-    const ok = await monit.guardar(lista);
-    const avisoFotos = fallaron ? ` ${fallaron} foto${fallaron>1?"s":""} no se pudo subir (sin señal o el Drive no respondió).` : "";
-    setMsg(ok ? {ok:!fallaron, txt:`✓ Guardado en la planilla (${lista.length} lote${lista.length>1?"s":""}${links.length ? `, ${links.length} foto${links.length>1?"s":""}` : ""}).${avisoFotos}`}
-      : {ok:false, txt:`Sin conexión con la planilla: quedó guardado en este equipo y se sube cuando vuelva la señal.${avisoFotos}`});
+    const ok = await monit.guardar([m]);
     fotos.forEach(ft => URL.revokeObjectURL(ft.url)); setFotos([]);
-    setForm(f => ({...vacio(), campo:f.campo, fecha:f.fecha}));
-    setAbierto(false);
+    setGuardando(false);
+    const avisoFotos = fallaron ? ` ${fallaron} foto${fallaron>1?"s":""} no se pudo subir (sin señal o el Drive no respondió).` : "";
+    onListo(ok ? {ok:!fallaron, txt:`✓ Monitoreo de ${campo.nombre} ${lote.label||lote.id} guardado en la planilla${links.length ? ` con ${links.length} foto${links.length>1?"s":""}` : ""}.${avisoFotos}`}
+      : {ok:false, txt:`Sin conexión con la planilla: el monitoreo quedó guardado en este equipo y se sube cuando vuelva la señal.${avisoFotos}`});
   };
-  const editar = m => {
-    setForm({id:m.id, fecha:m.fecha, campo:m.campo, lotes:[String(m.lote)], estado:m.estado||"", nivel:m.nivel||"ok", malezas:m.malezas||"",
-      plagas:m.plagas||"", enfermedades:m.enfermedades||"", suelo:m.suelo||"", observaciones:m.observaciones||"", accion:m.accion||"", fotos:m.fotos||""});
-    setAbierto(true); setMsg(null);
-    window.scrollTo({top:0, behavior:"smooth"});
-  };
+
+  const lbl = t => <div style={{fontSize:10.5,fontWeight:700,textTransform:"uppercase",opacity:0.6,marginBottom:3}}>{t}</div>;
+  const txt = {width:"100%",boxSizing:"border-box",padding:"9px 10px",fontSize:15,border:"1px solid #C8C2B0",borderRadius:7,background:"#FFFDF7",color:TINTA,fontFamily:"inherit"};
+  const chipS = a => ({padding:"7px 11px",fontSize:13,borderRadius:16,cursor:"pointer",fontFamily:"inherit",
+    border:`1px solid ${a?TINTA:"#C8C2B0"}`,background:a?TINTA:"#fff",color:a?CREMA:TINTA,fontWeight:a?700:500});
+
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:13}}>
+      <div>
+        <div style={{fontSize:16,fontWeight:700}}>{form.id ? "Editar monitoreo" : "🔍 Monitoreo"} · {campo.nombre} · Lote {lote.label||lote.id}</div>
+        <div style={{fontSize:12.5,opacity:0.7,marginTop:2}}>{lote.ha ? `${fmt(Number(lote.ha))} ha · ` : ""}{cv || "sin cultivo asignado"}</div>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:10}}>
+        <div>{lbl("Fecha")}<input type="date" value={form.fecha} onChange={e=>set({fecha:e.target.value})} style={txt}/></div>
+        <div>{lbl("Recorrió")}<input value={autor} onChange={e=>cambiarAutor(e.target.value)} placeholder="Tu nombre" style={txt}/></div>
+      </div>
+      <div>
+        {lbl("Nivel")}
+        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+          {Object.entries(NIVEL_MONITOREO).map(([k, n]) => (
+            <button key={k} onClick={()=>set({nivel:k})} style={{padding:"9px 13px",fontSize:14,fontWeight:700,borderRadius:9,cursor:"pointer",fontFamily:"inherit",
+              border:`2px solid ${form.nivel===k?n.color:"#C8C2B0"}`,background:form.nivel===k?n.fondo:"#fff",color:form.nivel===k?n.color:TINTA}}>{n.icono} {n.txt}</button>
+          ))}
+        </div>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:10}}>
+        <div>{lbl("Estado del cultivo")}<input value={form.estado} list="estados-cultivo" onChange={e=>set({estado:e.target.value})} placeholder="ej: V4, barbecho, macollaje" style={txt}/>
+          <datalist id="estados-cultivo">{ESTADOS_CULTIVO.map(e => <option key={e} value={e}/>)}</datalist></div>
+        <div>{lbl("Suelo / humedad")}<select value={form.suelo} onChange={e=>set({suelo:e.target.value})} style={txt}>
+          {HUMEDAD_SUELO.map(h => <option key={h} value={h}>{h || "—"}</option>)}</select></div>
+      </div>
+      {[["malezas","Malezas"],["plagas","Plagas"],["enfermedades","Enfermedades"]].map(([k, t]) => (
+        <div key={k}>
+          {lbl(t)}
+          <div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:6}}>
+            {SUGERENCIAS_MONITOREO[k].map(n => <button key={n} onClick={()=>toggleSugerencia(k, n)}
+              style={chipS(String(form[k]||"").split(",").some(x => normBusca(x.trim()) === normBusca(n)))}>{n}</button>)}
+          </div>
+          <input value={form[k]} onChange={e=>set({[k]:e.target.value})} placeholder={`${t} (y densidad / umbral si querés)`} style={txt}/>
+        </div>
+      ))}
+      <div>{lbl("Observaciones")}<textarea rows={3} value={form.observaciones} onChange={e=>set({observaciones:e.target.value})} style={{...txt,resize:"vertical"}}/></div>
+      <div>{lbl("Acción sugerida")}<textarea rows={2} value={form.accion} onChange={e=>set({accion:e.target.value})} placeholder="ej: aplicar residual antes del 25/10" style={{...txt,resize:"vertical"}}/></div>
+      <div>
+        {lbl("Fotos (se guardan en el Drive)")}
+        <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+          {fotos.map((ft, k) => (
+            <div key={ft.url} style={{position:"relative"}}>
+              <img src={ft.url} alt="" style={{width:72,height:72,objectFit:"cover",borderRadius:8,border:"1px solid #C8C2B0"}}/>
+              <button onClick={()=>{ URL.revokeObjectURL(ft.url); setFotos(fs => fs.filter((_, i) => i !== k)); }}
+                style={{position:"absolute",top:-6,right:-6,width:22,height:22,borderRadius:11,border:"none",background:TINTA,color:"#fff",fontSize:12,cursor:"pointer"}}>✕</button>
+            </div>
+          ))}
+          <label style={{padding:"10px 14px",fontSize:14,fontWeight:700,borderRadius:9,border:`1.5px dashed ${TINTA}`,cursor:"pointer"}}>
+            📷 Agregar fotos
+            <input type="file" accept="image/*" multiple style={{display:"none"}}
+              onChange={e=>{ const fs = [...e.target.files].map(file => ({file, url:URL.createObjectURL(file)})); setFotos(x => [...x, ...fs]); e.target.value=""; }}/>
+          </label>
+          {form.fotos && <span style={{fontSize:12,opacity:0.7}}>ya tiene {String(form.fotos).split(" ").filter(Boolean).length} foto(s) guardada(s)</span>}
+        </div>
+      </div>
+      {msg && <div style={{fontSize:13,fontWeight:600,color:msg.ok?"#2E7D32":"#8A6200"}}>{msg.txt}</div>}
+      <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+        <button onClick={guardar} disabled={guardando} style={{padding:"12px 20px",fontSize:15,fontWeight:700,borderRadius:9,border:"none",background:"#2E7D32",color:"#fff",cursor:"pointer",fontFamily:"inherit",opacity:guardando?0.7:1}}>{guardando ? "Guardando…" : "💾 Guardar monitoreo"}</button>
+        <button onClick={onCancelar} disabled={guardando} style={{padding:"12px 16px",fontSize:15,fontWeight:600,borderRadius:9,border:`1.5px solid ${TINTA}`,background:"transparent",color:TINTA,cursor:"pointer",fontFamily:"inherit"}}>Cancelar</button>
+      </div>
+    </div>
+  );
+}
+
+function VistaMonitoreo({monit, lluv, cultivoDe, autor, cambiarAutor}){
+  const [editando, setEditando] = useState(null);   // monitoreo que se está editando
+  const [msg, setMsg] = useState(null);
+  const [campoF, setCampoF] = useState("TODOS");
+  const [nivelF, setNivelF] = useState("TODOS");
+  const [busca, setBusca] = useState("");
+  const editar = m => { setEditando(m); setMsg(null); window.scrollTo({top:0, behavior:"smooth"}); };
 
   const palabras = normBusca(busca).split(/\s+/).filter(Boolean);
   const filtrados = monit.lista.filter(m => (campoF === "TODOS" || m.campo === campoF) && (nivelF === "TODOS" || m.nivel === nivelF)
@@ -2922,21 +2990,14 @@ function VistaMonitoreo({monit, lluv, cultivoDe, autor, cambiarAutor}){
   const ultimos = [];
   monit.lista.filter(m => campoF === "TODOS" || m.campo === campoF).forEach(m => { if(!ultimos.some(u => u.campo === m.campo && u.lote === m.lote)) ultimos.push(m); });
   const conAlerta = ultimos.filter(m => m.nivel === "urgente" || m.nivel === "atencion");
-
-  const lbl = t => <div style={{fontSize:10.5,fontWeight:700,textTransform:"uppercase",opacity:0.6,marginBottom:3}}>{t}</div>;
-  const txt = {width:"100%",boxSizing:"border-box",padding:"8px 9px",fontSize:14,border:"1px solid #C8C2B0",borderRadius:7,background:"#FFFDF7",color:TINTA,fontFamily:"inherit"};
-  const chipS = a => ({padding:"5px 10px",fontSize:12.5,borderRadius:16,cursor:"pointer",fontFamily:"inherit",
-    border:`1px solid ${a?TINTA:"#C8C2B0"}`,background:a?TINTA:"#fff",color:a?CREMA:TINTA,fontWeight:a?700:500});
   const fFecha = s => { const d = fechaLocal(s); return d ? ddmm(d) : s; };
 
   return (
     <div style={{display:"flex",flexDirection:"column",gap:14}}>
-      <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center",justifyContent:"space-between"}}>
-        <div style={{fontSize:12,opacity:0.7,flex:"1 1 260px"}}>
-          Cada recorrida se guarda en la hoja <b>monitoreo</b> de la planilla LABORES S-MIX 26-27 (Drive).
-          {monit.sync.estado==="error" && <span style={{color:"#C0392B"}}> No se pudo leer la planilla{monit.sync.txt ? ` (${monit.sync.txt})` : ""}.</span>}
-        </div>
-        {!abierto && <button onClick={()=>{ setAbierto(true); setMsg(null); }} style={{padding:"10px 16px",fontSize:14,fontWeight:700,borderRadius:9,border:"none",background:"#2E7D32",color:"#fff",cursor:"pointer",fontFamily:"inherit"}}>➕ Nuevo monitoreo</button>}
+      <div style={{fontSize:12.5,opacity:0.75}}>
+        Para cargar un monitoreo: <b>🗺️ Mapa por campo</b> → elegí el campo → tocá el lote → <b>🔍 Monitorear este lote</b>.
+        Se guardan en la hoja <b>monitoreo</b> de la planilla LABORES S-MIX 26-27 (Drive).
+        {monit.sync.estado==="error" && <span style={{color:"#C0392B"}}> No se pudo leer la planilla{monit.sync.txt ? ` (${monit.sync.txt})` : ""}.</span>}
       </div>
       {monit.sinSubir > 0 && (
         <div style={{...cajaV,borderColor:"#C9A227",background:"#FFF8E6",display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",padding:"10px 14px"}}>
@@ -2946,74 +3007,10 @@ function VistaMonitoreo({monit, lluv, cultivoDe, autor, cambiarAutor}){
       )}
       {msg && <div style={{fontSize:13,fontWeight:600,padding:"9px 12px",borderRadius:8,background:msg.ok?"#E8F5E9":"#FFF6DD",color:msg.ok?"#2E7D32":"#8A6200"}}>{msg.txt}</div>}
 
-      {abierto && (
-        <div style={{...cajaV,display:"flex",flexDirection:"column",gap:12}}>
-          <div style={{fontSize:15,fontWeight:700}}>{form.id ? "Editar monitoreo" : "Nuevo monitoreo"}</div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:10}}>
-            <div>{lbl("Fecha")}<input type="date" value={form.fecha} onChange={e=>set({fecha:e.target.value})} style={txt}/></div>
-            <div>{lbl("Campo")}<select value={form.campo} disabled={!!form.id} onChange={e=>set({campo:e.target.value, lotes:[]})} style={txt}>
-              {CAMPOS.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}</select></div>
-            <div>{lbl("Recorrió")}<input value={autor} onChange={e=>cambiarAutor(e.target.value)} placeholder="Tu nombre" style={txt}/></div>
-          </div>
-          <div>
-            {lbl(form.id ? "Lote" : "Lotes recorridos (podés marcar varios)")}
-            <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-              {campoForm.lotes.map(l => { const a = form.lotes.includes(l.id); const cv = cultivoDe(campoForm.id, l.id); return (
-                <button key={l.id} disabled={!!form.id && !a} onClick={()=>toggleLote(l.id)} style={{...chipS(a),opacity:!!form.id && !a ? 0.35 : 1}}>
-                  {l.label||l.id}{cv ? <span style={{fontSize:10.5,opacity:0.75}}> · {cv}</span> : null}
-                </button>
-              );})}
-            </div>
-          </div>
-          <div>
-            {lbl("Nivel")}
-            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-              {Object.entries(NIVEL_MONITOREO).map(([k, n]) => (
-                <button key={k} onClick={()=>set({nivel:k})} style={{padding:"8px 13px",fontSize:13.5,fontWeight:700,borderRadius:9,cursor:"pointer",fontFamily:"inherit",
-                  border:`2px solid ${form.nivel===k?n.color:"#C8C2B0"}`,background:form.nivel===k?n.fondo:"#fff",color:form.nivel===k?n.color:TINTA}}>{n.icono} {n.txt}</button>
-              ))}
-            </div>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:10}}>
-            <div>{lbl("Estado del cultivo")}<input value={form.estado} list="estados-cultivo" onChange={e=>set({estado:e.target.value})} placeholder="ej: V4, barbecho, macollaje" style={txt}/>
-              <datalist id="estados-cultivo">{ESTADOS_CULTIVO.map(e => <option key={e} value={e}/>)}</datalist></div>
-            <div>{lbl("Suelo / humedad")}<select value={form.suelo} onChange={e=>set({suelo:e.target.value})} style={txt}>
-              {HUMEDAD_SUELO.map(h => <option key={h} value={h}>{h || "—"}</option>)}</select></div>
-          </div>
-          {[["malezas","Malezas"],["plagas","Plagas"],["enfermedades","Enfermedades"]].map(([k, t]) => (
-            <div key={k}>
-              {lbl(t)}
-              <div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:6}}>
-                {SUGERENCIAS_MONITOREO[k].map(n => <button key={n} onClick={()=>toggleSugerencia(k, n)}
-                  style={chipS(form[k].split(",").some(x => normBusca(x.trim()) === normBusca(n)))}>{n}</button>)}
-              </div>
-              <input value={form[k]} onChange={e=>set({[k]:e.target.value})} placeholder={`${t} (y densidad / umbral si querés)`} style={txt}/>
-            </div>
-          ))}
-          <div>{lbl("Observaciones")}<textarea rows={3} value={form.observaciones} onChange={e=>set({observaciones:e.target.value})} style={{...txt,resize:"vertical"}}/></div>
-          <div>{lbl("Acción sugerida")}<textarea rows={2} value={form.accion} onChange={e=>set({accion:e.target.value})} placeholder="ej: aplicar residual antes del 25/10" style={{...txt,resize:"vertical"}}/></div>
-          <div>
-            {lbl("Fotos (se guardan en el Drive)")}
-            <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
-              {fotos.map((ft, k) => (
-                <div key={ft.url} style={{position:"relative"}}>
-                  <img src={ft.url} alt="" style={{width:72,height:72,objectFit:"cover",borderRadius:8,border:"1px solid #C8C2B0"}}/>
-                  <button onClick={()=>{ URL.revokeObjectURL(ft.url); setFotos(fs => fs.filter((_, i) => i !== k)); }}
-                    style={{position:"absolute",top:-6,right:-6,width:22,height:22,borderRadius:11,border:"none",background:TINTA,color:"#fff",fontSize:12,cursor:"pointer"}}>✕</button>
-                </div>
-              ))}
-              <label style={{padding:"9px 13px",fontSize:13.5,fontWeight:700,borderRadius:9,border:`1.5px dashed ${TINTA}`,cursor:"pointer"}}>
-                📷 Agregar fotos
-                <input type="file" accept="image/*" multiple style={{display:"none"}}
-                  onChange={e=>{ const fs = [...e.target.files].map(file => ({file, url:URL.createObjectURL(file)})); setFotos(x => [...x, ...fs]); e.target.value=""; }}/>
-              </label>
-              {form.fotos && <span style={{fontSize:12,opacity:0.7}}>ya tiene {form.fotos.split(" ").filter(Boolean).length} foto(s) guardada(s)</span>}
-            </div>
-          </div>
-          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-            <button onClick={guardar} disabled={monit.sync.estado==="guardando"} style={{padding:"10px 18px",fontSize:14,fontWeight:700,borderRadius:9,border:"none",background:"#2E7D32",color:"#fff",cursor:"pointer",fontFamily:"inherit"}}>💾 Guardar</button>
-            <button onClick={()=>{ setForm(vacio()); setAbierto(false); }} style={{padding:"10px 16px",fontSize:14,fontWeight:600,borderRadius:9,border:`1.5px solid ${TINTA}`,background:"transparent",color:TINTA,cursor:"pointer",fontFamily:"inherit"}}>Cancelar</button>
-          </div>
+      {editando && (
+        <div style={cajaV}>
+          <FormMonitoreo key={editando.id} monit={monit} campoId={editando.campo} loteId={editando.lote} cultivoDe={cultivoDe} autor={autor} cambiarAutor={cambiarAutor}
+            inicial={editando} onListo={m => { setMsg(m); setEditando(null); }} onCancelar={() => setEditando(null)}/>
         </div>
       )}
 
@@ -3141,7 +3138,6 @@ export default function App(){
   const [etiquetas,setEtiquetas]=useState(["","","",""]);
   const [titulos,setTitulos]=useState({});
   const [loteAbierto,setLoteAbierto]=useState(null); // {campo, lote} para modal historial
-  const [campSel,setCampSel]=useState("26-27");
 
   // === Estado del generador de órdenes ===
   const [ordFecha, setOrdFecha] = useState(new Date().toISOString().split("T")[0]);
@@ -4985,7 +4981,7 @@ export default function App(){
       </div>
 
       {/* MODAL HISTORIAL LOTE */}
-      {loteAbierto&&<ModalHistorial loteInfo={loteAbierto} onClose={cerrarLote} campSel={campSel} setCampSel={setCampSel} historico={HISTORICO_ROTACION} aplicaciones={APLICACIONES} fertilizaciones={FERTILIZACIONES} inv26={INV_26} plan2627={PLAN_2627} suelos={SUELOS}/>}
+      {loteAbierto&&<ModalHistorial loteInfo={loteAbierto} onClose={cerrarLote} monit={monit} cultivoDe={cultivoDe} autor={autor} cambiarAutor={cambiarAutor} aplicaciones={APLICACIONES} fertilizaciones={FERTILIZACIONES} inv26={INV_26} plan2627={PLAN_2627} suelos={SUELOS}/>}
     </div>
   );
 }
@@ -4993,21 +4989,14 @@ export default function App(){
 // ============================================================
 // MODAL HISTORIAL — muestra 8 campañas de un lote
 // ============================================================
-function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, aplicaciones=[], fertilizaciones=[], inv26={}, plan2627={}, suelos={}}){
-  const HISTORICO_ROTACION = historico || HISTORICO_ROTACION_FALLBACK;
+function ModalHistorial({loteInfo, onClose, aplicaciones=[], fertilizaciones=[], inv26={}, plan2627={}, suelos={}, monit, cultivoDe, autor, cambiarAutor}){
   const {campo,lote}=loteInfo;
-  const key=`${campo.id}|${lote.id}`;
-  const hist=buscarKey(HISTORICO_ROTACION, campo.id, lote.id);
-  const camps=["19-20","20-21","21-22","22-23","23-24","24-25","25-26","26-27"];
-  const camp=hist&&hist[campSel]?campSel:(hist?camps.filter(c=>hist[c]).slice(-1)[0]:"26-27");
-  const dato=hist?hist[camp]:null;
-  const cv=dato?.cv||"Sin datos";
-  const rF=dato?.rF;
-  const rG=dato?.rG;
-
-  // Estadísticas del lote
-  const rindesFina=hist?Object.entries(hist).filter(([_,d])=>d.rF).map(([c,d])=>({c,r:d.rF})):[];
-  const rindesGruesa=hist?Object.entries(hist).filter(([_,d])=>d.rG).map(([c,d])=>({c,r:d.rG})):[];
+  const [monitoreando,setMonitoreando]=useState(false);
+  const [aviso,setAviso]=useState(null);
+  const cajaRef=useRef(null);
+  const fFecha=s=>{ const d=fechaLocal(s); return d?ddmm(d):s; };
+  // Últimos monitoreos de este lote (la lista viene ordenada de más nuevo a más viejo)
+  const monLote=(monit?.lista||[]).filter(m=>m.campo===campo.id&&String(m.lote)===String(lote.id)).slice(0,3);
 
   // Filtrar aplicaciones y fert de este lote (matching flexible)
   const matchLote=(x)=> x.campo===campo.id && refApuntaALote(x.lote, lote.id);
@@ -5043,8 +5032,8 @@ function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, apli
   const modal={background:CREMA,borderRadius:14,maxWidth:640,width:"100%",maxHeight:"90vh",overflow:"auto",boxShadow:"0 20px 60px rgba(0,0,0,0.3)",border:`2px solid ${TINTA}`};
 
   return (
-    <div style={overlay} onClick={onClose}>
-      <div style={modal} onClick={e=>e.stopPropagation()}>
+    <div style={overlay} onClick={()=>{ if(!monitoreando) onClose(); }}>
+      <div ref={cajaRef} style={modal} onClick={e=>e.stopPropagation()}>
         {/* Header */}
         <div style={{padding:"16px 20px",borderBottom:`1.5px solid ${TINTA}`,display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10}}>
           <div>
@@ -5055,6 +5044,34 @@ function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, apli
           <button onClick={onClose} style={{background:"none",border:"none",fontSize:26,cursor:"pointer",lineHeight:1,color:TINTA,padding:4}}>×</button>
         </div>
 
+        {/* ── MONITOREO DEL LOTE ── */}
+        <div style={{padding:"14px 20px",borderBottom:"1px solid #D8D2C0",background:"#F4F8F1"}}>
+          {monitoreando?(
+            <FormMonitoreo monit={monit} campoId={campo.id} loteId={lote.id} cultivoDe={cultivoDe} autor={autor} cambiarAutor={cambiarAutor}
+              onListo={m=>{ setAviso(m); setMonitoreando(false); cajaRef.current?.scrollTo({top:0}); }} onCancelar={()=>setMonitoreando(false)}/>
+          ):(
+            <div style={{display:"flex",flexDirection:"column",gap:9}}>
+              <button onClick={()=>{ setAviso(null); setMonitoreando(true); }}
+                style={{padding:"13px 16px",fontSize:16,fontWeight:700,borderRadius:10,border:"none",background:"#2E7D32",color:"#fff",cursor:"pointer",fontFamily:"inherit"}}>🔍 Monitorear este lote</button>
+              {aviso&&<div style={{fontSize:13,fontWeight:600,color:aviso.ok?"#2E7D32":"#8A6200"}}>{aviso.txt}</div>}
+              {monLote.length>0?(
+                <div style={{display:"flex",flexDirection:"column",gap:5}}>
+                  <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55}}>Últimos monitoreos</div>
+                  {monLote.map(m=>{ const n=NIVEL_MONITOREO[m.nivel]||NIVEL_MONITOREO.ok; return (
+                    <div key={m.id} style={{fontSize:12.5,background:"#fff",borderLeft:`4px solid ${n.color}`,borderRadius:6,padding:"6px 9px"}}>
+                      <b>{fFecha(m.fecha)}</b> · <span style={{color:n.color,fontWeight:700}}>{n.icono} {n.txt}</span>
+                      {m.estado&&<span style={{opacity:0.75}}> · {m.estado}</span>}
+                      {[m.malezas,m.plagas,m.enfermedades].filter(Boolean).length>0&&<div style={{marginTop:2}}>{[m.malezas,m.plagas,m.enfermedades].filter(Boolean).join(" · ")}</div>}
+                      {m.accion&&<div style={{marginTop:2,color:"#1E5FA8"}}>→ {m.accion}</div>}
+                    </div>
+                  );})}
+                </div>
+              ):<div style={{fontSize:12,opacity:0.6,fontStyle:"italic"}}>Todavía no se monitoreó este lote.</div>}
+            </div>
+          )}
+        </div>
+
+        {!monitoreando&&<>
         {/* ── 1. CAMPAÑA ACTUAL 26-27 ── */}
         {(()=>{
           const k=`${campo.id}|${lote.id}`;
@@ -5184,94 +5201,7 @@ function ModalHistorial({loteInfo, onClose, campSel, setCampSel, historico, apli
           )}
         </div>
 
-        {/* ── 4. HISTÓRICO DE ROTACIÓN (plegable) ── */}
-        <details style={{padding:"0",borderTop:"1px solid #D8D2C0"}}>
-          <summary style={{padding:"14px 20px",cursor:"pointer",listStyle:"none",display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.65,fontWeight:700,userSelect:"none"}}>
-            <span>📜 Rotación histórica</span>
-            <span style={{fontSize:14,opacity:0.5}}>▾</span>
-          </summary>
-
-          {/* Selector de campaña */}
-          <div style={{padding:"0 20px 12px"}}>
-            <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-              {camps.map(c=>{
-                const tieneDato=hist&&hist[c];
-                const activa=c===camp;
-                return <button key={c} onClick={()=>tieneDato&&setCampSel(c)}
-                  disabled={!tieneDato}
-                  style={{padding:"5px 10px",fontSize:12,fontWeight:700,cursor:tieneDato?"pointer":"not-allowed",borderRadius:16,border:`1.5px solid ${activa?TINTA:"#C8C2B0"}`,background:activa?TINTA:tieneDato?"transparent":"#F0EDE3",color:activa?"#fff":tieneDato?TINTA:"#B5AF9D",fontFamily:"inherit",opacity:tieneDato?1:0.5}}>
-                  {c}
-                </button>;
-              })}
-            </div>
-          </div>
-
-          {/* Detalle de campaña seleccionada */}
-          <div style={{padding:"0 20px 14px"}}>
-            {dato?(
-              <div>
-                <div style={{fontSize:10.5,letterSpacing:"0.1em",textTransform:"uppercase",opacity:0.55}}>Campaña {camp}</div>
-                <div style={{display:"flex",alignItems:"center",gap:10,marginTop:6}}>
-                  <span style={{width:18,height:18,borderRadius:4,background:colorCv(cv),border:`1.5px solid ${TINTA}`,flexShrink:0}}/>
-                  <span style={{fontSize:17,fontWeight:700}}>{cv}</span>
-                </div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:10}}>
-                  <div style={{background:"#fff",border:"1px solid #E5E0D0",borderRadius:7,padding:"8px 10px"}}>
-                    <div style={{fontSize:10,letterSpacing:"0.1em",textTransform:"uppercase",opacity:0.55}}>Rinde fina</div>
-                    <div style={{fontSize:19,fontWeight:700,marginTop:2}}>{rF!=null?`${rF} qq/ha`:"—"}</div>
-                  </div>
-                  <div style={{background:"#fff",border:"1px solid #E5E0D0",borderRadius:7,padding:"8px 10px"}}>
-                    <div style={{fontSize:10,letterSpacing:"0.1em",textTransform:"uppercase",opacity:0.55}}>Rinde gruesa</div>
-                    <div style={{fontSize:19,fontWeight:700,marginTop:2}}>{rG!=null?`${rG} qq/ha`:"—"}</div>
-                  </div>
-                </div>
-              </div>
-            ):(
-              <div style={{opacity:0.55,fontStyle:"italic",fontSize:13}}>Sin datos históricos.</div>
-            )}
-          </div>
-
-          {/* Tabla completa */}
-          {hist&&(
-            <div style={{padding:"0 20px 18px"}}>
-              <div style={{background:"#fff",border:"1px solid #E5E0D0",borderRadius:8,overflow:"hidden"}}>
-                <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
-                  <thead><tr style={{background:"#E5E0D0"}}>
-                    {["Camp.","Cultivo","R. fina","R. gruesa"].map(h=>(
-                      <th key={h} style={{textAlign:"left",padding:"6px 9px",fontSize:10,textTransform:"uppercase",letterSpacing:"0.05em",opacity:0.7,whiteSpace:"nowrap"}}>{h}</th>
-                    ))}
-                  </tr></thead>
-                  <tbody>
-                    {camps.map(c=>{
-                      const d=hist[c];
-                      if(!d) return null;
-                      return <tr key={c} style={{borderTop:"1px solid #EEE9DC",background:c===camp?"#F8F5EC":"transparent"}}>
-                        <td style={{padding:"6px 9px",fontWeight:c===camp?700:500,whiteSpace:"nowrap"}}>{c}</td>
-                        <td style={{padding:"6px 9px"}}>
-                          {d.cv?<span style={{display:"inline-flex",alignItems:"center",gap:5}}>
-                            <span style={{width:8,height:8,borderRadius:2,background:colorCv(d.cv),flexShrink:0}}/>{d.cv}
-                          </span>:<span style={{opacity:0.4}}>—</span>}
-                        </td>
-                        <td style={{padding:"6px 9px",fontWeight:600}}>{d.rF!=null?`${d.rF} qq`:<span style={{opacity:0.4}}>—</span>}</td>
-                        <td style={{padding:"6px 9px",fontWeight:600}}>{d.rG!=null?`${d.rG} qq`:<span style={{opacity:0.4}}>—</span>}</td>
-                      </tr>;
-                    })}
-                  </tbody>
-                </table>
-              </div>
-              {(rindesFina.length>0||rindesGruesa.length>0)&&(
-                <div style={{display:"flex",gap:12,marginTop:10,flexWrap:"wrap",fontSize:11.5}}>
-                  {rindesFina.length>0&&<div style={{opacity:0.75}}>
-                    <b>Prom. fina:</b> {(rindesFina.reduce((s,x)=>s+x.r,0)/rindesFina.length).toFixed(1)} qq ({rindesFina.length}c)
-                  </div>}
-                  {rindesGruesa.length>0&&<div style={{opacity:0.75}}>
-                    <b>Prom. gruesa:</b> {(rindesGruesa.reduce((s,x)=>s+x.r,0)/rindesGruesa.length).toFixed(1)} qq ({rindesGruesa.length}c)
-                  </div>}
-                </div>
-              )}
-            </div>
-          )}
-        </details>
+        </>}
       </div>
     </div>
   );
