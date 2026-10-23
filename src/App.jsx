@@ -3003,7 +3003,9 @@ function FormMonitoreo({monit, campoId, loteId, cultivoDe, siembraDe, autor, cam
         nac.causas.length ? `fallas: ${nac.causas.join(", ")}` : "",
       ].filter(Boolean).join(" · ");
     }
-    const m = {id: form.id || `m${Date.now().toString(36)}`, fecha:form.fecha, campo:campoId, lote:String(loteId), cultivo:form.cultivo || cvPlan,
+    // campoNombre y loteNombre no van a la planilla: son para el título del Google Doc del campo
+    const m = {id: form.id || `m${Date.now().toString(36)}`, fecha:form.fecha, campo:campoId, campoNombre:campo.nombre, loteNombre:String(lote.label||lote.id),
+      lote:String(loteId), cultivo:form.cultivo || cvPlan,
       estado:String(form.estado).trim(), nivel:form.nivel, malezas:String(form.malezas).trim(), malezasDensidad:form.malezasDensidad, malezasTamano:form.malezasTamano,
       plagas:String(form.plagas).trim(), enfermedades:String(form.enfermedades).trim(), suelo:form.suelo, observaciones:String(form.observaciones).trim(),
       accion:String(form.accion).trim(), autor, fotos:links.join(" "), plantasHa, sembradasHa:sembradas, logro:logroTxt, nacimiento};
@@ -3192,7 +3194,8 @@ function VistaMonitoreo({monit, lluv, cultivoDe, siembraDe, autor, cambiarAutor}
     <div style={{display:"flex",flexDirection:"column",gap:14}}>
       <div style={{fontSize:12.5,opacity:0.75}}>
         Para cargar un monitoreo: <b>🗺️ Mapa por campo</b> → elegí el campo → tocá el lote → <b>🔍 Monitorear este lote</b>.
-        Se guardan en la hoja <b>monitoreo</b> de la planilla LABORES S-MIX 26-27 (Drive).
+        Se guardan en la hoja <b>monitoreo</b> de la planilla LABORES S-MIX 26-27 y, además, en un <b>Google Doc por campo</b>
+        ("Monitoreos – <i>campo</i>", en la carpeta Monitoreos del Drive, con las fotos).
         {monit.sync.estado==="error" && <span style={{color:"#C0392B"}}> No se pudo leer la planilla{monit.sync.txt ? ` (${monit.sync.txt})` : ""}.</span>}
       </div>
       {monit.sinSubir > 0 && (
