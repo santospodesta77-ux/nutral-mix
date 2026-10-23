@@ -2050,7 +2050,7 @@ const nombreCampo = id => (CAMPOS.find(c => c.id === id) || {}).nombre || id;
 // ============================================================
 // LABORES PENDIENTES — ficha por lote: qué residual tiene y cuál le falta
 // ============================================================
-function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDatos, onEditar}){
+function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDatos, onEditar, monitoreos}){
   const [campoF, setCampoF] = useState("TODOS");
   const [protF, setProtF] = useState("TODOS");
   const [estadoF, setEstadoF] = useState("TODOS");
@@ -2163,6 +2163,13 @@ function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDat
                 </div>
               );
             })}
+
+            {(() => { const m = ultimoMonitoreo(monitoreos, f.campo.id, f.lote.id); if(!m) return null; const n = NIVEL_MONITOREO[m.nivel] || NIVEL_MONITOREO.ok; return (
+              <div style={{fontSize:12.5,marginTop:6}}>
+                <b>🔍 Último monitoreo:</b> {fFecha(m.fecha)} · <span style={{color:n.color,fontWeight:600}}>{n.icono} {n.txt}</span>
+                {[m.estado, m.malezas && `malezas: ${m.malezas}`, m.plagas && `plagas: ${m.plagas}`, m.accion && `acción: ${m.accion}`].filter(Boolean).map(t => <span key={t} style={{opacity:0.8}}> · {t}</span>)}
+              </div>
+            );})()}
 
             <div style={{fontSize:12.5,marginTop:6}}>
               <b>Residuales aplicados:</b>{" "}
@@ -2563,6 +2570,274 @@ function VistaProtocoloEditor({protocolo, sync, onGuardar}){
   );
 }
 
+// ============================================================
+// MONITOREO — recorridas a campo, guardadas en la hoja "monitoreo" de la planilla (api/monitoreo.js).
+// Si no hay señal, quedan en el equipo y se suben solas cuando vuelve.
+// ============================================================
+const NIVEL_MONITOREO = {
+  ok:      {txt:"Sin problemas", icono:"🟢", color:"#2E7D32", fondo:"#E8F5E9"},
+  atencion:{txt:"Atención",      icono:"🟡", color:"#8A6200", fondo:"#FFF6DD"},
+  urgente: {txt:"Urgente",       icono:"🔴", color:"#C0392B", fondo:"#FBE3E0"},
+};
+const SUGERENCIAS_MONITOREO = {
+  malezas: ["Rama negra","Yuyo colorado","Sorgo de Alepo","Gramíneas anuales","Chloris","Eleusine","Cardo ruso","Quínoa","Cebadilla","Peludilla","Viola"],
+  plagas: ["Isoca","Chinche","Trips","Arañuela","Pulgón","Tucura","Cogollero","Bolillera","Babosa","Gusano blanco"],
+  enfermedades: ["Mancha amarilla","Roya","Tizón","Esclerotinia","Mildiu","Carbón"],
+};
+const ESTADOS_CULTIVO = ["Barbecho","Emergencia","V2","V4","V6","V8","V10","VT","R1","R2","R3","R5","R6","Macollaje","Encañazón","Espigazón","Llenado de grano","Madurez"];
+const HUMEDAD_SUELO = ["","Seco","Humedad justa","Buena humedad","Encharcado"];
+const PEND_MONIT_KEY = "smix_monitoreo_pendientes_v1";
+
+// Monitoreos compartidos + cola local de los que no se pudieron subir
+function useMonitoreos(){
+  const leerCola = () => { try { return JSON.parse(window.localStorage.getItem(PEND_MONIT_KEY)) || []; } catch { return []; } };
+  const escribirCola = c => { try { window.localStorage.setItem(PEND_MONIT_KEY, JSON.stringify(c)); } catch {} };
+  const [remotos, setRemotos] = useState([]);
+  const [cola, setCola] = useState(leerCola);
+  const [sync, setSync] = useState({estado:"cargando"});
+
+  const subir = async (m) => {
+    const r = await fetch("/api/monitoreo", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({monitoreo:m})});
+    const d = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(d.error || `HTTP ${r.status}`);
+  };
+  const recargar = async () => {
+    try {
+      const r = await fetch("/api/monitoreo");
+      if(!r.ok) throw new Error(`HTTP ${r.status}`);
+      const d = await r.json();
+      setRemotos(d.monitoreos || []);
+      setSync({estado:"ok"});
+    } catch(e) { setSync({estado:"error", txt:e.message}); }
+  };
+  // Sube lo que quedó en el equipo (sin señal) y después trae la lista
+  const reintentar = async () => {
+    let pendientes = leerCola();
+    for(const m of [...pendientes]){
+      try { await subir(m); pendientes = pendientes.filter(x => x.id !== m.id); } catch { break; }
+    }
+    escribirCola(pendientes); setCola(pendientes);
+    await recargar();
+  };
+  useEffect(() => { reintentar(); }, []);
+
+  const guardar = async (lista) => {
+    setSync({estado:"guardando"});
+    let pendientes = leerCola().filter(x => !lista.some(m => m.id === x.id));
+    let fallo = null;
+    for(const m of lista){
+      try { await subir(m); } catch(e) { fallo = e; pendientes.push(m); }
+    }
+    escribirCola(pendientes); setCola(pendientes);
+    if(fallo){ setSync({estado:"error", txt:fallo.message}); return false; }
+    await recargar();
+    return true;
+  };
+  const borrar = async (id) => {
+    const pendientes = leerCola().filter(x => x.id !== id);
+    escribirCola(pendientes); setCola(pendientes);
+    setRemotos(rs => rs.filter(m => m.id !== id));
+    try {
+      await fetch("/api/monitoreo", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({id, borrar:true})});
+    } catch {}
+  };
+  // Lo que está sin subir se ve igual (marcado), y pisa a la versión remota del mismo id
+  const lista = [...cola.map(m => ({...m, sinSubir:true})), ...remotos.filter(m => !cola.some(c => c.id === m.id))]
+    .sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)) || String(b.registrado||"").localeCompare(String(a.registrado||"")));
+  return {lista, guardar, borrar, reintentar, sync, sinSubir: cola.length};
+}
+
+// Último monitoreo de un lote (para la ficha de Labores pendientes)
+const ultimoMonitoreo = (lista, campoId, loteId) => (lista||[]).find(m => m.campo === campoId && String(m.lote) === String(loteId));
+
+function VistaMonitoreo({monit, cultivoDe, autor, cambiarAutor}){
+  const hoyISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
+  const vacio = () => ({id:null, fecha:hoyISO(), campo:CAMPOS[0].id, lotes:[], estado:"", nivel:"ok", malezas:"", plagas:"", enfermedades:"", suelo:"", observaciones:"", accion:""});
+  const [form, setForm] = useState(vacio);
+  const [abierto, setAbierto] = useState(false);
+  const [msg, setMsg] = useState(null);
+  const [campoF, setCampoF] = useState("TODOS");
+  const [nivelF, setNivelF] = useState("TODOS");
+  const [busca, setBusca] = useState("");
+
+  const set = cambios => setForm(f => ({...f, ...cambios}));
+  const campoForm = CAMPOS.find(c => c.id === form.campo) || CAMPOS[0];
+  const toggleLote = id => set({lotes: form.lotes.includes(id) ? form.lotes.filter(x => x !== id) : [...form.lotes, id]});
+  // Botón rápido: agrega o saca el nombre de la lista del campo de texto
+  const toggleSugerencia = (k, nombre) => {
+    const partes = form[k].split(",").map(x => x.trim()).filter(Boolean);
+    const esta = partes.some(x => normBusca(x) === normBusca(nombre));
+    set({[k]: (esta ? partes.filter(x => normBusca(x) !== normBusca(nombre)) : [...partes, nombre]).join(", ")});
+  };
+
+  const guardar = async () => {
+    if(!form.lotes.length){ setMsg({ok:false, txt:"Elegí al menos un lote."}); return; }
+    const base = {fecha:form.fecha, campo:form.campo, estado:form.estado.trim(), nivel:form.nivel, malezas:form.malezas.trim(), plagas:form.plagas.trim(),
+      enfermedades:form.enfermedades.trim(), suelo:form.suelo, observaciones:form.observaciones.trim(), accion:form.accion.trim(), autor};
+    const lista = form.lotes.map((l, i) => ({...base, lote:l, cultivo:cultivoDe(form.campo, l),
+      id: form.id && form.lotes.length === 1 ? form.id : `m${Date.now().toString(36)}${i}`}));
+    setMsg({ok:true, txt:"Guardando…"});
+    const ok = await monit.guardar(lista);
+    setMsg(ok ? {ok:true, txt:`✓ Guardado en la planilla (${lista.length} lote${lista.length>1?"s":""}).`}
+      : {ok:false, txt:"Sin conexión con la planilla: quedó guardado en este equipo y se sube cuando vuelva la señal."});
+    setForm(f => ({...vacio(), campo:f.campo, fecha:f.fecha}));
+    setAbierto(false);
+  };
+  const editar = m => {
+    setForm({id:m.id, fecha:m.fecha, campo:m.campo, lotes:[String(m.lote)], estado:m.estado||"", nivel:m.nivel||"ok", malezas:m.malezas||"",
+      plagas:m.plagas||"", enfermedades:m.enfermedades||"", suelo:m.suelo||"", observaciones:m.observaciones||"", accion:m.accion||""});
+    setAbierto(true); setMsg(null);
+    window.scrollTo({top:0, behavior:"smooth"});
+  };
+
+  const palabras = normBusca(busca).split(/\s+/).filter(Boolean);
+  const filtrados = monit.lista.filter(m => (campoF === "TODOS" || m.campo === campoF) && (nivelF === "TODOS" || m.nivel === nivelF)
+    && (!palabras.length || palabras.every(w => normBusca(Object.values(m).join(" ")).includes(w))));
+  // Último monitoreo de cada lote, para el resumen de arriba
+  const ultimos = [];
+  monit.lista.filter(m => campoF === "TODOS" || m.campo === campoF).forEach(m => { if(!ultimos.some(u => u.campo === m.campo && u.lote === m.lote)) ultimos.push(m); });
+  const conAlerta = ultimos.filter(m => m.nivel === "urgente" || m.nivel === "atencion");
+
+  const lbl = t => <div style={{fontSize:10.5,fontWeight:700,textTransform:"uppercase",opacity:0.6,marginBottom:3}}>{t}</div>;
+  const txt = {width:"100%",boxSizing:"border-box",padding:"8px 9px",fontSize:14,border:"1px solid #C8C2B0",borderRadius:7,background:"#FFFDF7",color:TINTA,fontFamily:"inherit"};
+  const chipS = a => ({padding:"5px 10px",fontSize:12.5,borderRadius:16,cursor:"pointer",fontFamily:"inherit",
+    border:`1px solid ${a?TINTA:"#C8C2B0"}`,background:a?TINTA:"#fff",color:a?CREMA:TINTA,fontWeight:a?700:500});
+  const fFecha = s => { const d = fechaLocal(s); return d ? ddmm(d) : s; };
+
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:14}}>
+      <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{fontSize:12,opacity:0.7,flex:"1 1 260px"}}>
+          Cada recorrida se guarda en la hoja <b>monitoreo</b> de la planilla LABORES S-MIX 26-27 (Drive).
+          {monit.sync.estado==="error" && <span style={{color:"#C0392B"}}> No se pudo leer la planilla{monit.sync.txt ? ` (${monit.sync.txt})` : ""}.</span>}
+        </div>
+        {!abierto && <button onClick={()=>{ setAbierto(true); setMsg(null); }} style={{padding:"10px 16px",fontSize:14,fontWeight:700,borderRadius:9,border:"none",background:"#2E7D32",color:"#fff",cursor:"pointer",fontFamily:"inherit"}}>➕ Nuevo monitoreo</button>}
+      </div>
+      {monit.sinSubir > 0 && (
+        <div style={{...cajaV,borderColor:"#C9A227",background:"#FFF8E6",display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",padding:"10px 14px"}}>
+          <span style={{fontSize:13}}>📵 {monit.sinSubir} monitoreo{monit.sinSubir>1?"s":""} guardado{monit.sinSubir>1?"s":""} en este equipo, sin subir a la planilla.</span>
+          <button onClick={monit.reintentar} style={{...chipV(false),padding:"5px 12px"}}>Subir ahora</button>
+        </div>
+      )}
+      {msg && <div style={{fontSize:13,fontWeight:600,padding:"9px 12px",borderRadius:8,background:msg.ok?"#E8F5E9":"#FFF6DD",color:msg.ok?"#2E7D32":"#8A6200"}}>{msg.txt}</div>}
+
+      {abierto && (
+        <div style={{...cajaV,display:"flex",flexDirection:"column",gap:12}}>
+          <div style={{fontSize:15,fontWeight:700}}>{form.id ? "Editar monitoreo" : "Nuevo monitoreo"}</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:10}}>
+            <div>{lbl("Fecha")}<input type="date" value={form.fecha} onChange={e=>set({fecha:e.target.value})} style={txt}/></div>
+            <div>{lbl("Campo")}<select value={form.campo} disabled={!!form.id} onChange={e=>set({campo:e.target.value, lotes:[]})} style={txt}>
+              {CAMPOS.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}</select></div>
+            <div>{lbl("Recorrió")}<input value={autor} onChange={e=>cambiarAutor(e.target.value)} placeholder="Tu nombre" style={txt}/></div>
+          </div>
+          <div>
+            {lbl(form.id ? "Lote" : "Lotes recorridos (podés marcar varios)")}
+            <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+              {campoForm.lotes.map(l => { const a = form.lotes.includes(l.id); const cv = cultivoDe(campoForm.id, l.id); return (
+                <button key={l.id} disabled={!!form.id && !a} onClick={()=>toggleLote(l.id)} style={{...chipS(a),opacity:!!form.id && !a ? 0.35 : 1}}>
+                  {l.label||l.id}{cv ? <span style={{fontSize:10.5,opacity:0.75}}> · {cv}</span> : null}
+                </button>
+              );})}
+            </div>
+          </div>
+          <div>
+            {lbl("Nivel")}
+            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+              {Object.entries(NIVEL_MONITOREO).map(([k, n]) => (
+                <button key={k} onClick={()=>set({nivel:k})} style={{padding:"8px 13px",fontSize:13.5,fontWeight:700,borderRadius:9,cursor:"pointer",fontFamily:"inherit",
+                  border:`2px solid ${form.nivel===k?n.color:"#C8C2B0"}`,background:form.nivel===k?n.fondo:"#fff",color:form.nivel===k?n.color:TINTA}}>{n.icono} {n.txt}</button>
+              ))}
+            </div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:10}}>
+            <div>{lbl("Estado del cultivo")}<input value={form.estado} list="estados-cultivo" onChange={e=>set({estado:e.target.value})} placeholder="ej: V4, barbecho, macollaje" style={txt}/>
+              <datalist id="estados-cultivo">{ESTADOS_CULTIVO.map(e => <option key={e} value={e}/>)}</datalist></div>
+            <div>{lbl("Suelo / humedad")}<select value={form.suelo} onChange={e=>set({suelo:e.target.value})} style={txt}>
+              {HUMEDAD_SUELO.map(h => <option key={h} value={h}>{h || "—"}</option>)}</select></div>
+          </div>
+          {[["malezas","Malezas"],["plagas","Plagas"],["enfermedades","Enfermedades"]].map(([k, t]) => (
+            <div key={k}>
+              {lbl(t)}
+              <div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:6}}>
+                {SUGERENCIAS_MONITOREO[k].map(n => <button key={n} onClick={()=>toggleSugerencia(k, n)}
+                  style={chipS(form[k].split(",").some(x => normBusca(x.trim()) === normBusca(n)))}>{n}</button>)}
+              </div>
+              <input value={form[k]} onChange={e=>set({[k]:e.target.value})} placeholder={`${t} (y densidad / umbral si querés)`} style={txt}/>
+            </div>
+          ))}
+          <div>{lbl("Observaciones")}<textarea rows={3} value={form.observaciones} onChange={e=>set({observaciones:e.target.value})} style={{...txt,resize:"vertical"}}/></div>
+          <div>{lbl("Acción sugerida")}<textarea rows={2} value={form.accion} onChange={e=>set({accion:e.target.value})} placeholder="ej: aplicar residual antes del 25/10" style={{...txt,resize:"vertical"}}/></div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            <button onClick={guardar} disabled={monit.sync.estado==="guardando"} style={{padding:"10px 18px",fontSize:14,fontWeight:700,borderRadius:9,border:"none",background:"#2E7D32",color:"#fff",cursor:"pointer",fontFamily:"inherit"}}>💾 Guardar</button>
+            <button onClick={()=>{ setForm(vacio()); setAbierto(false); }} style={{padding:"10px 16px",fontSize:14,fontWeight:600,borderRadius:9,border:`1.5px solid ${TINTA}`,background:"transparent",color:TINTA,cursor:"pointer",fontFamily:"inherit"}}>Cancelar</button>
+          </div>
+        </div>
+      )}
+
+      {conAlerta.length > 0 && (
+        <div style={cajaV}>
+          <div style={{fontSize:13,fontWeight:700,marginBottom:6}}>Lotes con alerta en su último monitoreo</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+            {conAlerta.map(m => { const n = NIVEL_MONITOREO[m.nivel]; return (
+              <span key={m.id} style={{fontSize:12.5,border:`1px solid ${n.color}55`,background:n.fondo,color:n.color,borderRadius:7,padding:"3px 9px",fontWeight:600}}>
+                {n.icono} {nombreCampo(m.campo)} {m.lote} · {fFecha(m.fecha)}{m.malezas||m.plagas ? ` · ${[m.malezas, m.plagas].filter(Boolean).join(", ")}` : ""}
+              </span>
+            );})}
+          </div>
+        </div>
+      )}
+
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+        <select value={campoF} onChange={e=>setCampoF(e.target.value)} style={selectV}>
+          <option value="TODOS">Todos los campos</option>
+          {CAMPOS.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+        </select>
+        <select value={nivelF} onChange={e=>setNivelF(e.target.value)} style={selectV}>
+          <option value="TODOS">Todos los niveles</option>
+          {Object.entries(NIVEL_MONITOREO).map(([k, n]) => <option key={k} value={k}>{n.icono} {n.txt}</option>)}
+        </select>
+        <input value={busca} onChange={e=>setBusca(e.target.value)} placeholder="Buscar (ej: rama negra, lote 5)" style={{...selectV,fontWeight:400,flex:"1 1 180px",minWidth:0}}/>
+      </div>
+
+      {monit.sync.estado==="cargando" && !monit.lista.length && <div style={{...cajaV,textAlign:"center",opacity:0.6}}>Cargando monitoreos…</div>}
+      {monit.sync.estado!=="cargando" && !filtrados.length && <div style={{...cajaV,textAlign:"center",opacity:0.7}}>Todavía no hay monitoreos{campoF!=="TODOS"||nivelF!=="TODOS"||busca ? " con estos filtros" : ""}.</div>}
+      {filtrados.map(m => { const n = NIVEL_MONITOREO[m.nivel] || NIVEL_MONITOREO.ok; return (
+        <div key={m.id} style={{...cajaV,borderLeft:`6px solid ${n.color}`,padding:"11px 14px"}}>
+          <div style={{display:"flex",justifyContent:"space-between",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+            <div style={{display:"flex",gap:7,alignItems:"center",flexWrap:"wrap"}}>
+              <span style={{fontWeight:700}}>{fFecha(m.fecha)}</span>
+              <span style={{fontSize:15,fontWeight:700}}>{nombreCampo(m.campo)} · Lote {m.lote}</span>
+              {m.cultivo && <span style={{fontSize:11.5,display:"inline-flex",alignItems:"center",gap:4,border:"1px solid #C8C2B0",borderRadius:6,padding:"1px 7px",background:"#fff"}}>
+                <span style={{width:8,height:8,borderRadius:2,background:colorCv(m.cultivo)}}/>{m.cultivo}</span>}
+              {m.estado && <span style={{fontSize:12,opacity:0.75}}>{m.estado}</span>}
+            </div>
+            <div style={{display:"flex",gap:6,alignItems:"center"}}>
+              <span style={{fontSize:11,fontWeight:700,color:n.color,background:n.fondo,borderRadius:5,padding:"2px 8px"}}>{n.icono} {n.txt}</span>
+              {m.sinSubir && <span title="Guardado en este equipo, falta subirlo a la planilla" style={{fontSize:11,color:"#8A6200"}}>📵 sin subir</span>}
+            </div>
+          </div>
+          <div style={{fontSize:12.5,marginTop:6,display:"flex",flexDirection:"column",gap:2}}>
+            {m.malezas && <div><b>Malezas:</b> {m.malezas}</div>}
+            {m.plagas && <div><b>Plagas:</b> {m.plagas}</div>}
+            {m.enfermedades && <div><b>Enfermedades:</b> {m.enfermedades}</div>}
+            {m.suelo && <div><b>Suelo:</b> {m.suelo}</div>}
+            {m.observaciones && <div><b>Observaciones:</b> {m.observaciones}</div>}
+            {m.accion && <div style={{color:"#1E5FA8"}}><b>Acción sugerida:</b> {m.accion}</div>}
+          </div>
+          <div style={{display:"flex",justifyContent:"space-between",gap:8,marginTop:8,fontSize:11.5,opacity:0.8,flexWrap:"wrap"}}>
+            <span>{m.autor ? `Recorrió: ${m.autor}` : ""}</span>
+            <span style={{display:"flex",gap:10}}>
+              <button onClick={()=>editar(m)} style={{border:"none",background:"none",padding:0,color:"#1E5FA8",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:12}}>Editar</button>
+              <button onClick={()=>{ if(window.confirm(`¿Borrar el monitoreo de ${nombreCampo(m.campo)} ${m.lote} del ${fFecha(m.fecha)}?`)) monit.borrar(m.id); }}
+                style={{border:"none",background:"none",padding:0,color:"#C0392B",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:12}}>Borrar</button>
+            </span>
+          </div>
+        </div>
+      );})}
+    </div>
+  );
+}
+
 export default function App(){
   // ── DATOS DINÁMICOS: cargados desde /datos.json (pipeline automático) ──
   const [datosOK, setDatosOK] = useState(null); // null=cargando, true=cargado, false=falló
@@ -2610,12 +2885,11 @@ export default function App(){
     datosRemotos.FERTILIZACIONES.map((f,i)=>({...f,id:i})).sort((a,b)=>fechaLocal(b.fecha)-fechaLocal(a.fecha))
     : FERTILIZACIONES_FALLBACK;
 
-  const [vista,setVista]=useState("mapas");        // mapas | galeria | realizadas | pendientes | herbicidas | fertilizaciones | ordenes | margenes | protocolo | precios
+  const [vista,setVista]=useState("mapas");        // mapas | galeria | realizadas | pendientes | monitoreo | ordenes | margenes | protocolo | precios
   const [campoSel,setCampoSel]=useState("L3H");
   const [capaModo,setCapaModo]=useState("campaña"); // campaña|rindes|margenes|suelos
   const [cultivoFiltro,setCultivoFiltro]=useState(null); // null = sin filtro; "MAIZ", "SOJA", etc.
   const [sueloVar,setSueloVar]=useState("P");
-  const [campoFiltro,setCampoFiltro]=useState("TODOS");
   const [pintura,setPintura]=useState({});
   const [brocha,setBrocha]=useState(0);
   const [etiquetas,setEtiquetas]=useState(["","","",""]);
@@ -2655,6 +2929,7 @@ export default function App(){
   const [autor, setAutor] = useState(() => { try { return window.localStorage.getItem("smix_autor") || ""; } catch { return ""; } });
   const [sincro, setSincro] = useState({estado:"", txt:""});   // estado: ok | error | subiendo
   const cambiarAutor = (v) => { setAutor(v); try { window.localStorage.setItem("smix_autor", v); } catch {} };
+  const monit = useMonitoreos();
 
   const leerBorradores = () => {
     try {
@@ -3358,13 +3633,6 @@ export default function App(){
   };
 
   // herbicidas
-  const aplFilt=useMemo(()=>{
-    const lista = campoFiltro==="TODOS" ? APLICACIONES : APLICACIONES.filter(a=>a.campo===campoFiltro);
-    // más reciente arriba; las fechas que no se puedan leer van al final
-    return [...lista].sort((a,b)=>(fechaLocal(b.fecha)?.getTime()||0)-(fechaLocal(a.fecha)?.getTime()||0));
-  },[campoFiltro,APLICACIONES]);
-  const haApl=aplFilt.reduce((s,a)=>s+a.ha,0);
-  const costoApl=aplFilt.reduce((s,a)=>s+a.costo,0);
 
   // suelos tabla
   const suelosTabla=Object.entries(SUELOS).map(([k,s])=>{
@@ -3432,9 +3700,8 @@ export default function App(){
           <button style={tab(vista==="mapas")} onClick={()=>setVista("mapas")}>🗺️ Mapa por campo</button>
           <button style={tab(vista==="realizadas")} onClick={()=>setVista("realizadas")}>✅ Labores realizadas</button>
           <button style={tab(vista==="pendientes")} onClick={()=>setVista("pendientes")}>⏳ Labores pendientes</button>
+          <button style={tab(vista==="monitoreo")} onClick={()=>setVista("monitoreo")}>🔍 Monitoreo</button>
           <button style={tab(vista==="galeria")} onClick={()=>setVista("galeria")}>🗂️ Todos los campos</button>
-          <button style={tab(vista==="herbicidas")} onClick={()=>setVista("herbicidas")}>🧪 Herbicidas</button>
-          <button style={tab(vista==="fertilizaciones")} onClick={()=>setVista("fertilizaciones")}>🌱 Fertilizaciones</button>
           <button style={tab(vista==="margenes")} onClick={()=>setVista("margenes")}>💵 Márgenes</button>
           <button style={tab(vista==="ordenes")} onClick={()=>setVista("ordenes")}>🚜 Nueva labor</button>
           <button style={tab(vista==="protocolo")} onClick={()=>setVista("protocolo")}>📝 Protocolo</button>
@@ -3642,103 +3909,15 @@ export default function App(){
         {vista==="realizadas"&&<VistaRealizadas aplicaciones={APLICACIONES} fertilizaciones={FERTILIZACIONES} registro={aplicacionesConDosis}/>}
 
         {vista==="pendientes"&&<VistaPendientes protocolo={protocolo} cultivoDe={cultivoDe}
-          aplicaciones={aplicacionesConDosis || APLICACIONES} conDosis={!!aplicacionesConDosis}
+          aplicaciones={aplicacionesConDosis || APLICACIONES} conDosis={!!aplicacionesConDosis} monitoreos={monit.lista}
           fechaDatos={fechaDatos ? new Date(fechaDatos).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}) : null}
           onEditar={()=>setVista("protocolo")}/>}
+
+        {vista==="monitoreo"&&<VistaMonitoreo monit={monit} cultivoDe={cultivoDe} autor={autor} cambiarAutor={cambiarAutor}/>}
 
         {vista==="protocolo"&&<VistaProtocoloEditor protocolo={protocolo} sync={protoSync} onGuardar={guardarProtocolo}/>}
 
         {vista==="precios"&&<VistaPrecios productos={[...PRODUCTOS_BASE, ...productosPropios]} precios={precios} sync={preciosSync} onGuardar={guardarPrecios}/>}
-
-        {vista==="herbicidas"&&(
-          <div style={{display:"flex",flexDirection:"column",gap:14}}>
-            <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center"}}>
-              <select value={campoFiltro} onChange={e=>setCampoFiltro(e.target.value)}
-                style={{padding:"9px 12px",fontSize:14,fontWeight:600,border:`1.5px solid ${TINTA}`,borderRadius:8,background:CREMA,color:TINTA,fontFamily:"inherit"}}>
-                <option value="TODOS">Todos los campos</option>
-                {[...new Set(APLICACIONES.map(a=>a.campo))].sort().map(c=><option key={c} value={c}>{c}</option>)}
-              </select>
-              <div style={{fontSize:12.5,opacity:0.6}}>Datos de la hoja "registro" de BH Pelayo.</div>
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:12}}>
-              {[{l:"Aplicaciones",v:aplFilt.length},{l:"Ha aplicadas",v:`${fmt(haApl)} ha`},{l:"Costo total",v:`US$ ${fmt(costoApl)}`},{l:"Costo prom. /ha",v:`US$ ${fmt1(haApl?costoApl/haApl:0)}`}]
-                .map((s,i)=><div key={i} style={{...caja,textAlign:"center"}}><div style={{fontSize:20,fontWeight:700}}>{s.v}</div><div style={{fontSize:11.5,opacity:0.65,marginTop:2}}>{s.l}</div></div>)}
-            </div>
-            <div style={{...caja,padding:0,overflow:"hidden"}}>
-              <div style={{overflowX:"auto"}}>
-                <table style={{width:"100%",borderCollapse:"collapse",fontSize:12.5,minWidth:700}}>
-                  <thead><tr style={{background:"#E5E0D0"}}>
-                    {["Fecha","Campo","Lote","Cultivo","Ha","Labor","Productos","Costo","$/ha"].map(h=>(
-                      <th key={h} style={{textAlign:"left",padding:"8px 11px",fontSize:11,textTransform:"uppercase",letterSpacing:"0.06em",opacity:0.7,whiteSpace:"nowrap"}}>{h}</th>
-                    ))}
-                  </tr></thead>
-                  <tbody>{aplFilt.map(a=>(
-                    <tr key={a.id} style={{borderTop:"1px solid #E5E0D0"}}>
-                      <td style={{padding:"7px 11px",whiteSpace:"nowrap"}}>{fechaCorta(a.fecha)}</td>
-                      <td style={{padding:"7px 11px",fontWeight:600,whiteSpace:"nowrap"}}>{a.campo}</td>
-                      <td style={{padding:"7px 11px"}}>{a.lote}</td>
-                      <td style={{padding:"7px 11px"}}><span style={{display:"inline-flex",alignItems:"center",gap:4}}><span style={{width:8,height:8,borderRadius:2,background:colorCv(a.cultivo),flexShrink:0}}/>{a.cultivo}</span></td>
-                      <td style={{padding:"7px 11px"}}>{a.ha}</td>
-                      <td style={{padding:"7px 11px",fontSize:11,opacity:0.7,whiteSpace:"nowrap"}}>{a.labor||"—"}</td>
-                      <td style={{padding:"7px 11px",fontSize:11.5,opacity:0.85,maxWidth:260}}>{a.productos.join(", ")}</td>
-                      <td style={{padding:"7px 11px",whiteSpace:"nowrap"}}>US$ {fmt(a.costo)}</td>
-                      <td style={{padding:"7px 11px",whiteSpace:"nowrap"}}>US$ {fmt1(a.costoHa)}</td>
-                    </tr>
-                  ))}</tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ══ FERTILIZACIONES ══ */}
-        {vista==="fertilizaciones"&&(()=>{
-          const fertFilt = campoFiltro==="TODOS" ? FERTILIZACIONES : FERTILIZACIONES.filter(f=>f.campo===campoFiltro);
-          const haFert = fertFilt.reduce((s,f)=>s+f.ha,0);
-          const costoFert = fertFilt.reduce((s,f)=>s+f.ha*(f.costoHa||0),0);
-          const camposFert = [...new Set(FERTILIZACIONES.map(f=>f.campo))].sort();
-          return (
-            <div style={{display:"flex",flexDirection:"column",gap:14}}>
-              <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center"}}>
-                <select value={campoFiltro} onChange={e=>setCampoFiltro(e.target.value)}
-                  style={{padding:"9px 12px",fontSize:14,fontWeight:600,border:`1.5px solid ${TINTA}`,borderRadius:8,background:CREMA,color:TINTA,fontFamily:"inherit"}}>
-                  <option value="TODOS">Todos los campos</option>
-                  {camposFert.map(c=><option key={c} value={c}>{c}</option>)}
-                </select>
-                <div style={{fontSize:12.5,opacity:0.6}}>Registro de fertilizaciones — arranque, N temprana, N tardía.</div>
-              </div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:12}}>
-                {[{l:"Aplicaciones",v:fertFilt.length},{l:"Ha fertilizadas",v:`${fmt(haFert)} ha`},{l:"Costo total",v:`US$ ${fmt(costoFert)}`},{l:"Costo prom. /ha",v:`US$ ${fmt1(haFert?costoFert/haFert:0)}`}]
-                  .map((s,i)=><div key={i} style={{...caja,textAlign:"center"}}><div style={{fontSize:20,fontWeight:700}}>{s.v}</div><div style={{fontSize:11.5,opacity:0.65,marginTop:2}}>{s.l}</div></div>)}
-              </div>
-              <div style={{...caja,padding:0,overflow:"hidden"}}>
-                <div style={{overflowX:"auto"}}>
-                  <table style={{width:"100%",borderCollapse:"collapse",fontSize:12.5,minWidth:700}}>
-                    <thead><tr style={{background:"#E5E0D0"}}>
-                      {["Fecha","Campo","Lote","Cultivo","Ha","Tipo","Producto","Dosis","$/ha","Total"].map(h=>(
-                        <th key={h} style={{textAlign:"left",padding:"8px 11px",fontSize:11,textTransform:"uppercase",letterSpacing:"0.06em",opacity:0.7,whiteSpace:"nowrap"}}>{h}</th>
-                      ))}
-                    </tr></thead>
-                    <tbody>{fertFilt.map(f=>(
-                      <tr key={f.id} style={{borderTop:"1px solid #E5E0D0"}}>
-                        <td style={{padding:"7px 11px",whiteSpace:"nowrap"}}>{fechaCorta(f.fecha)}</td>
-                        <td style={{padding:"7px 11px",fontWeight:600,whiteSpace:"nowrap"}}>{f.campo}</td>
-                        <td style={{padding:"7px 11px"}}>{f.lote}</td>
-                        <td style={{padding:"7px 11px"}}><span style={{display:"inline-flex",alignItems:"center",gap:4}}><span style={{width:8,height:8,borderRadius:2,background:colorCv(f.cultivo)}}/>{f.cultivo}</span></td>
-                        <td style={{padding:"7px 11px"}}>{f.ha}</td>
-                        <td style={{padding:"7px 11px"}}><span style={{fontSize:11,background:"#E3F2FD",color:"#0D47A1",borderRadius:5,padding:"2px 7px",fontWeight:700}}>{f.tipo}</span></td>
-                        <td style={{padding:"7px 11px",fontWeight:600}}>{f.producto}</td>
-                        <td style={{padding:"7px 11px"}}>{f.dosis}</td>
-                        <td style={{padding:"7px 11px",whiteSpace:"nowrap"}}>US$ {fmt1(f.costoHa||0)}</td>
-                        <td style={{padding:"7px 11px",whiteSpace:"nowrap",fontWeight:600}}>US$ {fmt(f.ha*(f.costoHa||0))}</td>
-                      </tr>
-                    ))}</tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          );
-        })()}
 
         {/* ══ MÁRGENES ══ */}
         {vista==="margenes"&&(
