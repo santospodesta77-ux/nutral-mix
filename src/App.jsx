@@ -3195,7 +3195,7 @@ function VistaMonitoreo({monit, lluv, cultivoDe, siembraDe, autor, cambiarAutor}
       <div style={{fontSize:12.5,opacity:0.75}}>
         Para cargar un monitoreo: <b>🗺️ Mapa por campo</b> → elegí el campo → tocá el lote → <b>🔍 Monitorear este lote</b>.
         Se guardan en la hoja <b>monitoreo</b> de la planilla LABORES S-MIX 26-27 y, además, en un <b>Google Doc por campo</b>
-        ("Monitoreos – <i>campo</i>", en la carpeta Monitoreos del Drive, con las fotos).
+        editable ("Monitoreos – <i>campo</i>", siempre el mismo, en la carpeta <b>Monitoreos S-MIX</b> del Drive, con las fotos).
         {monit.sync.estado==="error" && <span style={{color:"#C0392B"}}> No se pudo leer la planilla{monit.sync.txt ? ` (${monit.sync.txt})` : ""}.</span>}
       </div>
       {monit.sinSubir > 0 && (

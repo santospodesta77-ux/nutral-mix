@@ -18,15 +18,18 @@
 // POST { token, nombre, base64, carpeta?, mime?, subcarpeta? } → { ok:true, link, fileId, mime }  |  { ok:false, error }
 // mime: "application/pdf" (órdenes, por defecto) o "image/jpeg" (fotos de monitoreo, van a la subcarpeta).
 //
-// Monitoreos en Google Docs (uno por campo, en la subcarpeta "Monitoreos"):
-// POST { token, accion:"monitoreo", monitoreo, carpeta? }      → escribe o reescribe (por id) la entrada → { ok, link, doc:true }
-// POST { token, accion:"monitoreo_borrar", id, carpeta? }      → la saca del Doc donde esté
+// Monitoreos en Google Docs editables: UN documento por campo ("Monitoreos – El Descanso"), siempre el mismo,
+// al que se le van agregando los monitoreos. Van en su propia carpeta "Monitoreos S-MIX" (Mi unidad),
+// separada de las órdenes; o en la carpeta cuyo id llegue en carpetaMonitoreos.
+// POST { token, accion:"monitoreo", monitoreo, carpetaMonitoreos? }  → escribe o reescribe (por id) la entrada → { ok, link, doc:true }
+// POST { token, accion:"monitoreo_borrar", id, carpetaMonitoreos? }  → la saca del Doc donde esté
 // La primera vez que se usa esta versión, Google pide autorizar el permiso de Documentos.
 // Al actualizar este script: pegar el código nuevo, dejar la CLAVE que ya tenías, y en
 // Implementar → Gestionar implementaciones → lápiz → Versión: "Nueva versión" → Implementar.
 
 const CLAVE = "CAMBIAR_POR_LA_CLAVE";
 const CARPETA_POR_DEFECTO = "Ordenes S-MIX"; // se usa si no llega el id de carpeta
+const CARPETA_MONITOREOS = "Monitoreos S-MIX"; // carpeta propia de los Docs de monitoreo
 
 function doPost(e) {
   try {
@@ -72,7 +75,7 @@ function monitoreoEnDoc(datos) {
   const lock = LockService.getScriptLock();
   lock.waitLock(25000); // que dos guardados juntos no creen dos Docs del mismo campo
   try {
-    const carpeta = subCarpeta(buscarCarpeta(datos.carpeta), "Monitoreos");
+    const carpeta = carpetaMonitoreos(datos.carpetaMonitoreos);
     if (datos.accion === "monitoreo_borrar") {
       const docs = carpeta.getFilesByType(MimeType.GOOGLE_DOCS);
       while (docs.hasNext()) {
@@ -94,6 +97,13 @@ function monitoreoEnDoc(datos) {
   } finally {
     lock.releaseLock();
   }
+}
+
+// Carpeta de los Docs de monitoreo: la pedida, o "Monitoreos S-MIX" en Mi unidad (se crea la primera vez)
+function carpetaMonitoreos(id) {
+  if (id) return DriveApp.getFolderById(id);
+  const existentes = DriveApp.getFoldersByName(CARPETA_MONITOREOS);
+  return existentes.hasNext() ? existentes.next() : DriveApp.createFolder(CARPETA_MONITOREOS);
 }
 
 // Busca (o crea) el Doc "Monitoreos – <campo>" dentro de la carpeta

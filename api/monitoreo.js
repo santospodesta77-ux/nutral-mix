@@ -7,12 +7,13 @@
 // POST {monitoreo}          → guarda o pisa (por id) y devuelve { ok, fila }
 // POST {id, borrar:true}    → lo borra
 //
-// Además, cada monitoreo se escribe en un Google Doc por campo ("Monitoreos – <campo>", en la
-// subcarpeta "Monitoreos" de la carpeta de las órdenes), usando el Apps Script de los PDF.
+// Además, cada monitoreo se escribe en un Google Doc editable por campo ("Monitoreos – <campo>", siempre
+// el mismo), en su propia carpeta "Monitoreos S-MIX" del Drive, usando el Apps Script de los PDF.
 // Si el Doc falla, el monitoreo igual queda guardado en la planilla (la respuesta trae docError).
 //
 // Requiere la env GOOGLE_CREDENTIALS (la misma que usa guardar-labor.js).
-// Para los Docs: APPS_SCRIPT_PDF_URL, APPS_SCRIPT_PDF_TOKEN y (opcional) DRIVE_ORDENES_FOLDER.
+// Para los Docs: APPS_SCRIPT_PDF_URL, APPS_SCRIPT_PDF_TOKEN y (opcional) DRIVE_MONITOREOS_FOLDER, id de la
+// carpeta donde van los Docs (si no está, el script usa/crea "Monitoreos S-MIX" en Mi unidad).
 
 import { google } from "googleapis";
 import { claveOk } from "./_clave.js";
@@ -73,7 +74,7 @@ async function alDoc(cuerpo) {
   if (!url || !token) return { docError: "Falta configurar el Apps Script (APPS_SCRIPT_PDF_URL y APPS_SCRIPT_PDF_TOKEN)." };
   try {
     const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, carpeta: process.env.DRIVE_ORDENES_FOLDER || "", ...cuerpo }), signal: AbortSignal.timeout(40000) });
+      body: JSON.stringify({ token, carpetaMonitoreos: process.env.DRIVE_MONITOREOS_FOLDER || "", ...cuerpo }), signal: AbortSignal.timeout(40000) });
     const d = JSON.parse(await r.text());
     if (!d.ok) return { docError: d.error || "El Apps Script no pudo escribir el Doc." };
     // El script viejo no conoce "accion" y contesta como si fuera un PDF
