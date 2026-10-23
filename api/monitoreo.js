@@ -10,15 +10,16 @@
 // Requiere la env GOOGLE_CREDENTIALS (la misma que usa guardar-labor.js).
 
 import { google } from "googleapis";
+import { claveOk } from "./_clave.js";
 
 const PLANILLA_LABORES = "1JpAA6bCl_uhizVO4jOVBEs34RRlNuAVHKr8kSFRm5ro";
 const HOJA = "monitoreo";
-// Orden de las columnas en la hoja (A…O)
+// Orden de las columnas en la hoja (A…P). Las columnas nuevas van siempre al final.
 const CAMPOS_FILA = ["id", "fecha", "campo", "lote", "cultivo", "estado", "nivel", "malezas", "plagas",
-  "enfermedades", "suelo", "observaciones", "accion", "autor", "registrado"];
+  "enfermedades", "suelo", "observaciones", "accion", "autor", "registrado", "fotos"];
 const ENCABEZADO = ["id", "fecha", "campo", "lote", "cultivo", "estado del cultivo", "nivel", "malezas", "plagas",
-  "enfermedades", "suelo / humedad", "observaciones", "acción sugerida", "recorrió", "registrado (app)"];
-const ULTIMA_COL = "O";
+  "enfermedades", "suelo / humedad", "observaciones", "acción sugerida", "recorrió", "registrado (app)", "fotos (links del Drive)"];
+const ULTIMA_COL = "P";
 
 function getAuth() {
   const creds = JSON.parse(process.env.GOOGLE_CREDENTIALS);
@@ -30,7 +31,15 @@ function getAuth() {
 // Crea la hoja la primera vez, con su encabezado
 async function asegurarHoja(sheets) {
   const meta = await sheets.spreadsheets.get({ spreadsheetId: PLANILLA_LABORES });
-  if (meta.data.sheets.some(s => s.properties.title === HOJA)) return;
+  if (meta.data.sheets.some(s => s.properties.title === HOJA)) {
+    // hoja de antes: si le faltan columnas nuevas en el encabezado, se agregan
+    const enc = await sheets.spreadsheets.values.get({ spreadsheetId: PLANILLA_LABORES, range: `${HOJA}!A1:${ULTIMA_COL}1` });
+    if (((enc.data.values || [])[0] || []).length < ENCABEZADO.length) {
+      await sheets.spreadsheets.values.update({ spreadsheetId: PLANILLA_LABORES, range: `${HOJA}!A1:${ULTIMA_COL}1`,
+        valueInputOption: "RAW", requestBody: { values: [ENCABEZADO] } });
+    }
+    return;
+  }
   await sheets.spreadsheets.batchUpdate({
     spreadsheetId: PLANILLA_LABORES,
     requestBody: { requests: [{ addSheet: { properties: { title: HOJA, gridProperties: { frozenRowCount: 1 } } } }] },
@@ -56,8 +65,9 @@ const aObjeto = f => Object.fromEntries(CAMPOS_FILA.map((k, i) => [k, f[i] || ""
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-clave");
   if (req.method === "OPTIONS") return res.status(200).end();
+  if (!claveOk(req, res)) return;
 
   try {
     const auth = getAuth();

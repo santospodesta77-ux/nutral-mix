@@ -1,5 +1,19 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 
+// Clave de la app: va en cada llamada a /api (las funciones la piden cuando APP_CLAVE está cargada
+// en Vercel). Si el servidor la rechaza, la app muestra el recuadro para ingresarla.
+const CLAVE_KEY = "smix_clave_app";
+const claveApp = () => { try { return window.localStorage.getItem(CLAVE_KEY) || ""; } catch { return ""; } };
+if(typeof window !== "undefined" && !window.__smixFetchConClave){
+  const fetchOriginal = window.fetch.bind(window);
+  window.fetch = (url, opts = {}) => {
+    if(!String(url).startsWith("/api/")) return fetchOriginal(url, opts);
+    return fetchOriginal(url, {...opts, headers:{...(opts.headers || {}), "x-clave": claveApp()}})
+      .then(r => { if(r.status === 401) window.dispatchEvent(new Event("smix-clave")); return r; });
+  };
+  window.__smixFetchConClave = true;
+}
+
 // ============================================================
 // SMIX · Gestión integral de campos · campaña 26-27
 // General Pico, La Pampa
@@ -1435,9 +1449,8 @@ function getFill(campoId, loteId, modo, sueloVar, datos = {}) {
   if(modo==="residuales"){
     const r=(datos.RESIDUALES||{})[`${campoId}|${loteId}`];
     if(!r) return {fill:"#F0EDE5",label:"",dim:true};
-    const est=PENDIENTE_RESIDUAL.includes(r.estado)?`Falta ${r.faltan.join(", ")||"residual"}`:r.estado==="sinprot"?"Sin protocolo":"Al día";
-    return {fill:colorResidualMapa(r.estado),label:r.corto,label2:r.fecha,dim:r.estado==="sinprot"&&r.corto==="sin residual",
-      tip:`${est} · último: ${r.detalle}`};
+    const e=ESTADO_LOTE[r.estado]||ESTADO_LOTE.sinprot;
+    return {fill:e.mapa,label:r.corto,label2:r.fecha,dim:r.estado==="sinprot"&&r.corto==="sin residual",tip:`${e.icono} ${r.tip}`};
   }
   if(modo==="suelos"){
     const s=buscarKey(SUELOS, campoId, loteId);
@@ -1556,9 +1569,9 @@ function Leyenda({modo,sueloVar}){
     </div>;
   }
   if(modo==="residuales") return <div style={{display:"flex",flexWrap:"wrap",gap:"4px 14px",marginTop:6,alignItems:"center"}}>
-    {[["#9FD3A3","Al día"],["#E8857B","Le falta un residual"],["#F0EDE5","Sin protocolo"]].map(([c,t])=>
+    {["verde","amarillo","rojo","sinprot"].map(k=>[ESTADO_LOTE[k].mapa,ESTADO_LOTE[k].txt]).map(([c,t])=>
       <div key={t} style={tag}><span style={{width:11,height:11,borderRadius:3,background:c,border:`1px solid ${TINTA}`,flexShrink:0}}/>{t}</div>)}
-    <span style={{fontSize:11.5,opacity:0.7}}>En cada lote: último residual y fecha. El detalle está en Labores pendientes.</span>
+    <span style={{fontSize:11.5,opacity:0.7}}>En cada lote: último residual y fecha. Al pasar el mouse: hasta cuándo cubre y qué sigue.</span>
   </div>;
   if(modo==="rindes") return <GradBar min="0 qq" max="90 qq" c1="#FFF5CC" c2="#BF4000" label="Rinde 25-26"/>;
   if(modo==="margenes") return <div style={{display:"flex",gap:14,flexWrap:"wrap",marginTop:6}}>
@@ -1815,6 +1828,11 @@ const TIPO_LABOR = {
   labranza:      {txt:"Labranza",      color:"#5D4037", fondo:"#EFEBE9"},
 };
 const DIA_MS = 86400000;
+// Días que dura cada residual en el suelo (aproximado; se ajusta en la pestaña Protocolo)
+const DURACION_RESIDUAL = {atrazina:60, terbutilazina:60, diflufenican:80, sulfentrazone:75, flurocloridona:60, metolacloro:50,
+  acetoclor:45, flumioxazin:40, clorimuron:45, metsulfuron:60, imazetapir:45, flumetsulam:60, picloram:90, adengo:60, fierce:60, texaro:60};
+// Activación: el residual carga si llueven N mm dentro de los días siguientes a la aplicación
+const ACTIVACION_BASE = {mm:10, dias:15};
 // Tope de atrazina por lote en la campaña (protocolo: si el lote puede ir a soja la siguiente)
 const TOPE_ATRAZINA_KG = 2;
 
@@ -1882,10 +1900,15 @@ const ddmm = d => d ? `${String(d.getDate()).padStart(2,"0")}/${String(d.getMont
 // los activos de alguna de sus alternativas (pueden venir en pasadas distintas).
 // Estado de cada paso: hecho | parcial (menos del 80% de las ha) | ventana | atrasado (cerró hace
 // 30 días o menos y no abrió el siguiente) | siembra (se hace a la siembra) | salteado | proximo
-function evaluarProtocolo(protocolo, campos, cultivoDe, aplicaciones, hoy, incluirSinProtocolo = false){
+function evaluarProtocolo(protocolo, campos, cultivoDe, aplicaciones, hoy, incluirSinProtocolo = false, lluvias = []){
   const resultado = [];
   const porCampo = {};
   aplicaciones.forEach(a => { (porCampo[a.campo] = porCampo[a.campo] || []).push(a); });
+  const lluviasPorCampo = {};
+  lluvias.forEach(l => { const f = fechaLocal(l.fecha); if(f) (lluviasPorCampo[l.campo] = lluviasPorCampo[l.campo] || []).push({f, mm:Number(l.mm)||0}); });
+  const dur = {...DURACION_RESIDUAL, ...(protocolo.duraciones || {})};
+  const actP = protocolo.activacion || {};
+  const act = {mm: Number(actP.mm) >= 0 && actP.mm !== "" ? Number(actP.mm) : ACTIVACION_BASE.mm, dias: Number(actP.dias) || ACTIVACION_BASE.dias};
   const iniCampania = fechaDelPaso("01/03", protocolo.campania);
   const terminosProtocolo = (protocolo.cultivos||[]).flatMap(c => (c.pasos||[]).flatMap(p => parseClave(p.clave).flat()));
   const residuales = [...new Set([...RESIDUALES, ...terminosProtocolo])].filter(t => !NO_RESIDUALES.includes(t));
@@ -1951,11 +1974,14 @@ function evaluarProtocolo(protocolo, campos, cultivoDe, aplicaciones, hoy, inclu
         const sinAtrazina = candidatas.filter(alt => !alt.includes("atrazina"));
         const porTope = topeAtrazina && sinAtrazina.length > 0 && sinAtrazina.length < candidatas.length;
         if(porTope) candidatas = sinAtrazina;
-        const conAvance = candidatas.filter(alt => alt.some(t => hechos.has(t)));
+        // (un quemante como el paraquat no cuenta como avance: no define con qué residual seguir)
+        const conAvance = candidatas.filter(alt => alt.some(t => hechos.has(t) && !NO_RESIDUALES.includes(t)));
         const elegida = (conAvance.length ? conAvance : candidatas.slice(0, 1))
           .reduce((m, alt) => faltaDe(alt).length < faltaDe(m).length ? alt : m, (conAvance[0] || candidatas[0] || []));
         const completa = p.alts.find(alt => alt.length && !faltaDe(alt).length);
-        const faltan = completa ? [] : faltaDe(elegida);
+        // Si de esa alternativa sólo falta un quemante (ej. paraquat), lo que hay que aplicar es la mezcla principal
+        const faltaResidual = faltaDe(elegida).some(t => !NO_RESIDUALES.includes(t));
+        const faltan = completa ? [] : faltaResidual ? faltaDe(elegida) : faltaDe(candidatas[0] || []);
         const base = {paso:p, apls:asignadas[i], faltan, porTope};
         if(completa){
           const alt = completa;
@@ -1976,7 +2002,12 @@ function evaluarProtocolo(protocolo, campos, cultivoDe, aplicaciones, hoy, inclu
         if(p.hastaSiembra) return {...base, estado: dias <= 120 ? "siembra" : "salteado", dias};
         return {...base, estado: dias <= 30 ? "atrasado" : "salteado", dias};
       });
-      return {prot, estados, siembra};
+      // Lo que viene: pasos sin hacer cuya ventana no cerró (o que van a la siembra y el lote no se
+      // sembró). Lo que ya pasó no se reclama: el protocolo se mira siempre para adelante.
+      const sembrado = siembra && siembra.estado === "hecho";
+      const proximo = estados.find(s => s.estado !== "hecho" && !s.postSiembra &&
+        (s.paso.fin >= hoy || (s.paso.hastaSiembra && !sembrado))) || null;
+      return {prot, estados, siembra, proximo};
     });
 
     // Residuales que ya recibió el lote en la campaña, con dosis y fecha (de la más vieja a la última)
@@ -1988,54 +2019,94 @@ function evaluarProtocolo(protocolo, campos, cultivoDe, aplicaciones, hoy, inclu
     const ultima = apls.find(esPulverizacion) || null;
     const ultimaResiduales = ultima ? (ultima.items || (ultima.productos||[]).map(n => ({n, d:null})))
       .map(it => ({...it, activo: residuales.find(t => productoEs(it.n, t))})).filter(it => it.activo) : [];
-    resultado.push({campo, lote, cv, evals, aplicados, ultima, ultimaResiduales, atrazinaKg, topeAtrazina});
+    // ── Cobertura: cada pasada con residual cubre hasta fecha + duración del activo que más dura,
+    // siempre que haya llovido para activarlo (si hay registro de lluvias de ese campo) ──
+    const lluCampo = lluviasPorCampo[campo.id] || [];
+    const desdeLluvias = lluCampo.length ? Math.min(...lluCampo.map(l => l.f.getTime())) : null;
+    const pasadas = [];
+    aplicados.forEach(r => {
+      let g = pasadas.find(x => x.fecha === r.fecha);
+      if(!g){ g = {fecha:r.fecha, f:fechaLocal(r.fecha), activos:[]}; pasadas.push(g); }
+      if(!g.activos.includes(r.activo)) g.activos.push(r.activo);
+    });
+    pasadas.forEach(g => {
+      g.hasta = new Date(Math.max(...g.activos.map(a => g.f.getTime() + (Number(dur[a]) || DURACION_RESIDUAL[a] || 45) * DIA_MS)));
+      g.mm = lluCampo.filter(l => l.f >= g.f && l.f - g.f <= act.dias * DIA_MS).reduce((s, l) => s + l.mm, 0);
+      g.activacion = desdeLluvias == null || g.f < desdeLluvias ? "sindato"
+        : g.mm >= act.mm ? "activado" : (hoy - g.f) <= act.dias * DIA_MS ? "esperando" : "noactivado";
+    });
+    const vigentes = pasadas.filter(g => g.hasta >= hoy && g.activacion !== "noactivado");
+    const cobertura = {hasta: vigentes.length ? new Date(Math.max(...vigentes.map(g => g.hasta))) : null,
+      vigentes, ultima: pasadas[pasadas.length - 1] || null, esperandoLluvia: vigentes.some(g => g.activacion === "esperando")};
+
+    // ── Estado mirando para adelante: ¿tiene residual hoy? ¿le toca el próximo? ──
+    const proximos = evals.filter(ev => ev.proximo).map(ev => ({...ev.proximo, prot:ev.prot}));
+    const cubierto = !!cobertura.hasta;
+    const tocaYa = proximos.some(p => hoy >= p.paso.ini);
+    const pronto = proximos.some(p => p.paso.ini - hoy <= 15 * DIA_MS);
+    const estado = !evals.length ? "sinprot"
+      : tocaYa && !cubierto ? "rojo"
+      : tocaYa || cobertura.esperandoLluvia || (!cubierto && pronto) || (cubierto && proximos.length && cobertura.hasta - hoy <= 15 * DIA_MS) ? "amarillo"
+      : "verde";
+    resultado.push({campo, lote, cv, evals, aplicados, ultima, ultimaResiduales, atrazinaKg, topeAtrazina, cobertura, proximos, estado});
   }));
   return resultado;
 }
 
-const ESTADO_PASO = {
-  atrasado: {txt:"Atrasado",  color:"#C0392B", fondo:"#FBE3E0", icono:"!"},
-  ventana:  {txt:"En ventana", color:"#8A6200", fondo:"#FFF6DD", icono:"●"},
-  parcial:  {txt:"Hecho en parte", color:"#6D5BA8", fondo:"#EFEAF8", icono:"◐"},
-  siembra:  {txt:"Antes de sembrar", color:"#A0522D", fondo:"#FCEBDD", icono:"◆"},
-  proximo:  {txt:"Próximo",   color:"#5B6B7A", fondo:"#EEF2F6", icono:"○"},
-  salteado: {txt:"No se hizo", color:"#8C8572", fondo:"#F1EEE6", icono:"–"},
-  hecho:    {txt:"Hecho",     color:"#2E7D32", fondo:"#E8F5E9", icono:"✓"},
+// Estado del lote mirando para adelante
+const ESTADO_LOTE = {
+  rojo:     {txt:"Necesita residual",  icono:"🔴", color:"#C0392B", fondo:"#FBE3E0", mapa:"#E8857B"},
+  amarillo: {txt:"Atención",           icono:"🟡", color:"#8A6200", fondo:"#FFF6DD", mapa:"#F2CF6B"},
+  verde:    {txt:"Al día",             icono:"🟢", color:"#2E7D32", fondo:"#E8F5E9", mapa:"#9FD3A3"},
+  sinprot:  {txt:"Sin protocolo",      icono:"⚪", color:"#8C8572", fondo:"#F1EEE6", mapa:"#F0EDE5"},
 };
-const ORDEN_ESTADO = ["atrasado","ventana","parcial","siembra","proximo","salteado","hecho"];
-
-// Estado del lote = lo más urgente que tiene abierto ("aldia" si nada; "sinprot" si no tiene protocolo)
-const estadoDeLote = e => {
-  if(!e.evals.length) return "sinprot";
-  const abiertos = e.evals.flatMap(ev => ev.estados).filter(s => ["atrasado","ventana","parcial","siembra"].includes(s.estado) || (s.estado === "proximo" && s.dias <= 30));
-  return abiertos.length ? ORDEN_ESTADO.find(est => abiertos.some(s => s.estado === est)) : "aldia";
-};
+const ORDEN_LOTE = ["rojo","amarillo","verde","sinprot"];
 const ABREV_ACTIVO = {atrazina:"Atrazina", metolacloro:"S-meto", "s-metolacloro":"S-meto", flurocloridona:"Fluroc.", sulfentrazone:"Sulfen.",
   diflufenican:"Diflu.", flumioxazin:"Flumiox.", clorimuron:"Clorim.", terbutilazina:"Terbu.", metsulfuron:"Metsulf.",
   imazetapir:"Imazet.", flumetsulam:"Flumets.", acetoclor:"Acetoc."};
-// Capa del mapa: rojo = le falta algún residual ahora; verde = al día (puede tener un paso por abrir); gris = sin protocolo
-const PENDIENTE_RESIDUAL = ["atrasado","ventana","parcial","siembra"];
-const colorResidualMapa = est => PENDIENTE_RESIDUAL.includes(est) ? "#E8857B" : est === "sinprot" ? "#F0EDE5" : "#9FD3A3";
+const listaActivos = acts => acts.map(nombreActivo).join(" + ");
+// Qué falta del próximo paso (si ya tiene parte, sólo lo que falta; si no, la mezcla principal)
+const queAplicar = p => p.faltan.length ? p.faltan : (p.alt || p.paso.alts[0] || []);
+// Texto de cuándo toca el próximo residual
+const cuandoToca = (p, hoy) => hoy < p.paso.ini ? `desde el ${p.paso.desde} (en ${Math.ceil((p.paso.ini - hoy)/DIA_MS)} días)`
+  : hoy <= p.paso.fin ? `ahora · hasta el ${p.paso.hasta} (quedan ${Math.ceil((p.paso.fin - hoy)/DIA_MS)} días)`
+  : "a la siembra";
+// Cartel corto del estado del lote
+const cartelLote = (e, hoy) => {
+  const c = e.cobertura.hasta, p = e.proximos[0];
+  const enDias = p ? Math.ceil((p.paso.ini - hoy) / DIA_MS) : null;
+  if(e.estado === "rojo") return "Sin residual · le toca ahora";
+  if(e.estado === "amarillo") return c ? (p && enDias <= 0 ? `Cubierto hasta ${ddmm(c)} · toca el próximo` : e.cobertura.esperandoLluvia ? "Esperando lluvia" : `Vence ~${ddmm(c)}`)
+    : p ? `Sin residual · el próximo en ${enDias} días` : "Atención";
+  if(e.estado === "verde") return c ? `Cubierto hasta ${ddmm(c)}` : p ? `Sin residual · el próximo en ${enDias} días` : "Nada por aplicar";
+  return ESTADO_LOTE[e.estado].txt;
+};
+// Texto de la cobertura actual
+const textoCobertura = e => {
+  const c = e.cobertura;
+  const lluvia = g => g.activacion === "activado" ? ` · ${fmt(g.mm)} mm de lluvia` : g.activacion === "esperando" ? ` · esperando lluvia (${fmt(g.mm)} mm)` : "";
+  if(c.hasta){
+    const g = c.vigentes.reduce((m, x) => x.hasta > m.hasta ? x : m);
+    return {ok:true, txt:`hasta ~${ddmm(c.hasta)} — ${listaActivos(g.activos)} del ${ddmm(g.f)}${lluvia(g)}`};
+  }
+  if(!c.ultima) return {ok:false, txt:"sin residual en la campaña"};
+  const g = c.ultima;
+  return {ok:false, txt:`sin residual activo — el último (${listaActivos(g.activos)} del ${ddmm(g.f)}) ${g.activacion === "noactivado" ? `no se activó: ${fmt(g.mm)} mm en ${ACTIVACION_BASE.dias} días` : `venció ~${ddmm(g.hasta)}`}`};
+};
 
-// Para la capa "Residuales" del mapa: estado del protocolo y último residual de cada lote
-function residualesParaMapa(protocolo, campos, cultivoDe, aplicaciones, hoy){
+// Para la capa "Residuales" del mapa: estado del lote y último residual
+function residualesParaMapa(protocolo, campos, cultivoDe, aplicaciones, hoy, lluvias){
   const out = {};
-  evaluarProtocolo(protocolo, campos, cultivoDe, aplicaciones, hoy, true).forEach(e => {
+  evaluarProtocolo(protocolo, campos, cultivoDe, aplicaciones, hoy, true, lluvias).forEach(e => {
     const ult = e.aplicados.length ? e.aplicados[e.aplicados.length - 1].fecha : null;
-    const ultimos = ult ? e.aplicados.filter(r => r.fecha === ult) : [];
-    const activos = [...new Set(ultimos.map(r => r.activo))];
-    const fecha = ult ? ddmm(fechaLocal(ult)) : "";
-    const estado = estadoDeLote(e);
-    // qué falta ahora (para el detalle al pasar el mouse)
-    const faltan = e.evals.flatMap(ev => ev.estados).filter(st => PENDIENTE_RESIDUAL.includes(st.estado))
-      .map(st => (st.faltan.length ? st.faltan : st.alt || []).map(nombreActivo).join(" + ")).filter(Boolean);
+    const activos = ult ? [...new Set(e.aplicados.filter(r => r.fecha === ult).map(r => r.activo))] : [];
+    const cob = textoCobertura(e);
+    const prox = e.proximos[0];
     out[`${e.campo.id}|${e.lote.id}`] = {
-      estado,
+      estado: e.estado,
       corto: activos.length ? activos.map(a => ABREV_ACTIVO[a] || nombreActivo(a)).join(" + ") : "sin residual",
-      fecha,
-      detalle: activos.length ? `${ultimos.map(r => `${nombreActivo(r.activo)}${r.d != null ? " " + fmtDosis(r.d, r.n, r.activo) : ""}`)
-        .filter((x, i, arr) => arr.indexOf(x) === i).join(" + ")} el ${fecha}` : "sin residual en la campaña",
-      faltan: [...new Set(faltan)],
+      fecha: ult ? ddmm(fechaLocal(ult)) : "",
+      tip: `${cob.ok ? "Cubierto " : ""}${cob.txt}${prox ? ` · próximo: ${listaActivos(queAplicar(prox))} ${cuandoToca(prox, hoy)}` : ""}`,
     };
   });
   return out;
@@ -2047,33 +2118,59 @@ const chipV = a => ({padding:"5px 11px",fontSize:12,fontWeight:700,cursor:"point
 const selectV = {padding:"8px 11px",fontSize:13.5,fontWeight:600,border:`1.5px solid ${TINTA}`,borderRadius:8,background:CREMA,color:TINTA,fontFamily:"inherit"};
 const nombreCampo = id => (CAMPOS.find(c => c.id === id) || {}).nombre || id;
 
+
+// Producto y dosis sugeridos para un activo (para "Armar orden"): el producto que más se usó en la planilla
+// (si nunca se usó, el primero del catálogo con ese activo) y la dosis de la mezcla del protocolo para ese paso
+// (si la mezcla no la dice, la última que se usó de ese producto).
+function sugerirProducto(activo, mezcla, registro, catalogo){
+  const usos = {};
+  (registro || []).forEach(a => (a.items || []).forEach(it => {
+    if(!productoEs(it.n, activo)) return;
+    const u = usos[it.n] = usos[it.n] || {n:it.n, veces:0, d:null, fecha:""};
+    u.veces++;
+    if(it.d != null && String(a.fecha) >= u.fecha){ u.d = it.d; u.fecha = String(a.fecha); }
+  }));
+  const usado = Object.values(usos).sort((a, b) => b.veces - a.veces)[0];
+  const cat = usado ? catalogo.find(p => normBusca(p.n) === normBusca(usado.n)) : catalogo.find(p => p.cat === "HER" && productoEs(p.n, activo));
+  let d = null;
+  {
+    // dosis de la mezcla: el primer número después del activo que no sea un porcentaje ("Clorimuron 75% 10 g" → 10 g)
+    const variantes = SINONIMOS_ACTIVO[activo] || [activo];
+    const texto = normBusca(mezcla);
+    for(const v of variantes){
+      const m = texto.match(new RegExp(`${v}[^0-9]*(?:\\d+(?:[.,]\\d+)?\\s*%\\s*)?(\\d+(?:[.,]\\d+)?)\\s*(l|kg|g|cc)?\\b`));
+      if(m){ d = parseFloat(m[1].replace(",", ".")); if(m[2] === "g" || m[2] === "cc") d = d / 1000; break; }
+    }
+  }
+  if(d == null && usado) d = usado.d;
+  const n = usado ? usado.n : cat ? cat.n : nombreActivo(activo);
+  return {n, d, u: cat?.u || unidadProducto(n) || UNIDAD_ACTIVO[activo] || "L", p: cat?.p || 0, prov: cat?.prov || "", activo, enCatalogo: !!cat};
+}
+
 // ============================================================
-// LABORES PENDIENTES — ficha por lote: qué residual tiene y cuál le falta
+// LABORES PENDIENTES — por lote y para adelante: ¿tiene residual hoy? ¿con qué tengo que ir?
 // ============================================================
-function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDatos, onEditar, monitoreos}){
+function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDatos, onEditar, monitoreos, lluvias, catalogo, onArmarOrden}){
   const [campoF, setCampoF] = useState("TODOS");
   const [protF, setProtF] = useState("TODOS");
   const [estadoF, setEstadoF] = useState("TODOS");
   const hoy = useMemo(() => { const d = new Date(); d.setHours(0,0,0,0); return d; }, []);
-  const evaluacion = useMemo(() => evaluarProtocolo(protocolo, CAMPOS, cultivoDe, aplicaciones, hoy),
-    [protocolo, aplicaciones, cultivoDe, hoy]);
-
-  // Estado del lote = lo más urgente que tiene abierto
-  const fichas = evaluacion.map(e => ({...e, estado: estadoDeLote(e)}));
+  const fichas = useMemo(() => evaluarProtocolo(protocolo, CAMPOS, cultivoDe, aplicaciones, hoy, false, lluvias),
+    [protocolo, aplicaciones, cultivoDe, hoy, lluvias]);
   const paraSembrar = f => f.evals.some(ev => ev.siembra && ["ventana","atrasado"].includes(ev.siembra.estado));
-  const filtradas = fichas.filter(f => (campoF === "TODOS" || f.campo.id === campoF)
-    && (protF === "TODOS" || f.evals.some(ev => ev.prot.id === protF))
-    && (estadoF === "TODOS" || (estadoF === "sembrar" ? paraSembrar(f) : f.estado === estadoF)))
-    .sort((a, b) => (ORDEN_ESTADO.indexOf(a.estado)+1 || 99) - (ORDEN_ESTADO.indexOf(b.estado)+1 || 99)
-      || a.campo.nombre.localeCompare(b.campo.nombre) || String(a.lote.id).localeCompare(String(b.lote.id), "es", {numeric:true}));
   const base = fichas.filter(f => (campoF === "TODOS" || f.campo.id === campoF) && (protF === "TODOS" || f.evals.some(ev => ev.prot.id === protF)));
-  const tiles = [...["atrasado","ventana","parcial","siembra","proximo"].map(est => ({est, ...ESTADO_PASO[est], txt: est === "proximo" ? "Abre en 30 días" : ESTADO_PASO[est].txt})),
-    {est:"aldia", txt:"Sin nada pendiente", color:TINTA, fondo:CREMA}]
-    .map(t => ({...t, lotes: base.filter(f => f.estado === t.est)}))
-    .filter(t => t.lotes.length || t.est === "aldia")
-    .concat([{est:"sembrar", txt:"🌱 Falta sembrar", color:"#7A4E12", fondo:"#F6EAD7", lotes: base.filter(paraSembrar)}]);
-  const camposCon = [...new Set(evaluacion.map(e => e.campo.id))];
+  const filtradas = base.filter(f => estadoF === "TODOS" || (estadoF === "sembrar" ? paraSembrar(f) : f.estado === estadoF))
+    .sort((a, b) => ORDEN_LOTE.indexOf(a.estado) - ORDEN_LOTE.indexOf(b.estado)
+      || a.campo.nombre.localeCompare(b.campo.nombre) || String(a.lote.id).localeCompare(String(b.lote.id), "es", {numeric:true}));
+  const tiles = [
+    {est:"rojo", txt:"Sin residual y le toca ahora"},
+    {est:"amarillo", txt:"Atención: toca o vence pronto"},
+    {est:"verde", txt:"Cubiertos o nada por aplicar"},
+    {est:"sembrar", txt:"🌱 Falta sembrar", color:"#7A4E12", fondo:"#F6EAD7"},
+  ].map(t => ({...ESTADO_LOTE[t.est], ...t, lotes: t.est === "sembrar" ? base.filter(paraSembrar) : base.filter(f => f.estado === t.est)}));
+  const camposCon = [...new Set(fichas.map(e => e.campo.id))];
   const fFecha = s => { const d = fechaLocal(s); return d ? ddmm(d) : s; };
+  const linkBtn = {border:"none",background:"none",padding:0,color:"#1E5FA8",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:12};
 
   return (
     <div style={{display:"flex",flexDirection:"column",gap:14}}>
@@ -2084,12 +2181,12 @@ function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDat
         </select>
         <select value={protF} onChange={e=>setProtF(e.target.value)} style={selectV}>
           <option value="TODOS">Todos los cultivos</option>
-          {(protocolo.cultivos||[]).filter(p => evaluacion.some(e => e.evals.some(ev => ev.prot.id === p.id))).map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+          {(protocolo.cultivos||[]).filter(p => fichas.some(e => e.evals.some(ev => ev.prot.id === p.id))).map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
         </select>
         <div style={{fontSize:12,opacity:0.65,flex:"1 1 260px"}}>
-          Labores de la planilla{fechaDatos ? ` al ${fechaDatos}` : ""} cruzadas con el protocolo. Hoy: {ddmm(hoy)}.
+          Labores de la planilla{fechaDatos ? ` al ${fechaDatos}` : ""}. Hoy: {ddmm(hoy)}. Se mira para adelante: lo que ya pasó no se reclama.
           {!conDosis && " Las dosis aparecen cuando el pipeline publique el registro de labores."}{" "}
-          <button onClick={onEditar} style={{border:"none",background:"none",padding:0,color:"#1E5FA8",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:12}}>Editar protocolo</button>
+          <button onClick={onEditar} style={linkBtn}>Editar protocolo</button>
         </div>
       </div>
 
@@ -2099,17 +2196,16 @@ function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDat
             style={{...cajaV,textAlign:"center",borderColor:t.color,background:t.fondo,cursor:"pointer",fontFamily:"inherit",color:TINTA,
               boxShadow:activo?`inset 0 0 0 2px ${t.color}`:"none",padding:"10px 8px"}}>
             <div style={{fontSize:21,fontWeight:700,color:t.color}}>{t.lotes.length} <span style={{fontSize:12.5}}>lotes</span></div>
-            <div style={{fontSize:11.5,opacity:0.8,marginTop:2}}>{t.txt} · {fmt(t.lotes.reduce((s,f)=>s+(Number(f.lote.ha)||0),0))} ha</div>
+            <div style={{fontSize:11.5,opacity:0.8,marginTop:2}}>{t.icono && t.est !== "sembrar" ? `${t.icono} ` : ""}{t.txt} · {fmt(t.lotes.reduce((s,f)=>s+(Number(f.lote.ha)||0),0))} ha</div>
           </button>
         );})}
       </div>
-      {estadoF !== "TODOS" && <div style={{fontSize:12,opacity:0.7}}>Mostrando sólo "{estadoF==="sembrar" ? "Falta sembrar" : (ESTADO_PASO[estadoF]||{txt:"Sin nada pendiente"}).txt}". <button onClick={()=>setEstadoF("TODOS")} style={{border:"none",background:"none",padding:0,color:"#1E5FA8",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:12}}>Ver todos</button></div>}
+      {estadoF !== "TODOS" && <div style={{fontSize:12,opacity:0.7}}>Filtrado por "{tiles.find(t => t.est === estadoF)?.txt}". <button onClick={()=>setEstadoF("TODOS")} style={linkBtn}>Ver todos</button></div>}
 
       {!filtradas.length && <div style={{...cajaV,textAlign:"center",opacity:0.7}}>No hay lotes con estos filtros.</div>}
       {filtradas.map(f => {
-        const st = ESTADO_PASO[f.estado] || {txt:"Al día", color:"#2E7D32", fondo:"#E8F5E9"};
-        // Residuales agrupados por activo, con total si se repitió
-        // (las partes del lote aplicadas el mismo día son una sola pasada: no se suman)
+        const st = ESTADO_LOTE[f.estado];
+        const cob = textoCobertura(f);
         const porActivo = [];
         f.aplicados.forEach(r => {
           let g = porActivo.find(x => x.activo === r.activo);
@@ -2118,8 +2214,7 @@ function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDat
           if(mismoDia){ if(r.d != null && (mismoDia.d == null || r.d > mismoDia.d)) mismoDia.d = r.d; mismoDia.parte = mismoDia.parte && r.parte; mismoDia.ref += ` + ${r.ref}`; }
           else g.items.push({...r});
         });
-        const faltas = f.evals.flatMap(ev => ev.estados.filter(s => s.estado !== "hecho").map(s => ({...s, prot:ev.prot})))
-          .sort((a, b) => ORDEN_ESTADO.indexOf(a.estado) - ORDEN_ESTADO.indexOf(b.estado) || a.paso.ini - b.paso.ini);
+        const m = ultimoMonitoreo(monitoreos, f.campo.id, f.lote.id);
         return (
           <div key={`${f.campo.id}|${f.lote.id}`} style={{...cajaV,borderLeft:`6px solid ${st.color}`,padding:"12px 14px"}}>
             <div style={{display:"flex",justifyContent:"space-between",gap:8,flexWrap:"wrap",alignItems:"center"}}>
@@ -2131,18 +2226,30 @@ function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDat
                 </span>
                 <span style={{fontSize:11.5,opacity:0.6}}>{f.evals.map(ev => ev.prot.nombre).join(" + ")}</span>
               </div>
-              <span style={{fontSize:10.5,fontWeight:700,color:st.color,background:st.fondo,border:`1px solid ${st.color}55`,borderRadius:5,padding:"2px 8px",textTransform:"uppercase"}}>{f.estado==="aldia"?"Al día":st.txt}</span>
+              <span style={{fontSize:10.5,fontWeight:700,color:st.color,background:st.fondo,border:`1px solid ${st.color}55`,borderRadius:5,padding:"2px 8px",textTransform:"uppercase"}}>{st.icono} {cartelLote(f, hoy)}</span>
             </div>
 
-            <div style={{fontSize:12.5,marginTop:8}}>
-              <b>Última aplicación:</b>{" "}
-              {f.ultima ? <>
-                {fFecha(f.ultima.fecha)}{f.ultima.parte ? ` (${f.ultima.lote})` : ""} ·{" "}
-                {f.ultimaResiduales.length
-                  ? <span style={{color:"#2E7D32",fontWeight:600}}>con residual: {f.ultimaResiduales.map(it => `${it.n}${it.d!=null ? " " + fmtDosis(it.d, it.n, it.activo) : ""}`).join(", ")}</span>
-                  : <span style={{color:"#8A6200",fontWeight:600}}>sin residual</span>}
-                <span style={{opacity:0.6}}> — {(f.ultima.productos||[]).join(", ")}</span>
-              </> : <span style={{opacity:0.6}}>sin pulverizaciones en la campaña</span>}
+            <div style={{fontSize:13,marginTop:8}}>
+              <b>🛡 Residual hoy:</b> <span style={{color:cob.ok?"#2E7D32":"#C0392B",fontWeight:600}}>{cob.ok ? "cubierto " : ""}{cob.txt}</span>
+            </div>
+
+            <div style={{fontSize:13,marginTop:6}}>
+              <b>➡️ Próximo residual:</b>{" "}
+              {!f.proximos.length && <span style={{opacity:0.7}}>nada previsto en el protocolo</span>}
+              {f.proximos.map(p => {
+                const toca = hoy >= p.paso.ini;
+                return (
+                  <div key={p.prot.id + p.paso.id} style={{marginTop:3,paddingLeft:8}}>
+                    <span style={{fontWeight:700,color:toca?(f.cobertura.hasta?"#8A6200":"#C0392B"):TINTA}}>{listaActivos(queAplicar(p))}</span>
+                    <span style={{opacity:0.8}}> · {cuandoToca(p, hoy)}</span>
+                    <span style={{fontSize:11.5,opacity:0.55}}> · {f.evals.length > 1 ? `${p.prot.nombre}, ` : ""}{p.paso.nombre.toLowerCase()}</span>
+                    {p.porTope && <span style={{fontSize:11.5,color:"#C0392B",fontWeight:600}}> · sin más atrazina: ya lleva {fmtDosis(f.atrazinaKg, "", "atrazina")} (tope {TOPE_ATRAZINA_KG} kg)</span>}
+                    {p.estado === "parcial" && <span style={{fontSize:11.5,color:"#6D5BA8",fontWeight:600}}> · hecho en {fmt(p.haHecha)} de {fmt(Number(f.lote.ha)||0)} ha, completar</span>}
+                    {p.paso.mezcla && <div style={{fontSize:11.5,opacity:0.7}}>Mezcla: {p.paso.mezcla}</div>}
+                    {onArmarOrden && <button onClick={()=>onArmarOrden(f, p)} style={{...linkBtn,marginTop:3}}>🚜 Armar orden con este lote</button>}
+                  </div>
+                );
+              })}
             </div>
 
             {f.evals.filter(ev => ev.siembra).map(ev => {
@@ -2164,7 +2271,7 @@ function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDat
               );
             })}
 
-            {(() => { const m = ultimoMonitoreo(monitoreos, f.campo.id, f.lote.id); if(!m) return null; const n = NIVEL_MONITOREO[m.nivel] || NIVEL_MONITOREO.ok; return (
+            {m && (() => { const n = NIVEL_MONITOREO[m.nivel] || NIVEL_MONITOREO.ok; return (
               <div style={{fontSize:12.5,marginTop:6}}>
                 <b>🔍 Último monitoreo:</b> {fFecha(m.fecha)} · <span style={{color:n.color,fontWeight:600}}>{n.icono} {n.txt}</span>
                 {[m.estado, m.malezas && `malezas: ${m.malezas}`, m.plagas && `plagas: ${m.plagas}`, m.accion && `acción: ${m.accion}`].filter(Boolean).map(t => <span key={t} style={{opacity:0.8}}> · {t}</span>)}
@@ -2172,9 +2279,19 @@ function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDat
             );})()}
 
             <div style={{fontSize:12.5,marginTop:6}}>
-              <b>Residuales aplicados:</b>{" "}
-              {!porActivo.length && <span style={{opacity:0.6}}>ninguno todavía</span>}
-              <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:porActivo.length?4:0}}>
+              <b>Última aplicación:</b>{" "}
+              {f.ultima ? <>
+                {fFecha(f.ultima.fecha)}{f.ultima.parte ? ` (${f.ultima.lote})` : ""} ·{" "}
+                {f.ultimaResiduales.length
+                  ? <span style={{color:"#2E7D32",fontWeight:600}}>con residual: {f.ultimaResiduales.map(it => `${it.n}${it.d!=null ? " " + fmtDosis(it.d, it.n, it.activo) : ""}`).join(", ")}</span>
+                  : <span style={{color:"#8A6200",fontWeight:600}}>sin residual</span>}
+                <span style={{opacity:0.6}}> — {(f.ultima.productos||[]).join(", ")}</span>
+              </> : <span style={{opacity:0.6}}>sin pulverizaciones en la campaña</span>}
+            </div>
+
+            {porActivo.length > 0 && (
+              <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:6,alignItems:"center"}}>
+                <b style={{fontSize:12.5}}>Residuales de la campaña:</b>
                 {porActivo.map(g => {
                   const total = g.items.length > 1 && g.items.every(r => r.d != null) ? g.items.reduce((s, r) => s + r.d, 0) : null;
                   return (
@@ -2186,37 +2303,7 @@ function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDat
                   );
                 })}
               </div>
-            </div>
-
-            <div style={{fontSize:12.5,marginTop:8}}>
-              <b>Falta:</b>{" "}
-              {!faltas.length && <span style={{color:"#2E7D32",fontWeight:600}}>nada, el protocolo está completo ✓</span>}
-              <div style={{display:"flex",flexDirection:"column",gap:4,marginTop:faltas.length?4:0}}>
-                {faltas.map(s => {
-                  const e = ESTADO_PASO[s.estado];
-                  const que = s.faltan.length ? s.faltan.map(nombreActivo).join(" + ")
-                    : s.alt ? s.alt.map(nombreActivo).join(" + ") : s.paso.nombre;
-                  const cuando = s.postSiembra ? `se sembró el ${ddmm(s.postSiembra)} sin este residual`
-                    : s.estado==="atrasado" ? `venció el ${s.paso.hasta} (hace ${s.dias} días)`
-                    : s.estado==="ventana" ? `hasta el ${s.paso.hasta} · quedan ${s.dias} días`
-                    : s.estado==="siembra" ? "a la siembra"
-                    : s.estado==="parcial" ? `hecho en ${fmt(s.haHecha)} de ${fmt(Number(f.lote.ha)||0)} ha, falta completar`
-                    : s.estado==="proximo" ? `desde el ${s.paso.desde} (en ${s.dias} días)`
-                    : `no se hizo (ventana ${s.paso.desde}–${s.paso.hasta})`;
-                  const accionable = ["atrasado","ventana","siembra","parcial"].includes(s.estado);
-                  return (
-                    <div key={`${s.prot.id}${s.paso.id}`} style={{display:"flex",gap:7,alignItems:"baseline",flexWrap:"wrap",opacity:s.estado==="salteado"?0.7:1}}>
-                      <span style={{fontSize:10.5,fontWeight:700,color:e.color,background:e.fondo,borderRadius:5,padding:"1px 6px",minWidth:16,textAlign:"center"}}>{e.icono}</span>
-                      <span style={{fontWeight:700,color:e.color}}>{que}</span>
-                      <span style={{opacity:0.75}}>{cuando}</span>
-                      <span style={{fontSize:11.5,opacity:0.55}}>· {f.evals.length > 1 ? `${s.prot.nombre}, ` : ""}{s.paso.nombre.toLowerCase()}</span>
-                      {s.porTope && <span style={{fontSize:11.5,color:"#C0392B",fontWeight:600}}>· sin más atrazina: ya lleva {fmtDosis(f.atrazinaKg, "", "atrazina")} (tope {TOPE_ATRAZINA_KG} kg)</span>}
-                      {accionable && s.paso.mezcla && <div style={{width:"100%",fontSize:11.5,opacity:0.7,paddingLeft:24}}>Mezcla: {s.paso.mezcla}</div>}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            )}
           </div>
         );
       })}
@@ -2514,6 +2601,35 @@ function VistaProtocoloEditor({protocolo, sync, onGuardar}){
         </div>
       </div>
 
+      <div style={cajaV}>
+        <div style={{fontSize:14,fontWeight:700}}>Duración de los residuales y activación</div>
+        <div style={{fontSize:11.5,opacity:0.7,margin:"3px 0 10px"}}>
+          Con esto se calcula hasta cuándo un lote está cubierto: fecha de aplicación + días del activo que más dura.
+          Si hay lluvias cargadas para ese campo y no llovieron los mm en los días indicados, el residual cuenta como no activado.
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(210px,1fr))",gap:"8px 18px"}}>
+          {Object.keys(DURACION_RESIDUAL).map(a => (
+            <label key={a} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:6,fontSize:12.5,whiteSpace:"nowrap"}}>
+              <span>{nombreActivo(a)}</span>
+              <span style={{display:"flex",alignItems:"center",gap:4}}>
+                <input inputMode="numeric" value={(borrador.duraciones||{})[a] ?? DURACION_RESIDUAL[a]}
+                  onChange={e=>{ const v = parseInt(e.target.value, 10); setBorrador(b=>({...b, duraciones:{...(b.duraciones||{}), [a]: isNaN(v) ? "" : v}})); }}
+                  style={{...campoTxt,width:56,textAlign:"right",padding:"4px 6px"}}/>días
+              </span>
+            </label>
+          ))}
+        </div>
+        <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",marginTop:12,fontSize:12.5}}>
+          <span>Se activa con</span>
+          <input inputMode="numeric" value={(borrador.activacion||{}).mm ?? ACTIVACION_BASE.mm} onChange={e=>{ const v = parseInt(e.target.value, 10); setBorrador(b=>({...b, activacion:{...ACTIVACION_BASE, ...(b.activacion||{}), mm: isNaN(v) ? "" : v}})); }}
+            style={{...campoTxt,width:56,textAlign:"right",padding:"4px 6px"}}/>
+          <span>mm de lluvia dentro de los</span>
+          <input inputMode="numeric" value={(borrador.activacion||{}).dias ?? ACTIVACION_BASE.dias} onChange={e=>{ const v = parseInt(e.target.value, 10); setBorrador(b=>({...b, activacion:{...ACTIVACION_BASE, ...(b.activacion||{}), dias: isNaN(v) ? "" : v}})); }}
+            style={{...campoTxt,width:56,textAlign:"right",padding:"4px 6px"}}/>
+          <span>días de aplicado.</span>
+        </div>
+      </div>
+
       {(borrador.cultivos||[]).map((c, ci) => (
         <div key={c.id} style={cajaV}>
           <div style={{display:"flex",gap:10,alignItems:"center",justifyContent:"space-between",flexWrap:"wrap"}}>
@@ -2586,31 +2702,29 @@ const SUGERENCIAS_MONITOREO = {
 };
 const ESTADOS_CULTIVO = ["Barbecho","Emergencia","V2","V4","V6","V8","V10","VT","R1","R2","R3","R5","R6","Macollaje","Encañazón","Espigazón","Llenado de grano","Madurez"];
 const HUMEDAD_SUELO = ["","Seco","Humedad justa","Buena humedad","Encharcado"];
-const PEND_MONIT_KEY = "smix_monitoreo_pendientes_v1";
-
-// Monitoreos compartidos + cola local de los que no se pudieron subir
-function useMonitoreos(){
-  const leerCola = () => { try { return JSON.parse(window.localStorage.getItem(PEND_MONIT_KEY)) || []; } catch { return []; } };
-  const escribirCola = c => { try { window.localStorage.setItem(PEND_MONIT_KEY, JSON.stringify(c)); } catch {} };
+// Lista compartida en una hoja de la planilla (monitoreos, lluvias), con cola local de lo que
+// no se pudo subir por falta de señal: se ve igual (marcado) y se sube solo cuando vuelve.
+function useListaCompartida({url, cuerpo, colaKey, campo}){
+  const leerCola = () => { try { return JSON.parse(window.localStorage.getItem(colaKey)) || []; } catch { return []; } };
+  const escribirCola = c => { try { window.localStorage.setItem(colaKey, JSON.stringify(c)); } catch {} };
   const [remotos, setRemotos] = useState([]);
   const [cola, setCola] = useState(leerCola);
   const [sync, setSync] = useState({estado:"cargando"});
 
   const subir = async (m) => {
-    const r = await fetch("/api/monitoreo", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({monitoreo:m})});
+    const r = await fetch(url, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({[cuerpo]:m})});
     const d = await r.json().catch(() => ({}));
     if(!r.ok) throw new Error(d.error || `HTTP ${r.status}`);
   };
   const recargar = async () => {
     try {
-      const r = await fetch("/api/monitoreo");
+      const r = await fetch(url);
       if(!r.ok) throw new Error(`HTTP ${r.status}`);
       const d = await r.json();
-      setRemotos(d.monitoreos || []);
+      setRemotos(d[campo] || []);
       setSync({estado:"ok"});
     } catch(e) { setSync({estado:"error", txt:e.message}); }
   };
-  // Sube lo que quedó en el equipo (sin señal) y después trae la lista
   const reintentar = async () => {
     let pendientes = leerCola();
     for(const m of [...pendientes]){
@@ -2637,23 +2751,124 @@ function useMonitoreos(){
     const pendientes = leerCola().filter(x => x.id !== id);
     escribirCola(pendientes); setCola(pendientes);
     setRemotos(rs => rs.filter(m => m.id !== id));
-    try {
-      await fetch("/api/monitoreo", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({id, borrar:true})});
-    } catch {}
+    try { await fetch(url, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({id, borrar:true})}); } catch {}
   };
-  // Lo que está sin subir se ve igual (marcado), y pisa a la versión remota del mismo id
-  const lista = [...cola.map(m => ({...m, sinSubir:true})), ...remotos.filter(m => !cola.some(c => c.id === m.id))]
-    .sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)) || String(b.registrado||"").localeCompare(String(a.registrado||"")));
+  const lista = useMemo(() => [...cola.map(m => ({...m, sinSubir:true})), ...remotos.filter(m => !cola.some(c => c.id === m.id))]
+    .sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)) || String(b.registrado||"").localeCompare(String(a.registrado||""))), [cola, remotos]);
   return {lista, guardar, borrar, reintentar, sync, sinSubir: cola.length};
 }
+const useMonitoreos = () => useListaCompartida({url:"/api/monitoreo", cuerpo:"monitoreo", colaKey:"smix_monitoreo_pendientes_v1", campo:"monitoreos"});
+const useLluvias = () => useListaCompartida({url:"/api/lluvias", cuerpo:"registro", colaKey:"smix_lluvias_pendientes_v1", campo:"lluvias"});
+
+// Fotos: se achican en el teléfono (máx. 1600 px, JPEG) antes de subirlas al Drive
+const achicarFoto = file => new Promise((ok, mal) => {
+  const img = new Image(), url = URL.createObjectURL(file);
+  img.onload = () => {
+    const k = Math.min(1, 1600 / Math.max(img.width, img.height));
+    const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    URL.revokeObjectURL(url);
+    ok(c.toDataURL("image/jpeg", 0.8).split(",")[1]);
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); mal(new Error("no se pudo leer la foto")); };
+  img.src = url;
+});
 
 // Último monitoreo de un lote (para la ficha de Labores pendientes)
 const ultimoMonitoreo = (lista, campoId, loteId) => (lista||[]).find(m => m.campo === campoId && String(m.lote) === String(loteId));
 
-function VistaMonitoreo({monit, cultivoDe, autor, cambiarAutor}){
+// Lluvias por campo: sirven para saber si un residual se activó (pestaña Labores pendientes)
+function SeccionLluvias({lluv, autor}){
+  const hoyISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
+  const [abierto, setAbierto] = useState(false);
+  const [form, setForm] = useState({fecha:hoyISO(), mm:"", campos:[], nota:""});
+  const [msg, setMsg] = useState(null);
+  const [verTodas, setVerTodas] = useState(false);
+  const mm = parseFloat(String(form.mm).replace(",", "."));
+  const guardar = async () => {
+    if(!form.campos.length || !(mm >= 0)){ setMsg({ok:false, txt:"Elegí los campos y cargá los mm."}); return; }
+    const lista = form.campos.map((c, i) => ({id:`l${Date.now().toString(36)}${i}`, fecha:form.fecha, campo:c, mm, nota:form.nota.trim(), autor}));
+    setMsg({ok:true, txt:"Guardando…"});
+    const ok = await lluv.guardar(lista);
+    setMsg(ok ? {ok:true, txt:`✓ ${fmt1(mm)} mm guardados en ${lista.length} campo${lista.length>1?"s":""}.`}
+      : {ok:false, txt:"Sin conexión: quedó en este equipo y se sube cuando vuelva la señal."});
+    setForm(f => ({...f, mm:"", nota:"", campos:[]})); setAbierto(false);
+  };
+  // Acumulado de los últimos 30 días por campo
+  const corte = Date.now() - 30 * DIA_MS;
+  const acum = {};
+  lluv.lista.forEach(l => { const f = fechaLocal(l.fecha); if(f && f.getTime() >= corte) acum[l.campo] = (acum[l.campo] || 0) + (Number(l.mm) || 0); });
+  const recientes = verTodas ? lluv.lista : lluv.lista.slice(0, 6);
+  const chipS = a => ({padding:"5px 10px",fontSize:12.5,borderRadius:16,cursor:"pointer",fontFamily:"inherit",
+    border:`1px solid ${a?"#1E5FA8":"#C8C2B0"}`,background:a?"#1E5FA8":"#fff",color:a?"#fff":TINTA,fontWeight:a?700:500});
+  const txt = {boxSizing:"border-box",padding:"8px 9px",fontSize:14,border:"1px solid #C8C2B0",borderRadius:7,background:"#FFFDF7",color:TINTA,fontFamily:"inherit"};
+  return (
+    <div style={{...cajaV,borderColor:"#1E5FA8"}}>
+      <div style={{display:"flex",justifyContent:"space-between",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+        <div>
+          <div style={{fontSize:15,fontWeight:700}}>🌧 Lluvias</div>
+          <div style={{fontSize:11.5,opacity:0.7}}>Hoja <b>lluvias</b> de la planilla. Con ellas se sabe si un residual se activó.{lluv.sinSubir ? ` · 📵 ${lluv.sinSubir} sin subir` : ""}</div>
+        </div>
+        {!abierto && <button onClick={()=>{ setAbierto(true); setMsg(null); }} style={{padding:"8px 14px",fontSize:13.5,fontWeight:700,borderRadius:9,border:"none",background:"#1E5FA8",color:"#fff",cursor:"pointer",fontFamily:"inherit"}}>➕ Registrar lluvia</button>}
+      </div>
+      {msg && <div style={{fontSize:12.5,fontWeight:600,marginTop:8,color:msg.ok?"#2E7D32":"#8A6200"}}>{msg.txt}</div>}
+      {abierto && (
+        <div style={{display:"flex",flexDirection:"column",gap:10,marginTop:10}}>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            <input type="date" value={form.fecha} onChange={e=>setForm(f=>({...f,fecha:e.target.value}))} style={txt}/>
+            <input inputMode="decimal" value={form.mm} onChange={e=>setForm(f=>({...f,mm:e.target.value}))} placeholder="mm" style={{...txt,width:90,textAlign:"right"}}/>
+            <input value={form.nota} onChange={e=>setForm(f=>({...f,nota:e.target.value}))} placeholder="nota (opcional)" style={{...txt,flex:"1 1 140px",minWidth:0}}/>
+          </div>
+          <div>
+            <div style={{fontSize:10.5,fontWeight:700,textTransform:"uppercase",opacity:0.6,marginBottom:4}}>Campos donde llovió eso</div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+              {CAMPOS.map(c => { const a = form.campos.includes(c.id); return <button key={c.id} onClick={()=>setForm(f=>({...f,campos:a?f.campos.filter(x=>x!==c.id):[...f.campos,c.id]}))} style={chipS(a)}>{c.nombre}</button>; })}
+            </div>
+          </div>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={guardar} style={{padding:"9px 16px",fontSize:14,fontWeight:700,borderRadius:9,border:"none",background:"#1E5FA8",color:"#fff",cursor:"pointer",fontFamily:"inherit"}}>💾 Guardar</button>
+            <button onClick={()=>setAbierto(false)} style={{padding:"9px 14px",fontSize:14,fontWeight:600,borderRadius:9,border:`1.5px solid ${TINTA}`,background:"transparent",color:TINTA,cursor:"pointer",fontFamily:"inherit"}}>Cancelar</button>
+          </div>
+        </div>
+      )}
+      {Object.keys(acum).length > 0 && (
+        <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:10,alignItems:"center"}}>
+          <span style={{fontSize:12,fontWeight:700}}>Últimos 30 días:</span>
+          {Object.entries(acum).sort((a,b)=>b[1]-a[1]).map(([c, v]) => <span key={c} style={{fontSize:12,background:"#EAF1FA",border:"1px solid #B9CDE2",borderRadius:7,padding:"2px 8px"}}>{nombreCampo(c)} <b>{fmt1(v)} mm</b></span>)}
+        </div>
+      )}
+      {recientes.length > 0 && (
+        <div style={{marginTop:8,fontSize:12.5,display:"flex",flexDirection:"column",gap:3}}>
+          {recientes.map(l => (
+            <div key={l.id} style={{display:"flex",gap:8,alignItems:"baseline",flexWrap:"wrap"}}>
+              <span style={{fontWeight:700,minWidth:44}}>{(() => { const d = fechaLocal(l.fecha); return d ? ddmm(d) : l.fecha; })()}</span>
+              <span>{nombreCampo(l.campo)}: <b>{fmt1(Number(l.mm)||0)} mm</b></span>
+              {l.nota && <span style={{opacity:0.65}}>{l.nota}</span>}
+              {l.sinSubir && <span style={{fontSize:11,color:"#8A6200"}}>📵 sin subir</span>}
+              <button onClick={()=>{ if(window.confirm(`¿Borrar la lluvia de ${nombreCampo(l.campo)} del ${l.fecha}?`)) lluv.borrar(l.id); }}
+                style={{border:"none",background:"none",padding:0,color:"#C0392B",cursor:"pointer",fontFamily:"inherit",fontSize:11.5}}>borrar</button>
+            </div>
+          ))}
+          {lluv.lista.length > 6 && <button onClick={()=>setVerTodas(v=>!v)} style={{border:"none",background:"none",padding:0,color:"#1E5FA8",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:12,alignSelf:"flex-start"}}>{verTodas ? "Ver menos" : `Ver todas (${lluv.lista.length})`}</button>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Sube una foto al Drive (carpeta de las órdenes / "Fotos monitoreo") y devuelve el link
+const subirFoto = async (base64, nombre) => {
+  const r = await fetch("/api/guardar-foto", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({base64, nombre})});
+  const d = await r.json().catch(() => ({}));
+  if(!r.ok) throw new Error(d.error || `HTTP ${r.status}`);
+  return d.link;
+};
+
+function VistaMonitoreo({monit, lluv, cultivoDe, autor, cambiarAutor}){
   const hoyISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
   const vacio = () => ({id:null, fecha:hoyISO(), campo:CAMPOS[0].id, lotes:[], estado:"", nivel:"ok", malezas:"", plagas:"", enfermedades:"", suelo:"", observaciones:"", accion:""});
   const [form, setForm] = useState(vacio);
+  const [fotos, setFotos] = useState([]);   // {file, url} elegidas para este monitoreo
   const [abierto, setAbierto] = useState(false);
   const [msg, setMsg] = useState(null);
   const [campoF, setCampoF] = useState("TODOS");
@@ -2676,16 +2891,26 @@ function VistaMonitoreo({monit, cultivoDe, autor, cambiarAutor}){
       enfermedades:form.enfermedades.trim(), suelo:form.suelo, observaciones:form.observaciones.trim(), accion:form.accion.trim(), autor};
     const lista = form.lotes.map((l, i) => ({...base, lote:l, cultivo:cultivoDe(form.campo, l),
       id: form.id && form.lotes.length === 1 ? form.id : `m${Date.now().toString(36)}${i}`}));
+    // Fotos: se suben una vez y el link va en todos los lotes de la recorrida
+    let links = form.fotos ? form.fotos.split(" ").filter(Boolean) : [], fallaron = 0;
+    for(const [k, ft] of fotos.entries()){
+      setMsg({ok:true, txt:`Subiendo foto ${k+1} de ${fotos.length}…`});
+      try { links.push(await subirFoto(await achicarFoto(ft.file), `monitoreo ${form.fecha} ${nombreCampo(form.campo)} ${form.lotes.join("-")} ${k+1}.jpg`)); }
+      catch { fallaron++; }
+    }
+    lista.forEach(m => { m.fotos = links.join(" "); });
     setMsg({ok:true, txt:"Guardando…"});
     const ok = await monit.guardar(lista);
-    setMsg(ok ? {ok:true, txt:`✓ Guardado en la planilla (${lista.length} lote${lista.length>1?"s":""}).`}
-      : {ok:false, txt:"Sin conexión con la planilla: quedó guardado en este equipo y se sube cuando vuelva la señal."});
+    const avisoFotos = fallaron ? ` ${fallaron} foto${fallaron>1?"s":""} no se pudo subir (sin señal o el Drive no respondió).` : "";
+    setMsg(ok ? {ok:!fallaron, txt:`✓ Guardado en la planilla (${lista.length} lote${lista.length>1?"s":""}${links.length ? `, ${links.length} foto${links.length>1?"s":""}` : ""}).${avisoFotos}`}
+      : {ok:false, txt:`Sin conexión con la planilla: quedó guardado en este equipo y se sube cuando vuelva la señal.${avisoFotos}`});
+    fotos.forEach(ft => URL.revokeObjectURL(ft.url)); setFotos([]);
     setForm(f => ({...vacio(), campo:f.campo, fecha:f.fecha}));
     setAbierto(false);
   };
   const editar = m => {
     setForm({id:m.id, fecha:m.fecha, campo:m.campo, lotes:[String(m.lote)], estado:m.estado||"", nivel:m.nivel||"ok", malezas:m.malezas||"",
-      plagas:m.plagas||"", enfermedades:m.enfermedades||"", suelo:m.suelo||"", observaciones:m.observaciones||"", accion:m.accion||""});
+      plagas:m.plagas||"", enfermedades:m.enfermedades||"", suelo:m.suelo||"", observaciones:m.observaciones||"", accion:m.accion||"", fotos:m.fotos||""});
     setAbierto(true); setMsg(null);
     window.scrollTo({top:0, behavior:"smooth"});
   };
@@ -2767,12 +2992,32 @@ function VistaMonitoreo({monit, cultivoDe, autor, cambiarAutor}){
           ))}
           <div>{lbl("Observaciones")}<textarea rows={3} value={form.observaciones} onChange={e=>set({observaciones:e.target.value})} style={{...txt,resize:"vertical"}}/></div>
           <div>{lbl("Acción sugerida")}<textarea rows={2} value={form.accion} onChange={e=>set({accion:e.target.value})} placeholder="ej: aplicar residual antes del 25/10" style={{...txt,resize:"vertical"}}/></div>
+          <div>
+            {lbl("Fotos (se guardan en el Drive)")}
+            <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+              {fotos.map((ft, k) => (
+                <div key={ft.url} style={{position:"relative"}}>
+                  <img src={ft.url} alt="" style={{width:72,height:72,objectFit:"cover",borderRadius:8,border:"1px solid #C8C2B0"}}/>
+                  <button onClick={()=>{ URL.revokeObjectURL(ft.url); setFotos(fs => fs.filter((_, i) => i !== k)); }}
+                    style={{position:"absolute",top:-6,right:-6,width:22,height:22,borderRadius:11,border:"none",background:TINTA,color:"#fff",fontSize:12,cursor:"pointer"}}>✕</button>
+                </div>
+              ))}
+              <label style={{padding:"9px 13px",fontSize:13.5,fontWeight:700,borderRadius:9,border:`1.5px dashed ${TINTA}`,cursor:"pointer"}}>
+                📷 Agregar fotos
+                <input type="file" accept="image/*" multiple style={{display:"none"}}
+                  onChange={e=>{ const fs = [...e.target.files].map(file => ({file, url:URL.createObjectURL(file)})); setFotos(x => [...x, ...fs]); e.target.value=""; }}/>
+              </label>
+              {form.fotos && <span style={{fontSize:12,opacity:0.7}}>ya tiene {form.fotos.split(" ").filter(Boolean).length} foto(s) guardada(s)</span>}
+            </div>
+          </div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
             <button onClick={guardar} disabled={monit.sync.estado==="guardando"} style={{padding:"10px 18px",fontSize:14,fontWeight:700,borderRadius:9,border:"none",background:"#2E7D32",color:"#fff",cursor:"pointer",fontFamily:"inherit"}}>💾 Guardar</button>
             <button onClick={()=>{ setForm(vacio()); setAbierto(false); }} style={{padding:"10px 16px",fontSize:14,fontWeight:600,borderRadius:9,border:`1.5px solid ${TINTA}`,background:"transparent",color:TINTA,cursor:"pointer",fontFamily:"inherit"}}>Cancelar</button>
           </div>
         </div>
       )}
+
+      <SeccionLluvias lluv={lluv} autor={autor}/>
 
       {conAlerta.length > 0 && (
         <div style={cajaV}>
@@ -2823,6 +3068,7 @@ function VistaMonitoreo({monit, cultivoDe, autor, cambiarAutor}){
             {m.suelo && <div><b>Suelo:</b> {m.suelo}</div>}
             {m.observaciones && <div><b>Observaciones:</b> {m.observaciones}</div>}
             {m.accion && <div style={{color:"#1E5FA8"}}><b>Acción sugerida:</b> {m.accion}</div>}
+            {m.fotos && <div><b>Fotos:</b> {m.fotos.split(" ").filter(Boolean).map((l, k) => <a key={l} href={l} target="_blank" rel="noreferrer" style={{color:"#1E5FA8",fontWeight:600,marginRight:8}}>📷 {k+1}</a>)}</div>}
           </div>
           <div style={{display:"flex",justifyContent:"space-between",gap:8,marginTop:8,fontSize:11.5,opacity:0.8,flexWrap:"wrap"}}>
             <span>{m.autor ? `Recorrió: ${m.autor}` : ""}</span>
@@ -2930,6 +3176,10 @@ export default function App(){
   const [sincro, setSincro] = useState({estado:"", txt:""});   // estado: ok | error | subiendo
   const cambiarAutor = (v) => { setAutor(v); try { window.localStorage.setItem("smix_autor", v); } catch {} };
   const monit = useMonitoreos();
+  const [pideClave, setPideClave] = useState(false);
+  const [claveIngresada, setClaveIngresada] = useState("");
+  useEffect(() => { const f = () => setPideClave(true); window.addEventListener("smix-clave", f); return () => window.removeEventListener("smix-clave", f); }, []);
+  const lluv = useLluvias();
 
   const leerBorradores = () => {
     try {
@@ -3005,8 +3255,8 @@ export default function App(){
     [PLAN_2627, HISTORICO_ROTACION]);
   // Capa "Residuales" del mapa (se calcula sólo cuando está elegida)
   const residualesMapa = useMemo(() => capaModo === "residuales"
-    ? residualesParaMapa(protocolo, CAMPOS, cultivoDe, aplicacionesConDosis || APLICACIONES, (() => { const d = new Date(); d.setHours(0,0,0,0); return d; })())
-    : null, [capaModo, protocolo, cultivoDe, aplicacionesConDosis, datosRemotos]);
+    ? residualesParaMapa(protocolo, CAMPOS, cultivoDe, aplicacionesConDosis || APLICACIONES, (() => { const d = new Date(); d.setHours(0,0,0,0); return d; })(), lluv.lista)
+    : null, [capaModo, protocolo, cultivoDe, aplicacionesConDosis, datosRemotos, lluv.lista]);
   const [modoDividir, setModoDividir] = useState(false);
   const [loteDiv, setLoteDiv] = useState(null);       // {campoId, loteId} en edición
   const [puntosCorte, setPuntosCorte] = useState([]); // [[x,y],[x,y]]
@@ -3233,6 +3483,24 @@ export default function App(){
     setOrdProductor(""); setOrdFecha(new Date().toISOString().split("T")[0]);
     setModoDividir(false); setLoteDiv(null); setPuntosCorte([]);
     setGuardadoMsg(null); setPanelBorr(false);
+  };
+
+  // "Armar orden" desde Labores pendientes: orden nueva con el lote pintado y los residuales que tocan,
+  // con el producto que más se usó y su última dosis (el resto de la mezcla se agrega a mano)
+  const armarOrdenDesde = (f, p) => {
+    const sugeridos = queAplicar(p).map(a => sugerirProducto(a, p.paso.mezcla, aplicacionesConDosis, TODOS_PRODUCTOS));
+    const partes = cvPartes(f.cv).map(baseCv);
+    const cv = p.prot.id === "fina" ? partes[0] : partes[partes.length - 1];
+    nuevaOrden();
+    setOrdTipo("PULVERIZADA TERRESTRE");
+    setCampoSel(f.campo.id);
+    setBrocha(0);
+    setPintura({[clL(f.campo.id, f.lote.id)]: 0});
+    setTratamientos(ts => ts.map((t, i) => i !== 0 ? t : {...t, etiqueta:"", cultivo: CULTIVOS_ORDEN.includes(cv) ? cv : "",
+      productos: Array(10).fill(null).map((_, k) => { const s = sugeridos[k];
+        return s ? {n:s.n, d:s.d || 0, dTexto: s.d != null ? String(s.d).replace(".", ",") : "", u:s.u, p:s.p, prov:s.prov} : {n:"", d:0}; })}));
+    setVista("ordenes");
+    window.scrollTo({top:0});
   };
 
   const fechaBorrador = (ms) => {
@@ -3490,6 +3758,7 @@ export default function App(){
   // Estado de guardado a planilla
   const [guardando, setGuardando] = useState(false);
   const [guardadoMsg, setGuardadoMsg] = useState(null); // {ok:bool, texto:string}
+  const laboresGuardadas = useRef(new Set());            // lo guardado desde este equipo en esta sesión
 
   const guardarLaborEnPlanilla = async () => {
     if(bloqueosOrden.length){
@@ -3527,6 +3796,18 @@ export default function App(){
       tratamientos: tratamientosPayload,
     };
 
+    // Evitar cargar dos veces la misma labor: misma fecha, campo, lote y tipo de labor ya en la
+    // planilla (registro publicado) o guardada recién desde este equipo
+    const firma = (fecha, campo, lote, labor) => `${fecha}|${campo}|${String(lote).toUpperCase().trim()}|${String(labor).toUpperCase().trim()}`;
+    const enPlanilla = new Set((aplicacionesConDosis || []).map(a => firma(a.fecha, a.campo, a.lote, a.labor)));
+    const repetidos = [...new Set(tratamientosPayload.flatMap(t => t.lotes
+      .filter(l => { const k = firma(ordFecha, l.campo, l.lote, ordTipo); return enPlanilla.has(k) || laboresGuardadas.current.has(k); })
+      .map(l => `${nombreCampo(l.campo)} ${l.lote}`)))];
+    if(repetidos.length && !window.confirm(`Esta labor ya parece estar cargada en la planilla (${fechaCorta(ordFecha)}, ${ordTipo.toLowerCase()}):\n${repetidos.join(", ")}\n\n¿Guardar igual?`)){
+      setGuardadoMsg({ok:false, texto:"No se guardó: la labor ya estaba cargada."});
+      return;
+    }
+
     setGuardando(true);
     setGuardadoMsg(null);
     try {
@@ -3537,6 +3818,7 @@ export default function App(){
       });
       const data = await resp.json();
       if(resp.ok && data.ok){
+        tratamientosPayload.forEach(t => t.lotes.forEach(l => laboresGuardadas.current.add(firma(ordFecha, l.campo, l.lote, ordTipo))));
         setGuardadoMsg({ok:true, texto:`✓ ${data.mensaje} Aparecerá en la app tras la próxima corrida del pipeline.`});
       } else {
         setGuardadoMsg({ok:false, texto:`Error: ${data.error || "no se pudo guardar"}`});
@@ -3694,6 +3976,16 @@ export default function App(){
             <div style={{fontSize:13,opacity:0.6}}>{CAMPOS.length} campos · {fmt(haTotal)} ha totales · {APLICACIONES.length} aplicaciones registradas</div>
           </div>
         </div>
+
+        {pideClave && (
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center",padding:"10px 14px",marginBottom:14,borderRadius:10,border:"1.5px solid #C0392B",background:"#FBE3E0"}}>
+            <span style={{fontSize:13.5,fontWeight:700}}>🔒 La app pide la clave para leer y guardar en la planilla.</span>
+            <input type="password" value={claveIngresada} onChange={e=>setClaveIngresada(e.target.value)} placeholder="Clave"
+              style={{padding:"7px 10px",fontSize:14,border:"1px solid #C8C2B0",borderRadius:7,fontFamily:"inherit",flex:"1 1 140px",minWidth:0}}/>
+            <button onClick={()=>{ try { window.localStorage.setItem(CLAVE_KEY, claveIngresada.trim()); } catch {} window.location.reload(); }}
+              style={{padding:"8px 14px",fontSize:13.5,fontWeight:700,borderRadius:8,border:"none",background:TINTA,color:"#fff",cursor:"pointer",fontFamily:"inherit"}}>Entrar</button>
+          </div>
+        )}
 
         {/* TABS PRINCIPALES */}
         <div style={{display:"flex",gap:7,marginBottom:18,overflowX:"auto",paddingBottom:4}}>
@@ -3910,10 +4202,11 @@ export default function App(){
 
         {vista==="pendientes"&&<VistaPendientes protocolo={protocolo} cultivoDe={cultivoDe}
           aplicaciones={aplicacionesConDosis || APLICACIONES} conDosis={!!aplicacionesConDosis} monitoreos={monit.lista}
+          lluvias={lluv.lista} catalogo={TODOS_PRODUCTOS} onArmarOrden={armarOrdenDesde}
           fechaDatos={fechaDatos ? new Date(fechaDatos).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}) : null}
           onEditar={()=>setVista("protocolo")}/>}
 
-        {vista==="monitoreo"&&<VistaMonitoreo monit={monit} cultivoDe={cultivoDe} autor={autor} cambiarAutor={cambiarAutor}/>}
+        {vista==="monitoreo"&&<VistaMonitoreo monit={monit} lluv={lluv} cultivoDe={cultivoDe} autor={autor} cambiarAutor={cambiarAutor}/>}
 
         {vista==="protocolo"&&<VistaProtocoloEditor protocolo={protocolo} sync={protoSync} onGuardar={guardarProtocolo}/>}
 

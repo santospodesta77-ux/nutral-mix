@@ -12,12 +12,14 @@
 //   APPS_SCRIPT_PDF_URL     URL /exec de la aplicación web del Apps Script
 //   APPS_SCRIPT_PDF_TOKEN   la misma clave que CLAVE en el Apps Script
 //   DRIVE_ORDENES_FOLDER    (opcional) id de la carpeta de Drive donde se guardan los PDF
+import { claveOk } from "./_clave.js";
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-clave");
   if (req.method === "OPTIONS") return res.status(200).end();
+  if (!claveOk(req, res)) return;
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const url = process.env.APPS_SCRIPT_PDF_URL;
