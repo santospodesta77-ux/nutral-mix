@@ -117,7 +117,9 @@ function docDelCampo(carpeta, nombreCampo) {
   const doc = DocumentApp.create(nombre);
   DriveApp.getFileById(doc.getId()).moveTo(carpeta);
   const body = doc.getBody();
-  body.getChild(0).asParagraph().setText(nombre).setHeading(DocumentApp.ParagraphHeading.TITLE);
+  const titulo = body.getChild(0).asParagraph();
+  titulo.setText(nombre); // setText no devuelve el párrafo: no se puede encadenar
+  titulo.setHeading(DocumentApp.ParagraphHeading.TITLE);
   body.appendParagraph("Se completa solo desde la app Nutral Mix cada vez que se guarda un monitoreo. Los más nuevos van arriba.")
     .setHeading(DocumentApp.ParagraphHeading.NORMAL).editAsText().setItalic(true).setForegroundColor("#777777");
   return doc;
