@@ -2775,7 +2775,10 @@ function useListaCompartida({url, cuerpo, colaKey, campo}){
     const r = await fetch(url, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({[cuerpo]:m})});
     const d = await r.json().catch(() => ({}));
     if(!r.ok) throw new Error(d.error || `HTTP ${r.status}`);
+    return d;
   };
+  // Aviso del último guardado que no impide guardar (ej: no se pudo escribir el Google Doc del campo)
+  const avisoRef = useRef("");
   const recargar = async () => {
     try {
       const r = await fetch(url);
@@ -2799,8 +2802,9 @@ function useListaCompartida({url, cuerpo, colaKey, campo}){
     setSync({estado:"guardando"});
     let pendientes = leerCola().filter(x => !lista.some(m => m.id === x.id));
     let fallo = null;
+    avisoRef.current = "";
     for(const m of lista){
-      try { await subir(m); } catch(e) { fallo = e; pendientes.push(m); }
+      try { const d = await subir(m); if(d.docError) avisoRef.current = d.docError; } catch(e) { fallo = e; pendientes.push(m); }
     }
     escribirCola(pendientes); setCola(pendientes);
     if(fallo){ setSync({estado:"error", txt:fallo.message}); return false; }
@@ -2815,7 +2819,7 @@ function useListaCompartida({url, cuerpo, colaKey, campo}){
   };
   const lista = useMemo(() => [...cola.map(m => ({...m, sinSubir:true})), ...remotos.filter(m => !cola.some(c => c.id === m.id))]
     .sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)) || String(b.registrado||"").localeCompare(String(a.registrado||""))), [cola, remotos]);
-  return {lista, guardar, borrar, reintentar, sync, sinSubir: cola.length};
+  return {lista, guardar, borrar, reintentar, sync, sinSubir: cola.length, aviso: () => avisoRef.current};
 }
 const useMonitoreos = () => useListaCompartida({url:"/api/monitoreo", cuerpo:"monitoreo", colaKey:"smix_monitoreo_pendientes_v1", campo:"monitoreos"});
 const useLluvias = () => useListaCompartida({url:"/api/lluvias", cuerpo:"registro", colaKey:"smix_lluvias_pendientes_v1", campo:"lluvias"});
@@ -3011,10 +3015,11 @@ function FormMonitoreo({monit, campoId, loteId, cultivoDe, siembraDe, autor, cam
       accion:String(form.accion).trim(), autor, fotos:links.join(" "), plantasHa, sembradasHa:sembradas, logro:logroTxt, nacimiento};
     setMsg({ok:true, txt:"Guardando…"});
     const ok = await monit.guardar([m]);
+    const avisoDoc = ok && monit.aviso() ? ` Pero no se pudo escribir en el Google Doc del campo: ${monit.aviso()}` : "";
     fotos.forEach(ft => URL.revokeObjectURL(ft.url)); setFotos([]);
     setGuardando(false);
     const avisoFotos = fallaron ? ` ${fallaron} foto${fallaron>1?"s":""} no se pudo subir: ${/Failed to fetch|NetworkError|Load failed/i.test(motivo) ? "sin señal" : motivo}` : "";
-    onListo(ok ? {ok:!fallaron, txt:`✓ Monitoreo de ${campo.nombre} ${lote.label||lote.id} guardado en la planilla${links.length ? ` con ${links.length} foto${links.length>1?"s":""}` : ""}.${avisoFotos}`}
+    onListo(ok ? {ok:!fallaron && !avisoDoc, txt:`✓ Monitoreo de ${campo.nombre} ${lote.label||lote.id} guardado en la planilla${links.length ? ` con ${links.length} foto${links.length>1?"s":""}` : ""}${avisoDoc ? "." : " y en el Google Doc del campo."}${avisoFotos}${avisoDoc}`}
       : {ok:false, txt:`Sin conexión con la planilla: el monitoreo quedó guardado en este equipo y se sube cuando vuelva la señal.${avisoFotos}`});
   };
 
