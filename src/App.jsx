@@ -1472,12 +1472,39 @@ function getFill(campoId, loteId, modo, sueloVar, datos = {}) {
 }
 
 // ── COMPONENTE MAPA ──────────────────────────────────────────
+// Hacia dónde queda el norte en cada plano, en grados (0 = arriba). En casi todos los campos el norte
+// está arriba; en La Carlota está a la izquierda y en La Adoración, abajo.
+const NORTE_PLANO = {"LA CARLOTA": -90, "LA ADORACION": 180};
+// La flecha va en una franja que se agrega arriba del plano, así no tapa ningún lote
+const radioNorte = vw => 21*vw/700;
+const franjaNorte = vw => 2*radioNorte(vw) + 8*vw/700;
+const vbConNorte = ([vx,vy,vw,vh]) => `${vx} ${vy-franjaNorte(vw)} ${vw} ${vh+franjaNorte(vw)}`;
+// Flecha del norte, arriba a la derecha del plano (va también en la orden y su PDF)
+function RosaNorte({campo}){
+  const [vx,vy,vw] = campo.vb;
+  const k = vw/700, r = radioNorte(vw);
+  const cx = vx + vw - r - 2*k, cy = vy - r - 4*k;
+  const rot = NORTE_PLANO[campo.id] || 0;
+  // punto a distancia d del centro, en la dirección del norte
+  const pt = d => [cx + Math.sin(rot*Math.PI/180)*d, cy - Math.cos(rot*Math.PI/180)*d];
+  const [nx, ny] = pt(r*0.5);
+  return (
+    <g style={{pointerEvents:"none"}}>
+      <circle cx={cx} cy={cy} r={r} fill="rgba(255,255,255,0.92)" stroke={TINTA} strokeWidth={1.3*k}/>
+      <g transform={`rotate(${rot} ${cx} ${cy})`}>
+        <polygon points={`${cx},${cy-r*0.1} ${cx+r*0.3},${cy+r*0.72} ${cx},${cy+r*0.5} ${cx-r*0.3},${cy+r*0.72}`} fill={TINTA}/>
+      </g>
+      <text x={nx} y={ny + r*0.2} fontSize={r*0.62} fontWeight="800" textAnchor="middle" fill={TINTA} fontFamily="Arial, sans-serif">N</text>
+    </g>
+  );
+}
+
 function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick, datos, cultivoFiltro=null, cultivosDeLote=null}){
   const [hov,setHov]=useState(null);
   const [vx,vy,vw,vh]=campo.vb;
   const k=vw/700;
   return (
-    <svg viewBox={`${vx} ${vy} ${vw} ${vh}`} style={{width:"100%",height:"auto",display:"block",cursor:onLoteClick?"pointer":"default"}}>
+    <svg viewBox={mini ? `${vx} ${vy} ${vw} ${vh}` : vbConNorte(campo.vb)} style={{width:"100%",height:"auto",display:"block",cursor:onLoteClick?"pointer":"default"}}>
       {(campo.grises||[]).map((g,j)=>{
         const[cx,cy]=centro(g.poly);
         return <g key={j}>
@@ -1540,6 +1567,7 @@ function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick, datos, culti
           })()}
         </g>;
       })}
+      {!mini&&<RosaNorte campo={campo}/>}
     </svg>
   );
 }
@@ -4816,7 +4844,7 @@ export default function App(){
                     <div style={{fontSize:11,opacity:0.6,flex:1,minWidth:120}}>Pintás con color de <b>T{brocha+1}</b></div>
                   </div>
                   <div style={{background:"#fff",border:`1.5px solid ${TINTA}`,borderRadius:10,padding:8}}>
-                    <svg ref={svgRef} viewBox={`${vx} ${vy} ${vw} ${vh}`} style={{width:"100%",height:"auto",display:"block"}}
+                    <svg ref={svgRef} viewBox={campoOrd ? vbConNorte(campoOrd.vb) : `${vx} ${vy} ${vw} ${vh}`} style={{width:"100%",height:"auto",display:"block"}}
                       onClick={(e)=>{
                         if(!modoDividir || !loteDiv) return;
                         const p = puntoSVG(e.nativeEvent, svgRef.current);
@@ -4869,6 +4897,7 @@ export default function App(){
                       {puntosCorte.length===2&&(
                         <line x1={puntosCorte[0][0]} y1={puntosCorte[0][1]} x2={puntosCorte[1][0]} y2={puntosCorte[1][1]} stroke="#C0392B" strokeWidth={2*k} strokeDasharray={`${4*k} ${3*k}`} style={{pointerEvents:"none"}}/>
                       )}
+                      {campoOrd&&<RosaNorte campo={campoOrd}/>}
                     </svg>
                   </div>
                   {/* Aviso: el lote no coincide con el cultivo del tratamiento */}
@@ -5025,7 +5054,7 @@ export default function App(){
                                 );
                               })}
                             </div>
-                            <svg viewBox={`${vx} ${vy} ${vw} ${vh}`} style={{width:"100%",height:"auto",display:"block",border:`1px solid ${TINTA}`,background:"#fff",maxHeight:520}}>
+                            <svg viewBox={vbConNorte(campo.vb)} style={{width:"100%",height:"auto",display:"block",border:`1px solid ${TINTA}`,background:"#fff",maxHeight:520}}>
                               {(campo.grises||[]).map((g,j)=>(
                                 <polygon key={`g${j}`} points={g.poly.map(p=>p.join(",")).join(" ")} fill="#EDEBE3" stroke="#B5AF9D" strokeWidth={kk}/>
                               ))}
@@ -5050,6 +5079,7 @@ export default function App(){
                                   </g>
                                 );
                               })}
+                              <RosaNorte campo={campo}/>
                             </svg>
                           </div>
                         );
