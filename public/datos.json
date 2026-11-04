@@ -1,5 +1,5 @@
 {
-  "generado": "2026-11-04T13:30:57.280Z",
+  "generado": "2026-11-04T14:00:50.871Z",
   "warnings": [
     "L3H|10O 23-24: \"PATURA\" -> \"PASTURA\"",
     "LA DORA|2N 26-27: \"MAÍZ y SORGO (20 HA)\" -> \"MAIZ-SORGO\"",
@@ -8,7 +8,121 @@
     "LA MARIA OLIVA|FRANJA 1 25-26: \"MAIZ-FORRAJERO\" -> \"MAIZ FORRAJERO\"",
     "LA MARIA OLIVA|FRANJA 2 25-26: \"MAIZ-FORRAJERO\" -> \"MAIZ FORRAJERO\"",
     "DON RAMON|4 25-26: valor \"X\" no es un cultivo, se omite",
-    "LA ILUSION|8 26-27: \"CEBADA SOJA\" -> \"CEBADA-SOJA\""
+    "LA ILUSION|8 26-27: \"CEBADA SOJA\" -> \"CEBADA-SOJA\"",
+    "Campo 'EL DESCANSO' encontrado en labores - verificar si es válido",
+    "Lote duplicado con diferentes nomenclaturas: L3H-13, L3H-13ch, L3H-13G parecen referirse al mismo lote 13 de L3H",
+    "Cultivo 'COBERTURA' no es un cultivo válido - probablemente sea una aplicación de cobertura",
+    "Todas las fechas están en formato DD/MM/YYYY (argentino), convertidas a YYYY-MM-DD",
+    "Esta planilla solo contiene LABORES (aplicaciones), no hay datos de rotaciones, suelos ni fertilizaciones en este fragmento",
+    "Deduplicación aplicada: agrupando productos de la misma fecha+campo+lote+ha en una sola aplicación",
+    "Detectadas múltiples aplicaciones en la misma fecha para el mismo lote - se consolidaron según deduplicación requerida",
+    "Cultivos normalizados a MAYÚSCULAS según regla de normalización mínima",
+    "Campo 'LA DORA' tiene lote 'maiz humed' - verificar nombre de lote",
+    "Deduplicación: múltiples productos aplicados en misma fecha/campo/lote se consolidaron en una sola aplicación",
+    "Lote '13ch' y '13C' parecen ser el mismo (L3H|13C)",
+    "Lote '13G' y '13g' parecen ser el mismo (L3H|13G)",
+    "Lote '5 b (sur)' contiene espacios - verificar formato",
+    "Lote '8B (SUR)' contiene espacios - verificar formato",
+    "Registro de labores procesado. Se encontraron múltiples aplicaciones por fecha/campo/lote que fueron deduplicadas según la regla de agregación.",
+    "Lote 'EL ABUELO 1 y 3' contiene múltiples sublotes - se mantiene como aparece en planilla",
+    "Lote 'EL ABUELO-2,4 y 5' contiene múltiples sublotes - se mantiene como aparece en planilla",
+    "Lote 'LOS ABUELOS 2' y 'LOS ABUELOS 3' aparecen sin prefijo redundante, formato correcto",
+    "Campo 'MATEAN SAS' no está en la lista de campos válidos - revisar si es productor o campo",
+    "Campo '5' podría ser 'EL 5' - verificar formato",
+    "Cultivo 'vicia con triticale' y 'vicia y triticale' - verificar si son el mismo",
+    "Cultivo 'soja y maiz' en LA DORA 5 - formato ambiguo, no es doble cultivo estándar",
+    "Cultivo 'soja y maiz' es ambiguo - no queda claro si es doble cultivo o descriptor",
+    "Cultivo 'girasol' encontrado en múltiples aplicaciones",
+    "Cultivo 'soja' encontrado en múltiples aplicaciones",
+    "Lotes con formato 'campo lote' procesados: prefijo de campo removido",
+    "Múltiples aplicaciones en misma fecha para distintos lotes",
+    "No se encontraron datos de rotaciones, suelos ni fertilizaciones en esta planilla",
+    "Lote '1 sin cabecera' tiene formato inusual - verificar si es correcto",
+    "Todas las aplicaciones del 6/9/2026 son del mismo día - verificar si hay duplicaciones",
+    "No se encontraron datos de rotaciones, suelos, ni fertilizaciones en esta planilla",
+    "Campo 'MIRASOL' no identificado en la lista de campos válidos - requiere aclaración",
+    "Lote 'L3H|1 sin cabecera' tiene nombre atípico - verificar si es '1' solamente",
+    "Lote 'L3H|24 sector 2' tiene nombre atípico - verificar si es '24' solamente",
+    "Aplicación del 6/9/2026 en L3H|4 con cultivo 'soja' pero debería estar en mayúsculas",
+    "Aplicación del 6/9/2026 en L3H|24 sector 2 con cultivo 'girasol' pero debería estar en mayúsculas",
+    "Aplicación del 6/9/2026 en L3H|28 con cultivo 'girasol' pero debería estar en mayúsculas",
+    "Aplicación del 8/9/2026 en L3H|9B con cultivo 'soja' pero debería estar en mayúsculas",
+    "Aplicación del 8/9/2026 en L3H|22 con cultivo 'girasol' pero debería estar en mayúsculas",
+    "Aplicación del 9/9/2026 en EL DESCANSO|6 con cultivo 'soja' pero debería estar en mayúsculas",
+    "Aplicación del 9/9/2026 en EL DESCANSO|4 con cultivo 'soja' pero debería estar en mayúsculas",
+    "Aplicación del 9/9/2026 en EL DESCANSO|2 con cultivo 'soja' pero debería estar en mayúsculas",
+    "Aplicación del 9/9/2026 en EL DESCANSO|5 con cultivo 'girasol' pero debería estar en mayúsculas",
+    "Deduplicación aplicada: misma fecha+campo+lote+ha se consolidó en una sola aplicación",
+    "Campo 'SUC' no está en la lista de campos válidos - registros omitidos de las keys principales pero incluidos para trazabilidad",
+    "Campo 'SUC' no está en la lista de campos válidos - se interpretó como productor",
+    "Campo 'ENRIQUE' no está en la lista de campos válidos - se interpretó como productor",
+    "Lotes deduplicados por fecha+campo+lote+ha: se agruparon productos de la misma aplicación",
+    "Campo 'EL ABUELO' no está en la lista de campos válidos - revisar si es alias de otro campo",
+    "Campo 'EL CIPRES' encontrado - incluido en APLICACIONES",
+    "Campo 'LA ADORACION' encontrado - incluido en APLICACIONES",
+    "Campo 'LA CARLOTA' encontrado - incluido en APLICACIONES",
+    "Campo 'LOS NIETOS' encontrado - incluido en APLICACIONES",
+    "Cultivo en minúsculas normalizado a mayúsculas: sorgo → SORGO, girasol → GIRASOL",
+    "Múltiples productos en misma fecha+campo+lote+ha deduplicados como una sola aplicación",
+    "L3H|7: Aplicación duplicada 4 veces en fecha 2026-10-06 (mismos productos). Se registró una sola vez.",
+    "Todas las aplicaciones son de octubre 2026, fuera de la ventana típica de campaña 25-26 o inv 26-27",
+    "Lote '7 franja maiz' tiene nomenclatura no estándar, se normaliza a '7 FRANJA MAIZ'",
+    "Múltiples entradas duplicadas para L3H|7 en fecha 2026-10-06 (mismos productos, mismas cantidades) - se deduplica",
+    "Lote L3H|7,0 y L3H|7 parecen ser el mismo lote (formato inconsistente con decimales)",
+    "Fecha 6/10/2026 interpretada como 6 de octubre de 2026 (formato día/mes/año argentino)",
+    "Fecha 7/10/2026 interpretada como 7 de octubre de 2026",
+    "Fecha 9/10/2026 interpretada como 9 de octubre de 2026",
+    "Fecha 2/10/2026 interpretada como 2 de octubre de 2026",
+    "Cultivos normalizados a MAYÚSCULAS",
+    "Detectadas múltiples aplicaciones en misma fecha/campo/lote - deduplicando por grupo",
+    "NITROCOMPLEX en siembra: registrado como fertilización tipo 'Siembra'",
+    "Lote '9B' en L3H: formato con letra, transcrito tal cual",
+    "Múltiples aplicaciones en la misma fecha para LOS ABUELOS|10 (deduplicado por fecha+campo+lote+ha)",
+    "Múltiples aplicaciones en la misma fecha para LOS ABUELOS|8A (deduplicado por fecha+campo+lote+ha)",
+    "Múltiples aplicaciones en la misma fecha para LOS ABUELOS|7B (deduplicado por fecha+campo+lote+ha)",
+    "Múltiples aplicaciones en la misma fecha para LOS ABUELOS|4 (deduplicado por fecha+campo+lote+ha)",
+    "Múltiples aplicaciones en la misma fecha para LOS ABUELOS|2 (deduplicado por fecha+campo+lote+ha)",
+    "Múltiples aplicaciones en la misma fecha para LOS ABUELOS|3O (deduplicado por fecha+campo+lote+ha)",
+    "Múltiples aplicaciones en la misma fecha para LOS ABUELOS|3 (deduplicado por fecha+campo+lote+ha)",
+    "Múltiples aplicaciones en la misma fecha para LA MARIA OLIVA|FRANJA 1 (deduplicado por fecha+campo+lote+ha)",
+    "Múltiples aplicaciones en la misma fecha para EL 5|5L (deduplicado por fecha+campo+lote+ha)",
+    "Múltiples aplicaciones en la misma fecha para EL 5|3L (deduplicado por fecha+campo+lote+ha)",
+    "Múltiples aplicaciones en la misma fecha para LA CUCA|1 (deduplicado por fecha+campo+lote+ha)",
+    "Tabla de labores detectada con múltiples aplicaciones por fecha/campo/lote - se aplicó deduplicación",
+    "PULVERIZADA TERRESTRE aparece como producto pero no tiene dosis, se incluyó en productos de la aplicación",
+    "MIRASOL no está en la lista de campos válidos - no incluido",
+    "Todas las labores son de octubre 2026 (campaña 26-27) - no hay datos de fertilizaciones ni análisis de suelos en esta planilla",
+    "Todos los registros son del año 2026 pero las fechas están en octubre, lo cual es inusual para la campaña 26-27 que debería empezar en junio/julio. Se transcribe tal cual está en la planilla.",
+    "Se encontraron múltiples aplicaciones en la misma fecha para el mismo lote. Se deduplicaron agrupando productos de la misma aplicación.",
+    "Todas las fechas están en formato argentino (día/mes/año) - convertidas a YYYY-MM-DD",
+    "Múltiples productos por aplicación - agrupados por fecha+campo+lote+ha",
+    "Semillas con precio 0.00 registradas pero sin costo unitario válido",
+    "Campo DON ANTONIO no está en la lista de campos válidos - revisar si es alias o error de tipeo",
+    "Campo DOÑA TERESA no está en la lista de campos válidos - revisar si es alias o error de tipeo",
+    "Múltiples aplicaciones en la misma fecha para el mismo lote - se agruparon por fecha+campo+lote+ha",
+    "Campo 'SUC' no está en la lista de campos válidos",
+    "Múltiples aplicaciones con misma fecha, campo y lote fueron deduplicadas",
+    "Campo 'LA DORA' con lote '2 N': lote contiene espacio, verificar si es correcto",
+    "Campo 'LAS TIAS' con lote '10,0': lote con formato numérico decimal, verificar si debería ser '10'",
+    "Campo 'LAS TIAS' con lote '9,0': lote con formato numérico decimal, verificar si debería ser '9'",
+    "Campo 'DON ANTONIO' con lote '14,0': lote con formato numérico decimal, verificar si debería ser '14'",
+    "Campo 'DOÑA TERESA' con lote '1,0': lote con formato numérico decimal, verificar si debería ser '1'",
+    "Campo 'LA ILUSION' con lote '1,0': lote con formato numérico decimal, verificar si debería ser '1'",
+    "Campo 'LA ILUSION' con lote '7,0': lote con formato numérico decimal, verificar si debería ser '7'",
+    "Campo 'EL TORELLO' con lote '1,0': lote con formato numérico decimal, verificar si debería ser '1'",
+    "Campo 'EL ABUELO' con lote '1,0': lote con formato numérico decimal, verificar si debería ser '1'",
+    "Campo 'EL ABUELO' con lote '3,0': lote con formato numérico decimal, verificar si debería ser '3'",
+    "Campo 'L3H' con lote '19,0': lote con formato numérico decimal, verificar si debería ser '19'",
+    "Múltiples aplicaciones en misma fecha-campo-lote deduplicadas a una sola entrada con productos agregados",
+    "Todas las aplicaciones son de octubre 2026 (campaña 26-27)",
+    "No hay datos de rotaciones, suelos, ni fertilizaciones en esta planilla",
+    "Planilla contiene solo registro de labores/aplicaciones",
+    "Se deduplicaron aplicaciones por fecha+campo+lote+ha",
+    "Lote '3O' en LOS ABUELOS parece ser un typo de '3' (letra O en vez de cero)",
+    "Lote '8A' en LOS ABUELOS: registro incompleto, solo aparece pulverizada sin productos",
+    "Lote LOS ABUELOS|7B: cultivo vacío en fecha 3/11/2026, omitido",
+    "Todas las aplicaciones corresponden a noviembre 2026, probablemente labores de pre-siembra o barbecho",
+    "APLICACIONES: labor separada de la lista de productos en 137 registro(s)"
   ],
   "INV_26": {
     "L3H|4": "TRIGO",
@@ -109,7 +223,7 @@
     "EL CIPRES|2S": "PASTURA",
     "EL CIPRES|4": "AVENA",
     "EL CIPRES|7": "PASTURA",
-    "EL CIPRES|9": "PASTURA",
+    "EL CIPRES|8": "PASTURA",
     "DON MARCELINO|1": "AVENA",
     "DON MARCELINO|2": "AVENA",
     "DON MARCELINO|4": "PASTURA",
@@ -239,7 +353,7 @@
     "EL CIPRES|5": "MAIZ",
     "EL CIPRES|6": "MAIZ",
     "EL CIPRES|3": "SORGO",
-    "EL CIPRES|8": "MAIZ",
+    "EL CIPRES|9": "MAIZ",
     "DON MARCELINO|2": "AVENA-MAIZ",
     "DON MARCELINO|3": "SORGO",
     "DON MARCELINO|5": "SORGO",
@@ -2800,7 +2914,7 @@
         "cv": "PASTURA"
       },
       "26-27": {
-        "cv": "MAIZ"
+        "cv": "PASTURA"
       }
     },
     "EL CIPRES|9": {
@@ -2808,7 +2922,7 @@
         "cv": "PASTURA"
       },
       "26-27": {
-        "cv": "PASTURA"
+        "cv": "MAIZ"
       }
     },
     "DON MARCELINO|1": {
@@ -3685,7 +3799,7 @@
       "lote": "4",
       "ha": 32,
       "cultivo": "PASTURA",
-      "costo": 1081.8,
+      "costo": 1082.2,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
@@ -3826,8 +3940,7 @@
         "Coady. RizoSpray EXTREMO x 10 Lt",
         "S-Metolaclor x Lt",
         "Flurocloridona 25 %"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-10-27",
@@ -3928,13 +4041,13 @@
       "cultivo": "GIRASOL",
       "costo": 301.7,
       "productos": [
-        "PARAQUAT SIGMA x 20 LT",
-        "2-4 D 97 SIGMA x 20 LT",
-        "FLUROCLORIDONA RAINBOW x 10 LT",
-        "ACEITE METILADO ROCIO x 3 LT",
-        "LIGIER PH BIO x LT",
-        "S-METOLACLORO STRIM x 20 LT",
-        "AMPLIGO x LT"
+        "PARAQUAT SIGMA",
+        "2-4 D 97 SIGMA",
+        "FLUROCLORIDONA RAINBOW",
+        "ACEITE METILADO ROCIO",
+        "LIGIER PH BIO",
+        "S-METOLACLORO STRIM",
+        "AMPLIGO"
       ],
       "labor": "PULVERIZADA TERRESTRE"
     },
@@ -3946,13 +4059,13 @@
       "cultivo": "GIRASOL",
       "costo": 678.8,
       "productos": [
-        "PARAQUAT SIGMA x 20 LT",
-        "2-4 D 97 SIGMA x 20 LT",
-        "FLUROCLORIDONA RAINBOW x 10 LT",
-        "ACEITE METILADO ROCIO x 3 LT",
-        "LIGIER PH BIO x LT",
-        "S-METOLACLORO STRIM x 20 LT",
-        "AMPLIGO x LT"
+        "PARAQUAT SIGMA",
+        "2-4 D 97 SIGMA",
+        "FLUROCLORIDONA RAINBOW",
+        "ACEITE METILADO ROCIO",
+        "LIGIER PH BIO",
+        "S-METOLACLORO STRIM",
+        "AMPLIGO"
       ],
       "labor": "PULVERIZADA TERRESTRE"
     },
@@ -3964,13 +4077,13 @@
       "cultivo": "GIRASOL",
       "costo": 2037.2,
       "productos": [
-        "GLIFOSATO GRANULADO MAX SIGMA x 15 Kg",
-        "2-4 D 97 SIGMA x 20 LT",
-        "FLUROCLORIDONA RAINBOW x 10 LT",
-        "ACEITE METILADO ROCIO x 3 LT",
-        "LIGIER PH BIO x LT",
-        "S-METOLACLORO STRIM x 20 LT",
-        "AMPLIGO x LT"
+        "GLIFOSATO GRANULADO MAX SIGMA",
+        "2-4 D 97 SIGMA",
+        "FLUROCLORIDONA RAINBOW",
+        "ACEITE METILADO ROCIO",
+        "LIGIER PH BIO",
+        "S-METOLACLORO STRIM",
+        "AMPLIGO"
       ],
       "labor": "PULVERIZADA TERRESTRE"
     },
@@ -3980,15 +4093,15 @@
       "lote": "7",
       "ha": 48,
       "cultivo": "GIRASOL",
-      "costo": 1955.4,
+      "costo": 1955.6,
       "productos": [
-        "GLIFOSATO GRANULADO MAX SIGMA x 15 Kg",
-        "2-4 D 97 SIGMA x 20 LT",
-        "FLUROCLORIDONA RAINBOW x 10 LT",
-        "ACEITE METILADO ROCIO x 3 LT",
-        "LIGIER PH BIO x LT",
-        "S-METOLACLORO STRIM x 20 LT",
-        "AMPLIGO x LT"
+        "GLIFOSATO GRANULADO MAX SIGMA",
+        "2-4 D 97 SIGMA",
+        "FLUROCLORIDONA RAINBOW",
+        "ACEITE METILADO ROCIO",
+        "LIGIER PH BIO",
+        "S-METOLACLORO STRIM",
+        "AMPLIGO"
       ],
       "labor": "PULVERIZADA TERRESTRE"
     },
@@ -4070,15 +4183,6 @@
         "LIGIER PH BIO x LT",
         "ATRAZINA GESAPRIM 90 x 10 KG"
       ]
-    },
-    {
-      "fecha": "2026-10-23",
-      "campo": "LAS TIAS",
-      "lote": "10",
-      "ha": 63,
-      "cultivo": "GIRASOL",
-      "costo": 396.9,
-      "productos": []
     },
     {
       "fecha": "2026-10-23",
@@ -4178,8 +4282,7 @@
         "Sulfentrazone 50 % x 5 Lt",
         "S-Metolaclor x Lt",
         "Coady. RizoSpray Corrector Secuestrante x 1 Lt"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-10-23",
@@ -4194,8 +4297,7 @@
         "Coady. RizoSpray EXTREMO x 10 Lt",
         "Sulfentrazone 50 % x 5 Lt",
         "S-Metolaclor x Lt"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-10-23",
@@ -4203,15 +4305,14 @@
       "lote": "21N",
       "ha": 63,
       "cultivo": "SOJA",
-      "costo": 1979.1,
+      "costo": 1979.2,
       "productos": [
         "Paraquat 27.6% x 20 Lt",
         "POWERSPRAY 2,4D 68%",
         "Coady. RizoSpray EXTREMO x 10 Lt",
         "Sulfentrazone 50 % x 5 Lt",
         "S-Metolaclor x Lt"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-10-23",
@@ -4226,13 +4327,12 @@
         "Coady. RizoSpray EXTREMO x 10 Lt",
         "Sulfentrazone 50 % x 5 Lt",
         "S-Metolaclor x Lt"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-10-23",
       "campo": "L3H",
-      "lote": "13ch",
+      "lote": "13CH",
       "ha": 16,
       "cultivo": "SOJA",
       "costo": 810.6,
@@ -4245,8 +4345,7 @@
         "clorimuron 75% max sigma",
         "Sulfentrazone 50 % x 5 Lt",
         "S-Metolaclor x Lt"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-10-23",
@@ -4262,8 +4361,7 @@
         "Atrazina 90 % solida x 15 kg",
         "Coady. RizoSpray EXTREMO x 10 Lt",
         "Coady. RizoSpray Corrector Secuestrante x 1 Lt"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-10-23",
@@ -4279,55 +4377,6 @@
         "Atrazina 90 % solida x 15 kg",
         "Coady. RizoSpray EXTREMO x 10 Lt",
         "Coady. RizoSpray Corrector Secuestrante x 1 Lt"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
-    },
-    {
-      "fecha": "2026-10-21",
-      "campo": "L3H",
-      "lote": "28",
-      "ha": 47,
-      "cultivo": "GIRASOL",
-      "costo": 5513.1,
-      "productos": [
-        "Sun 3970",
-        "NITROCOMPLEX"
-      ]
-    },
-    {
-      "fecha": "2026-10-21",
-      "campo": "L3H",
-      "lote": "23",
-      "ha": 53,
-      "cultivo": "GIRASOL",
-      "costo": 6216.9,
-      "productos": [
-        "Sun 3970",
-        "NITROCOMPLEX"
-      ]
-    },
-    {
-      "fecha": "2026-10-21",
-      "campo": "L3H",
-      "lote": "17",
-      "ha": 112,
-      "cultivo": "GIRASOL",
-      "costo": 13137.6,
-      "productos": [
-        "Sun 3970",
-        "NITROCOMPLEX"
-      ]
-    },
-    {
-      "fecha": "2026-10-21",
-      "campo": "L3H",
-      "lote": "2",
-      "ha": 35,
-      "cultivo": "GIRASOL",
-      "costo": 4105.5,
-      "productos": [
-        "Sun 3970",
-        "NITROCOMPLEX"
       ]
     },
     {
@@ -4361,12 +4410,13 @@
       "lote": "5",
       "ha": 27,
       "cultivo": "MAIZ",
-      "costo": 546.3,
+      "costo": 546.4,
       "productos": [
-        "PARAQUAT 27.6%",
+        "Paraquat 27.6%",
         "POWERSPRAY 2,4D 68%",
-        "COADYUVANTE RIZOSPRAY EXTREMO"
-      ]
+        "Coady. RizoSpray EXTREMO"
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-10-20",
@@ -4376,10 +4426,11 @@
       "cultivo": "MAIZ",
       "costo": 1011.8,
       "productos": [
-        "PARAQUAT 27.6%",
+        "Paraquat 27.6%",
         "POWERSPRAY 2,4D 68%",
-        "COADYUVANTE RIZOSPRAY EXTREMO"
-      ]
+        "Coady. RizoSpray EXTREMO"
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-10-20",
@@ -4389,10 +4440,11 @@
       "cultivo": "MAIZ",
       "costo": 1011.8,
       "productos": [
-        "PARAQUAT 27.6%",
+        "Paraquat 27.6%",
         "POWERSPRAY 2,4D 68%",
-        "COADYUVANTE RIZOSPRAY EXTREMO"
-      ]
+        "Coady. RizoSpray EXTREMO"
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-10-20",
@@ -4402,10 +4454,11 @@
       "cultivo": "MAIZ",
       "costo": 1011.8,
       "productos": [
-        "PARAQUAT 27.6%",
+        "Paraquat 27.6%",
         "POWERSPRAY 2,4D 68%",
-        "COADYUVANTE RIZOSPRAY EXTREMO"
-      ]
+        "Coady. RizoSpray EXTREMO"
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-10-20",
@@ -4415,10 +4468,11 @@
       "cultivo": "SORGO",
       "costo": 991.6,
       "productos": [
-        "PARAQUAT 27.6%",
+        "Paraquat 27.6%",
         "POWERSPRAY 2,4D 68%",
-        "COADYUVANTE RIZOSPRAY EXTREMO"
-      ]
+        "Coady. RizoSpray EXTREMO"
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-10-20",
@@ -4428,10 +4482,11 @@
       "cultivo": "SORGO",
       "costo": 263.1,
       "productos": [
-        "PARAQUAT 27.6%",
+        "Paraquat 27.6%",
         "POWERSPRAY 2,4D 68%",
-        "COADYUVANTE RIZOSPRAY EXTREMO"
-      ]
+        "Coady. RizoSpray EXTREMO"
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-10-20",
@@ -4439,12 +4494,13 @@
       "lote": "1",
       "ha": 17,
       "cultivo": "SORGO",
-      "costo": 343.9,
+      "costo": 344,
       "productos": [
-        "PARAQUAT 27.6%",
+        "Paraquat 27.6%",
         "POWERSPRAY 2,4D 68%",
-        "COADYUVANTE RIZOSPRAY EXTREMO"
-      ]
+        "Coady. RizoSpray EXTREMO"
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-10-20",
@@ -4454,10 +4510,11 @@
       "cultivo": "SORGO",
       "costo": 202.4,
       "productos": [
-        "PARAQUAT 27.6%",
+        "Paraquat 27.6%",
         "POWERSPRAY 2,4D 68%",
-        "COADYUVANTE RIZOSPRAY EXTREMO"
-      ]
+        "Coady. RizoSpray EXTREMO"
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-10-20",
@@ -4469,10 +4526,11 @@
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
-        "DICAMBA 70.8%",
-        "COADYUVANTE RIZOSPRAY EXTREMO",
-        "COADYUVANTE RIZOSPRAY CORRECTOR SECUESTRANTE"
-      ]
+        "Dicamba 70.8 % Duranor Avance",
+        "Coady. RizoSpray EXTREMO",
+        "Coady. RizoSpray Corrector Secuestrante"
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-10-20",
@@ -4482,9 +4540,10 @@
       "cultivo": "GIRASOL",
       "costo": 638.4,
       "productos": [
-        "PARAQUAT 27.6%",
+        "Paraquat 27.6%",
         "POWERSPRAY 2,4D 68%"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-10-20",
@@ -4494,9 +4553,10 @@
       "cultivo": "GIRASOL",
       "costo": 532,
       "productos": [
-        "PARAQUAT 27.6%",
+        "Paraquat 27.6%",
         "POWERSPRAY 2,4D 68%"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-10-19",
@@ -4504,7 +4564,7 @@
       "lote": "1",
       "ha": 88,
       "cultivo": "GIRASOL",
-      "costo": 4413,
+      "costo": 4412.6,
       "productos": [
         "CONTROLMAX",
         "Fluroxipir 48%",
@@ -4571,9 +4631,9 @@
       "costo": 802,
       "productos": [
         "AMPLIGO",
-        "COADYUVANTE RIZOSPRAY EXTREMO",
-        "S-METOLACLOR",
-        "FLUROCLORIDONA"
+        "Coady. RizoSpray EXTREMO",
+        "S-Metolaclor",
+        "Flurocloridona 25 %"
       ]
     },
     {
@@ -4587,10 +4647,11 @@
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
         "CLETODIM SIGMA",
-        "SULFENTRAZONE 50%",
-        "COADYUVANTE RIZOSPRAY EXTREMO",
-        "COADYUVANTE RIZOSPRAY CORRECTOR SECUESTRANTE"
-      ]
+        "Sulfentrazone 50 %",
+        "Coady. RizoSpray EXTREMO",
+        "Coady. RizoSpray Corrector Secuestrante"
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-10-15",
@@ -4600,7 +4661,7 @@
       "cultivo": "SOJA",
       "costo": 1305.4,
       "productos": [
-        "Paraquat 27.6%"
+        "Paraquat 27.6% x 20 Lt"
       ]
     },
     {
@@ -4621,7 +4682,7 @@
       "lote": "6",
       "ha": 65,
       "cultivo": "GIRASOL",
-      "costo": 4248.7,
+      "costo": 3849.2,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
@@ -4668,14 +4729,14 @@
       "lote": "FRANJA 1",
       "ha": 33,
       "cultivo": "MAIZ",
-      "costo": 974.8,
+      "costo": 1182.7,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 % Duranor Avance",
-        "RizoSpray EXTREMO",
-        "RizoSpray Corrector Secuestrante",
-        "Atrazina 90 %"
+        "Dicamba 70.8 % Duranor Avance x Lt",
+        "Coady. RizoSpray EXTREMO x 10 Lt",
+        "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
+        "Atrazina 90 % solida x 15 kg"
       ]
     },
     {
@@ -4684,14 +4745,14 @@
       "lote": "5L",
       "ha": 26,
       "cultivo": "MAIZ",
-      "costo": 768.1,
+      "costo": 931.9,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 % Duranor Avance",
-        "RizoSpray EXTREMO",
-        "RizoSpray Corrector Secuestrante",
-        "Atrazina 90 %"
+        "Dicamba 70.8 % Duranor Avance x Lt",
+        "Coady. RizoSpray EXTREMO x 10 Lt",
+        "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
+        "Atrazina 90 % solida x 15 kg"
       ]
     },
     {
@@ -4700,41 +4761,15 @@
       "lote": "3L",
       "ha": 10,
       "cultivo": "MAIZ",
-      "costo": 295.5,
+      "costo": 358.5,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 % Duranor Avance",
-        "RizoSpray EXTREMO",
-        "RizoSpray Corrector Secuestrante",
-        "Atrazina 90 %"
+        "Dicamba 70.8 % Duranor Avance x Lt",
+        "Coady. RizoSpray EXTREMO x 10 Lt",
+        "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
+        "Atrazina 90 % solida x 15 kg"
       ]
-    },
-    {
-      "fecha": "2026-10-09",
-      "campo": "L3H",
-      "lote": "26",
-      "ha": 53,
-      "cultivo": "MAIZ",
-      "costo": 20041.9,
-      "productos": [
-        "DK6962",
-        "NITROCOMPLEX"
-      ],
-      "labor": "SIEMBRA"
-    },
-    {
-      "fecha": "2026-10-09",
-      "campo": "L3H",
-      "lote": "27",
-      "ha": 50,
-      "cultivo": "MAIZ",
-      "costo": 18907.5,
-      "productos": [
-        "DK6962",
-        "NITROCOMPLEX"
-      ],
-      "labor": "SIEMBRA"
     },
     {
       "fecha": "2026-10-09",
@@ -4999,9 +5034,9 @@
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
-        "DICAMBA 70.8 % DURANOR AVANCE x LT",
-        "COADY. RIZOSPRAY EXTREMO x 10 LT",
-        "COADY. RIZOSPRAY CORRECTOR SECUESTRANTE x 1 LT"
+        "DICAMBA 70.8 % DURANOR AVANCE",
+        "RIZOSPRAY EXTREMO",
+        "RIZOSPRAY CORRECTOR SECUESTRANTE"
       ],
       "labor": "PULVERIZADA TERRESTRE"
     },
@@ -5011,14 +5046,14 @@
       "lote": "5",
       "ha": 21,
       "cultivo": "GIRASOL",
-      "costo": 923.8,
+      "costo": 924.2,
       "productos": [
-        "PARAQUAT 27.6% x 20 LT",
+        "PARAQUAT 27.6%",
         "POWERSPRAY 2,4D 68%",
-        "COADY. RIZOSPRAY EXTREMO x 10 LT",
-        "SULFENTRAZONE 50 % x 5 LT",
-        "AMPLIGO x LT",
-        "S-METOLACLOR x LT",
+        "RIZOSPRAY EXTREMO",
+        "SULFENTRAZONE 50 %",
+        "AMPLIGO",
+        "S-METOLACLOR",
         "FLUROCLORIDONA 25 %"
       ],
       "labor": "PULVERIZADA TERRESTRE"
@@ -5032,7 +5067,7 @@
       "costo": 764.7,
       "productos": [
         "CONTROLMAX",
-        "SHARK (CARFENTRAZONE) x LT",
+        "SHARK",
         "POWERSPRAY 2,4D 68%"
       ],
       "labor": "PULVERIZADA TERRESTRE"
@@ -5109,8 +5144,7 @@
         "S-Metolaclor",
         "Flurocloridona 25 %",
         "RizoSpray Corrector Secuestrante"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-10-07",
@@ -5123,40 +5157,39 @@
         "Paraquat 27.6%",
         "POWERSPRAY 2,4D 68%",
         "RizoSpray EXTREMO"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-10-06",
       "campo": "L3H",
-      "lote": "26 SIN CABECERA",
+      "lote": "26 sin cabecera",
       "ha": 43,
       "cultivo": "MAIZ",
-      "costo": 1748.2,
+      "costo": 1748.3,
       "productos": [
         "CONTROLMAX",
-        "S-METOLACLOR",
-        "SULFENTRAZONE 50%",
+        "S-Metolaclor",
+        "Sulfentrazone 50 %",
         "AMPLIGO",
-        "COADY. RIZOSPRAY EXTREMO",
-        "COADY. RIZOSPRAY CORRECTOR SECUESTRANTE",
+        "Coady. RizoSpray EXTREMO",
+        "Coady. RizoSpray Corrector Secuestrante",
         "POWERSPRAY 2,4D 68%"
       ]
     },
     {
       "fecha": "2026-10-06",
       "campo": "L3H",
-      "lote": "27 SIN CABECERA",
+      "lote": "27 sin cabecera",
       "ha": 40,
       "cultivo": "MAIZ",
       "costo": 1627.1,
       "productos": [
         "CONTROLMAX",
-        "S-METOLACLOR",
-        "SULFENTRAZONE 50%",
+        "S-Metolaclor",
+        "Sulfentrazone 50 %",
         "AMPLIGO",
-        "COADY. RIZOSPRAY EXTREMO",
-        "COADY. RIZOSPRAY CORRECTOR SECUESTRANTE",
+        "Coady. RizoSpray EXTREMO",
+        "Coady. RizoSpray Corrector Secuestrante",
         "POWERSPRAY 2,4D 68%"
       ]
     },
@@ -5170,24 +5203,9 @@
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
-        "DICAMBA 70.8% DURANOR AVANCE",
-        "COADY. RIZOSPRAY EXTREMO",
-        "COADY. RIZOSPRAY CORRECTOR SECUESTRANTE"
-      ]
-    },
-    {
-      "fecha": "2026-10-06",
-      "campo": "L3H",
-      "lote": "7",
-      "ha": 20,
-      "cultivo": "MAIZ",
-      "costo": 567.1,
-      "productos": [
-        "CONTROLMAX",
-        "POWERSPRAY 2,4D 68%",
-        "DICAMBA 70.8% DURANOR AVANCE",
-        "COADY. RIZOSPRAY EXTREMO",
-        "COADY. RIZOSPRAY CORRECTOR SECUESTRANTE"
+        "Dicamba 70.8 % Duranor Avance",
+        "Coady. RizoSpray EXTREMO",
+        "Coady. RizoSpray Corrector Secuestrante"
       ]
     },
     {
@@ -5196,11 +5214,13 @@
       "lote": "7",
       "ha": 22,
       "cultivo": "MAIZ",
-      "costo": 514.8,
+      "costo": 652.8,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
-        "DICAMBA 70.8% DURANOR AVANCE"
+        "Dicamba 70.8 % Duranor Avance",
+        "Coady. RizoSpray EXTREMO",
+        "Coady. RizoSpray Corrector Secuestrante"
       ]
     },
     {
@@ -5209,7 +5229,7 @@
       "lote": "7",
       "ha": 22,
       "cultivo": "MAIZ",
-      "costo": 110.96,
+      "costo": 111,
       "productos": [
         "RizoSpray EXTREMO",
         "RizoSpray Corrector Secuestrante"
@@ -5225,7 +5245,7 @@
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8%",
+        "Dicamba 70.8 %",
         "RizoSpray EXTREMO",
         "RizoSpray Corrector Secuestrante"
       ],
@@ -5244,7 +5264,7 @@
         "AMPLIGO",
         "RizoSpray EXTREMO",
         "S-Metolaclor",
-        "Flurocloridona 25%",
+        "Flurocloridona 25 %",
         "RizoSpray Corrector Secuestrante"
       ],
       "labor": "PULVERIZADA TERRESTRE"
@@ -5259,7 +5279,7 @@
       "productos": [
         "Paraquat 27.6%",
         "AMPLIGO",
-        "Flurocloridona 25%",
+        "Flurocloridona 25 %",
         "S-Metolaclor",
         "RizoSpray EXTREMO"
       ],
@@ -5275,7 +5295,7 @@
       "productos": [
         "Paraquat 27.6%",
         "AMPLIGO",
-        "Flurocloridona 25%",
+        "Flurocloridona 25 %",
         "S-Metolaclor",
         "RizoSpray EXTREMO"
       ],
@@ -5291,7 +5311,7 @@
       "productos": [
         "Paraquat 27.6%",
         "AMPLIGO",
-        "Flurocloridona 25%",
+        "Flurocloridona 25 %",
         "S-Metolaclor",
         "RizoSpray EXTREMO"
       ],
@@ -5303,14 +5323,14 @@
       "lote": "7",
       "ha": 3,
       "cultivo": "MAIZ",
-      "costo": 117.5,
+      "costo": 136.4,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8%",
+        "Dicamba 70.8 %",
         "RizoSpray EXTREMO",
         "RizoSpray Corrector Secuestrante",
-        "Atrazina 90%"
+        "Atrazina 90 %"
       ],
       "labor": "PULVERIZADA TERRESTRE"
     },
@@ -5324,10 +5344,10 @@
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8%",
+        "Dicamba 70.8 %",
         "RizoSpray EXTREMO",
         "RizoSpray Corrector Secuestrante",
-        "Atrazina 90%"
+        "Atrazina 90 %"
       ],
       "labor": "PULVERIZADA TERRESTRE"
     },
@@ -5345,8 +5365,7 @@
         "RizoSpray EXTREMO",
         "RizoSpray Corrector Secuestrante",
         "Atrazina 90 %"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-10-06",
@@ -5362,8 +5381,7 @@
         "RizoSpray EXTREMO",
         "RizoSpray Corrector Secuestrante",
         "Atrazina 90 %"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-10-06",
@@ -5381,8 +5399,7 @@
         "RizoSpray Corrector Secuestrante",
         "POWERSPRAY 2,4D 68%",
         "Carfentrazone"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-10-06",
@@ -5400,8 +5417,7 @@
         "RizoSpray Corrector Secuestrante",
         "POWERSPRAY 2,4D 68%",
         "Carfentrazone"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-10-05",
@@ -5411,7 +5427,7 @@
       "cultivo": "CENTENO",
       "costo": 1463,
       "productos": [
-        "NITROMAG Z"
+        "nitromag z"
       ]
     },
     {
@@ -5422,7 +5438,7 @@
       "cultivo": "CENTENO",
       "costo": 3080,
       "productos": [
-        "NITROMAG Z"
+        "nitromag z"
       ]
     },
     {
@@ -5493,7 +5509,7 @@
       "lote": "1",
       "ha": 25,
       "cultivo": "MAIZ",
-      "costo": 656.2,
+      "costo": 655.7,
       "productos": [
         "GLIFOSATO GRANULADO MAX SIGMA 68,8%",
         "2-4 D 97 SIGMA x 20 LT",
@@ -5578,14 +5594,13 @@
       "lote": "10",
       "ha": 43,
       "cultivo": "MAIZ",
-      "costo": 1300,
+      "costo": 1299.9,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
         "Dicamba 70.8 %",
         "RizoSpray EXTREMO"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-10-02",
@@ -5593,10 +5608,10 @@
       "lote": "10",
       "ha": 43,
       "cultivo": "MAIZ",
-      "costo": 293.1,
+      "costo": 292.7,
       "productos": [
-        "RizoSpray Corrector Secuestrante",
-        "Atrazina 90 %"
+        "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
+        "Atrazina 90 % solida x 15 kg"
       ]
     },
     {
@@ -5605,14 +5620,14 @@
       "lote": "8A",
       "ha": 22,
       "cultivo": "MAIZ",
-      "costo": 676.4,
+      "costo": 815,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 % Duranor Avance",
-        "RizoSpray EXTREMO",
-        "RizoSpray Corrector Secuestrante",
-        "Atrazina 90 %"
+        "Dicamba 70.8 % Duranor Avance x Lt",
+        "Coady. RizoSpray EXTREMO x 10 Lt",
+        "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
+        "Atrazina 90 % solida x 15 kg"
       ]
     },
     {
@@ -5621,14 +5636,14 @@
       "lote": "7B",
       "ha": 32,
       "cultivo": "MAIZ",
-      "costo": 983.7,
+      "costo": 1185.3,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 % Duranor Avance",
-        "RizoSpray EXTREMO",
-        "RizoSpray Corrector Secuestrante",
-        "Atrazina 90 %"
+        "Dicamba 70.8 % Duranor Avance x Lt",
+        "Coady. RizoSpray EXTREMO x 10 Lt",
+        "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
+        "Atrazina 90 % solida x 15 kg"
       ]
     },
     {
@@ -5637,14 +5652,14 @@
       "lote": "4",
       "ha": 11,
       "cultivo": "MAIZ",
-      "costo": 337.9,
+      "costo": 407.5,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 % Duranor Avance",
-        "RizoSpray EXTREMO",
-        "RizoSpray Corrector Secuestrante",
-        "Atrazina 90 %"
+        "Dicamba 70.8 % Duranor Avance x Lt",
+        "Coady. RizoSpray EXTREMO x 10 Lt",
+        "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
+        "Atrazina 90 % solida x 15 kg"
       ]
     },
     {
@@ -5653,10 +5668,10 @@
       "lote": "2",
       "ha": 42,
       "cultivo": "MAIZ",
-      "costo": 534.9,
+      "costo": 799.5,
       "productos": [
-        "Cletodim 24 %",
-        "RizoSpray EXTREMO"
+        "Herb. Cletodim 24 % x 20 Lt",
+        "Coady. RizoSpray EXTREMO x 10 Lt"
       ]
     },
     {
@@ -5665,10 +5680,10 @@
       "lote": "3O",
       "ha": 21,
       "cultivo": "MAIZ",
-      "costo": 319.2,
+      "costo": 399.8,
       "productos": [
-        "Cletodim 24 %",
-        "RizoSpray EXTREMO"
+        "Herb. Cletodim 24 % x 20 Lt",
+        "Coady. RizoSpray EXTREMO x 10 Lt"
       ]
     },
     {
@@ -5677,10 +5692,10 @@
       "lote": "3",
       "ha": 39,
       "cultivo": "MAIZ",
-      "costo": 592.8,
+      "costo": 742.4,
       "productos": [
-        "Cletodim 24 %",
-        "RizoSpray EXTREMO"
+        "Herb. Cletodim 24 % x 20 Lt",
+        "Coady. RizoSpray EXTREMO x 10 Lt"
       ]
     },
     {
@@ -5693,8 +5708,7 @@
       "productos": [
         "Paraquat 27.6%",
         "RizoSpray EXTREMO"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-09-23",
@@ -5706,21 +5720,19 @@
       "productos": [
         "Paraquat 27.6%",
         "RizoSpray EXTREMO"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-09-23",
       "campo": "LAS TIAS",
-      "lote": "10 SECTOR 2",
+      "lote": "10 sector 2",
       "ha": 48,
       "cultivo": "GIRASOL",
       "costo": 769.7,
       "productos": [
         "Paraquat 27.6%",
         "RizoSpray EXTREMO"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-09-23",
@@ -5728,15 +5740,14 @@
       "lote": "7",
       "ha": 56,
       "cultivo": "SOJA",
-      "costo": 2186,
+      "costo": 2185.8,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
         "Fluroxipir 48%",
         "RizoSpray EXTREMO",
         "RizoSpray Corrector Secuestrante"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-09-23",
@@ -5767,7 +5778,8 @@
         "DICAMBA DURANOR ADV x 10 LT",
         "Coady. RizoSpray EXTREMO x 10 Lt",
         "Coady. RizoSpray Corrector Secuestrante x 1 Lt"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-09-21",
@@ -5783,7 +5795,8 @@
         "Coady. RizoSpray EXTREMO x 10 Lt",
         "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
         "Atrazina 90 % solida x 15 kg"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-09-21",
@@ -5799,7 +5812,8 @@
         "Coady. RizoSpray EXTREMO x 10 Lt",
         "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
         "Atrazina 90 % solida x 15 kg"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-09-21",
@@ -5815,7 +5829,8 @@
         "Coady. RizoSpray EXTREMO x 10 Lt",
         "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
         "Atrazina 90 % solida x 15 kg"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-09-21",
@@ -5831,7 +5846,8 @@
         "Coady. RizoSpray EXTREMO x 10 Lt",
         "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
         "Atrazina 90 % solida x 15 kg"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-09-21",
@@ -5847,7 +5863,8 @@
         "Coady. RizoSpray EXTREMO x 10 Lt",
         "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
         "Atrazina 90 % solida x 15 kg"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-09-21",
@@ -5863,6 +5880,33 @@
         "Fluroxipir 48%",
         "Sulfentrazone 50 % x 5 Lt",
         "Coady. RizoSpray EXTREMO x 10 Lt"
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
+    },
+    {
+      "fecha": "2026-09-21",
+      "campo": "EL ABUELO",
+      "lote": "3",
+      "ha": 35,
+      "cultivo": "GIRASOL",
+      "costo": 220.5,
+      "productos": [],
+      "labor": "PULVERIZADA TERRESTRE"
+    },
+    {
+      "fecha": "2026-09-21",
+      "campo": "EL ABUELO",
+      "lote": "3",
+      "ha": 35,
+      "cultivo": "GIRASOL",
+      "costo": 1184.1,
+      "productos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
+        "Fluroxipir 48%",
+        "Sulfentrazone 50 % x 5 Lt",
+        "Coady. RizoSpray EXTREMO x 10 Lt"
       ]
     },
     {
@@ -5871,7 +5915,7 @@
       "lote": "5",
       "ha": 27,
       "cultivo": "MAIZ",
-      "costo": 1063.9,
+      "costo": 1064,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
@@ -5879,7 +5923,8 @@
         "Coady. RizoSpray EXTREMO x 10 Lt",
         "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
         "Atrazina 90 % solida x 15 kg"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-09-21",
@@ -5895,7 +5940,8 @@
         "Coady. RizoSpray EXTREMO x 10 Lt",
         "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
         "Atrazina 90 % solida x 15 kg"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-09-21",
@@ -5911,7 +5957,8 @@
         "Coady. RizoSpray EXTREMO x 10 Lt",
         "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
         "Atrazina 90 % solida x 15 kg"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-09-21",
@@ -5927,7 +5974,8 @@
         "Coady. RizoSpray EXTREMO x 10 Lt",
         "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
         "Atrazina 90 % solida x 15 kg"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-09-21",
@@ -5943,7 +5991,8 @@
         "Coady. RizoSpray EXTREMO x 10 Lt",
         "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
         "Atrazina 90 % solida x 15 kg"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-09-21",
@@ -5959,7 +6008,8 @@
         "Coady. RizoSpray EXTREMO x 10 Lt",
         "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
         "Atrazina 90 % solida x 15 kg"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-09-21",
@@ -5975,7 +6025,8 @@
         "Coady. RizoSpray EXTREMO x 10 Lt",
         "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
         "Atrazina 90 % solida x 15 kg"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-09-21",
@@ -6017,7 +6068,7 @@
       "lote": "1",
       "ha": 107,
       "cultivo": "SOJA",
-      "costo": 4287.2,
+      "costo": 4461.3,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
@@ -6025,8 +6076,7 @@
         "RizoSpray Corrector Secuestrante",
         "RizoSpray EXTREMO",
         "clorimuron 75%"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-09-17",
@@ -6043,8 +6093,7 @@
         "Sulfentrazone 50%",
         "AMPLIGO",
         "RizoSpray EXTREMO"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-09-17",
@@ -6057,11 +6106,10 @@
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
         "RizoSpray Corrector Secuestrante",
-        "DICAMBA DURANOR",
+        "DICAMBA DURANOR ADV",
         "ATRAZINA GESAPRIM 90",
         "RizoSpray EXTREMO"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-09-16",
@@ -6069,7 +6117,7 @@
       "lote": "2",
       "ha": 54,
       "cultivo": "SOJA",
-      "costo": 2911.2,
+      "costo": 2256.4,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
@@ -6077,8 +6125,7 @@
         "RizoSpray EXTREMO",
         "RizoSpray Corrector Secuestrante",
         "clorimuron 75%"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-09-16",
@@ -6086,7 +6133,7 @@
       "lote": "1",
       "ha": 54,
       "cultivo": "GIRASOL",
-      "costo": 3006.2,
+      "costo": 2667.2,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
@@ -6095,8 +6142,7 @@
         "SULFENTRAZONE CAPAZ",
         "RizoSpray Corrector Secuestrante",
         "AMPLIGO"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-09-09",
@@ -6104,7 +6150,7 @@
       "lote": "6",
       "ha": 26,
       "cultivo": "SOJA",
-      "costo": 42.223,
+      "costo": 1167.9,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
@@ -6120,7 +6166,7 @@
       "lote": "4",
       "ha": 30,
       "cultivo": "SOJA",
-      "costo": 42.6,
+      "costo": 1347.7,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
@@ -6136,7 +6182,7 @@
       "lote": "2",
       "ha": 23,
       "cultivo": "SOJA",
-      "costo": 43.33,
+      "costo": 1033.1,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
@@ -6152,7 +6198,7 @@
       "lote": "5",
       "ha": 21,
       "cultivo": "GIRASOL",
-      "costo": 40.438,
+      "costo": 882.5,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
@@ -6179,7 +6225,7 @@
       "lote": "9B",
       "ha": 55,
       "cultivo": "SOJA",
-      "costo": 34.382,
+      "costo": 1966.2,
       "productos": [
         "CONTROLMAX",
         "Dicamba 70.8 % Duranor Avance x Lt",
@@ -6195,7 +6241,7 @@
       "lote": "22",
       "ha": 51,
       "cultivo": "GIRASOL",
-      "costo": 40.035,
+      "costo": 2107.7,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
@@ -6205,6 +6251,64 @@
         "Coady. RizoSpray EXTREMO x 10 Lt"
       ],
       "labor": "PULVERIZADA TERRESTRE"
+    },
+    {
+      "fecha": "2026-09-06",
+      "campo": "L3H",
+      "lote": "19",
+      "ha": 31,
+      "cultivo": "SOJA",
+      "costo": 1083.4,
+      "productos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Fluroxipir 48%",
+        "Coady. RizoSpray EXTREMO x 10 Lt",
+        "Coady. RizoSpray Corrector Secuestrante x 1 Lt"
+      ]
+    },
+    {
+      "fecha": "2026-09-06",
+      "campo": "L3H",
+      "lote": "3",
+      "ha": 98,
+      "cultivo": "SOJA",
+      "costo": 3425.4,
+      "productos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Fluroxipir 48%",
+        "Coady. RizoSpray EXTREMO x 10 Lt",
+        "Coady. RizoSpray Corrector Secuestrante x 1 Lt"
+      ]
+    },
+    {
+      "fecha": "2026-09-06",
+      "campo": "L3H",
+      "lote": "20",
+      "ha": 97,
+      "cultivo": "SOJA",
+      "costo": 3390.4,
+      "productos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Fluroxipir 48%",
+        "Coady. RizoSpray EXTREMO x 10 Lt",
+        "Coady. RizoSpray Corrector Secuestrante x 1 Lt"
+      ]
+    },
+    {
+      "fecha": "2026-09-06",
+      "campo": "L3H",
+      "lote": "21N",
+      "ha": 63,
+      "cultivo": "SOJA",
+      "costo": 1884.3,
+      "productos": [
+        "CONTROLMAX",
+        "POWERSPRAY 2,4D 68%",
+        "Fluroxipir 48%"
+      ]
     },
     {
       "fecha": "2026-09-06",
@@ -6254,7 +6358,7 @@
       "lote": "2",
       "ha": 35,
       "cultivo": "GIRASOL",
-      "costo": 1695.1,
+      "costo": 1695.3,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
@@ -6346,10 +6450,10 @@
     {
       "fecha": "2026-09-06",
       "campo": "L3H",
-      "lote": "1 SIN CABECERA",
+      "lote": "1 sin cabecera",
       "ha": 48,
       "cultivo": "SOJA",
-      "costo": 5.6,
+      "costo": 274.4,
       "productos": [
         "Atrazina 90 % solida x 15 kg"
       ]
@@ -6360,7 +6464,7 @@
       "lote": "4",
       "ha": 111,
       "cultivo": "SOJA",
-      "costo": 50.428,
+      "costo": 2541.1,
       "productos": [
         "POWERSPRAY 2,4D 68%",
         "Fluroxipir 48%",
@@ -6372,10 +6476,10 @@
     {
       "fecha": "2026-09-06",
       "campo": "L3H",
-      "lote": "24 SECTOR 2",
+      "lote": "24 sector 2",
       "ha": 20,
       "cultivo": "GIRASOL",
-      "costo": 36.605,
+      "costo": 722.1,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
@@ -6391,7 +6495,7 @@
       "lote": "28",
       "ha": 47,
       "cultivo": "GIRASOL",
-      "costo": 35.106,
+      "costo": 1889,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
@@ -6407,7 +6511,7 @@
       "campo": "LA DORA",
       "lote": "5",
       "ha": 66,
-      "cultivo": "soja y maiz",
+      "cultivo": "SOJA Y MAIZ",
       "costo": 1930.1,
       "productos": [
         "GLIFOSATO GRANULADO BOX 72%",
@@ -6416,6 +6520,94 @@
         "ACEITE METILADO ROCIO x 3 LT"
       ],
       "labor": "PULVERIZADA TERRESTRE"
+    },
+    {
+      "fecha": "2026-09-03",
+      "campo": "LA DORA",
+      "lote": "5",
+      "ha": 66,
+      "cultivo": "SOJA Y MAIZ",
+      "costo": 122.9,
+      "productos": [
+        "LIGIER PH BIO x LT"
+      ]
+    },
+    {
+      "fecha": "2026-09-03",
+      "campo": "LA DORA",
+      "lote": "2 N",
+      "ha": 50,
+      "cultivo": "SOJA Y MAIZ",
+      "costo": 1555.4,
+      "productos": [
+        "GLIFOSATO GRANULADO BOX 72%",
+        "2-4 D 97 SIGMA x 20 LT",
+        "DICAMBA SIGMA x 10 LT",
+        "ACEITE METILADO ROCIO x 3 LT",
+        "LIGIER PH BIO x LT"
+      ]
+    },
+    {
+      "fecha": "2026-09-03",
+      "campo": "LA DORA",
+      "lote": "2 NS",
+      "ha": 20,
+      "cultivo": "SOJA Y MAIZ",
+      "costo": 622.2,
+      "productos": [
+        "GLIFOSATO GRANULADO BOX 72%",
+        "2-4 D 97 SIGMA x 20 LT",
+        "DICAMBA SIGMA x 10 LT",
+        "ACEITE METILADO ROCIO x 3 LT",
+        "LIGIER PH BIO x LT"
+      ]
+    },
+    {
+      "fecha": "2026-09-03",
+      "campo": "LA DORA",
+      "lote": "4",
+      "ha": 67,
+      "cultivo": "GIRASOL",
+      "costo": 2884.6,
+      "productos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "FLUROXIPIR 48 SIGMA x 5 Lts",
+        "DIFLUFENICAN SIGMA 50%",
+        "ACEITE METILADO ROCIO x 3 LT"
+      ]
+    },
+    {
+      "fecha": "2026-09-03",
+      "campo": "LAS TIAS",
+      "lote": "10",
+      "ha": 63,
+      "cultivo": "GIRASOL",
+      "costo": 2711.4,
+      "productos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "FLUROXIPIR 48 SIGMA x 5 Lts",
+        "DIFLUFENICAN SIGMA 50%",
+        "ACEITE METILADO ROCIO x 3 LT"
+      ]
+    },
+    {
+      "fecha": "2026-09-03",
+      "campo": "LA DORA",
+      "lote": "1",
+      "ha": 59,
+      "cultivo": "SOJA",
+      "costo": 2060.5,
+      "productos": [
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "DICAMBA SIGMA x 10 LT",
+        "ATRAZINA GESAPRIM 90 x 10 KG"
+      ]
     },
     {
       "fecha": "2026-09-01",
@@ -6453,7 +6645,7 @@
       "lote": "1",
       "ha": 50,
       "cultivo": "GIRASOL",
-      "costo": 1812.8,
+      "costo": 2012.8,
       "productos": [
         "FLUROXIPIR 48 SIGMA x 5 Lts",
         "2-4 D 97 SIGMA x 20 LT",
@@ -6534,7 +6726,8 @@
         "Dicamba 70.8 % Duranor Avance x Lt",
         "Coady. RizoSpray Corrector Secuestrante x 1 Lt",
         "Atrazina 90 % solida x 15 kg"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-07-20",
@@ -6545,7 +6738,8 @@
       "costo": 665.1,
       "productos": [
         "CONTROLMAX"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-07-20",
@@ -6567,14 +6761,15 @@
       "lote": "2",
       "ha": 18,
       "cultivo": "AVENA",
-      "costo": 503.5,
+      "costo": 503.4,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
         "Dicamba 70.8 % Duranor Avance x Lt",
         "Metsulfuron Metil 60 %",
         "Coady. RizoSpray EXTREMO x 10 Lt"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-07-16",
@@ -6582,14 +6777,15 @@
       "lote": "1",
       "ha": 20,
       "cultivo": "AVENA",
-      "costo": 433.3,
+      "costo": 559.3,
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
         "Dicamba 70.8 % Duranor Avance x Lt",
         "Metsulfuron Metil 60 %",
         "Coady. RizoSpray EXTREMO x 10 Lt"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-07-16",
@@ -6601,7 +6797,92 @@
       "productos": [
         "Dicamba 70.8 % Duranor Avance x Lt",
         "POWERSPRAY 2,4D 68%"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
+    },
+    {
+      "fecha": "2026-07-15",
+      "campo": "LA CHOLITA",
+      "lote": "5",
+      "ha": 60,
+      "cultivo": "CEBADA",
+      "costo": 4921.2,
+      "productos": [
+        "CEBADA PROPIA"
+      ],
+      "labor": "Fina fert"
+    },
+    {
+      "fecha": "2026-07-15",
+      "campo": "LA CHOLITA",
+      "lote": "6",
+      "ha": 20,
+      "cultivo": "CEBADA",
+      "costo": 1640.4,
+      "productos": [
+        "CEBADA PROPIA"
+      ],
+      "labor": "Fina fert"
+    },
+    {
+      "fecha": "2026-07-14",
+      "campo": "L3H",
+      "lote": "4",
+      "ha": 100,
+      "cultivo": "TRIGO",
+      "costo": 8480,
+      "productos": [
+        "TRIGO PROPIO"
+      ],
+      "labor": "Fina fert"
+    },
+    {
+      "fecha": "2026-07-14",
+      "campo": "L3H",
+      "lote": "23",
+      "ha": 52,
+      "cultivo": "CEBADA",
+      "costo": 4265,
+      "productos": [
+        "CEBADA PROPIA"
+      ],
+      "labor": "Fina fert"
+    },
+    {
+      "fecha": "2026-07-14",
+      "campo": "L3H",
+      "lote": "13G",
+      "ha": 120,
+      "cultivo": "CEBADA",
+      "costo": 9842.4,
+      "productos": [
+        "CEBADA PROPIA"
+      ],
+      "labor": "Fina fert"
+    },
+    {
+      "fecha": "2026-07-14",
+      "campo": "L3H",
+      "lote": "13C",
+      "ha": 20,
+      "cultivo": "CEBADA",
+      "costo": 1640.4,
+      "productos": [
+        "CEBADA PROPIA"
+      ],
+      "labor": "Fina fert"
+    },
+    {
+      "fecha": "2026-07-14",
+      "campo": "L3H",
+      "lote": "10 O",
+      "ha": 33,
+      "cultivo": "CEBADA",
+      "costo": 2706.7,
+      "productos": [
+        "CEBADA PROPIA"
+      ],
+      "labor": "Fina fert"
     },
     {
       "fecha": "2026-07-13",
@@ -6616,7 +6897,8 @@
         "LIGIER PH BIO x LT",
         "DIFLUFENICAN SIGMA 50%",
         "FLUROXIPIR 48 SIGMA x 5 Lts"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-07-13",
@@ -6630,7 +6912,20 @@
         "2-4 D 97 SIGMA x 20 LT",
         "LIGIER PH BIO x LT",
         "METSULFURON SIGMA x kg"
-      ]
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
+    },
+    {
+      "fecha": "2026-07-08",
+      "campo": "EL ABUELO",
+      "lote": "4",
+      "ha": 100,
+      "cultivo": "TRIGO",
+      "costo": 8750,
+      "productos": [
+        "UREA-S NUTRIEN"
+      ],
+      "labor": "INCORPORADA"
     },
     {
       "fecha": "2026-07-08",
@@ -6645,6 +6940,41 @@
       "labor": "Fina fert"
     },
     {
+      "fecha": "2026-07-07",
+      "campo": "L3H",
+      "lote": "10",
+      "ha": 25,
+      "cultivo": "CEBADA",
+      "costo": 2118.8,
+      "productos": [
+        "UREA-S NUTRIEN"
+      ]
+    },
+    {
+      "fecha": "2026-07-07",
+      "campo": "L3H",
+      "lote": "23",
+      "ha": 50,
+      "cultivo": "CEBADA",
+      "costo": 4375,
+      "productos": [
+        "UREA-S NUTRIEN"
+      ],
+      "labor": "INCORPORADA"
+    },
+    {
+      "fecha": "2026-07-07",
+      "campo": "L3H",
+      "lote": "4",
+      "ha": 100,
+      "cultivo": "TRIGO",
+      "costo": 8750,
+      "productos": [
+        "UREA-S NUTRIEN"
+      ],
+      "labor": "INCORPORADA"
+    },
+    {
       "fecha": "2026-07-02",
       "campo": "EL TORELLO",
       "lote": "5",
@@ -6657,8 +6987,7 @@
         "LIGIER PH BIO x LT",
         "DICAMBA SIGMA x 10 LT",
         "METSULFURON SIGMA x 100 GRS"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-07-02",
@@ -6673,8 +7002,7 @@
         "LIGIER PH BIO x LT",
         "DICAMBA SIGMA x 10 LT",
         "METSULFURON SIGMA x 100 GRS"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-07-02",
@@ -6689,8 +7017,7 @@
         "LIGIER PH BIO x LT",
         "DICAMBA SIGMA x 10 LT",
         "METSULFURON SIGMA x 100 GRS"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-07-02",
@@ -6705,8 +7032,7 @@
         "LIGIER PH BIO x LT",
         "DICAMBA SIGMA x 10 LT",
         "METSULFURON SIGMA x 100 GRS"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-06-29",
@@ -6718,10 +7044,11 @@
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 % Duranor Avance",
+        "Dicamba 70.8 % Duranor Avance x Lt",
         "Metsulfuron Metil 60 %",
-        "Coady. RizoSpray EXTREMO"
-      ]
+        "Coady. RizoSpray EXTREMO x 10 Lt"
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-06-29",
@@ -6733,10 +7060,11 @@
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 % Duranor Avance",
+        "Dicamba 70.8 % Duranor Avance x Lt",
         "Metsulfuron Metil 60 %",
-        "Coady. RizoSpray EXTREMO"
-      ]
+        "Coady. RizoSpray EXTREMO x 10 Lt"
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-06-25",
@@ -6748,10 +7076,11 @@
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 % Duranor Avance",
+        "Dicamba 70.8 % Duranor Avance x Lt",
         "Flurocloridona 25 %",
-        "Coady. RizoSpray EXTREMO"
-      ]
+        "Coady. RizoSpray EXTREMO x 10 Lt"
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-06-25",
@@ -6763,10 +7092,11 @@
       "productos": [
         "CONTROLMAX",
         "POWERSPRAY 2,4D 68%",
-        "Dicamba 70.8 % Duranor Avance",
-        "Atrazina 90 % solida",
-        "Coady. RizoSpray EXTREMO"
-      ]
+        "Dicamba 70.8 % Duranor Avance x Lt",
+        "Atrazina 90 % solida x 15 kg",
+        "Coady. RizoSpray EXTREMO x 10 Lt"
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-06-24",
@@ -6781,8 +7111,7 @@
         "LIGIER PH BIO x LT",
         "DICAMBA SIGMA x 10 LT",
         "ATRAZINA GESAPRIM 90 x 10 KG"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-06-24",
@@ -6793,8 +7122,7 @@
       "costo": 1096.2,
       "productos": [
         "GLIFOSATO GRANULADO LT BOX x 15 KG"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-06-24",
@@ -6804,10 +7132,10 @@
       "cultivo": "MAIZ",
       "costo": 989.9,
       "productos": [
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
-        "ATRAZINA GESAPRIM 90"
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "DICAMBA SIGMA x 10 LT",
+        "ATRAZINA GESAPRIM 90 x 10 KG"
       ]
     },
     {
@@ -6816,14 +7144,15 @@
       "lote": "maiz humed",
       "ha": 34,
       "cultivo": "MAIZ",
-      "costo": 1006.8,
+      "costo": 1007.8,
       "productos": [
-        "GLIFOSATO GRANULADO LT BOX",
-        "2-4 D 97 SIGMA",
-        "LIGIER PH BIO",
-        "DICAMBA SIGMA",
-        "ATRAZINA GESAPRIM 90"
-      ]
+        "GLIFOSATO GRANULADO LT BOX x 15 KG",
+        "2-4 D 97 SIGMA x 20 LT",
+        "LIGIER PH BIO x LT",
+        "DICAMBA SIGMA x 10 LT",
+        "ATRAZINA GESAPRIM 90 x 10 KG"
+      ],
+      "labor": "PULVERIZADA TERRESTRE"
     },
     {
       "fecha": "2026-06-15",
@@ -6838,8 +7167,7 @@
         "LIGIER PH BIO x LT",
         "DICAMBA SIGMA x 10 LT",
         "ATRAZINA GESAPRIM 90%"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-06-14",
@@ -6854,8 +7182,7 @@
         "LIGIER PH BIO x LT",
         "DICAMBA SIGMA x 10 LT",
         "METSULFURON SIGMA x 100 GRS"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-06-13",
@@ -6869,7 +7196,7 @@
         "2-4 D 97",
         "LIGIER PH BIO",
         "FLUROXIPIR 48",
-        "DIFLUFENICAN SIGMA 50%"
+        "DIFLUFENICAN"
       ]
     },
     {
@@ -6884,7 +7211,7 @@
         "2-4 D 97",
         "LIGIER PH BIO",
         "FLUROXIPIR 48",
-        "DIFLUFENICAN SIGMA 50%"
+        "DIFLUFENICAN"
       ]
     },
     {
@@ -6899,7 +7226,7 @@
         "2-4 D 97",
         "LIGIER PH BIO",
         "FLUROXIPIR 48",
-        "DIFLUFENICAN SIGMA 50%"
+        "DIFLUFENICAN"
       ]
     },
     {
@@ -6914,7 +7241,7 @@
         "2-4 D 97",
         "LIGIER PH BIO",
         "FLUROXIPIR 48",
-        "DIFLUFENICAN SIGMA 50%"
+        "DIFLUFENICAN"
       ]
     },
     {
@@ -6929,7 +7256,7 @@
         "2-4 D 97",
         "LIGIER PH BIO",
         "FLUROXIPIR 48",
-        "DIFLUFENICAN SIGMA 50%"
+        "DIFLUFENICAN"
       ]
     },
     {
@@ -6944,7 +7271,7 @@
         "2-4 D 97",
         "LIGIER PH BIO",
         "DICAMBA SIGMA",
-        "ATRAZINA GESAPRIM 90%"
+        "ATRAZINA GESAPRIM"
       ]
     },
     {
@@ -6975,8 +7302,7 @@
         "LIGIER PH BIO x LT",
         "DICAMBA SIGMA x 10 LT",
         "ATRAZINA GESAPRIM 90%"
-      ],
-      "labor": "PULVERIZADA TERRESTRE"
+      ]
     },
     {
       "fecha": "2026-05-18",
@@ -7011,7 +7337,7 @@
     {
       "fecha": "2026-05-15",
       "campo": "L3H",
-      "lote": "13C",
+      "lote": "13CH",
       "ha": 20,
       "cultivo": "CEBADA",
       "costo": 646.8,
@@ -7043,7 +7369,7 @@
       "campo": "LA CHOLITA",
       "lote": "3",
       "ha": 50,
-      "cultivo": "vicia con triticale",
+      "cultivo": "VICIA CON TRITICALE",
       "costo": 15180,
       "productos": [
         "CENTENO PROPIO"
@@ -7067,7 +7393,7 @@
       "campo": "EL DESCANSO",
       "lote": "8",
       "ha": 14,
-      "cultivo": "vicia con triticale",
+      "cultivo": "VICIA CON TRITICALE",
       "costo": 1948.8,
       "productos": [
         "CENTENO PROPIO"
@@ -7079,7 +7405,7 @@
       "campo": "EL DESCANSO",
       "lote": "1",
       "ha": 25,
-      "cultivo": "vicia y triticale",
+      "cultivo": "VICIA Y TRITICALE",
       "costo": 3480,
       "productos": [
         "CENTENO PROPIO"
@@ -7091,7 +7417,7 @@
       "campo": "EL DESCANSO",
       "lote": "7",
       "ha": 15,
-      "cultivo": "vicia y triticale",
+      "cultivo": "VICIA Y TRITICALE",
       "costo": 2088,
       "productos": [
         "CENTENO PROPIO"
@@ -7104,7 +7430,7 @@
       "lote": "4",
       "ha": 50,
       "cultivo": "CEBADA",
-      "costo": 2070.7,
+      "costo": 2071.1,
       "productos": [
         "GLIFOSATO GRANULADO BOX",
         "2-4 D 97 SIGMA",
@@ -7284,81 +7610,48 @@
       "costoHa": 69.3
     },
     {
-      "fecha": "2026-07-15",
-      "campo": "LA CHOLITA",
-      "lote": "5",
-      "ha": 60,
-      "cultivo": "CEBADA",
-      "tipo": "Fina fert",
-      "producto": "CEBADA PROPIA",
-      "dosis": "0,09",
-      "costoHa": 82
-    },
-    {
-      "fecha": "2026-07-15",
-      "campo": "LA CHOLITA",
-      "lote": "6",
-      "ha": 20,
-      "cultivo": "CEBADA",
-      "tipo": "Fina fert",
-      "producto": "CEBADA PROPIA",
-      "dosis": "0,09",
-      "costoHa": 82
-    },
-    {
-      "fecha": "2026-07-14",
+      "fecha": "2026-10-09",
       "campo": "L3H",
-      "lote": "4",
-      "ha": 100,
-      "cultivo": "TRIGO",
-      "tipo": "Fina fert",
-      "producto": "TRIGO PROPIO",
-      "dosis": "0,10",
-      "costoHa": 84.8
+      "lote": "26",
+      "ha": 53,
+      "cultivo": "MAIZ",
+      "tipo": "Siembra",
+      "producto": "NITROCOMPLEX",
+      "dosis": "170 kg/ha",
+      "costoHa": 168.3
     },
     {
-      "fecha": "2026-07-14",
+      "fecha": "2026-10-09",
       "campo": "L3H",
-      "lote": "23",
-      "ha": 52,
-      "cultivo": "CEBADA",
-      "tipo": "Fina fert",
-      "producto": "CEBADA PROPIA",
-      "dosis": "0,09",
-      "costoHa": 82
+      "lote": "27",
+      "ha": 50,
+      "cultivo": "MAIZ",
+      "tipo": "Siembra",
+      "producto": "NITROCOMPLEX",
+      "dosis": "170 kg/ha",
+      "costoHa": 168.3
     },
     {
-      "fecha": "2026-07-14",
-      "campo": "L3H",
-      "lote": "13G",
-      "ha": 120,
-      "cultivo": "CEBADA",
-      "tipo": "Fina fert",
-      "producto": "CEBADA PROPIA",
-      "dosis": "0,09",
-      "costoHa": 82
+      "fecha": "2026-10-05",
+      "campo": "LOS ABUELOS",
+      "lote": "8B",
+      "ha": 19,
+      "cultivo": "CENTENO",
+      "tipo": "VOLEADA",
+      "producto": "nitromag z",
+      "dosis": "100 kg/ha",
+      "costoHa": 670
     },
     {
-      "fecha": "2026-07-14",
-      "campo": "L3H",
-      "lote": "13C",
-      "ha": 20,
-      "cultivo": "CEBADA",
-      "tipo": "Fina fert",
-      "producto": "CEBADA PROPIA",
-      "dosis": "0,09",
-      "costoHa": 82
-    },
-    {
-      "fecha": "2026-07-14",
-      "campo": "L3H",
-      "lote": "10 O",
-      "ha": 33,
-      "cultivo": "CEBADA",
-      "tipo": "Fina fert",
-      "producto": "CEBADA PROPIA",
-      "dosis": "0,09",
-      "costoHa": 82
+      "fecha": "2026-10-05",
+      "campo": "LOS ABUELOS",
+      "lote": "5B",
+      "ha": 40,
+      "cultivo": "CENTENO",
+      "tipo": "VOLEADA",
+      "producto": "nitromag z",
+      "dosis": "100 kg/ha",
+      "costoHa": 670
     },
     {
       "fecha": "2026-07-08",
@@ -7368,7 +7661,7 @@
       "cultivo": "CEBADA",
       "tipo": "Arranque",
       "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "0.05",
+      "dosis": "50 kg/ha",
       "costoHa": 46.9
     },
     {
@@ -7379,7 +7672,7 @@
       "cultivo": "CEBADA",
       "tipo": "Arranque",
       "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "0.05",
+      "dosis": "50 kg/ha",
       "costoHa": 46.9
     },
     {
@@ -7390,7 +7683,7 @@
       "cultivo": "CEBADA",
       "tipo": "Incorporada",
       "producto": "UREA-S NUTRIEN",
-      "dosis": "0.10",
+      "dosis": "100 kg/ha",
       "costoHa": 87.5
     },
     {
@@ -7401,18 +7694,7 @@
       "cultivo": "CEBADA",
       "tipo": "Incorporada",
       "producto": "UREA-S NUTRIEN",
-      "dosis": "0.10",
-      "costoHa": 87.5
-    },
-    {
-      "fecha": "2026-07-08",
-      "campo": "EL ABUELO",
-      "lote": "4",
-      "ha": 100,
-      "cultivo": "TRIGO",
-      "tipo": "INCORPORADA",
-      "producto": "UREA-S NUTRIEN",
-      "dosis": "0,10",
+      "dosis": "100 kg/ha",
       "costoHa": 87.5
     },
     {
@@ -7423,7 +7705,7 @@
       "cultivo": "CEBADA",
       "tipo": "Arranque",
       "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "0.05",
+      "dosis": "50 kg/ha",
       "costoHa": 46.9
     },
     {
@@ -7434,7 +7716,7 @@
       "cultivo": "CEBADA",
       "tipo": "Arranque",
       "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "0.05",
+      "dosis": "50 kg/ha",
       "costoHa": 46.9
     },
     {
@@ -7445,7 +7727,7 @@
       "cultivo": "CEBADA",
       "tipo": "Arranque",
       "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "0.07",
+      "dosis": "70 kg/ha",
       "costoHa": 65.6
     },
     {
@@ -7456,7 +7738,7 @@
       "cultivo": "CEBADA",
       "tipo": "Arranque",
       "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "0.07",
+      "dosis": "70 kg/ha",
       "costoHa": 65.6
     },
     {
@@ -7467,7 +7749,7 @@
       "cultivo": "TRIGO",
       "tipo": "Arranque",
       "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "0.05",
+      "dosis": "50 kg/ha",
       "costoHa": 46.9
     },
     {
@@ -7478,7 +7760,7 @@
       "cultivo": "CEBADA",
       "tipo": "Incorporada",
       "producto": "UREA-S NUTRIEN",
-      "dosis": "0.10",
+      "dosis": "100 kg/ha",
       "costoHa": 87.5
     },
     {
@@ -7489,40 +7771,7 @@
       "cultivo": "CEBADA",
       "tipo": "Incorporada",
       "producto": "UREA-S NUTRIEN",
-      "dosis": "0.10",
-      "costoHa": 87.5
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "10",
-      "ha": 25,
-      "cultivo": "CEBADA",
-      "tipo": "Arranque",
-      "producto": "UREA-S NUTRIEN",
-      "dosis": "0,15",
-      "costoHa": 84.8
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "23",
-      "ha": 50,
-      "cultivo": "CEBADA",
-      "tipo": "INCORPORADA",
-      "producto": "UREA-S NUTRIEN",
-      "dosis": "0,10",
-      "costoHa": 87.5
-    },
-    {
-      "fecha": "2026-07-07",
-      "campo": "L3H",
-      "lote": "4",
-      "ha": 100,
-      "cultivo": "TRIGO",
-      "tipo": "INCORPORADA",
-      "producto": "UREA-S NUTRIEN",
-      "dosis": "0,10",
+      "dosis": "100 kg/ha",
       "costoHa": 87.5
     },
     {
@@ -7533,7 +7782,7 @@
       "cultivo": "CEBADA",
       "tipo": "Arranque",
       "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "0.05",
+      "dosis": "50 kg/ha",
       "costoHa": 46.9
     },
     {
@@ -7544,7 +7793,7 @@
       "cultivo": "CEBADA",
       "tipo": "Arranque",
       "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "0.05",
+      "dosis": "50 kg/ha",
       "costoHa": 46.9
     },
     {
@@ -7555,7 +7804,7 @@
       "cultivo": "CEBADA",
       "tipo": "Arranque",
       "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "0.05",
+      "dosis": "50 kg/ha",
       "costoHa": 46.9
     },
     {
@@ -7566,7 +7815,7 @@
       "cultivo": "CEBADA",
       "tipo": "Arranque",
       "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "0.05",
+      "dosis": "50 kg/ha",
       "costoHa": 46.9
     },
     {
@@ -7577,7 +7826,7 @@
       "cultivo": "CEBADA",
       "tipo": "Arranque",
       "producto": "MAP AZURADO NUTRIEN",
-      "dosis": "0.05",
+      "dosis": "50 kg/ha",
       "costoHa": 46.9
     }
   ],
@@ -7585,8 +7834,8 @@
     "origen": "reconstruccion-manual-completa"
   },
   "modifiedTimes": {
-    "rotaciones": "2026-11-04T13:21:49.240Z",
-    "labores": "2026-11-04T13:15:03.095Z",
+    "rotaciones": "2026-11-04T13:59:43.585Z",
+    "labores": "2026-11-04T13:57:57.991Z",
     "margenes": "2026-10-29T13:51:10.106Z",
     "suelos": "2026-10-28T12:51:54.549Z"
   },
