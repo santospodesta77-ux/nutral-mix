@@ -1223,12 +1223,14 @@ const CAMPOS = [
    ]},
   {id:"DOÑA TERESA",nombre:"Doña Teresa",vb:[0,0,292,598],refs:[],
    grises:[
-     // franja sin lote entre el 1 y el 5 (con la arboleda del casco)
-     {poly:[[3,97],[165,97],[165,123],[3,123]]},
+     // arboleda del casco, al lado del lote 3
+     {poly:[[141,97],[165,97],[165,123],[141,123]]},
    ],
    lotes:[
     // calcado de la imagen satelital siguiendo las líneas rojas
     {id:"1",label:"1",ha:18,poly:[[3,5],[165,5],[165,97],[3,97]]},
+    // 3: franja angosta entre el 1 y el 5
+    {id:"3",label:"3",ha:5,poly:[[3,97],[141,97],[141,123],[3,123]]},
     {id:"2",label:"2",ha:15.5,poly:[[170,5],[288,5],[288,123],[170,123]]},
     {id:"5",label:"5",ha:13,poly:[[3,125],[165,125],[165,188],[3,188]]},
     {id:"4",label:"4",ha:16.5,poly:[[168,125],[288,125],[288,240],[168,240]]},
