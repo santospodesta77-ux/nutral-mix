@@ -1130,8 +1130,12 @@ const CAMPOS = [
     {id:"11",label:"11",ha:63,poly:[[190,222],[370,222],[370,430],[190,430]]},
    ]},
   {id:"LOS ABUELOS",nombre:"Los Abuelos",vb:[0,0,780,420],refs:[],
-   grises:[{poly:[[15,15],[173,15],[173,160],[15,160]],label:"12"},{poly:[[568,15],[755,15],[755,148],[568,148]],label:"1"},{poly:[[15,165],[365,165],[365,205],[15,205]],label:"Monte"}],
+   grises:[],
    lotes:[
+    // montes: son lotes (pueden tener rodeos) aunque no se siembren
+    {id:"12",label:"12",monte:true,poly:[[15,15],[173,15],[173,160],[15,160]]},
+    {id:"1",label:"1",monte:true,poly:[[568,15],[755,15],[755,148],[568,148]]},
+    {id:"MONTE",label:"Monte",monte:true,poly:[[15,165],[365,165],[365,205],[15,205]]},
     {id:"10",label:"10",ha:43,poly:[[178,15],[245,15],[245,90],[178,90]]},
     {id:"11",label:"11",ha:40,poly:[[178,90],[245,90],[245,160],[178,160]]},
     {id:"9A",label:"9A",ha:25,poly:[[245,15],[310,15],[310,90],[245,90]]},
@@ -1152,8 +1156,14 @@ const CAMPOS = [
    ]},
   {id:"LA MARIA OLIVA",nombre:"La María Oliva",vb:[0,0,830,460],
    refs:[{x:415,y:452,t:"Ruta Provincial N° 10"},{x:16,y:230,t:"camino vecinal",rot:-90}],
-   grises:[{poly:[[30,68],[145,68],[145,240],[30,240]],label:"Monte 5"},{poly:[[205,123],[370,123],[370,240],[205,240]],label:"Monte 4"},{poly:[[398,133],[800,133],[800,240],[398,240]],label:"Monte 3"},{poly:[[30,240],[395,240],[395,432],[30,432]],label:"Monte 2"},{poly:[[398,243],[800,243],[800,432],[398,432]],label:"Monte 1"}],
+   grises:[],
    lotes:[
+    // montes: son lotes (pueden tener rodeos) aunque no se siembren
+    {id:"MONTE 5",label:"Monte 5",monte:true,poly:[[30,68],[145,68],[145,240],[30,240]]},
+    {id:"MONTE 4",label:"Monte 4",monte:true,poly:[[205,123],[370,123],[370,240],[205,240]]},
+    {id:"MONTE 3",label:"Monte 3",monte:true,poly:[[398,133],[800,133],[800,240],[398,240]]},
+    {id:"MONTE 2",label:"Monte 2",monte:true,poly:[[30,240],[395,240],[395,432],[30,432]]},
+    {id:"MONTE 1",label:"Monte 1",monte:true,poly:[[398,243],[800,243],[800,432],[398,432]]},
     {id:"3",label:"L3",ha:15,poly:[[30,20],[215,20],[215,65],[30,65]]},
     {id:"2",label:"L2",ha:10,poly:[[215,20],[395,20],[395,65],[215,65]]},
     {id:"1",label:"L1",ha:25,poly:[[398,20],[800,20],[800,65],[398,65]]},
@@ -1517,7 +1527,7 @@ function RosaNorte({campo}){
   );
 }
 
-function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick, datos, cultivoFiltro=null, cultivosDeLote=null}){
+function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick, datos, cultivoFiltro=null, cultivosDeLote=null, cabezasEnLote=null}){
   const [hov,setHov]=useState(null);
   const [vx,vy,vw,vh]=campo.vb;
   const k=vw/700;
@@ -1564,6 +1574,7 @@ function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick, datos, culti
                 fontWeight="700" textAnchor="middle"
                 fill={dim?"#B0A89A":TINTA} opacity={dim?0.55:1}>{l.label}</text>
               {l.ha&&<text x={cx} y={cy+(dim?9:label?4:9)*k} fontSize={(w<55*k?7.5:9)*k} textAnchor="middle" fill={dim?"#B0A89A":TINTA} opacity={dim?0.5:0.65}>{l.ha} ha</text>}
+              {(()=>{ const cab=cabezasEnLote?cabezasEnLote(campo.id,l.id):0; return cab>0&&<text x={cx} y={cy-(dim?16:label?20:16)*k} fontSize={(w<55*k?8:9.5)*k} fontWeight="700" textAnchor="middle" fill="#6B4E16">🐄 {cab}</text>; })()}
               {!dim&&label&&(()=>{
                 // la letra se achica para que el texto no se salga del lote
                 const fs=Math.min(8.5*k,(w*0.9)/(Math.max(String(label).length,String(label2||"").length)*0.56));
@@ -2810,7 +2821,7 @@ const sembradasSegunRegistro = (siembra, cultivo) => {
 const fmtMiles = n => n == null || isNaN(n) ? "—" : Math.round(n).toLocaleString("es-AR");
 // Lista compartida en una hoja de la planilla (monitoreos, lluvias), con cola local de lo que
 // no se pudo subir por falta de señal: se ve igual (marcado) y se sube solo cuando vuelve.
-function useListaCompartida({url, cuerpo, colaKey, campo}){
+function useListaCompartida({url, cuerpo, colaKey, campo, onDatos}){
   const leerCola = () => { try { return JSON.parse(window.localStorage.getItem(colaKey)) || []; } catch { return []; } };
   const escribirCola = c => { try { window.localStorage.setItem(colaKey, JSON.stringify(c)); } catch {} };
   const [remotos, setRemotos] = useState([]);
@@ -2831,6 +2842,7 @@ function useListaCompartida({url, cuerpo, colaKey, campo}){
       if(!r.ok) throw new Error(`HTTP ${r.status}`);
       const d = await r.json();
       setRemotos(d[campo] || []);
+      if(onDatos) onDatos(d);
       setSync({estado:"ok"});
     } catch(e) { setSync({estado:"error", txt:e.message}); }
   };
@@ -2973,6 +2985,335 @@ const subirFoto = async (base64, nombre) => {
   if(!r.ok) throw new Error(d.error || `HTTP ${r.status}`);
   return d.link;
 };
+
+// ============================================================
+// GANADERÍA — rodeos y caravanas en los lotes (api/ganaderia.js, hojas rodeos / animales / rodeo_eventos).
+// El estado de hoy sale de aplicar los eventos (parto, venta, cambio de lote…) sobre el inventario inicial.
+// ============================================================
+const TIPOS_EVENTO_RODEO = {
+  parto:   {txt:"Parto",              icono:"🐮"},
+  venta:   {txt:"Venta",              icono:"💲"},
+  muerte:  {txt:"Muerte",             icono:"✝️"},
+  tacto:   {txt:"Tacto / preñez",     icono:"🔍"},
+  sanidad: {txt:"Sanidad",            icono:"💉"},
+  traspaso:{txt:"Pasar a otro rodeo", icono:"🔀"},
+  nota:    {txt:"Nota",               icono:"📝"},
+  mover:   {txt:"Cambio de lote",     icono:"🚚"},
+};
+const RESULTADOS_TACTO = ["Preñada","Preñada cabeza","Preñada cuerpo","Preñada cola","Vacía","Dudosa"];
+const RESULTADOS_PARTO = ["Ternero macho","Ternera hembra","Ternero muerto","Parto asistido"];
+const SANIDAD_SUGERIDA = ["Aftosa","Brucelosis","Clostridial","Carbunclo","Querato","Antiparasitario","Mineral / ADE"];
+// Las caravanas se guardan separadas por ";" porque muchas tienen espacios ("032 010004285791")
+const separarCaravanas = s => String(s||"").split(";").map(x => x.trim()).filter(Boolean);
+const normCaravana = s => String(s||"").toUpperCase().replace(/[^0-9A-Z]/g, "");
+// Lo que se muestra de una caravana: la visual corta o los últimos 6 números de la electrónica
+const caravanaCorta = c => { const n = normCaravana(c); return /^\d{9,}$/.test(n) ? `…${n.slice(-6)}` : c; };
+
+function estadoGanaderia(base, eventos){
+  const rodeos = new Map((base.rodeos||[]).map(r => [r.id, {...r, sinCaravanaHoy:r.sinCaravana||0, partos:0, eventos:[]}]));
+  const animales = (base.animales||[]).map(a => ({...a, activo:true, rodeoHoy:a.rodeo, estadoHoy:a.estado, baja:""}));
+  const buscar = (car, rodeo) => { const n = normCaravana(car);
+    return animales.find(a => a.activo && a.rodeoHoy === rodeo && normCaravana(a.caravana) === n)
+      || animales.find(a => a.activo && normCaravana(a.caravana) === n); };
+  const orden = [...(eventos||[])].sort((a, b) => String(a.fecha).localeCompare(String(b.fecha)) || String(a.registrado||"").localeCompare(String(b.registrado||"")));
+  for(const e of orden){
+    const r = rodeos.get(e.rodeo); if(!r) continue;
+    const cant = Number(e.cantidad) || 0;
+    const anims = separarCaravanas(e.caravanas).map(c => buscar(c, e.rodeo)).filter(Boolean);
+    if(e.tipo === "mover"){ r.campo = e.campoHasta || r.campo; r.lote = e.loteHasta || ""; }
+    else if(e.tipo === "venta" || e.tipo === "muerte"){
+      anims.forEach(a => { a.activo = false; a.baja = `${TIPOS_EVENTO_RODEO[e.tipo].txt} ${ddmm(fechaLocal(e.fecha))}`; });
+      r.sinCaravanaHoy = Math.max(0, r.sinCaravanaHoy - cant);
+    } else if(e.tipo === "traspaso"){
+      const d = rodeos.get(e.rodeoHasta);
+      if(d){ anims.forEach(a => { a.rodeoHoy = d.id; }); const c = Math.min(cant, r.sinCaravanaHoy); r.sinCaravanaHoy -= c; d.sinCaravanaHoy += c; }
+    } else if(e.tipo === "tacto" && e.resultado){ anims.forEach(a => { a.estadoHoy = e.resultado; }); }
+    else if(e.tipo === "parto"){ anims.forEach(a => { a.estadoHoy = `Parida ${ddmm(fechaLocal(e.fecha))}`; }); r.partos += anims.length || cant; }
+    r.eventos.unshift(e);
+    if(e.tipo === "traspaso" && rodeos.get(e.rodeoHasta)) rodeos.get(e.rodeoHasta).eventos.unshift(e);
+  }
+  const lista = [...rodeos.values()].map(r => {
+    const activos = animales.filter(a => a.activo && a.rodeoHoy === r.id);
+    const porEstado = {};
+    activos.forEach(a => { const k = /^pre[ñn]ada/i.test(a.estadoHoy) ? "Preñadas" : /^vac[ií]a/i.test(a.estadoHoy) ? "Vacías" : /^parida/i.test(a.estadoHoy) ? "Paridas" : null; if(k) porEstado[k] = (porEstado[k]||0) + 1; });
+    return {...r, activos, cabezas: activos.length + r.sinCaravanaHoy, porEstado, bajas: animales.filter(a => !a.activo && a.rodeoHoy === r.id)};
+  });
+  return {rodeos: lista, porLote: (campoId, loteId) => lista.filter(r => r.campo === campoId && String(r.lote).toUpperCase() === String(loteId).toUpperCase())};
+}
+
+function useGanaderia(){
+  const [base, setBase] = useState({rodeos:[], animales:[]});
+  const lista = useListaCompartida({url:"/api/ganaderia", cuerpo:"evento", colaKey:"smix_rodeo_eventos_pendientes_v1", campo:"eventos",
+    onDatos: d => setBase({rodeos:d.rodeos||[], animales:d.animales||[]})});
+  const estado = useMemo(() => estadoGanaderia(base, lista.lista), [base, lista.lista]);
+  return {...lista, ...estado};
+}
+
+// Destinos posibles para mover un rodeo: los lotes del campo (montes incluidos)
+const destinosDeCampo = campo => campo.lotes.map(l => ({id:String(l.id), label:`${l.monte && !/^\d/.test(l.label) ? l.label : `Lote ${l.label||l.id}`}${l.monte ? " (monte)" : ""}${l.ha ? ` · ${l.ha} ha` : ""}`}));
+
+// Formulario para cargar algo en un rodeo (parto, venta, tacto…) o cambiarlo de lote
+function FormEventoRodeo({gan, rodeo, autor, cambiarAutor, tipoInicial="nota", onListo, onCancelar}){
+  const hoyISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
+  const [tipo, setTipo] = useState(tipoInicial);
+  const [fecha, setFecha] = useState(hoyISO());
+  const [elegidas, setElegidas] = useState([]);       // caravanas tal cual están en el inventario
+  const [busca, setBusca] = useState("");
+  const [pegadas, setPegadas] = useState("");
+  const [cantidad, setCantidad] = useState("");
+  const [resultado, setResultado] = useState("");
+  const [detalle, setDetalle] = useState("");
+  const [campoHasta, setCampoHasta] = useState(rodeo.campo);
+  const [loteHasta, setLoteHasta] = useState("");
+  const [rodeoHasta, setRodeoHasta] = useState("");
+  const [guardando, setGuardando] = useState(false);
+  const campoDest = CAMPOS.find(c => c.id === campoHasta) || CAMPOS[0];
+  const conCaravanas = !["mover","nota"].includes(tipo);
+  const palabras = normCaravana(busca);
+  const candidatos = palabras ? rodeo.activos.filter(a => normCaravana(a.caravana).includes(palabras)).slice(0, 30) : [];
+  const toggle = c => setElegidas(x => x.includes(c) ? x.filter(y => y !== c) : [...x, c]);
+  // Pegar varias caravanas (o sus últimos números) separadas por espacio, coma o renglón
+  const sumarPegadas = () => {
+    const nuevas = [], noEstan = [];
+    pegadas.split(/[\s,;]+/).map(normCaravana).filter(Boolean).forEach(p => {
+      const ok = rodeo.activos.filter(a => normCaravana(a.caravana) === p || normCaravana(a.caravana).endsWith(p));
+      if(ok.length === 1) nuevas.push(ok[0].caravana); else noEstan.push(p);
+    });
+    setElegidas(x => [...new Set([...x, ...nuevas])]);
+    setPegadas(noEstan.join(" "));
+  };
+  const lbl = t => <div style={{fontSize:10.5,fontWeight:700,textTransform:"uppercase",opacity:0.6,marginBottom:3}}>{t}</div>;
+  const txt = {width:"100%",boxSizing:"border-box",padding:"9px 10px",fontSize:16,border:"1px solid #C8C2B0",borderRadius:7,background:"#FFFDF7",color:TINTA,fontFamily:"inherit"};
+  const chipS = a => ({padding:"7px 11px",fontSize:13,borderRadius:16,cursor:"pointer",fontFamily:"inherit",
+    border:`1px solid ${a?TINTA:"#C8C2B0"}`,background:a?TINTA:"#fff",color:a?CREMA:TINTA,fontWeight:a?700:500});
+  const falta = tipo === "mover" ? !loteHasta : tipo === "traspaso" ? !rodeoHasta || (!elegidas.length && !Number(cantidad))
+    : ["venta","muerte","parto","tacto"].includes(tipo) ? (!elegidas.length && !Number(cantidad)) : false;
+
+  const guardar = async () => {
+    setGuardando(true);
+    const e = {id:`r${Date.now().toString(36)}`, fecha, tipo, rodeo:rodeo.id, caravanas:elegidas.join("; "), cantidad:cantidad||"",
+      campoHasta: tipo === "mover" ? campoHasta : "", loteHasta: tipo === "mover" ? loteHasta : "", rodeoHasta: tipo === "traspaso" ? rodeoHasta : "",
+      resultado, detalle:detalle.trim(), autor};
+    const ok = await gan.guardar([e]);
+    setGuardando(false);
+    const n = elegidas.length + (Number(cantidad)||0);
+    const que = tipo === "mover" ? `${rodeo.nombre} pasó al ${destinosDeCampo(campoDest).find(d => d.id === loteHasta)?.label || loteHasta} de ${campoDest.nombre}`
+      : `${TIPOS_EVENTO_RODEO[tipo].txt}${n ? ` de ${n} animal${n>1?"es":""}` : ""} en ${rodeo.nombre}`;
+    onListo(ok ? {ok:true, txt:`✓ ${que}. Guardado en la planilla.`} : {ok:false, txt:`Sin conexión: quedó guardado en este equipo (${que}) y se sube cuando vuelva la señal.`});
+  };
+
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:12}}>
+      <div style={{fontSize:15.5,fontWeight:700}}>🐄 {rodeo.nombre} <span style={{fontSize:12,opacity:0.6,fontWeight:500}}>({rodeo.id} · {rodeo.cabezas} cab.)</span></div>
+      <div>
+        {lbl("¿Qué pasó?")}
+        <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+          {Object.entries(TIPOS_EVENTO_RODEO).map(([k, t]) => <button key={k} onClick={()=>{ setTipo(k); setResultado(""); }} style={chipS(tipo===k)}>{t.icono} {t.txt}</button>)}
+        </div>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:10}}>
+        <div>{lbl("Fecha")}<input type="date" value={fecha} onChange={e=>setFecha(e.target.value)} style={txt}/></div>
+        <div>{lbl("Quién")}<input value={autor} onChange={e=>cambiarAutor(e.target.value)} placeholder="Tu nombre" style={txt}/></div>
+      </div>
+
+      {tipo === "mover" && (
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:10}}>
+          <div>{lbl("Campo")}<select value={campoHasta} onChange={e=>{ setCampoHasta(e.target.value); setLoteHasta(""); }} style={txt}>
+            {CAMPOS.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}</select></div>
+          <div>{lbl("Lote al que pasa")}<select value={loteHasta} onChange={e=>setLoteHasta(e.target.value)} style={txt}>
+            <option value="">— elegir —</option>
+            {destinosDeCampo(campoDest).filter(d => !(campoHasta === rodeo.campo && d.id === String(rodeo.lote))).map(d => <option key={d.id} value={d.id}>{d.label}</option>)}</select></div>
+        </div>
+      )}
+      {tipo === "traspaso" && (
+        <div>{lbl("Rodeo al que pasan")}<select value={rodeoHasta} onChange={e=>setRodeoHasta(e.target.value)} style={txt}>
+          <option value="">— elegir —</option>
+          {gan.rodeos.filter(r => r.id !== rodeo.id).map(r => <option key={r.id} value={r.id}>{r.nombre} ({r.id})</option>)}</select></div>
+      )}
+      {tipo === "tacto" && (
+        <div>{lbl("Resultado")}<div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+          {RESULTADOS_TACTO.map(x => <button key={x} onClick={()=>setResultado(resultado===x?"":x)} style={chipS(resultado===x)}>{x}</button>)}</div></div>
+      )}
+      {tipo === "parto" && (
+        <div>{lbl("Cría")}<div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+          {RESULTADOS_PARTO.map(x => <button key={x} onClick={()=>setResultado(resultado===x?"":x)} style={chipS(resultado===x)}>{x}</button>)}</div></div>
+      )}
+      {tipo === "sanidad" && (
+        <div>{lbl("Qué se hizo")}<div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+          {SANIDAD_SUGERIDA.map(x => { const a = resultado.split(", ").includes(x); return <button key={x} onClick={()=>setResultado(r => (a ? r.split(", ").filter(y => y !== x) : [...r.split(", ").filter(Boolean), x]).join(", "))} style={chipS(a)}>{x}</button>; })}</div></div>
+      )}
+
+      {conCaravanas && (
+        <div style={{border:"1px solid #D8D2C0",borderRadius:9,padding:10,background:"#fff"}}>
+          {lbl(`Caravanas${tipo==="sanidad" ? " (opcional: si no elegís ninguna, vale para todo el rodeo)" : ""}`)}
+          <input value={busca} onChange={e=>setBusca(e.target.value)} placeholder="Buscar caravana (ej: 5791 o XN102A4)" style={txt}/>
+          {candidatos.length > 0 && (
+            <div style={{display:"flex",gap:5,flexWrap:"wrap",marginTop:6,maxHeight:150,overflow:"auto"}}>
+              {candidatos.map(a => <button key={a.caravana} onClick={()=>{ toggle(a.caravana); }} style={chipS(elegidas.includes(a.caravana))}>{a.caravana}</button>)}
+            </div>
+          )}
+          {busca && !candidatos.length && <div style={{fontSize:12,opacity:0.6,marginTop:5}}>No hay caravanas así en este rodeo.</div>}
+          <details style={{marginTop:8}}>
+            <summary style={{fontSize:12.5,cursor:"pointer",color:"#1E5FA8",fontWeight:600}}>Pegar varias caravanas juntas</summary>
+            <textarea rows={3} value={pegadas} onChange={e=>setPegadas(e.target.value)} placeholder="Separadas por espacio, coma o renglón. Alcanza con los últimos números." style={{...txt,marginTop:6,resize:"vertical"}}/>
+            <button onClick={sumarPegadas} style={{...chipS(false),marginTop:5}}>Agregar</button>
+            {pegadas && <div style={{fontSize:11.5,color:"#8A6200",marginTop:4}}>Las que quedan en el cuadro no se encontraron o coinciden con más de una.</div>}
+          </details>
+          {elegidas.length > 0 && (
+            <div style={{marginTop:8}}>
+              <div style={{fontSize:12,fontWeight:700,marginBottom:4}}>{elegidas.length} elegida{elegidas.length>1?"s":""} <button onClick={()=>setElegidas([])} style={{border:"none",background:"none",color:"#C0392B",fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>sacar todas</button></div>
+              <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+                {elegidas.map(c => <span key={c} onClick={()=>toggle(c)} style={{fontSize:12,background:TINTA,color:CREMA,borderRadius:12,padding:"3px 9px",cursor:"pointer"}}>{c} ✕</span>)}
+              </div>
+            </div>
+          )}
+          <div style={{marginTop:8}}>{lbl("Cantidad sin caravana (ej: terneros al pie)")}
+            <input value={cantidad} inputMode="numeric" onChange={e=>setCantidad(e.target.value.replace(/\D/g,""))} placeholder="0" style={{...txt,width:110}}/></div>
+        </div>
+      )}
+      <div>{lbl(tipo==="venta" ? "Detalle (comprador, kg, precio…)" : "Detalle")}<textarea rows={2} value={detalle} onChange={e=>setDetalle(e.target.value)} style={{...txt,resize:"vertical"}}/></div>
+      <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+        <button onClick={guardar} disabled={guardando||falta} style={{padding:"12px 20px",fontSize:15,fontWeight:700,borderRadius:9,border:"none",background:falta?"#9BB89A":"#2E7D32",color:"#fff",cursor:falta?"default":"pointer",fontFamily:"inherit"}}>{guardando ? "Guardando…" : "💾 Guardar"}</button>
+        <button onClick={onCancelar} disabled={guardando} style={{padding:"12px 16px",fontSize:15,fontWeight:600,borderRadius:9,border:`1.5px solid ${TINTA}`,background:"transparent",color:TINTA,cursor:"pointer",fontFamily:"inherit"}}>Cancelar</button>
+      </div>
+    </div>
+  );
+}
+
+const textoEventoRodeo = (e, gan) => {
+  const t = TIPOS_EVENTO_RODEO[e.tipo] || {txt:e.tipo, icono:"•"};
+  const cars = separarCaravanas(e.caravanas), n = cars.length + (Number(e.cantidad)||0);
+  const destino = e.tipo === "mover" ? ` → ${e.campoHasta && e.campoHasta !== "" ? `${nombreCampo(e.campoHasta)} ` : ""}lote ${e.loteHasta}`
+    : e.tipo === "traspaso" ? ` → ${(gan?.rodeos||[]).find(r => r.id === e.rodeoHasta)?.nombre || e.rodeoHasta}` : "";
+  return `${t.icono} ${t.txt}${n ? ` (${n})` : ""}${destino}${e.resultado ? ` · ${e.resultado}` : ""}${e.detalle ? ` · ${e.detalle}` : ""}`;
+};
+
+// Tarjeta de un rodeo, con sus botones para cargar cosas
+function TarjetaRodeo({r, gan, autor, cambiarAutor, conLote=false, onAviso}){
+  const [form, setForm] = useState(null);     // tipo de evento que se está cargando
+  const [verCaravanas, setVerCaravanas] = useState(false);
+  const [busca, setBusca] = useState("");
+  const [aviso, setAviso] = useState(null);
+  const fFecha = s => { const d = fechaLocal(s); return d ? ddmm(d) : s; };
+  const btn = {padding:"8px 12px",fontSize:13.5,fontWeight:700,borderRadius:8,border:`1.5px solid ${TINTA}`,background:"#fff",color:TINTA,cursor:"pointer",fontFamily:"inherit"};
+  const lista = verCaravanas ? r.activos.filter(a => !busca || normCaravana(a.caravana).includes(normCaravana(busca))) : [];
+  return (
+    <div style={{border:"1.5px solid #B9A57A",borderRadius:10,background:"#FFFBF2",padding:"10px 12px"}}>
+      {form ? (
+        <FormEventoRodeo gan={gan} rodeo={r} autor={autor} cambiarAutor={cambiarAutor} tipoInicial={form}
+          onListo={m => { setAviso(m); setForm(null); if(onAviso) onAviso(m); }} onCancelar={() => setForm(null)}/>
+      ) : <>
+        <div style={{display:"flex",justifyContent:"space-between",gap:8,alignItems:"flex-start",flexWrap:"wrap"}}>
+          <div style={{minWidth:0}}>
+            <div style={{fontSize:14.5,fontWeight:700}}>🐄 {r.nombre}</div>
+            <div style={{fontSize:11.5,opacity:0.65}}>{r.id}{r.servicio ? ` · servicio ${r.servicio.toLowerCase()}` : ""}{conLote ? ` · ${nombreCampo(r.campo)} ${r.lote ? `lote ${r.lote}` : "(sin lote)"}` : ""}</div>
+          </div>
+          <div style={{textAlign:"right"}}>
+            <div style={{fontSize:20,fontWeight:800,lineHeight:1}}>{r.cabezas}</div>
+            <div style={{fontSize:10.5,opacity:0.6}}>cabezas{r.sinCaravanaHoy ? ` (${r.sinCaravanaHoy} sin caravana)` : ""}</div>
+          </div>
+        </div>
+        {(Object.keys(r.porEstado).length > 0 || r.partos > 0) && (
+          <div style={{display:"flex",gap:5,flexWrap:"wrap",marginTop:6}}>
+            {Object.entries(r.porEstado).map(([k, v]) => <span key={k} style={{fontSize:11.5,background:"#F1EAD8",borderRadius:6,padding:"2px 7px"}}><b>{v}</b> {k.toLowerCase()}</span>)}
+            {r.partos > 0 && <span style={{fontSize:11.5,background:"#E8F5E9",borderRadius:6,padding:"2px 7px"}}><b>{r.partos}</b> partos cargados</span>}
+          </div>
+        )}
+        {aviso && <div style={{fontSize:12.5,fontWeight:600,marginTop:6,color:aviso.ok?"#2E7D32":"#8A6200"}}>{aviso.txt}</div>}
+        {r.eventos.length > 0 && (
+          <div style={{marginTop:7,display:"flex",flexDirection:"column",gap:3}}>
+            {r.eventos.slice(0, 3).map(e => <div key={e.id} style={{fontSize:12}}><b>{fFecha(e.fecha)}</b> {textoEventoRodeo(e, gan)}{e.sinSubir ? " · 📵" : ""}</div>)}
+          </div>
+        )}
+        <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:9}}>
+          <button onClick={()=>{ setAviso(null); setForm("parto"); }} style={{...btn,background:"#2E7D32",borderColor:"#2E7D32",color:"#fff"}}>📝 Cargar</button>
+          <button onClick={()=>{ setAviso(null); setForm("mover"); }} style={btn}>🚚 Cambiar de lote</button>
+          <button onClick={()=>setVerCaravanas(v => !v)} style={btn}>📋 Caravanas ({r.activos.length})</button>
+        </div>
+        {verCaravanas && (
+          <div style={{marginTop:8}}>
+            <input value={busca} onChange={e=>setBusca(e.target.value)} placeholder="Buscar caravana" style={{width:"100%",boxSizing:"border-box",padding:"8px 10px",fontSize:16,border:"1px solid #C8C2B0",borderRadius:7,fontFamily:"inherit"}}/>
+            <div style={{maxHeight:260,overflow:"auto",marginTop:6,fontSize:12.5}}>
+              {lista.map(a => (
+                <div key={a.caravana} style={{display:"flex",justifyContent:"space-between",gap:8,padding:"4px 2px",borderBottom:"1px solid #EEE7D6"}}>
+                  <span><b>{a.caravana}</b> <span style={{opacity:0.65}}>{[a.categoria, a.raza].filter(Boolean).join(" · ")}</span></span>
+                  <span style={{whiteSpace:"nowrap",color:/pre[ñn]ada/i.test(a.estadoHoy)?"#2E7D32":/vac[ií]a/i.test(a.estadoHoy)?"#C0392B":TINTA}}>{a.estadoHoy}</span>
+                </div>
+              ))}
+              {!lista.length && <div style={{opacity:0.6,padding:4}}>{r.activos.length ? "Ninguna coincide." : "Este rodeo no tiene caravanas cargadas."}</div>}
+              {r.bajas.length > 0 && !busca && <div style={{opacity:0.6,padding:"6px 2px"}}>Dadas de baja: {r.bajas.map(a => `${a.caravana} (${a.baja})`).join(", ")}</div>}
+            </div>
+          </div>
+        )}
+      </>}
+    </div>
+  );
+}
+
+// Sección de la ventana del lote: los rodeos que están en ese lote
+function RodeosDelLote({gan, campoId, loteId, autor, cambiarAutor}){
+  const rodeos = gan.porLote(campoId, loteId);
+  // si un rodeo se fue a otro lote, su tarjeta desaparece de acá: el aviso queda en la sección
+  const [aviso, setAviso] = useState(null);
+  if(!rodeos.length && !aviso) return null;
+  return (
+    <div style={{padding:"14px 20px",borderBottom:"1px solid #D8D2C0",background:"#FBF6EA"}}>
+      <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55,marginBottom:8}}>🐄 Rodeos en este lote · {rodeos.reduce((s, r) => s + r.cabezas, 0)} cabezas</div>
+      {aviso && <div style={{fontSize:12.5,fontWeight:600,marginBottom:8,color:aviso.ok?"#2E7D32":"#8A6200"}}>{aviso.txt}</div>}
+      <div style={{display:"flex",flexDirection:"column",gap:8}}>
+        {rodeos.map(r => <TarjetaRodeo key={r.id} r={r} gan={gan} autor={autor} cambiarAutor={cambiarAutor} onAviso={setAviso}/>)}
+      </div>
+    </div>
+  );
+}
+
+// Pestaña Ganadería: todos los rodeos, dónde están y lo último que se cargó
+function VistaGanaderia({gan, autor, cambiarAutor}){
+  const [campoF, setCampoF] = useState("TODOS");
+  const fFecha = s => { const d = fechaLocal(s); return d ? ddmm(d) : s; };
+  const rodeos = gan.rodeos.filter(r => campoF === "TODOS" || r.campo === campoF);
+  const campos = [...new Set(gan.rodeos.map(r => r.campo))];
+  const eventos = gan.lista.filter(e => campoF === "TODOS" || gan.rodeos.find(r => r.id === e.rodeo)?.campo === campoF);
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:14}}>
+      <div style={{fontSize:12.5,opacity:0.75}}>
+        Para cargar algo en el campo: <b>🗺️ Mapa por campo</b> → tocá el lote donde está el rodeo → <b>📝 Cargar</b> o <b>🚚 Cambiar de lote</b>.
+        Se guarda en las hojas <b>rodeos</b>, <b>animales</b> y <b>rodeo_eventos</b> de la planilla LABORES S-MIX 26-27.
+        {gan.sync.estado==="error" && <span style={{color:"#C0392B"}}> No se pudo leer la planilla{gan.sync.txt ? ` (${gan.sync.txt})` : ""}.</span>}
+      </div>
+      {gan.sinSubir > 0 && (
+        <div style={{...cajaV,borderColor:"#C9A227",background:"#FFF8E6",display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",padding:"10px 14px"}}>
+          <span style={{fontSize:13}}>📵 {gan.sinSubir} carga{gan.sinSubir>1?"s":""} guardada{gan.sinSubir>1?"s":""} en este equipo, sin subir a la planilla.</span>
+          <button onClick={gan.reintentar} style={{...chipV(false),padding:"5px 12px"}}>Subir ahora</button>
+        </div>
+      )}
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+        <select value={campoF} onChange={e=>setCampoF(e.target.value)} style={selectV}>
+          <option value="TODOS">Todos los campos</option>
+          {campos.map(c => <option key={c} value={c}>{nombreCampo(c)}</option>)}
+        </select>
+        <span style={{fontSize:13,opacity:0.7}}>{rodeos.length} rodeos · {rodeos.reduce((s, r) => s + r.cabezas, 0)} cabezas</span>
+      </div>
+      {gan.sync.estado==="cargando" && !gan.rodeos.length && <div style={{...cajaV,textAlign:"center",opacity:0.6}}>Cargando rodeos…</div>}
+      {gan.sync.estado!=="cargando" && !gan.rodeos.length && <div style={{...cajaV,textAlign:"center",opacity:0.7}}>Todavía no hay rodeos cargados en la planilla.</div>}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:10}}>
+        {rodeos.map(r => <TarjetaRodeo key={r.id} r={r} gan={gan} autor={autor} cambiarAutor={cambiarAutor} conLote/>)}
+      </div>
+      {eventos.length > 0 && (
+        <div style={cajaV}>
+          <div style={{fontSize:13,fontWeight:700,marginBottom:6}}>Últimas cargas</div>
+          {eventos.slice(0, 40).map(e => (
+            <div key={e.id} style={{display:"flex",justifyContent:"space-between",gap:8,fontSize:12.5,padding:"5px 0",borderBottom:"1px solid #E5DFCC"}}>
+              <span><b>{fFecha(e.fecha)}</b> · {gan.rodeos.find(r => r.id === e.rodeo)?.nombre || e.rodeo} · {textoEventoRodeo(e, gan)}{e.autor ? ` · ${e.autor}` : ""}{e.sinSubir ? " · 📵 sin subir" : ""}</span>
+              <button onClick={()=>{ if(window.confirm("¿Borrar esta carga? El rodeo vuelve a quedar como estaba antes de ella.")) gan.borrar(e.id); }}
+                style={{border:"none",background:"none",padding:0,color:"#C0392B",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:12}}>Borrar</button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // Formulario de monitoreo de UN lote. Se abre desde el lote (Mapa por campo → tocar el lote →
 // "Monitorear este lote") y también para editar uno ya cargado desde la pestaña Monitoreo.
@@ -3423,6 +3764,9 @@ export default function App(){
   const [sincro, setSincro] = useState({estado:"", txt:""});   // estado: ok | error | subiendo
   const cambiarAutor = (v) => { setAutor(v); try { window.localStorage.setItem("smix_autor", v); } catch {} };
   const monit = useMonitoreos();
+  const gan = useGanaderia();
+  // Cabezas en cada lote, para marcarlo en el mapa
+  const cabezasEnLote = (campoId, loteId) => gan.porLote(campoId, loteId).reduce((s, r) => s + r.cabezas, 0);
   const [pideClave, setPideClave] = useState(false);
   const [claveIngresada, setClaveIngresada] = useState("");
   useEffect(() => { const f = () => setPideClave(true); window.addEventListener("smix-clave", f); return () => window.removeEventListener("smix-clave", f); }, []);
@@ -4249,6 +4593,7 @@ export default function App(){
           <button style={tab(vista==="realizadas")} onClick={()=>setVista("realizadas")}>✅ Labores realizadas</button>
           <button style={tab(vista==="pendientes")} onClick={()=>setVista("pendientes")}>⏳ Labores pendientes</button>
           <button style={tab(vista==="monitoreo")} onClick={()=>setVista("monitoreo")}>🔍 Monitoreo</button>
+          <button style={tab(vista==="ganaderia")} onClick={()=>setVista("ganaderia")}>🐄 Ganadería</button>
           <button style={tab(vista==="galeria")} onClick={()=>setVista("galeria")}>🗂️ Todos los campos</button>
           <button style={tab(vista==="margenes")} onClick={()=>setVista("margenes")}>💵 Márgenes</button>
           <button style={tab(vista==="ordenes")} onClick={()=>setVista("ordenes")}>🚜 Nueva labor</button>
@@ -4292,7 +4637,7 @@ export default function App(){
                 <div style={{fontWeight:700,fontSize:15}}>{campo.nombre}</div>
                 <div style={{fontSize:12,opacity:0.6}}>{PRODUCTOR[campo.id]} · {fmt(haCampo(campo))} ha</div>
               </div>
-              <MapaCampo campo={campo} modo={capaModo} sueloVar={sueloVar} onLoteClick={abrirLote} datos={{INV_26,PLAN_2627,RINDE_2526,SUELOS,RESIDUALES:residualesMapa}} cultivoFiltro={cultivoFiltro} cultivosDeLote={cultivosDeLote}/>
+              <MapaCampo campo={campo} modo={capaModo} sueloVar={sueloVar} onLoteClick={abrirLote} cabezasEnLote={cabezasEnLote} datos={{INV_26,PLAN_2627,RINDE_2526,SUELOS,RESIDUALES:residualesMapa}} cultivoFiltro={cultivoFiltro} cultivosDeLote={cultivosDeLote}/>
               <div style={{paddingInline:4}}><Leyenda modo={capaModo} sueloVar={sueloVar}/></div>
               {/* Resumen ha por cultivo — campaña 26-27 */}
               {capaModo==="campaña"&&(()=>{
@@ -4323,7 +4668,7 @@ export default function App(){
                   }
                   if(fina) acum[fina]=(acum[fina]||0)+l.ha;
                   if(etiquetaGruesa) acum[etiquetaGruesa]=(acum[etiquetaGruesa]||0)+l.ha;
-                  if(!fina&&!gruesa) acum["sin sembrar"]=(acum["sin sembrar"]||0)+l.ha;
+                  if(!fina&&!gruesa) acum["sin sembrar"]=(acum["sin sembrar"]||0)+(Number(l.ha)||0);
                 });
                 const rows=Object.entries(acum).sort((a,b)=>b[1]-a[1]);
                 const total=rows.reduce((s,[_,ha])=>s+ha,0);
@@ -4445,7 +4790,7 @@ export default function App(){
                     <div style={{fontWeight:700,fontSize:14}}>{c.nombre}</div>
                     <div style={{fontSize:12,opacity:0.55}}>{PRODUCTOR[c.id]} · {fmt(haCampo(c))} ha</div>
                   </div>
-                  <MapaCampo campo={c} modo={capaModo} sueloVar={sueloVar} mini={false} onLoteClick={abrirLote} datos={{INV_26,PLAN_2627,RINDE_2526,SUELOS,RESIDUALES:residualesMapa}} cultivoFiltro={cultivoFiltro} cultivosDeLote={cultivosDeLote}/>
+                  <MapaCampo campo={c} modo={capaModo} sueloVar={sueloVar} mini={false} onLoteClick={abrirLote} cabezasEnLote={cabezasEnLote} datos={{INV_26,PLAN_2627,RINDE_2526,SUELOS,RESIDUALES:residualesMapa}} cultivoFiltro={cultivoFiltro} cultivosDeLote={cultivosDeLote}/>
                   <div style={{marginTop:4}}><Leyenda modo={capaModo} sueloVar={sueloVar}/></div>
                 </div>
               ))}
@@ -4462,6 +4807,7 @@ export default function App(){
           fechaDatos={fechaDatos ? new Date(fechaDatos).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}) : null}
           onEditar={()=>setVista("protocolo")}/>}
 
+        {vista==="ganaderia"&&<VistaGanaderia gan={gan} autor={autor} cambiarAutor={cambiarAutor}/>}
         {vista==="monitoreo"&&<VistaMonitoreo monit={monit} lluv={lluv} cultivoDe={cultivoDe} siembraDe={siembraDe} autor={autor} cambiarAutor={cambiarAutor}/>}
 
         {vista==="protocolo"&&<VistaProtocoloEditor protocolo={protocolo} sync={protoSync} onGuardar={guardarProtocolo}/>}
@@ -5063,7 +5409,7 @@ export default function App(){
                             <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:8,fontSize:11}}>
                               {Object.entries(lotesPorTrat).map(([tIdx, lotes]) => {
                                 const t = tratamientos[Number(tIdx)];
-                                const haT = lotes.reduce((s,l)=>s+l.ha,0);
+                                const haT = lotes.reduce((s,l)=>s+(Number(l.ha)||0),0);
                                 return (
                                   <div key={tIdx} style={{display:"flex",alignItems:"center",gap:5}}>
                                     <svg width="14" height="14" style={{flexShrink:0}}><rect width="14" height="14" fill={COLORES_APP[Number(tIdx)]} stroke={TINTA} strokeWidth="1"/></svg>
@@ -5238,7 +5584,7 @@ export default function App(){
       </div>
 
       {/* MODAL HISTORIAL LOTE */}
-      {loteAbierto&&<ModalHistorial loteInfo={loteAbierto} onClose={cerrarLote} monit={monit} cultivoDe={cultivoDe} siembraDe={siembraDe} autor={autor} cambiarAutor={cambiarAutor} aplicaciones={APLICACIONES} fertilizaciones={FERTILIZACIONES} inv26={INV_26} plan2627={PLAN_2627} suelos={SUELOS}/>}
+      {loteAbierto&&<ModalHistorial loteInfo={loteAbierto} onClose={cerrarLote} monit={monit} gan={gan} cultivoDe={cultivoDe} siembraDe={siembraDe} autor={autor} cambiarAutor={cambiarAutor} aplicaciones={APLICACIONES} fertilizaciones={FERTILIZACIONES} inv26={INV_26} plan2627={PLAN_2627} suelos={SUELOS}/>}
     </div>
   );
 }
@@ -5246,7 +5592,7 @@ export default function App(){
 // ============================================================
 // MODAL HISTORIAL — muestra 8 campañas de un lote
 // ============================================================
-function ModalHistorial({loteInfo, onClose, aplicaciones=[], fertilizaciones=[], inv26={}, plan2627={}, suelos={}, monit, cultivoDe, siembraDe, autor, cambiarAutor}){
+function ModalHistorial({loteInfo, onClose, aplicaciones=[], fertilizaciones=[], inv26={}, plan2627={}, suelos={}, monit, gan, cultivoDe, siembraDe, autor, cambiarAutor}){
   const {campo,lote}=loteInfo;
   const [monitoreando,setMonitoreando]=useState(false);
   const [aviso,setAviso]=useState(null);
@@ -5296,7 +5642,7 @@ function ModalHistorial({loteInfo, onClose, aplicaciones=[], fertilizaciones=[],
           <div>
             <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.6}}>{campo.nombre}</div>
             <div style={{fontSize:22,fontWeight:700,marginTop:2}}>Lote {lote.label||lote.id}</div>
-            <div style={{fontSize:13,opacity:0.7,marginTop:2}}>{lote.ha} ha</div>
+            {lote.ha&&<div style={{fontSize:13,opacity:0.7,marginTop:2}}>{lote.ha} ha</div>}
           </div>
           <button onClick={onClose} style={{background:"none",border:"none",fontSize:26,cursor:"pointer",lineHeight:1,color:TINTA,padding:4}}>×</button>
         </div>
@@ -5330,6 +5676,7 @@ function ModalHistorial({loteInfo, onClose, aplicaciones=[], fertilizaciones=[],
         </div>
 
         {!monitoreando&&<>
+        {gan&&<RodeosDelLote gan={gan} campoId={campo.id} loteId={lote.id} autor={autor} cambiarAutor={cambiarAutor}/>}
         {/* ── 1. CAMPAÑA ACTUAL 26-27 ── */}
         {(()=>{
           const k=`${campo.id}|${lote.id}`;
