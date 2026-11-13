@@ -19,6 +19,29 @@ const claveApp = () => { try { return window.localStorage.getItem(CLAVE_KEY) || 
 // Acceso de solo lectura (asesor): la app muestra todo pero sin los botones de cargar o editar.
 // Se fija una vez al arrancar (App); igual el servidor rechaza cualquier guardado con esa clave.
 let SOLO_LECTURA = false;
+// Instalar la app en el celular (Android/Chrome avisa con "beforeinstallprompt", a veces antes de que arranque React)
+let eventoInstalar = null;
+if(typeof window !== "undefined"){
+  window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); eventoInstalar = e; window.dispatchEvent(new Event("smix-instalable")); });
+}
+function useInstalarApp(){
+  const yaInstalada = () => { try { return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true; } catch { return false; } };
+  const [puede, setPuede] = useState(!!eventoInstalar);
+  const [instalada, setInstalada] = useState(yaInstalada);
+  useEffect(() => {
+    const si = () => setPuede(true), listo = () => { setInstalada(true); setPuede(false); };
+    window.addEventListener("smix-instalable", si); window.addEventListener("appinstalled", listo);
+    return () => { window.removeEventListener("smix-instalable", si); window.removeEventListener("appinstalled", listo); };
+  }, []);
+  const instalar = async () => {
+    if(!eventoInstalar) return;
+    eventoInstalar.prompt();
+    const r = await eventoInstalar.userChoice.catch(() => null);
+    eventoInstalar = null; setPuede(false);
+    if(r && r.outcome === "accepted") setInstalada(true);
+  };
+  return {puede, instalada, instalar};
+}
 if(typeof window !== "undefined" && !window.__smixFetchConClave){
   const fetchOriginal = window.fetch.bind(window);
   window.fetch = (url, opts = {}) => {
@@ -1646,6 +1669,7 @@ function AppEncargado({yo}){
   const cambiarAutor = v => { setAutor(v); try { window.localStorage.setItem("smix_autor", v); } catch {} };
   const gan = useGanaderia();
   const lluv = useLluvias();
+  const app = useInstalarApp();
   useEffect(() => { const f = () => setBloqueado(true); window.addEventListener("smix-clave", f); return () => window.removeEventListener("smix-clave", f); }, []);
   const campo = CAMPOS.find(c => c.id === campoId);
   const cabezasEnLote = (c, l) => gan.porLote(c, l).reduce((s, r) => s + r.cabezas, 0);
@@ -1662,6 +1686,16 @@ function AppEncargado({yo}){
           <h1 style={{margin:"2px 0 0",fontSize:24}}>{campo?.nombre}</h1>
         </div>
         {bloqueado && <div style={{...cajaV,borderColor:"#C0392B",background:"#FBE3E0",fontSize:13.5,fontWeight:600}}>🔒 Tu acceso no está habilitado o cambió. Pedile a Santos el link nuevo.</div>}
+        {!app.instalada && (app.puede ? (
+          <button onClick={app.instalar} style={{padding:"16px",fontSize:18,fontWeight:800,borderRadius:12,border:"none",background:"#2E7D32",color:"#fff",cursor:"pointer",fontFamily:"inherit"}}>
+            📲 Poner la app en el celular
+          </button>
+        ) : (
+          <div style={{...cajaV,borderColor:"#2E7D32",background:"#EEF7EC",fontSize:14,lineHeight:1.45}}>
+            <b>📲 Para tenerla como app en el celular:</b> tocá los <b>tres puntitos ⋮</b> de arriba a la derecha y elegí
+            <b> "Instalar app"</b> o <b>"Agregar a la pantalla principal"</b>. Después la abrís desde el ícono verde <b>SMIX</b>.
+          </div>
+        ))}
         {camposMios.length > 1 && (
           <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
             {camposMios.map(c => <button key={c.id} onClick={()=>{ setCampoId(c.id); setLoteAbierto(null); }} style={chipV(c.id===campoId)}>{c.nombre}</button>)}
