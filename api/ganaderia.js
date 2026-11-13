@@ -61,7 +61,8 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
   const quien = await acceso(req, res);
   if (!quien) return;
-  const esMio = campo => quien.rol === "admin" || quien.campos.includes(String(campo || "").toUpperCase());
+  const esMio = campo => quien.rol === "admin" || quien.campos.includes("*") || quien.campos.includes(String(campo || "").toUpperCase());
+  if (quien.rol === "lectura" && req.method !== "GET") return res.status(403).json({ error: "Acceso de solo lectura: no se puede guardar." });
 
   try {
     const auth = getAuth();

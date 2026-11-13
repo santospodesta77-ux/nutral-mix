@@ -54,7 +54,8 @@ export default async function handler(req, res) {
   const quien = await acceso(req, res);
   if (!quien) return;
   // Un encargado de campo (ver _acceso.js) solo ve y carga las lluvias de sus campos
-  const esMio = campo => quien.rol === "admin" || quien.campos.includes(String(campo || "").toUpperCase());
+  const esMio = campo => quien.rol === "admin" || quien.campos.includes("*") || quien.campos.includes(String(campo || "").toUpperCase());
+  if (quien.rol === "lectura" && req.method !== "GET") return res.status(403).json({ error: "Acceso de solo lectura: no se puede guardar." });
   const prohibido = () => res.status(403).json({ error: "Ese campo no es tuyo." });
 
   try {
