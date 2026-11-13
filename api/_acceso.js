@@ -11,7 +11,7 @@ import { google } from "googleapis";
 const PLANILLA_LABORES = "1JpAA6bCl_uhizVO4jOVBEs34RRlNuAVHKr8kSFRm5ro";
 let cache = { t: 0, usuarios: [] };
 
-async function leerUsuarios() {
+export async function leerUsuarios() {
   if (Date.now() - cache.t < 60000) return cache.usuarios;   // se relee cada minuto: sacar a alguien tarda eso
   try {
     const creds = JSON.parse(process.env.GOOGLE_CREDENTIALS);
