@@ -1646,6 +1646,8 @@ function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick, datos, culti
 export default function App(){
   const leerYo = () => { try { return JSON.parse(window.localStorage.getItem(YO_KEY)); } catch { return null; } };
   const [yo, setYo] = useState(leerYo);
+  // "Ver como…": el administrador mira la versión de un encargado o del asesor sin cambiar su clave
+  const [verComo, setVerComo] = useState(null);
   const [listo, setListo] = useState(() => !!leerYo());   // con el acceso ya conocido arranca sin esperar (sirve sin señal)
   useEffect(() => {
     fetch("/api/yo").then(r => r.ok ? r.json() : null).then(d => {
@@ -1653,13 +1655,29 @@ export default function App(){
     }).catch(() => {}).finally(() => setListo(true));
   }, []);
   if(!listo) return <div style={{minHeight:"100vh",background:FONDO,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Avenir Next','Segoe UI',system-ui,sans-serif",color:TINTA,opacity:0.6}}>Cargando…</div>;
+  if(verComo){
+    const volver = () => setVerComo(null);
+    SOLO_LECTURA = verComo.rol === "lectura";
+    return verComo.rol === "lectura" ? <AppCompleta lector={verComo} previa={volver}/> : <AppEncargado yo={verComo} previa={volver}/>;
+  }
   SOLO_LECTURA = yo?.rol === "lectura";
-  return yo?.rol === "encargado" ? <AppEncargado yo={yo}/> : <AppCompleta lector={SOLO_LECTURA ? yo : null}/>;
+  return yo?.rol === "encargado" ? <AppEncargado yo={yo}/>
+    : <AppCompleta lector={SOLO_LECTURA ? yo : null} usuarios={yo?.rol === "admin" ? yo.usuarios || [] : []} onVerComo={setVerComo}/>;
+}
+
+// Cartel de la vista previa ("Ver como…") del administrador
+function BarraVistaPrevia({nombre, onVolver}){
+  return (
+    <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",padding:"10px 14px",borderRadius:10,background:"#FFF3CD",border:"1.5px solid #C9A227",fontSize:13.5}}>
+      <span style={{flex:"1 1 200px"}}><b>👁 Estás viendo la app como {nombre}.</b> Lo que cargues acá se guarda de verdad.</span>
+      <button onClick={onVolver} style={{padding:"8px 14px",fontSize:14,fontWeight:700,borderRadius:8,border:"none",background:TINTA,color:"#fff",cursor:"pointer",fontFamily:"inherit"}}>← Volver a mi app</button>
+    </div>
+  );
 }
 
 // Versión para el encargado: elige su campo, ve el mapa con las cabezas de cada lote,
 // carga en sus rodeos (parto, venta, tacto, cambio de lote…) y registra lluvias. Nada más.
-function AppEncargado({yo}){
+function AppEncargado({yo, previa=null}){
   const camposMios = CAMPOS.filter(c => (yo.campos||[]).includes(c.id));
   const [campoId, setCampoId] = useState(camposMios[0]?.id);
   const [vista, setVista] = useState("rodeos");
@@ -1667,9 +1685,13 @@ function AppEncargado({yo}){
   const [bloqueado, setBloqueado] = useState(false);
   const [autor, setAutor] = useState(() => { try { return window.localStorage.getItem("smix_autor") || yo.nombre || ""; } catch { return yo.nombre || ""; } });
   const cambiarAutor = v => { setAutor(v); try { window.localStorage.setItem("smix_autor", v); } catch {} };
-  const gan = useGanaderia();
-  const lluv = useLluvias();
+  const ganTodo = useGanaderia();
+  const lluvTodo = useLluvias();
   const app = useInstalarApp();
+  // El servidor ya le manda solo lo de sus campos; se filtra igual para la vista previa del administrador
+  const esMio = c => camposMios.some(x => x.id === c);
+  const gan = useMemo(() => ({...ganTodo, rodeos: ganTodo.rodeos.filter(r => esMio(r.campo))}), [ganTodo]);
+  const lluv = useMemo(() => ({...lluvTodo, lista: lluvTodo.lista.filter(l => esMio(l.campo))}), [lluvTodo]);
   useEffect(() => { const f = () => setBloqueado(true); window.addEventListener("smix-clave", f); return () => window.removeEventListener("smix-clave", f); }, []);
   const campo = CAMPOS.find(c => c.id === campoId);
   const cabezasEnLote = (c, l) => gan.porLote(c, l).reduce((s, r) => s + r.cabezas, 0);
@@ -1686,7 +1708,8 @@ function AppEncargado({yo}){
           <h1 style={{margin:"2px 0 0",fontSize:24}}>{campo?.nombre}</h1>
         </div>
         {bloqueado && <div style={{...cajaV,borderColor:"#C0392B",background:"#FBE3E0",fontSize:13.5,fontWeight:600}}>🔒 Tu acceso no está habilitado o cambió. Pedile a Santos el link nuevo.</div>}
-        {!app.instalada && (app.puede ? (
+        {previa && <BarraVistaPrevia nombre={yo.nombre} onVolver={previa}/>}
+        {!previa && !app.instalada && (app.puede ? (
           <button onClick={app.instalar} style={{padding:"16px",fontSize:18,fontWeight:800,borderRadius:12,border:"none",background:"#2E7D32",color:"#fff",cursor:"pointer",fontFamily:"inherit"}}>
             📲 Poner la app en el celular
           </button>
@@ -3815,7 +3838,7 @@ function VistaMonitoreo({monit, lluv, cultivoDe, siembraDe, autor, cambiarAutor}
   );
 }
 
-function AppCompleta({lector=null}){
+function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
   // ── DATOS DINÁMICOS: cargados desde /datos.json (pipeline automático) ──
   const [datosOK, setDatosOK] = useState(null); // null=cargando, true=cargado, false=falló
   const [datosRemotos, setDatosRemotos] = useState(null);
@@ -4729,6 +4752,13 @@ function AppCompleta({lector=null}){
           </div>
         )}
 
+        {previa && <div style={{marginBottom:10}}><BarraVistaPrevia nombre={lector?.nombre} onVolver={previa}/></div>}
+        {!lector && usuarios.length > 0 && onVerComo && (
+          <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center",marginBottom:12,fontSize:13}}>
+            <span style={{fontWeight:700,opacity:0.7}}>👁 Ver como:</span>
+            {usuarios.map(u => <button key={u.nombre} onClick={()=>{ onVerComo(u); window.scrollTo(0, 0); }} style={chipV(false)}>{u.nombre}{u.rol === "lectura" ? " (solo lectura)" : ""}</button>)}
+          </div>
+        )}
         {lector && <div style={{padding:"9px 14px",marginBottom:12,borderRadius:10,background:"#EAF1FA",border:"1.5px solid #1E5FA8",fontSize:13.5,fontWeight:600}}>👁 Solo lectura{lector.nombre ? ` · ${lector.nombre}` : ""}: podés ver todo, sin cargar ni modificar.</div>}
         {/* TABS PRINCIPALES */}
         <div style={{display:"flex",gap:7,marginBottom:18,overflowX:"auto",paddingBottom:4}}>
