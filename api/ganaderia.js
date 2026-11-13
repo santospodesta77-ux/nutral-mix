@@ -11,10 +11,12 @@
 // POST {evento}          → guarda o pisa (por id)
 // POST {id, borrar:true} → borra el evento
 //
+// Un encargado de campo (ver _acceso.js) solo recibe y carga los rodeos de sus campos.
+//
 // Requiere la env GOOGLE_CREDENTIALS (la misma que usa guardar-labor.js).
 
 import { google } from "googleapis";
-import { claveOk } from "./_clave.js";
+import { acceso } from "./_acceso.js";
 
 const PLANILLA_LABORES = "1JpAA6bCl_uhizVO4jOVBEs34RRlNuAVHKr8kSFRm5ro";
 const HOJA_EVENTOS = "rodeo_eventos";
@@ -57,7 +59,9 @@ export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-clave");
   if (req.method === "OPTIONS") return res.status(200).end();
-  if (!claveOk(req, res)) return;
+  const quien = await acceso(req, res);
+  if (!quien) return;
+  const esMio = campo => quien.rol === "admin" || quien.campos.includes(String(campo || "").toUpperCase());
 
   try {
     const auth = getAuth();
@@ -74,23 +78,36 @@ export default async function handler(req, res) {
         cc: txt(f[4]), estado: txt(f[5]), detalle: txt(f[6]), obs: txt(f[7]) }));
       const eventos = fe.filter(f => f[0]).map(f => Object.fromEntries(CAMPOS_EVENTO.map((k, i) => [k, f[i] || ""])))
         .sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)) || String(b.registrado).localeCompare(String(a.registrado)));
-      return res.status(200).json({ rodeos, animales, eventos });
+      if (quien.rol === "admin") return res.status(200).json({ rodeos, animales, eventos });
+      const mios = new Set(rodeos.filter(r => esMio(r.campo)).map(r => r.id));
+      return res.status(200).json({ rodeos: rodeos.filter(r => mios.has(r.id)), animales: animales.filter(a => mios.has(a.rodeo)),
+        eventos: eventos.filter(e => mios.has(e.rodeo)) });
     }
 
     if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
     const { evento, id: idBorrar, borrar } = req.body || {};
     const actuales = await leerEventos();
+    // Encargado: solo eventos de rodeos de sus campos, y sin sacar un rodeo hacia un campo ajeno
+    let rodeosMios = null;
+    if (quien.rol !== "admin") {
+      rodeosMios = new Set((await filas(sheets, "rodeos!A2:B2000")).filter(f => esMio(f[1])).map(f => txt(f[0])));
+    }
+    const prohibido = () => res.status(403).json({ error: "Ese rodeo no es de tu campo." });
 
     if (borrar) {
       const idx = actuales.findIndex(f => f[0] === idBorrar);
       if (idx < 0) return res.status(200).json({ ok: true, borrado: false });
+      if (rodeosMios && !rodeosMios.has(txt(actuales[idx][3]))) return prohibido();
       await sheets.spreadsheets.values.clear({ spreadsheetId: PLANILLA_LABORES, range: `${HOJA_EVENTOS}!A${idx + 2}:${ULTIMA_COL}${idx + 2}` });
       return res.status(200).json({ ok: true, borrado: true });
     }
 
     const e = evento || {};
     if (!e.id || !e.fecha || !e.tipo || !e.rodeo) return res.status(400).json({ error: "Faltan datos: fecha, tipo y rodeo." });
+    if (rodeosMios && (!rodeosMios.has(e.rodeo) || (e.tipo === "mover" && !esMio(e.campoHasta))
+      || (e.tipo === "traspaso" && !rodeosMios.has(e.rodeoHasta)))) return prohibido();
     const idx = actuales.findIndex(f => f[0] === e.id);
+    if (rodeosMios && idx >= 0 && !rodeosMios.has(txt(actuales[idx][3]))) return prohibido();
     const fila = idx >= 0 ? idx + 2 : actuales.length + 2;
     const valores = CAMPOS_EVENTO.map(k => k === "registrado" ? new Date().toISOString() : String(e[k] ?? "").slice(0, 20000));
     await sheets.spreadsheets.values.update({
