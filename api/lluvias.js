@@ -10,7 +10,7 @@
 // Requiere la env GOOGLE_CREDENTIALS (la misma que usa guardar-labor.js).
 
 import { google } from "googleapis";
-import { claveOk } from "./_clave.js";
+import { acceso } from "./_acceso.js";
 
 const PLANILLA_LABORES = "1JpAA6bCl_uhizVO4jOVBEs34RRlNuAVHKr8kSFRm5ro";
 const HOJA = "lluvias";
@@ -51,7 +51,11 @@ export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-clave");
   if (req.method === "OPTIONS") return res.status(200).end();
-  if (!claveOk(req, res)) return;
+  const quien = await acceso(req, res);
+  if (!quien) return;
+  // Un encargado de campo (ver _acceso.js) solo ve y carga las lluvias de sus campos
+  const esMio = campo => quien.rol === "admin" || quien.campos.includes(String(campo || "").toUpperCase());
+  const prohibido = () => res.status(403).json({ error: "Ese campo no es tuyo." });
 
   try {
     const auth = getAuth();
@@ -62,6 +66,7 @@ export default async function handler(req, res) {
     if (req.method === "GET") {
       const lluvias = (await leerFilas(sheets)).filter(f => f[0])
         .map(f => ({ ...Object.fromEntries(CAMPOS_FILA.map((k, i) => [k, f[i] || ""])), mm: Number(String(f[3] || "").replace(",", ".")) || 0 }))
+        .filter(l => esMio(l.campo))
         .sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
       return res.status(200).json({ lluvias });
     }
@@ -72,6 +77,7 @@ export default async function handler(req, res) {
     if (borrar) {
       const idx = filas.findIndex(f => f[0] === idBorrar);
       if (idx < 0) return res.status(200).json({ ok: true, borrado: false });
+      if (!esMio(filas[idx][2])) return prohibido();
       await sheets.spreadsheets.values.clear({ spreadsheetId: PLANILLA_LABORES, range: `${HOJA}!A${idx + 2}:${ULTIMA_COL}${idx + 2}` });
       return res.status(200).json({ ok: true, borrado: true });
     }
@@ -79,7 +85,9 @@ export default async function handler(req, res) {
     const r = registro || {};
     const mm = Number(String(r.mm ?? "").replace(",", "."));
     if (!r.id || !r.fecha || !r.campo || !(mm >= 0)) return res.status(400).json({ error: "Faltan datos: fecha, campo y mm." });
+    if (!esMio(r.campo)) return prohibido();
     const idx = filas.findIndex(f => f[0] === r.id);
+    if (idx >= 0 && !esMio(filas[idx][2])) return prohibido();
     const fila = idx >= 0 ? idx + 2 : filas.length + 2;
     const valores = CAMPOS_FILA.map(k => k === "registrado" ? new Date().toISOString() : k === "mm" ? mm : String(r[k] ?? "").slice(0, 2000));
     await sheets.spreadsheets.values.update({

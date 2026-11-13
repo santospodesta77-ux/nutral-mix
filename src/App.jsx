@@ -3,6 +3,15 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 // Clave de la app: va en cada llamada a /api (las funciones la piden cuando APP_CLAVE está cargada
 // en Vercel). Si el servidor la rechaza, la app muestra el recuadro para ingresarla.
 const CLAVE_KEY = "smix_clave_app";
+const YO_KEY = "smix_yo";   // con qué acceso entró la app la última vez (admin o encargado)
+// Link personal de un encargado: ?acceso=CLAVE. Se guarda la clave y se deja en la dirección
+// (en el iPhone, el ícono de la pantalla de inicio guarda la dirección y no comparte lo guardado en Safari).
+if(typeof window !== "undefined"){
+  try {
+    const delLink = new URLSearchParams(window.location.search).get("acceso");
+    if(delLink && delLink !== window.localStorage.getItem(CLAVE_KEY)){ window.localStorage.setItem(CLAVE_KEY, delLink); window.localStorage.removeItem(YO_KEY); }
+  } catch {}
+}
 const claveApp = () => { try { return window.localStorage.getItem(CLAVE_KEY) || ""; } catch { return ""; } };
 if(typeof window !== "undefined" && !window.__smixFetchConClave){
   const fetchOriginal = window.fetch.bind(window);
@@ -1601,6 +1610,95 @@ function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick, datos, culti
   );
 }
 
+// ============================================================
+// ACCESO: la app completa (administrador) o la versión reducida para un encargado de campo
+// (sus campos, sus rodeos y las lluvias). Lo decide el servidor con la clave (api/yo.js).
+// ============================================================
+export default function App(){
+  const leerYo = () => { try { return JSON.parse(window.localStorage.getItem(YO_KEY)); } catch { return null; } };
+  const [yo, setYo] = useState(leerYo);
+  const [listo, setListo] = useState(() => !!leerYo());   // con el acceso ya conocido arranca sin esperar (sirve sin señal)
+  useEffect(() => {
+    fetch("/api/yo").then(r => r.ok ? r.json() : null).then(d => {
+      if(d && d.rol){ setYo(d); try { window.localStorage.setItem(YO_KEY, JSON.stringify(d)); } catch {} }
+    }).catch(() => {}).finally(() => setListo(true));
+  }, []);
+  if(!listo) return <div style={{minHeight:"100vh",background:FONDO,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Avenir Next','Segoe UI',system-ui,sans-serif",color:TINTA,opacity:0.6}}>Cargando…</div>;
+  return yo?.rol === "encargado" ? <AppEncargado yo={yo}/> : <AppCompleta/>;
+}
+
+// Versión para el encargado: elige su campo, ve el mapa con las cabezas de cada lote,
+// carga en sus rodeos (parto, venta, tacto, cambio de lote…) y registra lluvias. Nada más.
+function AppEncargado({yo}){
+  const camposMios = CAMPOS.filter(c => (yo.campos||[]).includes(c.id));
+  const [campoId, setCampoId] = useState(camposMios[0]?.id);
+  const [vista, setVista] = useState("rodeos");
+  const [loteAbierto, setLoteAbierto] = useState(null);
+  const [bloqueado, setBloqueado] = useState(false);
+  const [autor, setAutor] = useState(() => { try { return window.localStorage.getItem("smix_autor") || yo.nombre || ""; } catch { return yo.nombre || ""; } });
+  const cambiarAutor = v => { setAutor(v); try { window.localStorage.setItem("smix_autor", v); } catch {} };
+  const gan = useGanaderia();
+  const lluv = useLluvias();
+  useEffect(() => { const f = () => setBloqueado(true); window.addEventListener("smix-clave", f); return () => window.removeEventListener("smix-clave", f); }, []);
+  const campo = CAMPOS.find(c => c.id === campoId);
+  const cabezasEnLote = (c, l) => gan.porLote(c, l).reduce((s, r) => s + r.cabezas, 0);
+  const rodeos = gan.rodeos.filter(r => r.campo === campoId);
+  const tab = a => ({padding:"10px 16px",fontSize:15,fontWeight:700,borderRadius:10,cursor:"pointer",fontFamily:"inherit",
+    border:`1.5px solid ${TINTA}`,background:a?TINTA:"transparent",color:a?CREMA:TINTA});
+
+  if(!camposMios.length) return <div style={{padding:30,fontFamily:"system-ui"}}>Tu acceso no tiene campos asignados. Avisale a Santos.</div>;
+  return (
+    <div style={{minHeight:"100vh",background:FONDO,padding:"16px 12px 40px",fontFamily:"'Avenir Next','Segoe UI',system-ui,sans-serif",color:TINTA}}>
+      <div style={{maxWidth:820,margin:"0 auto",display:"flex",flexDirection:"column",gap:14}}>
+        <div>
+          <div style={{fontSize:11,letterSpacing:"0.2em",textTransform:"uppercase",opacity:0.55}}>SMIX · {yo.nombre}</div>
+          <h1 style={{margin:"2px 0 0",fontSize:24}}>{campo?.nombre}</h1>
+        </div>
+        {bloqueado && <div style={{...cajaV,borderColor:"#C0392B",background:"#FBE3E0",fontSize:13.5,fontWeight:600}}>🔒 Tu acceso no está habilitado o cambió. Pedile a Santos el link nuevo.</div>}
+        {camposMios.length > 1 && (
+          <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+            {camposMios.map(c => <button key={c.id} onClick={()=>{ setCampoId(c.id); setLoteAbierto(null); }} style={chipV(c.id===campoId)}>{c.nombre}</button>)}
+          </div>
+        )}
+        <div style={{display:"flex",gap:8}}>
+          <button onClick={()=>setVista("rodeos")} style={tab(vista==="rodeos")}>🐄 Rodeos</button>
+          <button onClick={()=>setVista("lluvias")} style={tab(vista==="lluvias")}>🌧 Lluvias</button>
+        </div>
+
+        {vista === "rodeos" && <>
+          {gan.sinSubir > 0 && (
+            <div style={{...cajaV,borderColor:"#C9A227",background:"#FFF8E6",display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",padding:"10px 14px"}}>
+              <span style={{fontSize:13}}>📵 {gan.sinSubir} carga{gan.sinSubir>1?"s":""} guardada{gan.sinSubir>1?"s":""} en el teléfono, sin subir.</span>
+              <button onClick={gan.reintentar} style={{...chipV(false),padding:"5px 12px"}}>Subir ahora</button>
+            </div>
+          )}
+          <div style={{...cajaV,padding:8}}>
+            <div style={{fontSize:12,opacity:0.65,margin:"2px 4px 6px"}}>Tocá un lote para ver sus rodeos y cargar.</div>
+            <MapaCampo campo={campo} modo="campaña" sueloVar="P" onLoteClick={(c, l) => setLoteAbierto(l)} cabezasEnLote={cabezasEnLote}/>
+          </div>
+          {loteAbierto && (
+            <div style={{...cajaV,padding:0,overflow:"hidden"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",borderBottom:`1.5px solid ${TINTA}`}}>
+                <div style={{fontSize:18,fontWeight:700}}>Lote {loteAbierto.label || loteAbierto.id}{loteAbierto.ha ? <span style={{fontSize:13,opacity:0.6,fontWeight:500}}> · {loteAbierto.ha} ha</span> : null}</div>
+                <button onClick={()=>setLoteAbierto(null)} style={{background:"none",border:"none",fontSize:26,cursor:"pointer",color:TINTA,lineHeight:1}}>×</button>
+              </div>
+              <RodeosDelLote gan={gan} campoId={campoId} loteId={loteAbierto.id} autor={autor} cambiarAutor={cambiarAutor} campos={camposMios}/>
+              {!gan.porLote(campoId, loteAbierto.id).length && <div style={{padding:"14px 16px",fontSize:13.5,opacity:0.65}}>No hay rodeos en este lote.</div>}
+            </div>
+          )}
+          <div style={{fontSize:13,fontWeight:700}}>Rodeos de {campo?.nombre} · {rodeos.reduce((s, r) => s + r.cabezas, 0)} cabezas</div>
+          {gan.sync.estado === "cargando" && !gan.rodeos.length && <div style={{...cajaV,textAlign:"center",opacity:0.6}}>Cargando rodeos…</div>}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))",gap:10}}>
+            {rodeos.map(r => <TarjetaRodeo key={r.id} r={r} gan={gan} autor={autor} cambiarAutor={cambiarAutor} conLote campos={camposMios}/>)}
+          </div>
+        </>}
+
+        {vista === "lluvias" && <SeccionLluvias lluv={lluv} autor={autor} campos={camposMios}/>}
+      </div>
+    </div>
+  );
+}
+
 // ── LEYENDA ──────────────────────────────────────────────────
 function Leyenda({modo,sueloVar}){
   const tag={display:"flex",alignItems:"center",gap:5,fontSize:12};
@@ -2900,10 +2998,11 @@ const achicarFoto = file => new Promise((ok, mal) => {
 const ultimoMonitoreo = (lista, campoId, loteId) => (lista||[]).find(m => m.campo === campoId && String(m.lote) === String(loteId));
 
 // Lluvias por campo: sirven para saber si un residual se activó (pestaña Labores pendientes)
-function SeccionLluvias({lluv, autor}){
+function SeccionLluvias({lluv, autor, campos=CAMPOS}){
   const hoyISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
   const [abierto, setAbierto] = useState(false);
-  const [form, setForm] = useState({fecha:hoyISO(), mm:"", campos:[], nota:""});
+  const unSoloCampo = campos.length === 1 ? [campos[0].id] : [];
+  const [form, setForm] = useState({fecha:hoyISO(), mm:"", campos:unSoloCampo, nota:""});
   const [msg, setMsg] = useState(null);
   const [verTodas, setVerTodas] = useState(false);
   const mm = parseFloat(String(form.mm).replace(",", "."));
@@ -2914,7 +3013,7 @@ function SeccionLluvias({lluv, autor}){
     const ok = await lluv.guardar(lista);
     setMsg(ok ? {ok:true, txt:`✓ ${fmt1(mm)} mm guardados en ${lista.length} campo${lista.length>1?"s":""}.`}
       : {ok:false, txt:"Sin conexión: quedó en este equipo y se sube cuando vuelva la señal."});
-    setForm(f => ({...f, mm:"", nota:"", campos:[]})); setAbierto(false);
+    setForm(f => ({...f, mm:"", nota:"", campos:unSoloCampo})); setAbierto(false);
   };
   // Acumulado de los últimos 30 días por campo
   const corte = Date.now() - 30 * DIA_MS;
@@ -2944,7 +3043,7 @@ function SeccionLluvias({lluv, autor}){
           <div>
             <div style={{fontSize:10.5,fontWeight:700,textTransform:"uppercase",opacity:0.6,marginBottom:4}}>Campos donde llovió eso</div>
             <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
-              {CAMPOS.map(c => { const a = form.campos.includes(c.id); return <button key={c.id} onClick={()=>setForm(f=>({...f,campos:a?f.campos.filter(x=>x!==c.id):[...f.campos,c.id]}))} style={chipS(a)}>{c.nombre}</button>; })}
+              {campos.map(c => { const a = form.campos.includes(c.id); return <button key={c.id} onClick={()=>setForm(f=>({...f,campos:a?f.campos.filter(x=>x!==c.id):[...f.campos,c.id]}))} style={chipS(a)}>{c.nombre}</button>; })}
             </div>
           </div>
           <div style={{display:"flex",gap:8}}>
@@ -3053,7 +3152,7 @@ function useGanaderia(){
 const destinosDeCampo = campo => campo.lotes.map(l => ({id:String(l.id), label:`${l.monte && !/^\d/.test(l.label) ? l.label : `Lote ${l.label||l.id}`}${l.monte ? " (monte)" : ""}${l.ha ? ` · ${l.ha} ha` : ""}`}));
 
 // Formulario para cargar algo en un rodeo (parto, venta, tacto…) o cambiarlo de lote
-function FormEventoRodeo({gan, rodeo, autor, cambiarAutor, tipoInicial="nota", onListo, onCancelar}){
+function FormEventoRodeo({gan, rodeo, autor, cambiarAutor, tipoInicial="nota", onListo, onCancelar, campos=CAMPOS}){
   const hoyISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
   const [tipo, setTipo] = useState(tipoInicial);
   const [fecha, setFecha] = useState(hoyISO());
@@ -3067,7 +3166,7 @@ function FormEventoRodeo({gan, rodeo, autor, cambiarAutor, tipoInicial="nota", o
   const [loteHasta, setLoteHasta] = useState("");
   const [rodeoHasta, setRodeoHasta] = useState("");
   const [guardando, setGuardando] = useState(false);
-  const campoDest = CAMPOS.find(c => c.id === campoHasta) || CAMPOS[0];
+  const campoDest = campos.find(c => c.id === campoHasta) || campos[0];
   const conCaravanas = !["mover","nota"].includes(tipo);
   const palabras = normCaravana(busca);
   const candidatos = palabras ? rodeo.activos.filter(a => normCaravana(a.caravana).includes(palabras)).slice(0, 30) : [];
@@ -3119,7 +3218,7 @@ function FormEventoRodeo({gan, rodeo, autor, cambiarAutor, tipoInicial="nota", o
       {tipo === "mover" && (
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:10}}>
           <div>{lbl("Campo")}<select value={campoHasta} onChange={e=>{ setCampoHasta(e.target.value); setLoteHasta(""); }} style={txt}>
-            {CAMPOS.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}</select></div>
+            {campos.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}</select></div>
           <div>{lbl("Lote al que pasa")}<select value={loteHasta} onChange={e=>setLoteHasta(e.target.value)} style={txt}>
             <option value="">— elegir —</option>
             {destinosDeCampo(campoDest).filter(d => !(campoHasta === rodeo.campo && d.id === String(rodeo.lote))).map(d => <option key={d.id} value={d.id}>{d.label}</option>)}</select></div>
@@ -3189,7 +3288,7 @@ const textoEventoRodeo = (e, gan) => {
 };
 
 // Tarjeta de un rodeo, con sus botones para cargar cosas
-function TarjetaRodeo({r, gan, autor, cambiarAutor, conLote=false, onAviso}){
+function TarjetaRodeo({r, gan, autor, cambiarAutor, conLote=false, onAviso, campos=CAMPOS}){
   const [form, setForm] = useState(null);     // tipo de evento que se está cargando
   const [verCaravanas, setVerCaravanas] = useState(false);
   const [busca, setBusca] = useState("");
@@ -3200,7 +3299,7 @@ function TarjetaRodeo({r, gan, autor, cambiarAutor, conLote=false, onAviso}){
   return (
     <div style={{border:"1.5px solid #B9A57A",borderRadius:10,background:"#FFFBF2",padding:"10px 12px"}}>
       {form ? (
-        <FormEventoRodeo gan={gan} rodeo={r} autor={autor} cambiarAutor={cambiarAutor} tipoInicial={form}
+        <FormEventoRodeo gan={gan} rodeo={r} autor={autor} cambiarAutor={cambiarAutor} tipoInicial={form} campos={campos}
           onListo={m => { setAviso(m); setForm(null); if(onAviso) onAviso(m); }} onCancelar={() => setForm(null)}/>
       ) : <>
         <div style={{display:"flex",justifyContent:"space-between",gap:8,alignItems:"flex-start",flexWrap:"wrap"}}>
@@ -3251,7 +3350,7 @@ function TarjetaRodeo({r, gan, autor, cambiarAutor, conLote=false, onAviso}){
 }
 
 // Sección de la ventana del lote: los rodeos que están en ese lote
-function RodeosDelLote({gan, campoId, loteId, autor, cambiarAutor}){
+function RodeosDelLote({gan, campoId, loteId, autor, cambiarAutor, campos=CAMPOS}){
   const rodeos = gan.porLote(campoId, loteId);
   // si un rodeo se fue a otro lote, su tarjeta desaparece de acá: el aviso queda en la sección
   const [aviso, setAviso] = useState(null);
@@ -3261,7 +3360,7 @@ function RodeosDelLote({gan, campoId, loteId, autor, cambiarAutor}){
       <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55,marginBottom:8}}>🐄 Rodeos en este lote · {rodeos.reduce((s, r) => s + r.cabezas, 0)} cabezas</div>
       {aviso && <div style={{fontSize:12.5,fontWeight:600,marginBottom:8,color:aviso.ok?"#2E7D32":"#8A6200"}}>{aviso.txt}</div>}
       <div style={{display:"flex",flexDirection:"column",gap:8}}>
-        {rodeos.map(r => <TarjetaRodeo key={r.id} r={r} gan={gan} autor={autor} cambiarAutor={cambiarAutor} onAviso={setAviso}/>)}
+        {rodeos.map(r => <TarjetaRodeo key={r.id} r={r} gan={gan} autor={autor} cambiarAutor={cambiarAutor} onAviso={setAviso} campos={campos}/>)}
       </div>
     </div>
   );
@@ -3673,7 +3772,7 @@ function VistaMonitoreo({monit, lluv, cultivoDe, siembraDe, autor, cambiarAutor}
   );
 }
 
-export default function App(){
+function AppCompleta(){
   // ── DATOS DINÁMICOS: cargados desde /datos.json (pipeline automático) ──
   const [datosOK, setDatosOK] = useState(null); // null=cargando, true=cargado, false=falló
   const [datosRemotos, setDatosRemotos] = useState(null);
