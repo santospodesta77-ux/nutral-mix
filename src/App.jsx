@@ -9,10 +9,16 @@ const YO_KEY = "smix_yo";   // con qué acceso entró la app la última vez (adm
 if(typeof window !== "undefined"){
   try {
     const delLink = new URLSearchParams(window.location.search).get("acceso");
-    if(delLink && delLink !== window.localStorage.getItem(CLAVE_KEY)){ window.localStorage.setItem(CLAVE_KEY, delLink); window.localStorage.removeItem(YO_KEY); }
+    if(delLink === "salir"){   // ?acceso=salir: olvida la clave guardada y vuelve a la app normal
+      window.localStorage.removeItem(CLAVE_KEY); window.localStorage.removeItem(YO_KEY);
+      window.history.replaceState(null, "", window.location.pathname);
+    } else if(delLink && delLink !== window.localStorage.getItem(CLAVE_KEY)){ window.localStorage.setItem(CLAVE_KEY, delLink); window.localStorage.removeItem(YO_KEY); }
   } catch {}
 }
 const claveApp = () => { try { return window.localStorage.getItem(CLAVE_KEY) || ""; } catch { return ""; } };
+// Acceso de solo lectura (asesor): la app muestra todo pero sin los botones de cargar o editar.
+// Se fija una vez al arrancar (App); igual el servidor rechaza cualquier guardado con esa clave.
+let SOLO_LECTURA = false;
 if(typeof window !== "undefined" && !window.__smixFetchConClave){
   const fetchOriginal = window.fetch.bind(window);
   window.fetch = (url, opts = {}) => {
@@ -1624,7 +1630,8 @@ export default function App(){
     }).catch(() => {}).finally(() => setListo(true));
   }, []);
   if(!listo) return <div style={{minHeight:"100vh",background:FONDO,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Avenir Next','Segoe UI',system-ui,sans-serif",color:TINTA,opacity:0.6}}>Cargando…</div>;
-  return yo?.rol === "encargado" ? <AppEncargado yo={yo}/> : <AppCompleta/>;
+  SOLO_LECTURA = yo?.rol === "lectura";
+  return yo?.rol === "encargado" ? <AppEncargado yo={yo}/> : <AppCompleta lector={SOLO_LECTURA ? yo : null}/>;
 }
 
 // Versión para el encargado: elige su campo, ve el mapa con las cabezas de cada lote,
@@ -2341,7 +2348,7 @@ function VistaPendientes({protocolo, cultivoDe, aplicaciones, conDosis, fechaDat
         <div style={{fontSize:12,opacity:0.65,flex:"1 1 260px"}}>
           Labores de la planilla{fechaDatos ? ` al ${fechaDatos}` : ""}. Hoy: {ddmm(hoy)}. Se mira para adelante: lo que ya pasó no se reclama.
           {!conDosis && " Las dosis aparecen cuando el pipeline publique el registro de labores."}{" "}
-          <button onClick={onEditar} style={linkBtn}>Editar protocolo</button>
+          {!SOLO_LECTURA && <button onClick={onEditar} style={linkBtn}>Editar protocolo</button>}
         </div>
       </div>
 
@@ -3030,7 +3037,7 @@ function SeccionLluvias({lluv, autor, campos=CAMPOS}){
           <div style={{fontSize:15,fontWeight:700}}>🌧 Lluvias</div>
           <div style={{fontSize:11.5,opacity:0.7}}>Hoja <b>lluvias</b> de la planilla. Con ellas se sabe si un residual se activó.{lluv.sinSubir ? ` · 📵 ${lluv.sinSubir} sin subir` : ""}</div>
         </div>
-        {!abierto && <button onClick={()=>{ setAbierto(true); setMsg(null); }} style={{padding:"8px 14px",fontSize:13.5,fontWeight:700,borderRadius:9,border:"none",background:"#1E5FA8",color:"#fff",cursor:"pointer",fontFamily:"inherit"}}>➕ Registrar lluvia</button>}
+        {!abierto && !SOLO_LECTURA && <button onClick={()=>{ setAbierto(true); setMsg(null); }} style={{padding:"8px 14px",fontSize:13.5,fontWeight:700,borderRadius:9,border:"none",background:"#1E5FA8",color:"#fff",cursor:"pointer",fontFamily:"inherit"}}>➕ Registrar lluvia</button>}
       </div>
       {msg && <div style={{fontSize:12.5,fontWeight:600,marginTop:8,color:msg.ok?"#2E7D32":"#8A6200"}}>{msg.txt}</div>}
       {abierto && (
@@ -3066,8 +3073,8 @@ function SeccionLluvias({lluv, autor, campos=CAMPOS}){
               <span>{nombreCampo(l.campo)}: <b>{fmt1(Number(l.mm)||0)} mm</b></span>
               {l.nota && <span style={{opacity:0.65}}>{l.nota}</span>}
               {l.sinSubir && <span style={{fontSize:11,color:"#8A6200"}}>📵 sin subir</span>}
-              <button onClick={()=>{ if(window.confirm(`¿Borrar la lluvia de ${nombreCampo(l.campo)} del ${l.fecha}?`)) lluv.borrar(l.id); }}
-                style={{border:"none",background:"none",padding:0,color:"#C0392B",cursor:"pointer",fontFamily:"inherit",fontSize:11.5}}>borrar</button>
+              {!SOLO_LECTURA && <button onClick={()=>{ if(window.confirm(`¿Borrar la lluvia de ${nombreCampo(l.campo)} del ${l.fecha}?`)) lluv.borrar(l.id); }}
+                style={{border:"none",background:"none",padding:0,color:"#C0392B",cursor:"pointer",fontFamily:"inherit",fontSize:11.5}}>borrar</button>}
             </div>
           ))}
           {lluv.lista.length > 6 && <button onClick={()=>setVerTodas(v=>!v)} style={{border:"none",background:"none",padding:0,color:"#1E5FA8",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:12,alignSelf:"flex-start"}}>{verTodas ? "Ver menos" : `Ver todas (${lluv.lista.length})`}</button>}
@@ -3325,8 +3332,10 @@ function TarjetaRodeo({r, gan, autor, cambiarAutor, conLote=false, onAviso, camp
           </div>
         )}
         <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:9}}>
+          {!SOLO_LECTURA && <>
           <button onClick={()=>{ setAviso(null); setForm("parto"); }} style={{...btn,background:"#2E7D32",borderColor:"#2E7D32",color:"#fff"}}>📝 Cargar</button>
           <button onClick={()=>{ setAviso(null); setForm("mover"); }} style={btn}>🚚 Cambiar de lote</button>
+          </>}
           <button onClick={()=>setVerCaravanas(v => !v)} style={btn}>📋 Caravanas ({r.activos.length})</button>
         </div>
         {verCaravanas && (
@@ -3376,7 +3385,7 @@ function VistaGanaderia({gan, autor, cambiarAutor}){
   return (
     <div style={{display:"flex",flexDirection:"column",gap:14}}>
       <div style={{fontSize:12.5,opacity:0.75}}>
-        Para cargar algo en el campo: <b>🗺️ Mapa por campo</b> → tocá el lote donde está el rodeo → <b>📝 Cargar</b> o <b>🚚 Cambiar de lote</b>.
+        {!SOLO_LECTURA && <>Para cargar algo en el campo: <b>🗺️ Mapa por campo</b> → tocá el lote donde está el rodeo → <b>📝 Cargar</b> o <b>🚚 Cambiar de lote</b>. </>}
         Se guarda en las hojas <b>rodeos</b>, <b>animales</b> y <b>rodeo_eventos</b> de la planilla LABORES S-MIX 26-27.
         {gan.sync.estado==="error" && <span style={{color:"#C0392B"}}> No se pudo leer la planilla{gan.sync.txt ? ` (${gan.sync.txt})` : ""}.</span>}
       </div>
@@ -3404,8 +3413,8 @@ function VistaGanaderia({gan, autor, cambiarAutor}){
           {eventos.slice(0, 40).map(e => (
             <div key={e.id} style={{display:"flex",justifyContent:"space-between",gap:8,fontSize:12.5,padding:"5px 0",borderBottom:"1px solid #E5DFCC"}}>
               <span><b>{fFecha(e.fecha)}</b> · {gan.rodeos.find(r => r.id === e.rodeo)?.nombre || e.rodeo} · {textoEventoRodeo(e, gan)}{e.autor ? ` · ${e.autor}` : ""}{e.sinSubir ? " · 📵 sin subir" : ""}</span>
-              <button onClick={()=>{ if(window.confirm("¿Borrar esta carga? El rodeo vuelve a quedar como estaba antes de ella.")) gan.borrar(e.id); }}
-                style={{border:"none",background:"none",padding:0,color:"#C0392B",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:12}}>Borrar</button>
+              {!SOLO_LECTURA && <button onClick={()=>{ if(window.confirm("¿Borrar esta carga? El rodeo vuelve a quedar como estaba antes de ella.")) gan.borrar(e.id); }}
+                style={{border:"none",background:"none",padding:0,color:"#C0392B",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:12}}>Borrar</button>}
             </div>
           ))}
         </div>
@@ -3684,7 +3693,7 @@ function VistaMonitoreo({monit, lluv, cultivoDe, siembraDe, autor, cambiarAutor}
   return (
     <div style={{display:"flex",flexDirection:"column",gap:14}}>
       <div style={{fontSize:12.5,opacity:0.75}}>
-        Para cargar un monitoreo: <b>🗺️ Mapa por campo</b> → elegí el campo → tocá el lote → <b>🔍 Monitorear este lote</b>.
+        {!SOLO_LECTURA && <>Para cargar un monitoreo: <b>🗺️ Mapa por campo</b> → elegí el campo → tocá el lote → <b>🔍 Monitorear este lote</b>. </>}
         Se guardan en la hoja <b>monitoreo</b> de la planilla LABORES S-MIX 26-27 y, además, en un <b>Google Doc por campo</b>
         editable ("Monitoreos – <i>campo</i>", siempre el mismo, en la carpeta <b>Monitoreos S-MIX</b> del Drive, con las fotos).
         {monit.sync.estado==="error" && <span style={{color:"#C0392B"}}> No se pudo leer la planilla{monit.sync.txt ? ` (${monit.sync.txt})` : ""}.</span>}
@@ -3761,9 +3770,9 @@ function VistaMonitoreo({monit, lluv, cultivoDe, siembraDe, autor, cambiarAutor}
           <div style={{display:"flex",justifyContent:"space-between",gap:8,marginTop:8,fontSize:11.5,opacity:0.8,flexWrap:"wrap"}}>
             <span>{m.autor ? `Recorrió: ${m.autor}` : ""}</span>
             <span style={{display:"flex",gap:10}}>
-              <button onClick={()=>editar(m)} style={{border:"none",background:"none",padding:0,color:"#1E5FA8",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:12}}>Editar</button>
+              {!SOLO_LECTURA && <><button onClick={()=>editar(m)} style={{border:"none",background:"none",padding:0,color:"#1E5FA8",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:12}}>Editar</button>
               <button onClick={()=>{ if(window.confirm(`¿Borrar el monitoreo de ${nombreCampo(m.campo)} ${m.lote} del ${fFecha(m.fecha)}?`)) monit.borrar(m.id); }}
-                style={{border:"none",background:"none",padding:0,color:"#C0392B",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:12}}>Borrar</button>
+                style={{border:"none",background:"none",padding:0,color:"#C0392B",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:12}}>Borrar</button></>}
             </span>
           </div>
         </div>
@@ -3772,7 +3781,7 @@ function VistaMonitoreo({monit, lluv, cultivoDe, siembraDe, autor, cambiarAutor}
   );
 }
 
-function AppCompleta(){
+function AppCompleta({lector=null}){
   // ── DATOS DINÁMICOS: cargados desde /datos.json (pipeline automático) ──
   const [datosOK, setDatosOK] = useState(null); // null=cargando, true=cargado, false=falló
   const [datosRemotos, setDatosRemotos] = useState(null);
@@ -4686,6 +4695,7 @@ function AppCompleta(){
           </div>
         )}
 
+        {lector && <div style={{padding:"9px 14px",marginBottom:12,borderRadius:10,background:"#EAF1FA",border:"1.5px solid #1E5FA8",fontSize:13.5,fontWeight:600}}>👁 Solo lectura{lector.nombre ? ` · ${lector.nombre}` : ""}: podés ver todo, sin cargar ni modificar.</div>}
         {/* TABS PRINCIPALES */}
         <div style={{display:"flex",gap:7,marginBottom:18,overflowX:"auto",paddingBottom:4}}>
           <button style={tab(vista==="mapas")} onClick={()=>setVista("mapas")}>🗺️ Mapa por campo</button>
@@ -4695,9 +4705,11 @@ function AppCompleta(){
           <button style={tab(vista==="ganaderia")} onClick={()=>setVista("ganaderia")}>🐄 Ganadería</button>
           <button style={tab(vista==="galeria")} onClick={()=>setVista("galeria")}>🗂️ Todos los campos</button>
           <button style={tab(vista==="margenes")} onClick={()=>setVista("margenes")}>💵 Márgenes</button>
+          {!lector && <>
           <button style={tab(vista==="ordenes")} onClick={()=>setVista("ordenes")}>🚜 Nueva labor</button>
           <button style={tab(vista==="protocolo")} onClick={()=>setVista("protocolo")}>📝 Protocolo</button>
           <button style={tab(vista==="precios")} onClick={()=>setVista("precios")}>💲 Precios</button>
+          </>}
         </div>
 
         {/* ══ MAPA POR CAMPO ══ */}
@@ -4902,7 +4914,7 @@ function AppCompleta(){
 
         {vista==="pendientes"&&<VistaPendientes protocolo={protocolo} cultivoDe={cultivoDe}
           aplicaciones={aplicacionesConDosis || APLICACIONES} conDosis={!!aplicacionesConDosis} monitoreos={monit.lista}
-          lluvias={lluv.lista} catalogo={TODOS_PRODUCTOS} onArmarOrden={armarOrdenDesde}
+          lluvias={lluv.lista} catalogo={TODOS_PRODUCTOS} onArmarOrden={lector ? null : armarOrdenDesde}
           fechaDatos={fechaDatos ? new Date(fechaDatos).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}) : null}
           onEditar={()=>setVista("protocolo")}/>}
 
@@ -5753,8 +5765,8 @@ function ModalHistorial({loteInfo, onClose, aplicaciones=[], fertilizaciones=[],
               onListo={m=>{ setAviso(m); setMonitoreando(false); cajaRef.current?.scrollTo({top:0}); }} onCancelar={()=>setMonitoreando(false)}/>
           ):(
             <div style={{display:"flex",flexDirection:"column",gap:9}}>
-              <button onClick={()=>{ setAviso(null); setMonitoreando(true); }}
-                style={{padding:"13px 16px",fontSize:16,fontWeight:700,borderRadius:10,border:"none",background:"#2E7D32",color:"#fff",cursor:"pointer",fontFamily:"inherit"}}>🔍 Monitorear este lote</button>
+              {!SOLO_LECTURA && <button onClick={()=>{ setAviso(null); setMonitoreando(true); }}
+                style={{padding:"13px 16px",fontSize:16,fontWeight:700,borderRadius:10,border:"none",background:"#2E7D32",color:"#fff",cursor:"pointer",fontFamily:"inherit"}}>🔍 Monitorear este lote</button>}
               {aviso&&<div style={{fontSize:13,fontWeight:600,color:aviso.ok?"#2E7D32":"#8A6200"}}>{aviso.txt}</div>}
               {monLote.length>0?(
                 <div style={{display:"flex",flexDirection:"column",gap:5}}>
