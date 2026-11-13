@@ -1685,6 +1685,17 @@ function AppEncargado({yo, previa=null}){
   const [bloqueado, setBloqueado] = useState(false);
   const [autor, setAutor] = useState(() => { try { return window.localStorage.getItem("smix_autor") || yo.nombre || ""; } catch { return yo.nombre || ""; } });
   const cambiarAutor = v => { setAutor(v); try { window.localStorage.setItem("smix_autor", v); } catch {} };
+  // Cultivos de cada lote (planilla de rotaciones, vía /datos.json). Se guardan en el teléfono para verlos sin señal.
+  const [cultivos, setCultivos] = useState(() => { try { return JSON.parse(window.localStorage.getItem("smix_cultivos")) || null; } catch { return null; } });
+  useEffect(() => {
+    fetch("/datos.json?t=" + Date.now(), {cache:"no-store"}).then(r => r.ok ? r.json() : null).then(d => {
+      if(!d) return;
+      const c = {INV_26:d.INV_26 || {}, PLAN_2627:d.PLAN_2627 || {}};
+      setCultivos(c); try { window.localStorage.setItem("smix_cultivos", JSON.stringify(c)); } catch {}
+    }).catch(() => {});
+  }, []);
+  const datosMapa = {INV_26:cultivos?.INV_26 || INV_26_FALLBACK, PLAN_2627:cultivos?.PLAN_2627 || PLAN_2627_FALLBACK};
+  const cultivosDelLote = (cId, lId) => [...new Set([...cvPartes(buscarKey(datosMapa.INV_26, cId, lId)), ...cvPartes(buscarKey(datosMapa.PLAN_2627, cId, lId))])];
   const ganTodo = useGanaderia();
   const lluvTodo = useLluvias();
   const app = useInstalarApp();
@@ -1738,7 +1749,8 @@ function AppEncargado({yo, previa=null}){
           )}
           <div style={{...cajaV,padding:8}}>
             <div style={{fontSize:12,opacity:0.65,margin:"2px 4px 6px"}}>Tocá un lote para ver sus rodeos y cargar.</div>
-            <MapaCampo campo={campo} modo="campaña" sueloVar="P" onLoteClick={(c, l) => setLoteAbierto(l)} cabezasEnLote={cabezasEnLote}/>
+            <MapaCampo campo={campo} modo="campaña" sueloVar="P" onLoteClick={(c, l) => setLoteAbierto(l)} cabezasEnLote={cabezasEnLote} datos={datosMapa}/>
+            <div style={{padding:"0 4px"}}><Leyenda modo="campaña" sueloVar="P"/></div>
           </div>
           {loteAbierto && (
             <div style={{...cajaV,padding:0,overflow:"hidden"}}>
@@ -1746,6 +1758,14 @@ function AppEncargado({yo, previa=null}){
                 <div style={{fontSize:18,fontWeight:700}}>Lote {loteAbierto.label || loteAbierto.id}{loteAbierto.ha ? <span style={{fontSize:13,opacity:0.6,fontWeight:500}}> · {loteAbierto.ha} ha</span> : null}</div>
                 <button onClick={()=>setLoteAbierto(null)} style={{background:"none",border:"none",fontSize:26,cursor:"pointer",color:TINTA,lineHeight:1}}>×</button>
               </div>
+              {(() => { const cvs = cultivosDelLote(campoId, loteAbierto.id); return (
+                <div style={{padding:"10px 16px",borderBottom:"1px solid #D8D2C0",display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",fontSize:14}}>
+                  <span style={{fontSize:11,letterSpacing:"0.12em",textTransform:"uppercase",opacity:0.55}}>Cultivo 26-27</span>
+                  {cvs.length ? cvs.map((c, i) => <span key={c} style={{display:"inline-flex",alignItems:"center",gap:6,fontWeight:700}}>
+                    {i > 0 && <span style={{opacity:0.5,fontWeight:400}}>→</span>}
+                    <span style={{width:14,height:14,borderRadius:3,background:colorCv(c),border:`1px solid ${TINTA}`}}/>{c}</span>)
+                    : <span style={{opacity:0.6,fontStyle:"italic"}}>sin cultivo asignado</span>}
+                </div>); })()}
               <RodeosDelLote gan={gan} campoId={campoId} loteId={loteAbierto.id} autor={autor} cambiarAutor={cambiarAutor} campos={camposMios}/>
               {!gan.porLote(campoId, loteAbierto.id).length && <div style={{padding:"14px 16px",fontSize:13.5,opacity:0.65}}>No hay rodeos en este lote.</div>}
             </div>
