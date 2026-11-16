@@ -3502,7 +3502,7 @@ function VistaGanaderia({gan, autor, cambiarAutor}){
     <div style={{display:"flex",flexDirection:"column",gap:14}}>
       <div style={{fontSize:12.5,opacity:0.75}}>
         {!SOLO_LECTURA && <>Para cargar algo en el campo: <b>🗺️ Mapa por campo</b> → tocá el lote donde está el rodeo → <b>📝 Cargar</b> o <b>🚚 Cambiar de lote</b>. </>}
-        Se guarda en las hojas <b>rodeos</b>, <b>animales</b> y <b>rodeo_eventos</b> de la planilla LABORES S-MIX 26-27.
+        Se guarda en las hojas <b>rodeos</b>, <b>animales</b> y <b>rodeo_eventos</b> de la planilla <b>GANADERÍA S-MIX</b> (carpeta Ganadería del Drive).
         {gan.sync.estado==="error" && <span style={{color:"#C0392B"}}> No se pudo leer la planilla{gan.sync.txt ? ` (${gan.sync.txt})` : ""}.</span>}
       </div>
       {gan.sinSubir > 0 && (

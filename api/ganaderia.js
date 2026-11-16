@@ -1,6 +1,6 @@
 // api/ganaderia.js
 // Vercel Serverless Function — rodeos, caravanas y lo que les pasa (partos, ventas, cambios de lote…),
-// en la planilla LABORES S-MIX 26-27:
+// en la planilla GANADERÍA S-MIX (carpeta Ganadería del Drive):
 //   hoja "rodeos"         id | campo | lote | nombre | servicio | sin caravana | notas      (cómo arrancó cada rodeo)
 //   hoja "animales"       caravana | rodeo | categoria | raza | cc | estado | detalle | obs (inventario inicial)
 //   hoja "rodeo_eventos"  lo que se carga desde la app, una fila por evento
@@ -18,7 +18,8 @@
 import { google } from "googleapis";
 import { acceso } from "./_acceso.js";
 
-const PLANILLA_LABORES = "1JpAA6bCl_uhizVO4jOVBEs34RRlNuAVHKr8kSFRm5ro";
+// Planilla propia de ganadería (GANADERÍA S-MIX, carpeta Ganadería del Drive), separada de la de labores
+const PLANILLA_GANADERIA = "18Ap-SA0vktTvsnFKbBk3XIuQc_JY7imUCts0QuQqNxE";
 const HOJA_EVENTOS = "rodeo_eventos";
 // Orden de las columnas en la hoja de eventos (A…M). Las nuevas van siempre al final.
 const CAMPOS_EVENTO = ["id", "fecha", "tipo", "rodeo", "caravanas", "cantidad", "campoHasta", "loteHasta", "rodeoHasta",
@@ -36,20 +37,20 @@ function getAuth() {
 
 // Crea la hoja de eventos la primera vez, con su encabezado
 async function asegurarHoja(sheets) {
-  const meta = await sheets.spreadsheets.get({ spreadsheetId: PLANILLA_LABORES });
+  const meta = await sheets.spreadsheets.get({ spreadsheetId: PLANILLA_GANADERIA });
   if (meta.data.sheets.some(s => s.properties.title === HOJA_EVENTOS)) return;
   await sheets.spreadsheets.batchUpdate({
-    spreadsheetId: PLANILLA_LABORES,
+    spreadsheetId: PLANILLA_GANADERIA,
     requestBody: { requests: [{ addSheet: { properties: { title: HOJA_EVENTOS, gridProperties: { frozenRowCount: 1 } } } }] },
   });
   await sheets.spreadsheets.values.update({
-    spreadsheetId: PLANILLA_LABORES, range: `${HOJA_EVENTOS}!A1:${ULTIMA_COL}1`,
+    spreadsheetId: PLANILLA_GANADERIA, range: `${HOJA_EVENTOS}!A1:${ULTIMA_COL}1`,
     valueInputOption: "RAW", requestBody: { values: [ENCABEZADO_EVENTO] },
   });
 }
 
 const filas = async (sheets, rango) => {
-  try { return (await sheets.spreadsheets.values.get({ spreadsheetId: PLANILLA_LABORES, range: rango })).data.values || []; }
+  try { return (await sheets.spreadsheets.values.get({ spreadsheetId: PLANILLA_GANADERIA, range: rango })).data.values || []; }
   catch { return []; }   // la hoja todavía no existe
 };
 const txt = v => String(v ?? "").trim();
@@ -99,7 +100,7 @@ export default async function handler(req, res) {
       const idx = actuales.findIndex(f => f[0] === idBorrar);
       if (idx < 0) return res.status(200).json({ ok: true, borrado: false });
       if (rodeosMios && !rodeosMios.has(txt(actuales[idx][3]))) return prohibido();
-      await sheets.spreadsheets.values.clear({ spreadsheetId: PLANILLA_LABORES, range: `${HOJA_EVENTOS}!A${idx + 2}:${ULTIMA_COL}${idx + 2}` });
+      await sheets.spreadsheets.values.clear({ spreadsheetId: PLANILLA_GANADERIA, range: `${HOJA_EVENTOS}!A${idx + 2}:${ULTIMA_COL}${idx + 2}` });
       return res.status(200).json({ ok: true, borrado: true });
     }
 
@@ -112,7 +113,7 @@ export default async function handler(req, res) {
     const fila = idx >= 0 ? idx + 2 : actuales.length + 2;
     const valores = CAMPOS_EVENTO.map(k => k === "registrado" ? new Date().toISOString() : String(e[k] ?? "").slice(0, 20000));
     await sheets.spreadsheets.values.update({
-      spreadsheetId: PLANILLA_LABORES, range: `${HOJA_EVENTOS}!A${fila}:${ULTIMA_COL}${fila}`,
+      spreadsheetId: PLANILLA_GANADERIA, range: `${HOJA_EVENTOS}!A${fila}:${ULTIMA_COL}${fila}`,
       valueInputOption: "RAW", requestBody: { values: [valores] },
     });
     return res.status(200).json({ ok: true, fila });
