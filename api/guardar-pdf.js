@@ -2,7 +2,8 @@
 // Vercel Serverless Function — recibe el PDF de una orden (base64) y lo archiva en
 // Google Drive, para que quede guardado y lo vean Santos y Andrés.
 //
-// POST { nombre, base64, id }  → { ok:true, link, fileId }
+// POST { nombre, base64, id, reemplazar? }  → { ok:true, link, fileId, reemplazado }
+// reemplazar: id del PDF anterior de la misma orden; el Apps Script (versión 4+) lo manda a la papelera.
 //
 // No sube directo con la cuenta de servicio: esas cuentas no tienen espacio en Drive y
 // Google rechaza el archivo. Se lo pasa a un Apps Script que corre con la cuenta de
@@ -29,7 +30,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { nombre, base64 } = req.body || {};
+    const { nombre, base64, reemplazar } = req.body || {};
     if (!base64) return res.status(400).json({ error: "Falta el PDF." });
 
     const limpio = base64.replace(/^data:application\/pdf;base64,/, "");
@@ -39,7 +40,7 @@ export default async function handler(req, res) {
     const r = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, nombre, base64: limpio, carpeta: process.env.DRIVE_ORDENES_FOLDER || "" }),
+      body: JSON.stringify({ token, nombre, base64: limpio, carpeta: process.env.DRIVE_ORDENES_FOLDER || "", reemplazar: String(reemplazar || "").replace(/[^\w-]/g, "") }),
     });
     const texto = await r.text();
     let data;
@@ -53,7 +54,7 @@ export default async function handler(req, res) {
     }
     if (!data.ok) throw new Error(data.error || "El Apps Script no pudo guardar el PDF.");
 
-    return res.status(200).json({ ok: true, fileId: data.fileId, link: data.link });
+    return res.status(200).json({ ok: true, fileId: data.fileId, link: data.link, reemplazado: !!data.reemplazado });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: e.message || "Error subiendo el PDF." });

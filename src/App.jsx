@@ -4258,7 +4258,7 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
     const t = setTimeout(() => {
       const previo = leerBorradores().find(b => b.id === ordId) || {};
       const item = {
-        id: ordId, guardado: Date.now(), autor: autor || previo.autor || "", pdf: previo.pdf || "",
+        id: ordId, guardado: Date.now(), autor: autor || previo.autor || "", pdf: previo.pdf || "", enPlanilla: !!previo.enPlanilla,
         fecha: ordFecha, productor: ordProductor, tipo: ordTipo,
         tratamientos, pintura, divisiones,
         resumen: { ha: r.ha, nTrats: r.nTrats, campos: r.campos, etiquetas: r.etiquetas },
@@ -4609,6 +4609,7 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
     }
 
     const payload = {
+      id: ordId,
       fecha: ordFecha,
       productor: ordProductor,
       tipoLabor: ordTipo,
@@ -4619,7 +4620,10 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
     // planilla (registro publicado) o guardada recién desde este equipo
     const firma = (fecha, campo, lote, labor) => `${fecha}|${campo}|${String(lote).toUpperCase().trim()}|${String(labor).toUpperCase().trim()}`;
     const enPlanilla = new Set((aplicacionesConDosis || []).map(a => firma(a.fecha, a.campo, a.lote, a.labor)));
-    const repetidos = [...new Set(tratamientosPayload.flatMap(t => t.lotes
+    // Si esta misma orden ya se guardó, la planilla reescribe sus filas (no se duplican)
+    const yaGuardada = laboresGuardadas.current.has(`orden|${ordId}`) || !!leerBorradores().find(b => b.id === ordId)?.enPlanilla;
+    if(yaGuardada && !window.confirm("Esta orden ya está en la planilla.\n¿Reemplazo sus datos por esta versión corregida?")) return;
+    const repetidos = yaGuardada ? [] : [...new Set(tratamientosPayload.flatMap(t => t.lotes
       .filter(l => { const k = firma(ordFecha, l.campo, l.lote, ordTipo); return enPlanilla.has(k) || laboresGuardadas.current.has(k); })
       .map(l => `${nombreCampo(l.campo)} ${l.lote}`)))];
     if(repetidos.length && !window.confirm(`Esta labor ya parece estar cargada en la planilla (${fechaCorta(ordFecha)}, ${ordTipo.toLowerCase()}):\n${repetidos.join(", ")}\n\n¿Guardar igual?`)){
@@ -4638,6 +4642,9 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
       const data = await resp.json();
       if(resp.ok && data.ok){
         tratamientosPayload.forEach(t => t.lotes.forEach(l => laboresGuardadas.current.add(firma(ordFecha, l.campo, l.lote, ordTipo))));
+        laboresGuardadas.current.add(`orden|${ordId}`);
+        const borr = leerBorradores().find(b => b.id === ordId);
+        if(borr && !borr.enPlanilla){ const item = {...borr, enPlanilla:true}; escribirBorradores([item, ...leerBorradores().filter(b=>b.id!==ordId)]); subirBorrador(item); }
         setGuardadoMsg({ok:true, texto:`✓ ${data.mensaje} Aparecerá en la app tras la próxima corrida del pipeline.`});
       } else {
         setGuardadoMsg({ok:false, texto:`Error: ${data.error || "no se pudo guardar"}`});
@@ -4681,49 +4688,66 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
 
   const [pdfMsg, setPdfMsg] = useState(null);
 
-  // Genera el PDF de la orden, lo descarga y lo archiva en la carpeta de Drive
-  const descargarPDFOrden = async () => {
-    if(bloqueosOrden.length){ window.alert(textoBloqueos()); return; }
+  // Arma el PDF de la orden tal cual se ve (sin precios). Lo usan "Descargar" y "Guardar en Drive", que van por separado:
+  // se puede descargar las veces que haga falta y subir al Drive sólo la versión final.
+  const armarPDFOrden = async () => {
+    if(bloqueosOrden.length){ window.alert(textoBloqueos()); return null; }
     const nodo = document.querySelector(".orden-completa-print");
-    if(!nodo){ window.alert("No encuentro la orden en pantalla."); return; }
-    try{
-      setPdfMsg({ok:true, texto:"Armando el PDF…"});
-      await cargarScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
-      await cargarScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
-      // El PDF va al aplicador: sin precios ni dólares (lo mismo que se oculta al imprimir)
-      nodo.classList.add("pdf-sin-precios");
-      let canvas;
-      try { canvas = await window.html2canvas(nodo, {scale:2, backgroundColor:"#FFFFFF", useCORS:true}); }
-      finally { nodo.classList.remove("pdf-sin-precios"); }
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({unit:"mm", format:"a4", orientation:"portrait"});
-      const anchoP = 210, altoP = 297;
-      const alto = canvas.height * anchoP / canvas.width;
-      const img = canvas.toDataURL("image/jpeg", 0.92);
-      let resta = alto, y = 0;
-      pdf.addImage(img, "JPEG", 0, 0, anchoP, alto);
-      resta -= altoP;
-      while(resta > 0){ y -= altoP; pdf.addPage(); pdf.addImage(img, "JPEG", 0, y, anchoP, alto); resta -= altoP; }
-      const nombre = `orden ${ordFecha} ${(ordProductor||"sin productor").toLowerCase()}.pdf`;
-      pdf.save(nombre);
+    if(!nodo){ window.alert("No encuentro la orden en pantalla."); return null; }
+    setPdfMsg({ok:true, texto:"Armando el PDF…"});
+    await cargarScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
+    await cargarScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+    // El PDF va al aplicador: sin precios ni dólares (lo mismo que se oculta al imprimir)
+    nodo.classList.add("pdf-sin-precios");
+    let canvas;
+    try { canvas = await window.html2canvas(nodo, {scale:2, backgroundColor:"#FFFFFF", useCORS:true}); }
+    finally { nodo.classList.remove("pdf-sin-precios"); }
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({unit:"mm", format:"a4", orientation:"portrait"});
+    const anchoP = 210, altoP = 297;
+    const alto = canvas.height * anchoP / canvas.width;
+    const img = canvas.toDataURL("image/jpeg", 0.92);
+    let resta = alto, y = 0;
+    pdf.addImage(img, "JPEG", 0, 0, anchoP, alto);
+    resta -= altoP;
+    while(resta > 0){ y -= altoP; pdf.addPage(); pdf.addImage(img, "JPEG", 0, y, anchoP, alto); resta -= altoP; }
+    return {pdf, nombre:`orden ${ordFecha} ${(ordProductor||"sin productor").toLowerCase()}.pdf`};
+  };
 
-      // Archivo en Drive, para que quede la orden tal cual se descargó
-      setPdfMsg({ok:true, texto:"Guardando copia en Drive…"});
-      const base64 = pdf.output("datauristring").split(",")[1];
-      const r = await fetch("/api/guardar-pdf", {method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({nombre, base64, id: ordId})});
-      const data = await r.json();
-      if(!r.ok) throw new Error(data.error || "no se pudo archivar");
+  // Sólo baja el PDF al equipo (no toca el Drive)
+  const descargarPDFOrden = async () => {
+    try{
+      const r = await armarPDFOrden(); if(!r) return;
+      r.pdf.save(r.nombre);
+      setPdfMsg({ok:true, texto:"PDF descargado en este equipo. Cuando esté la versión final, tocá ☁️ Guardar en Drive."});
+    }catch(e){ setPdfMsg({ok:false, texto:`No se pudo armar el PDF: ${e.message}`}); }
+  };
+
+  // Sube el PDF a la carpeta de órdenes del Drive. Si esta orden ya tenía uno, lo reemplaza (no quedan dos).
+  const guardarPDFEnDrive = async () => {
+    const previo = leerBorradores().find(b => b.id === ordId);
+    const idViejo = (String(previo?.pdf || "").match(/\/d\/([\w-]{10,})/) || [])[1] || "";
+    if(idViejo && !window.confirm("Esta orden ya tiene un PDF en el Drive.\n¿Lo reemplazo por esta versión corregida?")) return;
+    try{
+      const r = await armarPDFOrden(); if(!r) return;
+      setPdfMsg({ok:true, texto: idViejo ? "Reemplazando el PDF en el Drive…" : "Guardando en el Drive…"});
+      const base64 = r.pdf.output("datauristring").split(",")[1];
+      const resp = await fetch("/api/guardar-pdf", {method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({nombre:r.nombre, base64, id: ordId, reemplazar: idViejo})});
+      const data = await resp.json();
+      if(!resp.ok) throw new Error(data.error || "no se pudo guardar");
       // El link queda pegado al borrador, así Andrés abre el PDF desde la lista
-      const previo = leerBorradores().find(b => b.id === ordId);
-      if(previo){
-        const item = {...previo, pdf: data.link};
+      const actual = leerBorradores().find(b => b.id === ordId);
+      if(actual){
+        const item = {...actual, pdf: data.link};
         escribirBorradores([item, ...leerBorradores().filter(b=>b.id!==ordId)]);
         subirBorrador(item);
       }
-      setPdfMsg({ok:true, texto:"PDF descargado y archivado en Drive."});
+      setPdfMsg(!idViejo ? {ok:true, texto:"✓ PDF guardado en el Drive."}
+        : data.reemplazado ? {ok:true, texto:"✓ PDF reemplazado en el Drive (el anterior se fue a la papelera)."}
+        : {ok:false, texto:"Se guardó en el Drive, pero el anterior quedó también: falta actualizar el Apps Script a la versión 4 para que lo reemplace."});
     }catch(e){
-      setPdfMsg({ok:false, texto:`PDF descargado, pero no se archivó: ${e.message}`});
+      setPdfMsg({ok:false, texto:`No se guardó en el Drive: ${e.message}`});
     }
   };
 
@@ -5582,7 +5606,8 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
 
                   <div style={{display:"flex",gap:8,marginTop:10,flexWrap:"wrap"}}>
                     <button onClick={guardarLaborEnPlanilla} disabled={guardando||tratamientosActivos.length===0} style={{padding:"9px 15px",fontSize:12.5,fontWeight:700,cursor:guardando?"wait":"pointer",border:"none",borderRadius:8,background:tratamientosActivos.length===0?"#B5AF9D":"#2E7D32",color:"#fff",fontFamily:"inherit",opacity:guardando?0.7:1}}>{guardando?"Guardando…":"💾 Guardar en planilla"}</button>
-                    <button onClick={descargarPDFOrden} style={{padding:"9px 13px",fontSize:12.5,fontWeight:700,cursor:"pointer",border:"none",borderRadius:8,background:TINTA,color:"#F3EFE3",fontFamily:"inherit"}}>⬇️ Descargar PDF y archivar</button>
+                    <button onClick={descargarPDFOrden} style={{padding:"9px 13px",fontSize:12.5,fontWeight:700,cursor:"pointer",border:`1.5px solid ${TINTA}`,borderRadius:8,background:"transparent",color:TINTA,fontFamily:"inherit"}}>⬇️ Descargar PDF</button>
+                    <button onClick={guardarPDFEnDrive} style={{padding:"9px 13px",fontSize:12.5,fontWeight:700,cursor:"pointer",border:"none",borderRadius:8,background:TINTA,color:"#F3EFE3",fontFamily:"inherit"}}>☁️ Guardar en Drive</button>
                     <button onClick={imprimirOrdenCompleta} style={{padding:"9px 13px",fontSize:12.5,fontWeight:600,cursor:"pointer",border:`1.5px solid ${TINTA}`,borderRadius:8,background:"transparent",color:TINTA,fontFamily:"inherit"}}>🖨️ Imprimir</button>
                     <button onClick={descargarPNG} style={{padding:"9px 13px",fontSize:12.5,fontWeight:600,cursor:"pointer",border:`1.5px solid ${TINTA}`,borderRadius:8,background:"transparent",color:TINTA,fontFamily:"inherit"}}>⬇ PNG mapa actual</button>
                     <button onClick={limpiarOrd} style={{padding:"9px 13px",fontSize:12.5,fontWeight:600,cursor:"pointer",border:`1.5px solid ${TINTA}`,borderRadius:8,background:"transparent",color:TINTA,fontFamily:"inherit"}}>Limpiar campo</button>

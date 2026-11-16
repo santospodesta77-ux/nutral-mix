@@ -16,6 +16,7 @@
 //      Esa URL va en Vercel como APPS_SCRIPT_PDF_URL.
 //
 // POST { token, nombre, base64, carpeta?, mime?, subcarpeta? } → { ok:true, link, fileId, mime }  |  { ok:false, error }
+// reemplazar: id de un PDF anterior de la misma orden → se manda a la papelera (versión 4) y responde reemplazado:true.
 // mime: "application/pdf" (órdenes, por defecto) o "image/jpeg" (fotos de monitoreo, van a la subcarpeta).
 //
 // Monitoreos en Google Docs editables: UN documento por campo ("Monitoreos – El Descanso"), siempre el mismo,
@@ -28,7 +29,7 @@
 // Implementar → Gestionar implementaciones → lápiz → Versión: "Nueva versión" → Implementar.
 
 const CLAVE = "CAMBIAR_POR_LA_CLAVE";
-const VERSION = 3; // 1: sólo PDF · 2: fotos · 3: Docs de monitoreo por campo
+const VERSION = 4; // 1: sólo PDF · 2: fotos · 3: Docs de monitoreo por campo · 4: reemplazar el PDF de una orden
 const CARPETA_POR_DEFECTO = "Ordenes S-MIX"; // se usa si no llega el id de carpeta
 const CARPETA_MONITOREOS = "Monitoreos S-MIX"; // carpeta propia de los Docs de monitoreo
 
@@ -50,7 +51,12 @@ function doPost(e) {
     if (datos.subcarpeta) carpeta = subCarpeta(carpeta, String(datos.subcarpeta));
     const archivo = carpeta.createFile(blob);
 
-    return responder({ ok: true, fileId: archivo.getId(), link: archivo.getUrl(), mime: mime });
+    // Orden corregida: el PDF anterior va a la papelera, para que no queden dos
+    let reemplazado = false;
+    if (datos.reemplazar && datos.reemplazar !== archivo.getId()) {
+      try { DriveApp.getFileById(String(datos.reemplazar)).setTrashed(true); reemplazado = true; } catch (err) {}
+    }
+    return responder({ ok: true, fileId: archivo.getId(), link: archivo.getUrl(), mime: mime, reemplazado: reemplazado });
   } catch (err) {
     return responder({ ok: false, error: String(err && err.message || err) });
   }
