@@ -1753,10 +1753,15 @@ function AppEncargado({yo, previa=null}){
             <div style={{padding:"0 4px"}}><Leyenda modo="campaña" sueloVar="P"/></div>
           </div>
           {loteAbierto && (
-            <div style={{...cajaV,padding:0,overflow:"hidden"}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",borderBottom:`1.5px solid ${TINTA}`}}>
-                <div style={{fontSize:18,fontWeight:700}}>Lote {loteAbierto.label || loteAbierto.id}{loteAbierto.ha ? <span style={{fontSize:13,opacity:0.6,fontWeight:500}}> · {loteAbierto.ha} ha</span> : null}</div>
-                <button onClick={()=>setLoteAbierto(null)} style={{background:"none",border:"none",fontSize:26,cursor:"pointer",color:TINTA,lineHeight:1}}>×</button>
+            <div onClick={()=>setLoteAbierto(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:12}}>
+            <div onClick={e=>e.stopPropagation()} style={{background:CREMA,borderRadius:14,maxWidth:640,width:"100%",maxHeight:"92vh",overflow:"auto",boxShadow:"0 20px 60px rgba(0,0,0,0.3)",border:`2px solid ${TINTA}`}}>
+              <div style={{position:"sticky",top:0,zIndex:1,background:CREMA,padding:"14px 18px",borderBottom:`1.5px solid ${TINTA}`,display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10}}>
+                <div>
+                  <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.6}}>{campo?.nombre}</div>
+                  <div style={{fontSize:22,fontWeight:700,marginTop:2}}>Lote {loteAbierto.label || loteAbierto.id}</div>
+                  {loteAbierto.ha ? <div style={{fontSize:13,opacity:0.7,marginTop:2}}>{loteAbierto.ha} ha</div> : null}
+                </div>
+                <button onClick={()=>setLoteAbierto(null)} style={{background:"none",border:"none",fontSize:30,cursor:"pointer",color:TINTA,lineHeight:1,padding:4}}>×</button>
               </div>
               {(() => { const cvs = cultivosDelLote(campoId, loteAbierto.id); return (
                 <div style={{padding:"10px 16px",borderBottom:"1px solid #D8D2C0",display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",fontSize:14}}>
@@ -1767,7 +1772,16 @@ function AppEncargado({yo, previa=null}){
                     : <span style={{opacity:0.6,fontStyle:"italic"}}>sin cultivo asignado</span>}
                 </div>); })()}
               <RodeosDelLote gan={gan} campoId={campoId} loteId={loteAbierto.id} autor={autor} cambiarAutor={cambiarAutor} campos={camposMios}/>
-              {!gan.porLote(campoId, loteAbierto.id).length && <div style={{padding:"14px 16px",fontSize:13.5,opacity:0.65}}>No hay rodeos en este lote.</div>}
+              {!gan.porLote(campoId, loteAbierto.id).length && <div style={{padding:"14px 18px",fontSize:13.5,opacity:0.65}}>No hay rodeos en este lote. Para traer uno, tocá <b>🚚 Cambiar de lote</b> en ese rodeo.</div>}
+              {(() => { const ids = new Set(gan.porLote(campoId, loteAbierto.id).map(r => r.id));
+                const ev = gan.lista.filter(e => ids.has(e.rodeo) || (e.tipo === "mover" && e.campoHasta === campoId && String(e.loteHasta) === String(loteAbierto.id))).slice(0, 8);
+                return ev.length > 0 && (
+                <div style={{padding:"12px 18px"}}>
+                  <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55,marginBottom:6}}>Últimas cargas en este lote</div>
+                  {ev.map(e => <div key={e.id} style={{fontSize:12.5,padding:"4px 0",borderBottom:"1px solid #E5DFCC"}}>
+                    <b>{ddmm(fechaLocal(e.fecha))}</b> · {gan.rodeos.find(r => r.id === e.rodeo)?.nombre || e.rodeo} · {textoEventoRodeo(e, gan)}{e.autor ? ` · ${e.autor}` : ""}{e.sinSubir ? " · 📵" : ""}</div>)}
+                </div>); })()}
+            </div>
             </div>
           )}
           <div style={{fontSize:13,fontWeight:700}}>Rodeos de {campo?.nombre} · {rodeos.reduce((s, r) => s + r.cabezas, 0)} cabezas</div>
@@ -3185,7 +3199,13 @@ const TIPOS_EVENTO_RODEO = {
 };
 const RESULTADOS_TACTO = ["Preñada","Preñada cabeza","Preñada cuerpo","Preñada cola","Vacía","Dudosa"];
 const RESULTADOS_PARTO = ["Ternero macho","Ternera hembra","Ternero muerto","Parto asistido"];
-const SANIDAD_SUGERIDA = ["Aftosa","Brucelosis","Clostridial","Carbunclo","Querato","Antiparasitario","Mineral / ADE"];
+// Maniobras del plan sanitario, agrupadas como se ven en el formulario
+const SANIDAD_GRUPOS = [
+  {txt:"Vacunas", items:["Aftosa","Brucelosis","Clostridial (mancha/gangrena)","Carbunclo","Queratoconjuntivitis","Reproductiva (IBR-DVB-Lepto)","Respiratoria","Rabia"]},
+  {txt:"Parásitos", items:["Antiparasitario interno","Antiparasitario externo (mosca/garrapata)","Pour-on"]},
+  {txt:"Otros", items:["Mineral / ADE / Cobre","Sangrado / análisis","Raspaje de toros","Revisación de toros","Tratamiento / curación"]},
+];
+const SANIDAD_SUGERIDA = SANIDAD_GRUPOS.flatMap(g => g.items);
 // Las caravanas se guardan separadas por ";" porque muchas tienen espacios ("032 010004285791")
 const separarCaravanas = s => String(s||"").split(";").map(x => x.trim()).filter(Boolean);
 const normCaravana = s => String(s||"").toUpperCase().replace(/[^0-9A-Z]/g, "");
@@ -3249,6 +3269,8 @@ function FormEventoRodeo({gan, rodeo, autor, cambiarAutor, tipoInicial="nota", o
   const [campoHasta, setCampoHasta] = useState(rodeo.campo);
   const [loteHasta, setLoteHasta] = useState("");
   const [rodeoHasta, setRodeoHasta] = useState("");
+  const [producto, setProducto] = useState("");
+  const [dosis, setDosis] = useState("");
   const [guardando, setGuardando] = useState(false);
   const campoDest = campos.find(c => c.id === campoHasta) || campos[0];
   const conCaravanas = !["mover","nota"].includes(tipo);
@@ -3270,13 +3292,14 @@ function FormEventoRodeo({gan, rodeo, autor, cambiarAutor, tipoInicial="nota", o
   const chipS = a => ({padding:"7px 11px",fontSize:13,borderRadius:16,cursor:"pointer",fontFamily:"inherit",
     border:`1px solid ${a?TINTA:"#C8C2B0"}`,background:a?TINTA:"#fff",color:a?CREMA:TINTA,fontWeight:a?700:500});
   const falta = tipo === "mover" ? !loteHasta : tipo === "traspaso" ? !rodeoHasta || (!elegidas.length && !Number(cantidad))
-    : ["venta","muerte","parto","tacto"].includes(tipo) ? (!elegidas.length && !Number(cantidad)) : false;
+    : ["venta","muerte","parto","tacto"].includes(tipo) ? (!elegidas.length && !Number(cantidad))
+    : tipo === "sanidad" ? !resultado : false;
 
   const guardar = async () => {
     setGuardando(true);
     const e = {id:`r${Date.now().toString(36)}`, fecha, tipo, rodeo:rodeo.id, caravanas:elegidas.join("; "), cantidad:cantidad||"",
       campoHasta: tipo === "mover" ? campoHasta : "", loteHasta: tipo === "mover" ? loteHasta : "", rodeoHasta: tipo === "traspaso" ? rodeoHasta : "",
-      resultado, detalle:detalle.trim(), autor};
+      resultado, detalle: tipo === "sanidad" ? [producto.trim() && `Producto: ${producto.trim()}`, dosis.trim() && `Dosis: ${dosis.trim()}`, detalle.trim()].filter(Boolean).join(" · ") : detalle.trim(), autor};
     const ok = await gan.guardar([e]);
     setGuardando(false);
     const n = elegidas.length + (Number(cantidad)||0);
@@ -3322,8 +3345,21 @@ function FormEventoRodeo({gan, rodeo, autor, cambiarAutor, tipoInicial="nota", o
           {RESULTADOS_PARTO.map(x => <button key={x} onClick={()=>setResultado(resultado===x?"":x)} style={chipS(resultado===x)}>{x}</button>)}</div></div>
       )}
       {tipo === "sanidad" && (
-        <div>{lbl("Qué se hizo")}<div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-          {SANIDAD_SUGERIDA.map(x => { const a = resultado.split(", ").includes(x); return <button key={x} onClick={()=>setResultado(r => (a ? r.split(", ").filter(y => y !== x) : [...r.split(", ").filter(Boolean), x]).join(", "))} style={chipS(a)}>{x}</button>; })}</div></div>
+        <div style={{display:"flex",flexDirection:"column",gap:8}}>
+          {lbl("Qué se hizo (podés marcar varias)")}
+          {SANIDAD_GRUPOS.map(g => (
+            <div key={g.txt}>
+              <div style={{fontSize:11.5,fontWeight:600,opacity:0.7,margin:"0 0 4px"}}>{g.txt}</div>
+              <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+                {g.items.map(x => { const a = resultado.split(", ").includes(x); return <button key={x} onClick={()=>setResultado(r => (a ? r.split(", ").filter(y => y !== x) : [...r.split(", ").filter(Boolean), x]).join(", "))} style={chipS(a)}>{x}</button>; })}
+              </div>
+            </div>
+          ))}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:10}}>
+            <div>{lbl("Producto / marca")}<input value={producto} onChange={e=>setProducto(e.target.value)} placeholder="Ej: Ivomec" style={txt}/></div>
+            <div>{lbl("Dosis")}<input value={dosis} onChange={e=>setDosis(e.target.value)} placeholder="Ej: 5 ml por animal" style={txt}/></div>
+          </div>
+        </div>
       )}
 
       {conCaravanas && (
@@ -3403,6 +3439,8 @@ function TarjetaRodeo({r, gan, autor, cambiarAutor, conLote=false, onAviso, camp
           </div>
         )}
         {aviso && <div style={{fontSize:12.5,fontWeight:600,marginTop:6,color:aviso.ok?"#2E7D32":"#8A6200"}}>{aviso.txt}</div>}
+        {(() => { const s = r.eventos.find(e => e.tipo === "sanidad"); return s && (
+          <div style={{fontSize:12,marginTop:6,background:"#EAF2FB",borderRadius:6,padding:"4px 8px"}}>💉 <b>Última sanidad {fFecha(s.fecha)}:</b> {s.resultado || "—"}</div>); })()}
         {r.eventos.length > 0 && (
           <div style={{marginTop:7,display:"flex",flexDirection:"column",gap:3}}>
             {r.eventos.slice(0, 3).map(e => <div key={e.id} style={{fontSize:12}}><b>{fFecha(e.fecha)}</b> {textoEventoRodeo(e, gan)}{e.sinSubir ? " · 📵" : ""}</div>)}
@@ -3411,6 +3449,7 @@ function TarjetaRodeo({r, gan, autor, cambiarAutor, conLote=false, onAviso, camp
         <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:9}}>
           {!SOLO_LECTURA && <>
           <button onClick={()=>{ setAviso(null); setForm("parto"); }} style={{...btn,background:"#2E7D32",borderColor:"#2E7D32",color:"#fff"}}>📝 Cargar</button>
+          <button onClick={()=>{ setAviso(null); setForm("sanidad"); }} style={btn}>💉 Sanidad</button>
           <button onClick={()=>{ setAviso(null); setForm("mover"); }} style={btn}>🚚 Cambiar de lote</button>
           </>}
           <button onClick={()=>setVerCaravanas(v => !v)} style={btn}>📋 Caravanas ({r.activos.length})</button>
