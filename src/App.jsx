@@ -1727,7 +1727,7 @@ function AppEncargado({yo, previa=null}){
         ) : (
           <div style={{...cajaV,borderColor:"#2E7D32",background:"#EEF7EC",fontSize:14,lineHeight:1.45}}>
             <b>📲 Para tenerla como app en el celular:</b> tocá los <b>tres puntitos ⋮</b> de arriba a la derecha y elegí
-            <b> "Instalar app"</b> o <b>"Agregar a la pantalla principal"</b>. Después la abrís desde el ícono verde <b>SMIX</b>.
+            <b> "Instalar app"</b> o <b>"Agregar a la pantalla principal"</b>. Después la abrís desde el ícono de <b>SMIX</b>.
           </div>
         ))}
         {camposMios.length > 1 && (
