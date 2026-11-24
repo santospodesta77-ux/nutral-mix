@@ -4081,6 +4081,10 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
   const [puntosCorte, setPuntosCorte] = useState([]); // [[x,y],[x,y]]
   const [ordCultivo, setOrdCultivo] = useState("cebada");
   const [ordTipo, setOrdTipo] = useState("PULVERIZADA TERRESTRE"); // tipo de labor GLOBAL
+  // Siembra y fertilización: cada lote pintado puede ir a dosis fija o variable (prescripción en el monitor).
+  // {claveUnidad: {d: {producto: dosis promedio}}}; si la clave está, el lote es variable.
+  const [variables, setVariables] = useState({});
+  const conVariable = ["SIEMBRA","INCORPORADA","VOLEADA"].includes(ordTipo);
   // 4 tratamientos, uno por color. Cada uno con su etiqueta, cultivo y tabla de 10 filas.
   const [tratamientos, setTratamientos] = useState(
     Array(COLORES_APP.length).fill(null).map(() => ({
@@ -4237,6 +4241,13 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
     return total;
   };
   const haTotalOrden = () => COLORES_APP.reduce((s,_,i) => s + haTratamiento(i), 0);
+  const esVar = key => conVariable && !!variables[key];
+  // Dosis de un producto en un lote: la promedio de la prescripción si se cargó, si no la del tratamiento
+  const dosisLote = (key, p) => { const v = esVar(key) ? Number(variables[key]?.d?.[p.n]) : 0; return v > 0 ? v : p.d; };
+  const unidadesDeTrat = idx => CAMPOS.flatMap(c => unidadesDe(c.id).filter(u => pintura[u.key] === idx).map(u => ({...u, campo:c})));
+  const cantTrat = (t, p) => unidadesDeTrat(t.idx).reduce((s, u) => s + dosisLote(u.key, p) * u.ha, 0);
+  const marcarVariable = (key, on) => setVariables(v => { const n = {...v}; if(on) n[key] = n[key] || {d:{}}; else delete n[key]; return n; });
+  const dosisVariable = (key, prod, val) => setVariables(v => ({...v, [key]: {...(v[key]||{}), d: {...(v[key]?.d||{}), [prod]: val}}}));
 
   // ── Guardado automático del borrador en curso ──
   const resumenOrden = () => {
@@ -4260,7 +4271,7 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
       const item = {
         id: ordId, guardado: Date.now(), autor: autor || previo.autor || "", pdf: previo.pdf || "", enPlanilla: !!previo.enPlanilla,
         fecha: ordFecha, productor: ordProductor, tipo: ordTipo,
-        tratamientos, pintura, divisiones,
+        tratamientos, pintura, divisiones, variables,
         resumen: { ha: r.ha, nTrats: r.nTrats, campos: r.campos, etiquetas: r.etiquetas },
       };
       const lista = leerBorradores().filter(b => b.id !== ordId);
@@ -4268,7 +4279,7 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
       subirBorrador(item);
     }, 800);
     return () => clearTimeout(t);
-  }, [ordId, ordFecha, ordProductor, ordTipo, tratamientos, pintura, divisiones, autor]);
+  }, [ordId, ordFecha, ordProductor, ordTipo, tratamientos, pintura, divisiones, variables, autor]);
 
   const cargarBorrador = (b) => {
     setOrdId(b.id);
@@ -4282,6 +4293,7 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
     setTratamientos(ts.slice(0, COLORES_APP.length));
     setPintura(b.pintura || {});
     setDivisiones(b.divisiones || {});
+    setVariables(b.variables || {});
     setModoDividir(false); setLoteDiv(null); setPuntosCorte([]);
     setPanelBorr(false);
     setGuardadoMsg(null);
@@ -4295,7 +4307,7 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
 
   const nuevaOrden = () => {
     setOrdId(`o${Date.now()}`);
-    setPintura({}); setDivisiones({});
+    setPintura({}); setDivisiones({}); setVariables({});
     setTratamientos(Array(COLORES_APP.length).fill(null).map(() => ({
       etiqueta: "", cultivo: "", productos: Array(10).fill(null).map(() => ({n:"", d:0})),
     })));
@@ -4593,7 +4605,8 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
       const lotes = [];
       CAMPOS.forEach(c => unidadesDe(c.id).forEach(u => {
         if(pintura[u.key] === t.idx){
-          lotes.push({campo: c.id, lote: u.label, ha: u.ha});
+          lotes.push({campo: c.id, lote: u.label, ha: u.ha,
+            ...(conVariable ? {variable: esVar(u.key), dosis: Object.fromEntries(t.filasActivas.map(p => [p.n, dosisLote(u.key, p)]))} : {})});
         }
       }));
       return {
@@ -5114,14 +5127,14 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
 
           const tratActual = tratamientos[brocha];
           const haBrocha = haTratamiento(brocha);
-          const costoTratamiento = (t, ha) => t.filasActivas.reduce((s,p) => s + (p.d||0)*ha*(p.p||0), 0);
+          const costoTratamiento = (t, ha) => t.filasActivas.reduce((s,p) => s + (ha === t.ha ? cantTrat(t, p) : (p.d||0)*ha)*(p.p||0), 0);
 
           // Totalizador general: suma de productos de TODOS los tratamientos
           const totalesGenerales = {};
           tratamientosActivos.forEach(t => {
             t.filasActivas.forEach(p => {
               if(!totalesGenerales[p.n]) totalesGenerales[p.n] = {n:p.n, u:p.u, p:p.p, total:0, costo:0};
-              const cantP = p.d * t.ha;
+              const cantP = cantTrat(t, p);
               totalesGenerales[p.n].total += cantP;
               totalesGenerales[p.n].costo += cantP * (p.p||0);
             });
@@ -5604,6 +5617,51 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
                     })()}
                   </div>
 
+                  {conVariable && tratamientosActivos.length > 0 && (
+                    <div style={{marginTop:12,border:`1.5px solid ${TINTA}`,borderRadius:10,background:"#FFFDF7",padding:"12px 14px"}}>
+                      <div style={{fontSize:13,fontWeight:700}}>Dosis por lote: fija o variable</div>
+                      <div style={{fontSize:11.5,opacity:0.7,margin:"2px 0 8px"}}>
+                        Marcá los lotes que van con prescripción (dosis variable en el monitor). En esos podés poner la dosis promedio de la prescripción para que la planilla quede con los kg reales de cada lote.
+                      </div>
+                      {tratamientosActivos.map(t => (
+                        <div key={t.idx} style={{marginTop:6}}>
+                          <div style={{fontSize:12,fontWeight:700,display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+                            <span style={{width:12,height:12,borderRadius:3,background:COLORES_APP[t.idx],border:`1px solid ${TINTA}`}}/>
+                            T{t.idx+1}{t.etiqueta ? ` · ${t.etiqueta}` : ""}{t.cultivo ? ` · ${t.cultivo}` : ""}
+                          </div>
+                          {unidadesDeTrat(t.idx).map(u => { const v = esVar(u.key); return (
+                            <div key={u.key} style={{padding:"6px 0",borderTop:"1px solid #EEE7D6"}}>
+                              <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                                <span style={{fontSize:12.5,minWidth:150}}><b>{u.campo.nombre} {u.label}</b> <span style={{opacity:0.6}}>· {fmt(u.ha)} ha</span></span>
+                                <span style={{display:"inline-flex",border:`1.5px solid ${TINTA}`,borderRadius:7,overflow:"hidden",marginLeft:"auto"}}>
+                                  {[["Fija",false],["Variable",true]].map(([txt, on]) => (
+                                    <button key={txt} onClick={()=>marcarVariable(u.key, on)}
+                                      style={{padding:"5px 12px",fontSize:12,fontWeight:700,border:"none",cursor:"pointer",fontFamily:"inherit",
+                                        background:v===on?(on?"#1E5FA8":TINTA):"transparent",color:v===on?"#fff":TINTA}}>{txt}</button>
+                                  ))}
+                                </span>
+                              </div>
+                              {v && (
+                                <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:5}}>
+                                  {t.filasActivas.map(p => (
+                                    <label key={p.n} style={{fontSize:11.5,display:"inline-flex",alignItems:"center",gap:4}}>
+                                      {p.n}
+                                      <input type="text" inputMode="decimal" value={variables[u.key]?.d?.[p.n] ?? ""}
+                                        onChange={e=>dosisVariable(u.key, p.n, e.target.value.replace(",", "."))}
+                                        placeholder={String(p.d).replace(".", ",")}
+                                        style={{...inputB,width:70,fontSize:12,padding:"3px 6px",textAlign:"right"}}/>
+                                      <span style={{opacity:0.6}}>{p.u||""}/ha prom.</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ); })}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <div style={{display:"flex",gap:8,marginTop:10,flexWrap:"wrap"}}>
                     <button onClick={guardarLaborEnPlanilla} disabled={guardando||tratamientosActivos.length===0} style={{padding:"9px 15px",fontSize:12.5,fontWeight:700,cursor:guardando?"wait":"pointer",border:"none",borderRadius:8,background:tratamientosActivos.length===0?"#B5AF9D":"#2E7D32",color:"#fff",fontFamily:"inherit",opacity:guardando?0.7:1}}>{guardando?"Guardando…":"💾 Guardar en planilla"}</button>
                     <button onClick={descargarPDFOrden} style={{padding:"9px 13px",fontSize:12.5,fontWeight:700,cursor:"pointer",border:`1.5px solid ${TINTA}`,borderRadius:8,background:"transparent",color:TINTA,fontFamily:"inherit"}}>⬇️ Descargar PDF</button>
@@ -5697,6 +5755,7 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
                                       <g style={{pointerEvents:"none"}}>
                                         <text x={cx} y={cy-2*kk} fontSize={(w<55*kk?9:10.5)*kk} fontWeight="700" textAnchor="middle" fill={pintado?"#fff":TINTA} style={pintado?{paintOrder:"stroke",stroke:"rgba(0,0,0,0.25)",strokeWidth:2*kk}:{}}>{u.label}</text>
                                         {u.ha>0 && <text x={cx} y={cy+9*kk} fontSize={(w<55*kk?7:8)*kk} textAnchor="middle" fill={pintado?"#fff":TINTA} opacity={pintado?0.95:0.6}>{u.ha} ha</text>}
+                                        {pintado && esVar(u.key) && <text x={cx} y={cy+19*kk} fontSize={(w<55*kk?7:8)*kk} fontWeight="800" textAnchor="middle" fill="#fff" style={{paintOrder:"stroke",stroke:"#1E5FA8",strokeWidth:2.5*kk}}>VARIABLE</text>}
                                       </g>
                                     )}
                                   </g>
@@ -5716,14 +5775,16 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
                       unidadesDe(c.id).forEach(l => {
                         if(pintura[l.key] === t.idx) {
                           if(!camposDelTrat[c.id]) camposDelTrat[c.id] = {campo: c, lotes: []};
-                          camposDelTrat[c.id].lotes.push({label: l.label, ha: l.ha});
+                          camposDelTrat[c.id].lotes.push({label: l.label, ha: l.ha, key: l.key});
                         }
                       });
                     });
                     return Object.values(camposDelTrat).map(({campo: c, lotes: lotesC}) => {
                       const haC = lotesC.reduce((s,x) => s+x.ha, 0);
-                      const lotesLabel = lotesC.map(x => x.label).join(", ");
-                      const costoC = t.filasActivas.reduce((s,p) => s + (p.d||0)*haC*(p.p||0), 0);
+                      const lotesLabel = lotesC.map(x => esVar(x.key) ? `${x.label} (VAR)` : x.label).join(", ");
+                      const cantC = p => lotesC.reduce((s, x) => s + dosisLote(x.key, p) * x.ha, 0);
+                      const costoC = t.filasActivas.reduce((s,p) => s + cantC(p)*(p.p||0), 0);
+                      const lotesVar = lotesC.filter(x => esVar(x.key)), lotesFijos = lotesC.filter(x => !esVar(x.key));
                       return (
                         <div key={`${t.idx}-${c.id}`} style={{background:"#fff",border:`2px solid ${TINTA}`,borderRadius:10,overflow:"hidden",pageBreakInside:"avoid"}}>
                           <div style={{position:"relative",padding:"6px 12px",fontSize:11,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:"#fff",overflow:"hidden"}}>
@@ -5752,6 +5813,12 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
                             <div style={{padding:"6px 10px",fontSize:14,fontWeight:700,borderRight:"1px solid #E5E0D0"}}>{fmt(haC)}</div>
                             <div style={{padding:"6px 10px",fontSize:13,fontWeight:700,textTransform:"uppercase"}}>{t.cultivo || "—"}</div>
                           </div>
+                          {conVariable && (
+                            <div style={{padding:"7px 10px",fontSize:12.5,borderBottom:`1.5px solid ${TINTA}`,background:lotesVar.length?"#EAF2FB":"#F8F5EC",lineHeight:1.45}}>
+                              {lotesVar.length > 0 && <div><b style={{color:"#1E5FA8"}}>DOSIS VARIABLE</b> (usar la prescripción del lote en el monitor): <b>{lotesVar.map(x => x.label).join(", ")}</b></div>}
+                              {lotesFijos.length > 0 && <div><b>DOSIS FIJA</b>: <b>{lotesFijos.map(x => x.label).join(", ")}</b></div>}
+                            </div>
+                          )}
                           {/* Productos */}
                           <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
                             <thead>
@@ -5766,12 +5833,13 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
                             </thead>
                             <tbody>
                               {t.filasActivas.map((p,i) => {
-                                const totalP = p.d * haC;
+                                const totalP = cantC(p);
                                 const costoP = totalP * (p.p||0);
+                                const dProm = haC ? totalP / haC : p.d;
                                 return (
                                   <tr key={i} style={{borderBottom:"1px solid #EEE9DC"}}>
                                     <td style={{padding:"5px 10px",fontWeight:600}}>{p.n}</td>
-                                    <td style={{padding:"5px 10px",textAlign:"right"}}>{p.d.toFixed(3)}</td>
+                                    <td style={{padding:"5px 10px",textAlign:"right"}}>{Math.abs(dProm - p.d) > 1e-9 ? <>{dProm.toFixed(3)} <span style={{fontSize:10,opacity:0.7}}>prom.</span></> : p.d.toFixed(3)}</td>
                                     <td style={{padding:"5px 10px",textAlign:"right"}}>{fmtCant(totalP)}</td>
                                     <td className="no-print" style={{padding:"5px 10px",textAlign:"right"}}>{p.p.toFixed(2)}</td>
                                     <td className="no-print" style={{padding:"5px 10px",textAlign:"right",fontWeight:600}}>{fmt(costoP)}</td>
