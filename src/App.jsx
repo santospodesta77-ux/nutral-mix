@@ -1057,6 +1057,22 @@ const PRODUCTOS_BASE = [
 
 
 
+// Campos que siembra cada productor (hoja "CLIENTES Y CAMPOS" de la planilla de labores). En Nueva labor,
+// al elegir el productor sus campos van primero en la lista (los demás siguen estando).
+const CAMPOS_DE_PRODUCTOR = {
+  "ENRIQUE": ["LOS NIETOS","EL TORELLO","EL CIPRES","DON MARCELINO","EL ABUELO"],
+  "ANDRES": ["LOS ABUELOS"],
+  "ENRIQUE - ANDRES": ["LA CUCA"],
+  "MARIANO - ANDRES": ["EL DESCANSO"],
+  "MARIANO - MATIAS - ANDRES": ["L3H"],
+  "HAYDEE": ["L3H","LA MARIA OLIVA","EL 5"],
+  "MATEAN SAS": ["DOÑA TERESA","DON ANTONIO","LA FLECHA"],
+  "FAROUX MARIA GRACIELA": ["LA CHOLITA"],
+  "SUC": ["LA DORA","LAS TIAS"],
+};
+// Si el productor es una combinación sin campos propios (ej "HAYDEE - MARIANO"), suma los de cada uno
+const camposDeProductor = prod => CAMPOS_DE_PRODUCTOR[prod]
+  || [...new Set(String(prod||"").split(/\s+-\s+/).flatMap(x => CAMPOS_DE_PRODUCTOR[x.trim()] || []))];
 const PRODUCTORES_BASE = ["ENRIQUE","ANDRES","ENRIQUE - ANDRES","MARIANO","MARIANO - ANDRES","MARIANO - MATIAS - ANDRES","HAYDEE","HAYDEE - MARIANO","MATIAS","LORENZO","FAROUX MARIA GRACIELA","MATEAN SAS","SUC"];
 
 // Recetas plantilla (dosis/ha típicas)
@@ -5248,7 +5264,9 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
                   </div>
                   <div>
                     <div style={{fontSize:10.5,opacity:0.55,marginBottom:3}}>Productor</div>
-                    <select value={ordProductor} onChange={e=>setOrdProductor(e.target.value)} style={{...inputB,fontSize:13,fontWeight:600,color:ordProductor?TINTA:"#9A937E"}}>
+                    <select value={ordProductor} onChange={e=>{ const v = e.target.value; setOrdProductor(v);
+                      // Mostrar de entrada un campo del productor (si el que está a la vista no es suyo)
+                      const suyos = camposDeProductor(v); if(suyos.length && !suyos.includes(campoSel)) setCampoSel(suyos[0]); }} style={{...inputB,fontSize:13,fontWeight:600,color:ordProductor?TINTA:"#9A937E"}}>
                       <option value="">— elegir productor —</option>                      {PRODUCTORES_BASE.map(p => <option key={p} value={p}>{p}</option>)}
                     </select>
                   </div>
@@ -5474,7 +5492,15 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
                   <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:8,flexWrap:"wrap"}}>
                     <select value={campoSel} onChange={e=>setCampoSel(e.target.value)}
                       style={{padding:"7px 11px",fontSize:14,fontWeight:600,border:`1.5px solid ${TINTA}`,borderRadius:8,background:CREMA,color:TINTA,fontFamily:"inherit",cursor:"pointer"}}>
-                      {CAMPOS.map(c=><option key={c.id} value={c.id}>{c.nombre}{haPint(c.id)?` ● ${fmt(haPint(c.id))} ha`:""}</option>)}
+                      {(() => {
+                        const opcion = c => <option key={c.id} value={c.id}>{c.nombre}{haPint(c.id)?` ● ${fmt(haPint(c.id))} ha`:""}</option>;
+                        const suyos = camposDeProductor(ordProductor).map(id => CAMPOS.find(c => c.id === id)).filter(Boolean);
+                        if(!suyos.length) return CAMPOS.map(opcion);
+                        return <>
+                          <optgroup label={`Campos de ${ordProductor}`}>{suyos.map(opcion)}</optgroup>
+                          <optgroup label="Otros campos">{CAMPOS.filter(c => !suyos.includes(c)).map(opcion)}</optgroup>
+                        </>;
+                      })()}
                     </select>
                     <div style={{fontSize:11,opacity:0.6,flex:1,minWidth:120}}>Pintás con color de <b>T{brocha+1}</b></div>
                   </div>
