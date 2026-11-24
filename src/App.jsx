@@ -5851,6 +5851,88 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
 // ============================================================
 // MODAL HISTORIAL — muestra 8 campañas de un lote
 // ============================================================
+// ── PRESCRIPCIONES ──────────────────────────────────────────
+// Salen del Drive (AMBIENTACIONES / campo / Lote_XX / prescripcion), vía api/prescripciones.js.
+// Se piden una sola vez por sesión y se reparten por lote.
+let prescPedido = null;
+const pedirPrescripciones = () => prescPedido || (prescPedido = fetch("/api/prescripciones")
+  .then(r => r.json().then(d => { if(!r.ok) throw new Error(d.error || `HTTP ${r.status}`); return d.prescripciones || []; }))
+  .catch(e => { prescPedido = null; throw e; }));
+// "Las 3 Hermanas" y "Las Tres Hermanas" tienen que dar lo mismo
+const claveCampo = s => normBusca(s).replace(/\b3\b/g, "tres").replace(/[^a-z0-9]/g, "");
+const esDelCampo = (p, campo) => [campo.id, campo.nombre].some(n => claveCampo(n) === claveCampo(p.campo));
+const kb = n => n >= 1048576 ? `${fmt1(n/1048576)} MB` : `${Math.max(1, Math.round(n/1024))} KB`;
+// Nombre legible: "L3H_lote27_siembra_DK6962.zip" → "siembra DK6962"
+const nombrePresc = n => /^informe/i.test(n) ? "Informe de prescripción" : String(n).replace(/\.[a-z0-9]+$/i, "").replace(/^L3H_|^[A-Z0-9]{2,6}_(?=lote)/i, "").replace(/^lote\s*_?[0-9a-z]+_/i, "").replace(/_/g, " ");
+
+async function bajarArchivoPresc(a, abrir){
+  const r = await fetch(`/api/prescripciones?id=${encodeURIComponent(a.id)}`);
+  if(!r.ok){ let m = `HTTP ${r.status}`; try { m = (await r.json()).error || m; } catch {} throw new Error(m); }
+  const url = URL.createObjectURL(await r.blob());
+  if(abrir) window.open(url, "_blank");
+  else { const l = document.createElement("a"); l.href = url; l.download = a.nombre; document.body.appendChild(l); l.click(); l.remove(); }
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+
+function ImagenPresc({a}){
+  const [url, setUrl] = useState(null);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    let vivo = true, u = null;
+    fetch(`/api/prescripciones?id=${encodeURIComponent(a.id)}`).then(r => r.ok ? r.blob() : Promise.reject())
+      .then(b => { u = URL.createObjectURL(b); if(vivo) setUrl(u); }).catch(() => vivo && setError(true));
+    return () => { vivo = false; if(u) URL.revokeObjectURL(u); };
+  }, [a.id]);
+  return (
+    <figure style={{margin:0,background:"#fff",border:"1px solid #D8D2C0",borderRadius:8,overflow:"hidden"}}>
+      {url ? <img src={url} alt={a.nombre} onClick={()=>window.open(url, "_blank")} style={{display:"block",width:"100%",cursor:"zoom-in"}}/>
+        : <div style={{height:120,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,opacity:0.6}}>{error ? "No se pudo cargar" : "Cargando mapa…"}</div>}
+      <figcaption style={{fontSize:11.5,padding:"5px 8px",borderTop:"1px solid #EEE7D6"}}>{nombrePresc(a.nombre)}</figcaption>
+    </figure>
+  );
+}
+
+function SeccionPrescripcion({campo, lote}){
+  const [lista, setLista] = useState(null);
+  const [error, setError] = useState("");
+  const [bajando, setBajando] = useState("");
+  useEffect(() => { pedirPrescripciones().then(setLista).catch(e => setError(e.message)); }, []);
+  const mias = (lista || []).filter(p => esDelCampo(p, campo) && String(p.lote).toUpperCase() === String(lote.id).toUpperCase());
+  if(error) return <div style={{padding:"10px 20px",borderBottom:"1px solid #D8D2C0",fontSize:12,color:"#8A6200"}}>📐 Prescripciones: {error}</div>;
+  if(!mias.length) return null;
+  const archivos = mias.flatMap(p => p.archivos);
+  const imagenes = archivos.filter(a => /^image\//.test(a.tipo));
+  const otros = archivos.filter(a => !/^image\//.test(a.tipo));
+  const ultima = archivos.map(a => a.modificado).filter(Boolean).sort().pop();
+  const usar = async (a) => { setBajando(a.id); try { await bajarArchivoPresc(a, /pdf$/.test(a.tipo)); } catch(e){ window.alert(`No se pudo bajar: ${e.message}`); } setBajando(""); };
+  const icono = a => /pdf$/.test(a.tipo) ? "📄" : /zip/.test(a.tipo) ? "🗜️" : /html/.test(a.tipo) ? "🧊" : "📎";
+  return (
+    <div style={{padding:"16px 20px",borderBottom:"1px solid #D8D2C0",background:"#F3F6FB"}}>
+      <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55,marginBottom:8}}>
+        📐 Prescripción{ultima ? ` · ${ddmm(new Date(ultima))}` : ""}
+      </div>
+      {otros.length > 0 && (
+        <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:imagenes.length?10:0}}>
+          {otros.map(a => (
+            <button key={a.id} onClick={()=>usar(a)} disabled={!!bajando}
+              style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,padding:"9px 12px",fontSize:13.5,fontWeight:600,textAlign:"left",
+                borderRadius:8,border:`1.5px solid ${TINTA}`,background:"#fff",color:TINTA,cursor:bajando?"wait":"pointer",fontFamily:"inherit"}}>
+              <span>{icono(a)} {/pdf$/.test(a.tipo) ? "Ver " : "Bajar "}{nombrePresc(a.nombre)}</span>
+              <span style={{fontSize:11,opacity:0.6,whiteSpace:"nowrap"}}>{bajando === a.id ? "bajando…" : kb(a.tam)}</span>
+            </button>
+          ))}
+          {otros.some(a => /zip/.test(a.tipo)) && <div style={{fontSize:11.5,opacity:0.65}}>Los .zip son los archivos para cargar en el monitor de la sembradora / fertilizadora.</div>}
+        </div>
+      )}
+      {imagenes.length > 0 && (
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(170px,1fr))",gap:8}}>
+          {imagenes.map(a => <ImagenPresc key={a.id} a={a}/>)}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ModalHistorial({loteInfo, onClose, aplicaciones=[], fertilizaciones=[], inv26={}, plan2627={}, suelos={}, monit, gan, cultivoDe, siembraDe, autor, cambiarAutor}){
   const {campo,lote}=loteInfo;
   const [monitoreando,setMonitoreando]=useState(false);
@@ -5993,6 +6075,7 @@ function ModalHistorial({loteInfo, onClose, aplicaciones=[], fertilizaciones=[],
           );
         })()}
 
+        <SeccionPrescripcion campo={campo} lote={lote}/>
         {/* ── 2. ÚLTIMAS APLICACIONES DE HERBICIDA ── */}
         <div style={{padding:"14px 20px",borderBottom:"1px solid #D8D2C0"}}>
           <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",opacity:0.55,marginBottom:8}}>🧪 Aplicaciones de herbicida</div>
