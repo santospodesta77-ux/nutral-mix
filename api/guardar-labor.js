@@ -4,7 +4,7 @@
 //
 // La hoja "registro" es una tabla plana. Columnas (empezando en A):
 // A fecha | B productor | C campo | D lote | E campo lote | F productos |
-// G dosis | H ha | I total | J precio | K $us totales | L cultivo | M orden
+// G dosis | H ha | I total | J precio | K $us totales | L cultivo | M orden | N dosis (FIJA / VARIABLE, siembra y fertilización)
 //
 // M orden: id de la orden de la app. Si la misma orden se guarda otra vez (corregida),
 // sus filas se reescriben en el mismo lugar en vez de agregarse de nuevo.
@@ -73,19 +73,23 @@ export default async function handler(req, res) {
         const loteId = lote.lote;
         const ha = Number(lote.ha) || 0;
         const campoLote = `${campo} ${loteId}`;
+        // Siembra / fertilización: si el lote va con prescripción, la dosis de cada producto puede ser la promedio del lote
+        const tipoDosis = typeof lote.variable === "boolean" ? (lote.variable ? "VARIABLE" : "FIJA") : "";
+        const dosisDe = p => { const v = Number(lote.dosis?.[p.n]); return v > 0 ? v : p.d; };
 
         filas.push([
           fechaAR, orden.productor, campo, loteId, campoLote,
           tipo, "", fmtNum(ha, 1), "", fmtNum(precioLabor, 2),
-          fmtNum(ha * precioLabor, 1), cultivo, idOrden,
+          fmtNum(ha * precioLabor, 1), cultivo, idOrden, tipoDosis,
         ]);
         for (const p of productos) {
-          const total = p.d * ha;
+          const dosis = dosisDe(p);
+          const total = dosis * ha;
           const costo = total * (p.p || 0);
           filas.push([
             fechaAR, orden.productor, campo, loteId, campoLote,
-            p.n, fmtNum(p.d, 3), fmtNum(ha, 1), fmtNum(total, 2),
-            fmtNum(p.p, 2), fmtNum(costo, 1), cultivo, idOrden,
+            p.n, fmtNum(dosis, 3), fmtNum(ha, 1), fmtNum(total, 2),
+            fmtNum(p.p, 2), fmtNum(costo, 1), cultivo, idOrden, tipoDosis,
           ]);
         }
       }
@@ -123,12 +127,11 @@ export default async function handler(req, res) {
       }));
       pedidos.push({ insertDimension: { range: { sheetId, dimension: "ROWS", startIndex: filaInicio - 1, endIndex: filaInicio - 1 + filas.length }, inheritFromBefore: filaInicio > 2 } });
       await sheets.spreadsheets.batchUpdate({ spreadsheetId: PLANILLA_LABORES, requestBody: { requests: pedidos } });
-    } else if (idOrden && !String(colM.data.values?.[0]?.[0] || "").trim()) {
-      // Primera vez: título de la columna nueva
-      await sheets.spreadsheets.values.update({ spreadsheetId: PLANILLA_LABORES, range: `${HOJA}!M1`, valueInputOption: "RAW", requestBody: { values: [["orden"]] } });
     }
+    // Títulos de las columnas nuevas (M orden, N dosis fija/variable)
+    if (idOrden) await sheets.spreadsheets.values.update({ spreadsheetId: PLANILLA_LABORES, range: `${HOJA}!M1:N1`, valueInputOption: "RAW", requestBody: { values: [["orden", "dosis"]] } });
     const filaFin = filaInicio + filas.length - 1;
-    const rango = `${HOJA}!A${filaInicio}:M${filaFin}`;
+    const rango = `${HOJA}!A${filaInicio}:N${filaFin}`;
 
     // 3) Escribir con update en posición explícita
     await sheets.spreadsheets.values.update({
