@@ -1222,7 +1222,7 @@ const CAMPOS = [
     {id:"2",label:"L2",ha:10,poly:[[215,20],[395,20],[395,65],[215,65]]},
     {id:"1",label:"L1",ha:25,poly:[[398,20],[800,20],[800,65],[398,65]]},
     {id:"FRANJA 2",label:"Franja 2",ha:41,poly:[[145,68],[365,68],[365,120],[205,120],[205,236],[145,236]]},
-    {id:"FRANJA 1",label:"Franja 1",ha:33,poly:[[398,88],[800,88],[800,130],[398,130]]},
+    {id:"FRANJA 1",label:"Franja 1",ha:33,poly:[[398,68],[800,68],[800,130],[398,130]]},
     // Picada entre los montes (en T: del camino vecinal al centro y del centro a la ruta); se siembra de maíz para forraje
     {id:"PICADA",label:"Picada",ha:14,cxy:[300,240],poly:[[387,123],[397,123],[397,432],[387,432],[387,244],[30,244],[30,236],[387,236]]},
    ]},
