@@ -1213,16 +1213,18 @@ const CAMPOS = [
    grises:[],
    lotes:[
     // montes: son lotes (pueden tener rodeos) aunque no se siembren
-    {id:"MONTE 5",label:"Monte 5",monte:true,poly:[[30,68],[145,68],[145,240],[30,240]]},
-    {id:"MONTE 4",label:"Monte 4",monte:true,poly:[[205,123],[370,123],[370,240],[205,240]]},
+    {id:"MONTE 5",label:"Monte 5",monte:true,poly:[[30,68],[145,68],[145,236],[30,236]]},
+    {id:"MONTE 4",label:"Monte 4",monte:true,poly:[[205,123],[370,123],[370,236],[205,236]]},
     {id:"MONTE 3",label:"Monte 3",monte:true,poly:[[398,133],[800,133],[800,240],[398,240]]},
-    {id:"MONTE 2",label:"Monte 2",monte:true,poly:[[30,240],[395,240],[395,432],[30,432]]},
+    {id:"MONTE 2",label:"Monte 2",monte:true,poly:[[30,244],[387,244],[387,432],[30,432]]},
     {id:"MONTE 1",label:"Monte 1",monte:true,poly:[[398,243],[800,243],[800,432],[398,432]]},
     {id:"3",label:"L3",ha:15,poly:[[30,20],[215,20],[215,65],[30,65]]},
     {id:"2",label:"L2",ha:10,poly:[[215,20],[395,20],[395,65],[215,65]]},
     {id:"1",label:"L1",ha:25,poly:[[398,20],[800,20],[800,65],[398,65]]},
-    {id:"FRANJA 2",label:"Franja 2",ha:41,poly:[[145,68],[365,68],[365,120],[205,120],[205,240],[145,240]]},
+    {id:"FRANJA 2",label:"Franja 2",ha:41,poly:[[145,68],[365,68],[365,120],[205,120],[205,236],[145,236]]},
     {id:"FRANJA 1",label:"Franja 1",ha:33,poly:[[398,88],[800,88],[800,130],[398,130]]},
+    // Picada entre los montes (en T: del camino vecinal al centro y del centro a la ruta); se siembra de maíz para forraje
+    {id:"PICADA",label:"Picada",ha:14,cxy:[300,240],poly:[[387,123],[397,123],[397,432],[387,432],[387,244],[30,244],[30,236],[387,236]]},
    ]},
   {id:"EL 5",nombre:"El 5",vb:[0,0,960,405],refs:[],
    grises:[
@@ -1606,7 +1608,7 @@ function MapaCampo({campo, modo, sueloVar, mini=false, onLoteClick, datos, culti
           const cvs=cultivosDeLote(campo.id,l.id);
           if(!cvs.includes(cultivoFiltro)){ apagadoPorFiltro=true; dim=true; }
         }
-        const [cx,cy]=centro(l.poly);
+        const [cx,cy]=l.cxy||centro(l.poly);
         const w=anchoP(l.poly);
         const isH=hov===l.id;
         const patternId=`p_${campo.id.replace(/\s+/g,"")}_${l.id.replace(/\s+/g,"")}`.replace(/[^a-zA-Z0-9_]/g,"");
@@ -4170,7 +4172,7 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
           key: clL(cid, l.id),
           loteId: l.id, secId: null, nombre: "",
           label: l.label||l.id,
-          ha: Number(l.ha)||0, poly: l.poly, dividido: false,
+          ha: Number(l.ha)||0, poly: l.poly, cxy: l.cxy, dividido: false,
         });
       }
     });
@@ -5529,7 +5531,7 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
                       {unidadesDe(campoSel).map(u=>{
                         const idx=pintura[u.key];
                         const pint=idx!==undefined;
-                        const [cx,cy]=centro(u.poly);
+                        const [cx,cy]=u.cxy||centro(u.poly);
                         const w=anchoP(u.poly);
                         const mHa=u.ha>0&&w>=40*k;
                         const enDiv = modoDividir && loteDiv && loteDiv.campoId===campoSel && loteDiv.loteId===u.loteId;
@@ -5766,7 +5768,7 @@ function AppCompleta({lector=null, previa=null, usuarios=[], onVerComo=null}){
                                 <polygon key={`g${j}`} points={g.poly.map(p=>p.join(",")).join(" ")} fill="#EDEBE3" stroke="#B5AF9D" strokeWidth={kk}/>
                               ))}
                               {unidadesDe(campo.id).map(u => {
-                                const [cx,cy] = centro(u.poly);
+                                const [cx,cy] = u.cxy||centro(u.poly);
                                 const tIdx = pintadoPorUnidad[u.key];
                                 const pintado = tIdx !== undefined;
                                 const w = anchoP(u.poly);
